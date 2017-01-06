@@ -45,7 +45,7 @@ public final class mudclient extends GameWindowMiddleMan {
     private long lastFrame = 0;
 
     public static final void main(String[] args) throws Exception {
-        Config.initConfig(args.length > 0 ? args[0] : "settings.ini");
+        Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
         mudclient mc = new mudclient();
         mc.appletMode = false;
@@ -421,11 +421,14 @@ public final class mudclient extends GameWindowMiddleMan {
         gameGraphics.drawImage(aGraphics936, 0, 0);
     }
 
-    private final void drawAbuseWindow1() {
+    private final void drawAbuseWindow1()
+    {
         abuseSelectedType = 0;
         int i = 135;
-        for (int j = 0; j < 12; j++) {
-            if (super.mouseX > 66 && super.mouseX < 446 && super.mouseY >= i - 12 && super.mouseY < i + 3)
+        for (int j = 0; j < 12; j++)
+        {
+            if (super.mouseX > 66 && super.mouseX < 446
+            		&& super.mouseY >= i - 12 && super.mouseY < i + 3)
                 abuseSelectedType = j + 1;
             i += 14;
         }
@@ -890,9 +893,17 @@ public final class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final void drawBankBox() {
-        char c = '\u0198';
-        char c1 = '\u014E';
+    private final void drawBankBox()
+    {
+    	/*
+    	 * TODO: complete the variable screen-size remake.
+    	 * need to check mouse events such as clicking and mouseover
+    	 * as well as finish linking boxes together.
+    	 */
+        //char bankWidth = '\u0198'; // bank window width
+        //char bankHeight = '\u014E'; // bank window height
+        int bankWidth = 408;
+        int bankHeight = 280;
         if (mouseOverBankPageText > 0 && bankItemCount <= 48)
             mouseOverBankPageText = 0;
         if (mouseOverBankPageText > 1 && bankItemCount <= 96)
@@ -907,15 +918,25 @@ public final class mudclient extends GameWindowMiddleMan {
         }
         if (mouseButtonClick != 0) {
             mouseButtonClick = 0;
-            int i = super.mouseX - (256 - c / 2);
-            int k = super.mouseY - (170 - c1 / 2);
-            if (i >= 0 && k >= 12 && i < 408 && k < 280) {
+            /*
+            int i = super.mouseX - (256 - bankWidth / 2);
+            int k = super.mouseY - (170 - bankHeight / 2);
+            */
+            int mouseXBankWindow = super.mouseX - (windowWidth/2 - bankWidth / 2);
+            int mouseYBankWindow = super.mouseY - (windowHeight/2 - bankHeight / 2);
+            if (mouseXBankWindow >= 0 && mouseYBankWindow >= 12
+            		&& mouseXBankWindow < bankWidth && mouseYBankWindow < bankHeight)
+            {
                 int i1 = mouseOverBankPageText * 48;
-                for (int l1 = 0; l1 < 6; l1++) {
-                    for (int j2 = 0; j2 < 8; j2++) {
+                for (int l1 = 0; l1 < 6; l1++)
+                {
+                    for (int j2 = 0; j2 < 8; j2++)
+                    {
                         int l6 = 7 + j2 * 49;
                         int j7 = 28 + l1 * 34;
-                        if (i > l6 && i < l6 + 49 && k > j7 && k < j7 + 34 && i1 < bankItemCount && bankItems[i1] != -1) {
+                        if (mouseXBankWindow > l6 && mouseXBankWindow < l6 + 49 && mouseYBankWindow > j7 && mouseYBankWindow < j7 + 34
+                        		&& i1 < bankItemCount && bankItems[i1] != -1)
+                        {
                             selectedBankItemType = bankItems[i1];
                             selectedBankItem = i1;
                         }
@@ -924,8 +945,8 @@ public final class mudclient extends GameWindowMiddleMan {
 
                 }
 
-                i = 256 - c / 2;
-                k = 170 - c1 / 2;
+                mouseXBankWindow = windowWidth/2 - bankWidth / 2;
+                mouseYBankWindow = windowHeight/2 - bankHeight / 2;
                 int k2;
                 if (selectedBankItem < 0)
                     k2 = -1;
@@ -935,87 +956,87 @@ public final class mudclient extends GameWindowMiddleMan {
                     int j1 = bankItemsCount[selectedBankItem];
 //                    if (!EntityHandler.getItemDef(k2).isStackable() && j1 > 1)
 //                        j1 = 1;
-                    if (j1 >= 1 && super.mouseX >= i + 220 && super.mouseY >= k + 238 && super.mouseX < i + 250 && super.mouseY <= k + 249) {
+                    if (j1 >= 1 && super.mouseX >= mouseXBankWindow + 220 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 250 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(1);
                         super.streamClass.formatPacket();
                     }
-                    if (j1 >= 10 && super.mouseX >= i + 250 && super.mouseY >= k + 238 && super.mouseX < i + 280 && super.mouseY <= k + 249) {
+                    if (j1 >= 10 && super.mouseX >= mouseXBankWindow + 250 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 280 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(10);
                         super.streamClass.formatPacket();
                     }
-                    if (j1 >= 100 && super.mouseX >= i + 280 && super.mouseY >= k + 238 && super.mouseX < i + 305 && super.mouseY <= k + 249) {
+                    if (j1 >= 100 && super.mouseX >= mouseXBankWindow + 280 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 305 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(100);
                         super.streamClass.formatPacket();
                     }
-                    if (j1 >= 1000 && super.mouseX >= i + 305 && super.mouseY >= k + 238 && super.mouseX < i + 335 && super.mouseY <= k + 249) {
+                    if (j1 >= 1000 && super.mouseX >= mouseXBankWindow + 305 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 335 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(1000);
                         super.streamClass.formatPacket();
                     }
-                    if (j1 >= 10000 && super.mouseX >= i + 335 && super.mouseY >= k + 238 && super.mouseX < i + 368 && super.mouseY <= k + 249) {
+                    if (j1 >= 10000 && super.mouseX >= mouseXBankWindow + 335 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 368 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(10000);
                         super.streamClass.formatPacket();
                     }
-                    if (super.mouseX >= i + 370 && super.mouseY >= k + 238 && super.mouseX < i + 400 && super.mouseY <= k + 249) {
+                    if (super.mouseX >= mouseXBankWindow + 370 && super.mouseY >= mouseYBankWindow + 238 && super.mouseX < mouseXBankWindow + 400 && super.mouseY <= mouseYBankWindow + 249) {
                         super.streamClass.createPacket(183);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(j1);
                         super.streamClass.formatPacket();
                     }
 
-                    if (inventoryCount(k2) >= 1 && super.mouseX >= i + 220 && super.mouseY >= k + 263 && super.mouseX < i + 250 && super.mouseY <= k + 274) {
+                    if (inventoryCount(k2) >= 1 && super.mouseX >= mouseXBankWindow + 220 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 250 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(1);
                         super.streamClass.formatPacket();
                     }
-                    if (inventoryCount(k2) >= 10 && super.mouseX >= i + 250 && super.mouseY >= k + 263 && super.mouseX < i + 280 && super.mouseY <= k + 274) {
+                    if (inventoryCount(k2) >= 10 && super.mouseX >= mouseXBankWindow + 250 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 280 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(10);
                         super.streamClass.formatPacket();
                     }
-                    if (inventoryCount(k2) >= 100 && super.mouseX >= i + 280 && super.mouseY >= k + 263 && super.mouseX < i + 305 && super.mouseY <= k + 274) {
+                    if (inventoryCount(k2) >= 100 && super.mouseX >= mouseXBankWindow + 280 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 305 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(100);
                         super.streamClass.formatPacket();
                     }
-                    if (inventoryCount(k2) >= 1000 && super.mouseX >= i + 305 && super.mouseY >= k + 263 && super.mouseX < i + 335 && super.mouseY <= k + 274) {
+                    if (inventoryCount(k2) >= 1000 && super.mouseX >= mouseXBankWindow + 305 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 335 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(1000);
                         super.streamClass.formatPacket();
                     }
-                    if (inventoryCount(k2) >= 10000 && super.mouseX >= i + 335 && super.mouseY >= k + 263 && super.mouseX < i + 368 && super.mouseY <= k + 274) {
+                    if (inventoryCount(k2) >= 10000 && super.mouseX >= mouseXBankWindow + 335 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 368 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(10000);
                         super.streamClass.formatPacket();
                     }
-                    if (super.mouseX >= i + 370 && super.mouseY >= k + 263 && super.mouseX < i + 400 && super.mouseY <= k + 274) {
+                    if (super.mouseX >= mouseXBankWindow + 370 && super.mouseY >= mouseYBankWindow + 263 && super.mouseX < mouseXBankWindow + 400 && super.mouseY <= mouseYBankWindow + 274) {
                         super.streamClass.createPacket(198);
                         super.streamClass.add2ByteInt(k2);
                         super.streamClass.add4ByteInt(inventoryCount(k2));
                         super.streamClass.formatPacket();
                     }
                 }
-            } else if (bankItemCount > 48 && i >= 50 && i <= 115 && k <= 12)
+            } else if (bankItemCount > 48 && mouseXBankWindow >= 50 && mouseXBankWindow <= 115 && mouseYBankWindow <= 12)
                 mouseOverBankPageText = 0;
-            else if (bankItemCount > 48 && i >= 115 && i <= 180 && k <= 12)
+            else if (bankItemCount > 48 && mouseXBankWindow >= 115 && mouseXBankWindow <= 180 && mouseYBankWindow <= 12)
                 mouseOverBankPageText = 1;
-            else if (bankItemCount > 96 && i >= 180 && i <= 245 && k <= 12)
+            else if (bankItemCount > 96 && mouseXBankWindow >= 180 && mouseXBankWindow <= 245 && mouseYBankWindow <= 12)
                 mouseOverBankPageText = 2;
-            else if (bankItemCount > 144 && i >= 245 && i <= 310 && k <= 12) {
+            else if (bankItemCount > 144 && mouseXBankWindow >= 245 && mouseXBankWindow <= 310 && mouseYBankWindow <= 12) {
                 mouseOverBankPageText = 3;
             } else {
                 super.streamClass.createPacket(48);
@@ -1024,80 +1045,105 @@ public final class mudclient extends GameWindowMiddleMan {
                 return;
             }
         }
+        /*
         int j = 256 - c / 2;
         int l = 170 - c1 / 2;
-        gameGraphics.drawBox(j, l, 408, 12, 192);
-        int k1 = 0x989898;
-        gameGraphics.drawBoxAlpha(j, l + 12, 408, 17, k1, 160);
-        gameGraphics.drawBoxAlpha(j, l + 29, 8, 204, k1, 160);
-        gameGraphics.drawBoxAlpha(j + 399, l + 29, 9, 204, k1, 160);
-        gameGraphics.drawBoxAlpha(j, l + 233, 408, 47, k1, 160);
-        gameGraphics.drawString("Bank", j + 1, l + 10, 1, 0xffffff);
+        */
+        int windowX = windowWidth/2 - bankWidth / 2;
+        int windowY = windowHeight/2 - bankHeight / 2;    
+        // title bar
+        int tbh = 12;
+        gameGraphics.drawBox(windowX, windowY, bankWidth, tbh, 0x0000c0);
+        int bankClr = 0x989898;
+        // top info box
+        int tiby = windowY + tbh;
+        int tibh = 17;
+        gameGraphics.drawBoxAlpha(windowX, tiby, bankWidth, tibh, bankClr, 0xa0);
+        // bottom info box (item name & withdraw/deposit amount)
+        int bibh = 47;
+        int biby = windowY + bankHeight - bibh;
+        gameGraphics.drawBoxAlpha(windowX, biby, bankWidth, bibh, bankClr, 0xa0);
+        // left margin box
+        int lmby = tiby + tibh;
+        int lmbw = 8;
+        int lmbh = biby - (tiby + tibh);
+        gameGraphics.drawBoxAlpha(windowX, lmby, lmbw, lmbh, bankClr, 0xa0);
+        // right margin box
+        int rmbw = 8;
+        int rmbh = biby - (tiby + tibh);
+        int rmbx = windowX + bankWidth - rmbw;
+        int rmby = tiby + tibh;
+        gameGraphics.drawBoxAlpha(rmbx, rmby, rmbw, rmbh, bankClr, 0xa0);
+        gameGraphics.drawString("Bank", windowX + 1, windowY + 10, 1, 0xffffff);
         int i2 = 50;
         if (bankItemCount > 48) {
             int l2 = 0xffffff;
             if (mouseOverBankPageText == 0)
                 l2 = 0xff0000;
-            else if (super.mouseX > j + i2 && super.mouseY >= l && super.mouseX < j + i2 + 65 && super.mouseY < l + 12)
+            else if (super.mouseX > windowX + i2 && super.mouseY >= windowY && super.mouseX < windowX + i2 + 65 && super.mouseY < windowY + 12)
                 l2 = 0xffff00;
-            gameGraphics.drawString("<page 1>", j + i2, l + 10, 1, l2);
+            gameGraphics.drawString("<page 1>", windowX + i2, windowY + 10, 1, l2);
             i2 += 65;
             l2 = 0xffffff;
             if (mouseOverBankPageText == 1)
                 l2 = 0xff0000;
-            else if (super.mouseX > j + i2 && super.mouseY >= l && super.mouseX < j + i2 + 65 && super.mouseY < l + 12)
+            else if (super.mouseX > windowX + i2 && super.mouseY >= windowY && super.mouseX < windowX + i2 + 65 && super.mouseY < windowY + 12)
                 l2 = 0xffff00;
-            gameGraphics.drawString("<page 2>", j + i2, l + 10, 1, l2);
+            gameGraphics.drawString("<page 2>", windowX + i2, windowY + 10, 1, l2);
             i2 += 65;
         }
         if (bankItemCount > 96) {
             int i3 = 0xffffff;
             if (mouseOverBankPageText == 2)
                 i3 = 0xff0000;
-            else if (super.mouseX > j + i2 && super.mouseY >= l && super.mouseX < j + i2 + 65 && super.mouseY < l + 12)
+            else if (super.mouseX > windowX + i2 && super.mouseY >= windowY && super.mouseX < windowX + i2 + 65 && super.mouseY < windowY + 12)
                 i3 = 0xffff00;
-            gameGraphics.drawString("<page 3>", j + i2, l + 10, 1, i3);
+            gameGraphics.drawString("<page 3>", windowX + i2, windowY + 10, 1, i3);
             i2 += 65;
         }
         if (bankItemCount > 144) {
             int j3 = 0xffffff;
             if (mouseOverBankPageText == 3)
                 j3 = 0xff0000;
-            else if (super.mouseX > j + i2 && super.mouseY >= l && super.mouseX < j + i2 + 65 && super.mouseY < l + 12)
+            else if (super.mouseX > windowX + i2 && super.mouseY >= windowY && super.mouseX < windowX + i2 + 65 && super.mouseY < windowY + 12)
                 j3 = 0xffff00;
-            gameGraphics.drawString("<page 4>", j + i2, l + 10, 1, j3);
+            gameGraphics.drawString("<page 4>", windowX + i2, windowY + 10, 1, j3);
             i2 += 65;
         }
         int k3 = 0xffffff;
-        if (super.mouseX > j + 320 && super.mouseY >= l && super.mouseX < j + 408 && super.mouseY < l + 12)
+        if (super.mouseX > windowX + bankWidth - 88 && super.mouseY >= windowY && super.mouseX < windowX + bankWidth && super.mouseY < windowY + tbh)
             k3 = 0xff0000;
-        gameGraphics.drawBoxTextRight("Close window", j + 406, l + 10, 1, k3);
-        gameGraphics.drawString("Number in bank in green", j + 7, l + 24, 1, 65280);
-        gameGraphics.drawString("Number held in blue", j + 289, l + 24, 1, 65535);
+        gameGraphics.drawBoxTextRight("Close window", windowX + bankWidth - 2, windowY + 10, 1, k3);
+        gameGraphics.drawString("Number in bank in green", windowX + 7, windowY + tbh + 12, 1, 0x00ff00);
+        gameGraphics.drawString("Number held in blue", windowX + bankWidth - 119, windowY + tbh + 12, 1, 0x00ffff);
         int i7 = 0xd0d0d0;
         int k7 = mouseOverBankPageText * 48;
-        for (int i8 = 0; i8 < 6; i8++) {
-            for (int j8 = 0; j8 < 8; j8++) {
-                int l8 = j + 7 + j8 * 49;
-                int i9 = l + 28 + i8 * 34;
+        int bankSlotWidth = 49;
+        int bankSlotHeight = 34;
+        int nRows = (biby - (tiby + tibh))/(bankSlotHeight);
+        int nCols = (bankWidth - lmbw - rmbw)/(bankSlotWidth);
+        for (int row = 0; row < nRows; row++) {
+            for (int col = 0; col < nCols; col++) {
+                int slotX = windowX + 7 + col * bankSlotWidth;
+                int slotY = windowY + 28 + row * bankSlotHeight;
                 if (selectedBankItem == k7)
-                    gameGraphics.drawBoxAlpha(l8, i9, 49, 34, 0xff0000, 160);
+                    gameGraphics.drawBoxAlpha(slotX, slotY, bankSlotWidth, bankSlotHeight, 0xff0000, 160);
                 else
-                    gameGraphics.drawBoxAlpha(l8, i9, 49, 34, i7, 160);
-                gameGraphics.drawBoxEdge(l8, i9, 50, 35, 0);
+                    gameGraphics.drawBoxAlpha(slotX, slotY, bankSlotWidth, bankSlotHeight, i7, 160);
+                gameGraphics.drawBoxEdge(slotX, slotY, bankSlotWidth+1, bankSlotHeight+1, 0);
                 if (k7 < bankItemCount && bankItems[k7] != -1) {
-                    gameGraphics.spriteClip4(l8, i9, 48, 32, SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(), EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
-                    gameGraphics.drawString(String.valueOf(bankItemsCount[k7]), l8 + 1, i9 + 10, 1, 65280);
-                    gameGraphics.drawBoxTextRight(String.valueOf(inventoryCount(bankItems[k7])), l8 + 47, i9 + 29, 1, 65535);
+                    gameGraphics.spriteClip4(slotX, slotY, bankSlotWidth-1, bankSlotHeight-2, SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(), EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
+                    gameGraphics.drawString(String.valueOf(bankItemsCount[k7]), slotX + 1, slotY + 10, 1, 65280);
+                    gameGraphics.drawBoxTextRight(String.valueOf(inventoryCount(bankItems[k7])), slotX + 47, slotY + 29, 1, 65535);
                 }
                 k7++;
             }
 
         }
 
-        gameGraphics.drawLineX(j + 5, l + 256, 398, 0);
+        gameGraphics.drawLineX(windowX + 5, windowY + 256, 398, 0);
         if (selectedBankItem == -1) {
-            gameGraphics.drawText("Select an object to withdraw or deposit", j + 204, l + 248, 3, 0xffff00);
+            gameGraphics.drawText("Select an object to withdraw or deposit", windowX + 204, windowY + 248, 3, 0xffff00);
             return;
         }
         int k8;
@@ -1110,74 +1156,74 @@ public final class mudclient extends GameWindowMiddleMan {
 //            if (!EntityHandler.getItemDef(k8).isStackable() && l7 > 1)
 //                l7 = 1;
             if (l7 > 0) {
-                gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(k8).getName(), j + 2, l + 248, 1, 0xffffff);
+                gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(k8).getName(), windowX + 2, windowY + 248, 1, 0xffffff);
                 int l3 = 0xffffff;
-                if (super.mouseX >= j + 220 && super.mouseY >= l + 238 && super.mouseX < j + 250 && super.mouseY <= l + 249)
+                if (super.mouseX >= windowX + 220 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 250 && super.mouseY <= windowY + 249)
                     l3 = 0xff0000;
-                gameGraphics.drawString("One", j + 222, l + 248, 1, l3);
+                gameGraphics.drawString("One", windowX + 222, windowY + 248, 1, l3);
                 if (l7 >= 10) {
                     int i4 = 0xffffff;
-                    if (super.mouseX >= j + 250 && super.mouseY >= l + 238 && super.mouseX < j + 280 && super.mouseY <= l + 249)
+                    if (super.mouseX >= windowX + 250 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 280 && super.mouseY <= windowY + 249)
                         i4 = 0xff0000;
-                    gameGraphics.drawString("10", j + 252, l + 248, 1, i4);
+                    gameGraphics.drawString("10", windowX + 252, windowY + 248, 1, i4);
                 }
                 if (l7 >= 100) {
                     int j4 = 0xffffff;
-                    if (super.mouseX >= j + 280 && super.mouseY >= l + 238 && super.mouseX < j + 305 && super.mouseY <= l + 249)
+                    if (super.mouseX >= windowX + 280 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 305 && super.mouseY <= windowY + 249)
                         j4 = 0xff0000;
-                    gameGraphics.drawString("100", j + 282, l + 248, 1, j4);
+                    gameGraphics.drawString("100", windowX + 282, windowY + 248, 1, j4);
                 }
                 if (l7 >= 1000) {
                     int k4 = 0xffffff;
-                    if (super.mouseX >= j + 305 && super.mouseY >= l + 238 && super.mouseX < j + 335 && super.mouseY <= l + 249)
+                    if (super.mouseX >= windowX + 305 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 335 && super.mouseY <= windowY + 249)
                         k4 = 0xff0000;
-                    gameGraphics.drawString("1k", j + 307, l + 248, 1, k4);
+                    gameGraphics.drawString("1k", windowX + 307, windowY + 248, 1, k4);
                 }
                 if (l7 >= 10000) {
                     int l4 = 0xffffff;
-                    if (super.mouseX >= j + 335 && super.mouseY >= l + 238 && super.mouseX < j + 368 && super.mouseY <= l + 249)
+                    if (super.mouseX >= windowX + 335 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 368 && super.mouseY <= windowY + 249)
                         l4 = 0xff0000;
-                    gameGraphics.drawString("10k", j + 337, l + 248, 1, l4);
+                    gameGraphics.drawString("10k", windowX + 337, windowY + 248, 1, l4);
                 }
                 int i5 = 0xffffff;
-                if (super.mouseX >= j + 370 && super.mouseY >= l + 238 && super.mouseX < j + 400 && super.mouseY <= l + 249)
+                if (super.mouseX >= windowX + 370 && super.mouseY >= windowY + 238 && super.mouseX < windowX + 400 && super.mouseY <= windowY + 249)
                     i5 = 0xff0000;
-                gameGraphics.drawString("All", j + 370, l + 248, 1, i5);
+                gameGraphics.drawString("All", windowX + 370, windowY + 248, 1, i5);
             }
             if (inventoryCount(k8) > 0) {
-                gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(k8).getName(), j + 2, l + 273, 1, 0xffffff);
+                gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(k8).getName(), windowX + 2, windowY + 273, 1, 0xffffff);
                 int j5 = 0xffffff;
-                if (super.mouseX >= j + 220 && super.mouseY >= l + 263 && super.mouseX < j + 250 && super.mouseY <= l + 274)
+                if (super.mouseX >= windowX + 220 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 250 && super.mouseY <= windowY + 274)
                     j5 = 0xff0000;
-                gameGraphics.drawString("One", j + 222, l + 273, 1, j5);
+                gameGraphics.drawString("One", windowX + 222, windowY + 273, 1, j5);
                 if (inventoryCount(k8) >= 10) {
                     int k5 = 0xffffff;
-                    if (super.mouseX >= j + 250 && super.mouseY >= l + 263 && super.mouseX < j + 280 && super.mouseY <= l + 274)
+                    if (super.mouseX >= windowX + 250 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 280 && super.mouseY <= windowY + 274)
                         k5 = 0xff0000;
-                    gameGraphics.drawString("10", j + 252, l + 273, 1, k5);
+                    gameGraphics.drawString("10", windowX + 252, windowY + 273, 1, k5);
                 }
                 if (inventoryCount(k8) >= 100) {
                     int l5 = 0xffffff;
-                    if (super.mouseX >= j + 280 && super.mouseY >= l + 263 && super.mouseX < j + 305 && super.mouseY <= l + 274)
+                    if (super.mouseX >= windowX + 280 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 305 && super.mouseY <= windowY + 274)
                         l5 = 0xff0000;
-                    gameGraphics.drawString("100", j + 282, l + 273, 1, l5);
+                    gameGraphics.drawString("100", windowX + 282, windowY + 273, 1, l5);
                 }
                 if (inventoryCount(k8) >= 1000) {
                     int i6 = 0xffffff;
-                    if (super.mouseX >= j + 305 && super.mouseY >= l + 263 && super.mouseX < j + 335 && super.mouseY <= l + 274)
+                    if (super.mouseX >= windowX + 305 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 335 && super.mouseY <= windowY + 274)
                         i6 = 0xff0000;
-                    gameGraphics.drawString("1k", j + 307, l + 273, 1, i6);
+                    gameGraphics.drawString("1k", windowX + 307, windowY + 273, 1, i6);
                 }
                 if (inventoryCount(k8) >= 10000) {
                     int j6 = 0xffffff;
-                    if (super.mouseX >= j + 335 && super.mouseY >= l + 263 && super.mouseX < j + 368 && super.mouseY <= l + 274)
+                    if (super.mouseX >= windowX + 335 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 368 && super.mouseY <= windowY + 274)
                         j6 = 0xff0000;
-                    gameGraphics.drawString("10k", j + 337, l + 273, 1, j6);
+                    gameGraphics.drawString("10k", windowX + 337, windowY + 273, 1, j6);
                 }
                 int k6 = 0xffffff;
-                if (super.mouseX >= j + 370 && super.mouseY >= l + 263 && super.mouseX < j + 400 && super.mouseY <= l + 274)
+                if (super.mouseX >= windowX + 370 && super.mouseY >= windowY + 263 && super.mouseX < windowX + 400 && super.mouseY <= windowY + 274)
                     k6 = 0xff0000;
-                gameGraphics.drawString("All", j + 370, l + 273, 1, k6);
+                gameGraphics.drawString("All", windowX + 370, windowY + 273, 1, k6);
             }
         }
     }
@@ -1784,48 +1830,109 @@ public final class mudclient extends GameWindowMiddleMan {
         displayMessage(s, 3, 0);
     }
 
-    private final void checkMouseOverMenus() {
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 && super.mouseY < 35)
+    private final void checkMouseOverMenus()
+    {
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3
+        		&& super.mouseY < 35)
             mouseOverMenu = 1;
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 33 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 33 && super.mouseY < 35) {
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 33
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 33
+        		&& super.mouseY < 35)
+        {
             mouseOverMenu = 2;
             anInt985 = (int) (Math.random() * 13D) - 6;
             anInt986 = (int) (Math.random() * 23D) - 11;
         }
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 66 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 66 && super.mouseY < 35)
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 66
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 66
+        		&& super.mouseY < 35)
             mouseOverMenu = 3;
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 99 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 99 && super.mouseY < 35)
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 99
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 99
+        		&& super.mouseY < 35)
             mouseOverMenu = 4;
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 132 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 132 && super.mouseY < 35)
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 132
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 132
+        		&& super.mouseY < 35)
             mouseOverMenu = 5;
-        if (mouseOverMenu == 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 165 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 165 && super.mouseY < 35)
+        if (mouseOverMenu == 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 165
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 165
+        		&& super.mouseY < 35)
             mouseOverMenu = 6;
-        if (mouseOverMenu != 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 && super.mouseY < 26)
+        if (mouseOverMenu != 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3
+        		&& super.mouseY < 26)
             mouseOverMenu = 1;
-        if (mouseOverMenu != 0 && mouseOverMenu != 2 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 33 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 33 && super.mouseY < 26) {
+        if (mouseOverMenu != 0
+        		&& mouseOverMenu != 2
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 33
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 33
+        		&& super.mouseY < 26)
+        {
             mouseOverMenu = 2;
             anInt985 = (int) (Math.random() * 13D) - 6;
             anInt986 = (int) (Math.random() * 23D) - 11;
         }
-        if (mouseOverMenu != 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 66 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 66 && super.mouseY < 26)
+        if (mouseOverMenu != 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 66
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 66
+        		&& super.mouseY < 26)
             mouseOverMenu = 3;
-        if (mouseOverMenu != 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 99 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 99 && super.mouseY < 26)
+        if (mouseOverMenu != 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 99
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 99
+        		&& super.mouseY < 26)
             mouseOverMenu = 4;
-        if (mouseOverMenu != 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 132 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 132 && super.mouseY < 26)
+        if (mouseOverMenu != 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 132
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 132
+        		&& super.mouseY < 26)
             mouseOverMenu = 5;
-        if (mouseOverMenu != 0 && super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 165 && super.mouseY >= 3 && super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 165 && super.mouseY < 26)
+        if (mouseOverMenu != 0
+        		&& super.mouseX >= ((GameImage) (gameGraphics)).menuDefaultWidth - 35 - 165
+        		&& super.mouseY >= 3
+        		&& super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 165
+        		&& super.mouseY < 26)
             mouseOverMenu = 6;
-        if (mouseOverMenu == 1 && (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 248 || super.mouseY > 36 + (anInt882 / 5) * 34))
+        if (mouseOverMenu == 1
+        		&& (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 248
+        				|| super.mouseY > 36 + (anInt882 / 5) * 34))
             mouseOverMenu = 0;
-        if (mouseOverMenu == 3 && (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199 || super.mouseY > 316))
+        if (mouseOverMenu == 3
+        		&& (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199
+        				|| super.mouseY > 316))
             mouseOverMenu = 0;
-        if ((mouseOverMenu == 2 || mouseOverMenu == 4 || mouseOverMenu == 5) && (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199 || super.mouseY > 240))
+        if ((mouseOverMenu == 2 || mouseOverMenu == 4 || mouseOverMenu == 5)
+        		&& (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199
+        				|| super.mouseY > 240))
             mouseOverMenu = 0;
-        if (mouseOverMenu == 6 && (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199 || super.mouseY > 311))
+        if (mouseOverMenu == 6
+        		&& (super.mouseX < ((GameImage) (gameGraphics)).menuDefaultWidth - 199
+        				|| super.mouseY > 311))
             mouseOverMenu = 0;
     }
 
-    private final void menuClick(int index) {
+    private final void menuClick(int index)
+    {
         int actionX = menuActionX[index];
         int actionY = menuActionY[index];
         int actionType = menuActionType[index];
@@ -3215,10 +3322,10 @@ public final class mudclient extends GameWindowMiddleMan {
                     menuX = 0;
                 if (menuY < 0)
                     menuY = 0;
-                if (menuX + menuWidth > 510)
-                    menuX = 510 - menuWidth;
-                if (menuY + menuHeight > 315)
-                    menuY = 315 - menuHeight;
+                if (menuX + menuWidth > windowWidth - 2)
+                    menuX = windowWidth - 2 - menuWidth;
+                if (menuY + menuHeight > windowHeight - 19)
+                    menuY = windowHeight - 19 - menuHeight;
                 mouseButtonClick = 0;
             }
         }
@@ -6952,8 +7059,16 @@ public final class mudclient extends GameWindowMiddleMan {
         aBooleanArray970 = new boolean[500];
         tradeMyItems = new int[14];
         tradeMyItemsCount = new int[14];
+        /*
         windowWidth = 512;
         windowHeight = 334;
+        */
+        /* rs2 values
+        windowWidth = 765;
+        windowHeight = 503;
+        */
+        windowWidth = 1300;
+        windowHeight = 680;
         cameraSizeInt = 9;
         tradeOtherPlayerName = "";
     }

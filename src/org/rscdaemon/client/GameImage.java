@@ -183,36 +183,36 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void drawBoxAlpha(int i, int j, int k, int l, int i1, int j1) {
-        if (i < imageX) {
-            k -= imageX - i;
-            i = imageX;
+    public void drawBoxAlpha(int x, int y, int width, int height, int colour, int alpha) {
+        if (x < imageX) {
+            width -= imageX - x;
+            x = imageX;
         }
-        if (j < imageY) {
-            l -= imageY - j;
-            j = imageY;
+        if (y < imageY) {
+            height -= imageY - y;
+            y = imageY;
         }
-        if (i + k > imageWidth)
-            k = imageWidth - i;
-        if (j + l > imageHeight)
-            l = imageHeight - j;
-        int k1 = 256 - j1;
-        int l1 = (i1 >> 16 & 0xff) * j1;
-        int i2 = (i1 >> 8 & 0xff) * j1;
-        int j2 = (i1 & 0xff) * j1;
-        int j3 = menuDefaultWidth - k;
+        if (x + width > imageWidth)
+            width = imageWidth - x;
+        if (y + height > imageHeight)
+            height = imageHeight - y;
+        int k1 = 256 - alpha;
+        int l1 = (colour >> 16 & 0xff) * alpha;
+        int i2 = (colour >> 8 & 0xff) * alpha;
+        int j2 = (colour & 0xff) * alpha;
+        int j3 = menuDefaultWidth - width;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
             j3 += menuDefaultWidth;
-            if ((j & 1) != 0) {
-                j++;
-                l--;
+            if ((y & 1) != 0) {
+                y++;
+                height--;
             }
         }
-        int k3 = i + j * menuDefaultWidth;
-        for (int l3 = 0; l3 < l; l3 += byte0) {
-            for (int i4 = -k; i4 < 0; i4++) {
+        int k3 = x + y * menuDefaultWidth;
+        for (int l3 = 0; l3 < height; l3 += byte0) {
+            for (int i4 = -width; i4 < 0; i4++) {
                 int k2 = (imagePixelArray[k3] >> 16 & 0xff) * k1;
                 int l2 = (imagePixelArray[k3] >> 8 & 0xff) * k1;
                 int i3 = (imagePixelArray[k3] & 0xff) * k1;
@@ -262,33 +262,33 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void drawBox(int i, int j, int k, int l, int i1) {
-        if (i < imageX) {
-            k -= imageX - i;
-            i = imageX;
+    public void drawBox(int x, int y, int width, int height, int colour) {
+        if (x < imageX) {
+            width -= imageX - x;
+            x = imageX;
         }
-        if (j < imageY) {
-            l -= imageY - j;
-            j = imageY;
+        if (y < imageY) {
+            height -= imageY - y;
+            y = imageY;
         }
-        if (i + k > imageWidth)
-            k = imageWidth - i;
-        if (j + l > imageHeight)
-            l = imageHeight - j;
-        int j1 = menuDefaultWidth - k;
+        if (x + width > imageWidth)
+            width = imageWidth - x;
+        if (y + height > imageHeight)
+            height = imageHeight - y;
+        int j1 = menuDefaultWidth - width;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
             j1 += menuDefaultWidth;
-            if ((j & 1) != 0) {
-                j++;
-                l--;
+            if ((y & 1) != 0) {
+                y++;
+                height--;
             }
         }
-        int k1 = i + j * menuDefaultWidth;
-        for (int l1 = -l; l1 < 0; l1 += byte0) {
-            for (int i2 = -k; i2 < 0; i2++)
-                imagePixelArray[k1++] = i1;
+        int k1 = x + y * menuDefaultWidth;
+        for (int l1 = -height; l1 < 0; l1 += byte0) {
+            for (int i2 = -width; i2 < 0; i2++)
+                imagePixelArray[k1++] = colour;
 
             k1 += j1;
         }

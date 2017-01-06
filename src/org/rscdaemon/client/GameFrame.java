@@ -2,26 +2,27 @@ package org.rscdaemon.client;
 
 import java.awt.*;
 
-public class GameFrame extends Frame {
+public class GameFrame extends Frame
+{
 
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = -5653713738612659906L;
-	public GameFrame(GameWindow gameWindow, int width, int height, String title, boolean resizable, boolean flag1) {
-        frameOffset = 28;
+	public GameFrame(GameWindow gameWindow, int width, int height, String title, boolean resizable, boolean flag1)
+	{
         frameWidth = width;
         frameHeight = height;
         aGameWindow = gameWindow;
         if (flag1)
             frameOffset = 48;
         else
-            frameOffset = 28;
+            frameOffset = 0;
         setTitle(title);
         setResizable(resizable);
-        show();
+        setVisible(true);
         toFront();
-        resize(frameWidth, frameHeight);
+        setSize(frameWidth, frameHeight + frameOffset);
         aGraphics49 = getGraphics();
     }
 
@@ -32,10 +33,6 @@ public class GameFrame extends Frame {
         else
             g.translate(-5, 0);
         return g;
-    }
-
-	public void resize(int i, int j) {
-        super.resize(i, j + frameOffset); //size of frame
     }
 
 	@SuppressWarnings("deprecation")
