@@ -1,8 +1,8 @@
-package org.rscdaemon.client;
+package org;
 
-import org.rscdaemon.client.model.Sprite;
-import org.rscdaemon.client.util.Config;
-import org.rscdaemon.client.util.DataConversions;
+import org.model.Sprite;
+import org.util.Config;
+import org.util.DataConversions;
 
 import java.awt.*;
 import java.awt.image.*;

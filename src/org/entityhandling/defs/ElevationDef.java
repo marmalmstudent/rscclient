@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs;
+package org.entityhandling.defs;
 
 public class ElevationDef {
     public int unknown1;

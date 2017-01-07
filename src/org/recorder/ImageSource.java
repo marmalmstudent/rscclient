@@ -1,4 +1,4 @@
-package org.rscdaemon.client.recorder;
+package org.recorder;
 
 import javax.media.MediaLocator;
 import javax.media.Time;

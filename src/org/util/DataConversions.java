@@ -1,4 +1,4 @@
-package org.rscdaemon.client.util;
+package org.util;
 
 import com.bombaydigital.vault.HexString;
 

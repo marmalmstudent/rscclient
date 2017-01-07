@@ -1,4 +1,4 @@
-package org.rscdaemon.client.model;
+package org.model;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

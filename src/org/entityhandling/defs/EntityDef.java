@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs;
+package org.entityhandling.defs;
 
 /**
  * The abstract class EntityDef implements methods for

@@ -1,4 +1,4 @@
-package org.rscdaemon.client;
+package org;
 
 
 public class CameraModel {

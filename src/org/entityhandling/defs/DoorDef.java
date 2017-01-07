@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs;
+package org.entityhandling.defs;
 
 /**
  * The definition wrapper for doors

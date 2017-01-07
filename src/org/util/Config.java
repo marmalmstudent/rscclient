@@ -1,4 +1,4 @@
-package org.rscdaemon.client.util;
+package org.util;
 
 public class Config {
     /**
@@ -9,7 +9,7 @@ public class Config {
         START_TIME = System.currentTimeMillis();
         SERVER_IP = "127.0.0.1";
         SERVER_PORT = 43594;
-        CONF_DIR = "conf/client";
+        CONF_DIR = "src/org/conf/client/";
         MEDIA_DIR = "media";
         MOVIE_FPS = 5;
     }

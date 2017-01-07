@@ -1,12 +1,12 @@
-package org.rscdaemon.client.model;
-
-import org.rscdaemon.client.util.PersistenceManager;
+package org.model;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.util.PersistenceManager;
 
 public class Sprite {
     private static final int TRANSPARENT = Color.BLACK.getRGB();

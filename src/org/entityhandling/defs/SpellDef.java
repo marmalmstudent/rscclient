@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs;
+package org.entityhandling.defs;
 
 import java.util.HashMap;
 import java.util.Map.Entry;

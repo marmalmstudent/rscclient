@@ -1,16 +1,16 @@
-package org.rscdaemon.client;
-
-import org.rscdaemon.client.util.Config;
-import org.rscdaemon.client.util.DataConversions;
+package org;
 
 import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.util.Config;
+import org.util.DataConversions;
+
 public abstract class GameWindowMiddleMan extends GameWindow {
 	
 	 
-    protected final void login(String user, String pass, boolean reconnecting) {
+    public void login(String user, String pass, boolean reconnecting) {
         if (socketTimeout > 0) {
             loginScreenPrint("Please wait...", "Connecting to server");
             try {

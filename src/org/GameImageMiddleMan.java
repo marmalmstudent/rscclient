@@ -1,4 +1,4 @@
-package org.rscdaemon.client;
+package org;
 
 import java.awt.*;
 

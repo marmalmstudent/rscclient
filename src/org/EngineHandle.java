@@ -1,9 +1,9 @@
-package org.rscdaemon.client;
+package org;
 
-import org.rscdaemon.client.entityhandling.EntityHandler;
-import org.rscdaemon.client.model.Sector;
-import org.rscdaemon.client.util.Config;
-import org.rscdaemon.client.util.DataConversions;
+import org.entityhandling.EntityHandler;
+import org.model.Sector;
+import org.util.Config;
+import org.util.DataConversions;
 
 import java.io.BufferedInputStream;
 import java.io.File;

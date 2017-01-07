@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs.extras;
+package org.entityhandling.defs.extras;
 
 public class AnimationDef {
     public String name;

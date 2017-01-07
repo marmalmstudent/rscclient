@@ -1,4 +1,4 @@
-package org.rscdaemon.client.util;
+package org.util;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -11,18 +11,18 @@ public class PersistenceManager {
     private static final XStream xstream = new XStream();
 
     static {
-        addAlias("NPCDef", "org.rscdaemon.client.entityhandling.defs.NPCDef");
-        addAlias("ItemDef", "org.rscdaemon.client.entityhandling.defs.ItemDef");
-        addAlias("TextureDef", "org.rscdaemon.client.entityhandling.defs.extras.TextureDef");
-        addAlias("AnimationDef", "org.rscdaemon.client.entityhandling.defs.extras.AnimationDef");
-        addAlias("ItemDropDef", "org.rscdaemon.client.entityhandling.defs.extras.ItemDropDef");
-        addAlias("SpellDef", "org.rscdaemon.client.entityhandling.defs.SpellDef");
-        addAlias("PrayerDef", "org.rscdaemon.client.entityhandling.defs.PrayerDef");
-        addAlias("TileDef", "org.rscdaemon.client.entityhandling.defs.TileDef");
-        addAlias("DoorDef", "org.rscdaemon.client.entityhandling.defs.DoorDef");
-        addAlias("ElevationDef", "org.rscdaemon.client.entityhandling.defs.ElevationDef");
-        addAlias("GameObjectDef", "org.rscdaemon.client.entityhandling.defs.GameObjectDef");
-        addAlias("org.rscdaemon.spriteeditor.Sprite", "org.rscdaemon.client.model.Sprite");
+        addAlias("NPCDef", "org.entityhandling.defs.NPCDef");
+        addAlias("ItemDef", "org.entityhandling.defs.ItemDef");
+        addAlias("TextureDef", "org.entityhandling.defs.extras.TextureDef");
+        addAlias("AnimationDef", "org.entityhandling.defs.extras.AnimationDef");
+        addAlias("ItemDropDef", "org.entityhandling.defs.extras.ItemDropDef");
+        addAlias("SpellDef", "org.entityhandling.defs.SpellDef");
+        addAlias("PrayerDef", "org.entityhandling.defs.PrayerDef");
+        addAlias("TileDef", "org.entityhandling.defs.TileDef");
+        addAlias("DoorDef", "org.entityhandling.defs.DoorDef");
+        addAlias("ElevationDef", "org.entityhandling.defs.ElevationDef");
+        addAlias("GameObjectDef", "org.entityhandling.defs.GameObjectDef");
+        addAlias("org.rscdaemon.spriteeditor.Sprite", "org.model.Sprite");
     }
 
     private static void addAlias(String name, String className) {

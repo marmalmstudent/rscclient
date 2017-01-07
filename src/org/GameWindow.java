@@ -1,16 +1,22 @@
-package org.rscdaemon.client;
+package org;
 
 import java.applet.Applet;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
+import javax.swing.*;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 
-public class GameWindow extends Applet implements Runnable
+import org.util.Config;
+
+public class GameWindow extends JApplet 
+	implements Runnable, MouseListener, MouseMotionListener, KeyListener, FocusListener, WindowListener, ComponentListener
 {
 	public static final Color BAR_COLOUR = new Color(132, 132, 132); //144, 192, 64
 	public static final Font LOADING_FONT = new Font("Helvetica", 0, 12);
@@ -37,14 +43,23 @@ public class GameWindow extends Applet implements Runnable
 
 	protected final void createWindow(int width, int height, String title, boolean resizable)
 	{
-		appletMode = true;
+		appletMode = false;
 		appletWidth = width;
 		appletHeight = height;
 		gameFrame = new GameFrame(this, width, height, title, resizable, false);
-		loadingScreen = 1; //1
-		gameWindowThread = new Thread(this);
-		gameWindowThread.start();
-		gameWindowThread.setPriority(1);
+		graphics = getFrameComponent().getGraphics();
+		loadingScreen = 1;
+		startThread(this);
+	}
+	
+	public void initCreateWindow(int width, int height)
+	{		
+		appletMode = true;
+		appletWidth = width;
+		appletHeight = height;
+		graphics = getFrameComponent().getGraphics();
+		loadingScreen = 1;
+		startThread(this);
 	}
     
 	public void setLogo(Image logo)
@@ -62,16 +77,6 @@ public class GameWindow extends Applet implements Runnable
 		for (int i = 0; i < 10; i++) {
 			currentTimeArray[i] = 0L;
 		}
-	}
-
- 	protected void handleMenuKeyDown(int key)
-	{
-		
-	}
-
-	protected void handleMouseDown(int button, int x, int y)
-	{
-		
 	}
 
 	private final void close()
@@ -103,16 +108,30 @@ public class GameWindow extends Applet implements Runnable
 		GameImage.loadFont("h24b", 7, this); //h24b //used on display msg when you die
 	}
 
+    public Component getFrameComponent()
+    {
+        if(gameFrame != null)
+            return gameFrame;
+        else
+            return this;
+    }
+
     public final void run()
     {
+    	getFrameComponent().addMouseListener(this);
+    	getFrameComponent().addMouseMotionListener(this);
+    	getFrameComponent().addKeyListener(this);
+    	getFrameComponent().addFocusListener(this);
+        if(gameFrame != null)
+        	gameFrame.addWindowListener(this);
         if (loadingScreen == 1)
         { //very first loginscreen
             loadingScreen = 2; // 2
-            loadingGraphics = getGraphics();
+            //graphics = getGraphics();
             drawLoadingLogo();
             drawLoadingScreen(0, "Loading..."); //this is the screen during load
             startGame();
-            //loadingScreen = 0; // dunno what this does
+            loadingScreen = 0; // dunno what this does
         }
         int i = 0;
         int j = 256;
@@ -120,7 +139,6 @@ public class GameWindow extends Applet implements Runnable
         int i1 = 0;
         for (int j1 = 0; j1 < 10; j1++)
             currentTimeArray[j1] = System.currentTimeMillis();
-
         while (exitTimeout >= 0)
         {
             if (exitTimeout > 0)
@@ -199,8 +217,8 @@ public class GameWindow extends Applet implements Runnable
 
 	private final void drawLoadingLogo()
 	{
-		loadingGraphics.setColor(Color.black);
-		loadingGraphics.drawImage(loadingLogo, 5, 0, this);
+		graphics.setColor(Color.black);
+		graphics.drawImage(loadingLogo, 5, 0, this);
 		loadFonts();
 	}
 
@@ -209,21 +227,21 @@ public class GameWindow extends Applet implements Runnable
         try {
             int j = (appletWidth - 281) / 2;
             int k = (appletHeight - 148) / 2;
-            loadingGraphics.setColor(Color.black);
-            loadingGraphics.fillRect(0, 0, appletWidth, appletHeight);
-            loadingGraphics.drawImage(loadingLogo, 5, 0, this);
+            graphics.setColor(Color.black);
+            graphics.fillRect(0, 0, appletWidth, appletHeight);
+            graphics.drawImage(loadingLogo, 5, 0, this);
             j += 2;
             k += 120;
             anInt16 = i;
             loadingBarText = s;
-            loadingGraphics.setColor(BAR_COLOUR);
-            loadingGraphics.drawRect(j - 2, k - 2, 280, 23);
-            loadingGraphics.fillRect(j, k, (277 * i) / 100, 20);
-            loadingGraphics.setColor(Color.black);
-            drawString(loadingGraphics, s, LOADING_FONT, j + 138, k + 10);
+            graphics.setColor(BAR_COLOUR);
+            graphics.drawRect(j - 2, k - 2, 280, 23);
+            graphics.fillRect(j, k, (277 * i) / 100, 20);
+            graphics.setColor(Color.black);
+            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
             if (loadingString != null) {
-                loadingGraphics.setColor(Color.WHITE);
-                drawString(loadingGraphics, loadingString, LOADING_FONT, j + 138, k - 120);
+                graphics.setColor(Color.WHITE);
+                drawString(graphics, loadingString, LOADING_FONT, j + 138, k - 120);
                 return;
             }
         }
@@ -233,7 +251,7 @@ public class GameWindow extends Applet implements Runnable
         }
     }
 
-    protected final void drawLoadingBarText(int i, String s)
+    public final void drawLoadingBarText(int i, String s)
     {
         try
         {
@@ -244,12 +262,12 @@ public class GameWindow extends Applet implements Runnable
             anInt16 = i;
             loadingBarText = s;
             int l = (277 * i) / 100;
-            loadingGraphics.setColor(BAR_COLOUR);
-            loadingGraphics.fillRect(j, k, l, 20);
-            loadingGraphics.setColor(Color.black);
-            loadingGraphics.fillRect(j + l, k, 277 - l, 20);
-            loadingGraphics.setColor(Color.WHITE);
-            drawString(loadingGraphics, s, LOADING_FONT, j + 138, k + 10);
+            graphics.setColor(BAR_COLOUR);
+            graphics.fillRect(j, k, l, 20);
+            graphics.setColor(Color.black);
+            graphics.fillRect(j + l, k, 277 - l, 20);
+            graphics.setColor(Color.WHITE);
+            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
             return;
         }
         catch (Exception _ex)
@@ -312,7 +330,18 @@ public class GameWindow extends Applet implements Runnable
             return abyte0;
         }
     }
-    
+
+    /*
+ 	protected void handleMenuKeyDown(int key)
+	{
+		
+	}
+
+	protected void handleMouseDown(int button, int x, int y)
+	{
+		
+	}
+	
     public final synchronized boolean keyDown(Event event, int key)
     {
         handleMenuKeyDown(key);
@@ -422,16 +451,14 @@ public class GameWindow extends Applet implements Runnable
 		mouseY = j + yOffset;
 		mouseDownButton = event.metaDown() ? 2 : 1;
 		return true;
-	}
+	}*/
 
 	public final void init()
 	{
-		appletMode = true;
-		System.out.println("Started applet");
-		appletWidth = 512;
-		appletHeight = 344;
-		loadingScreen = 1;
-		startThread(this);
+        Config.initConfig();
+        GameWindowMiddleMan.clientVersion = 25;
+        setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
+        initCreateWindow(512, 344);
 	}
 	
 	public final void start()
@@ -556,7 +583,7 @@ public class GameWindow extends Applet implements Runnable
 	public String loadingString;
 	private int anInt16;
 	private String loadingBarText;
-	private Graphics loadingGraphics;
+	private Graphics graphics;
 	private static String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
 	public boolean keyLeftBraceDown;
 	public boolean keyRightBraceDown;
@@ -579,4 +606,200 @@ public class GameWindow extends Applet implements Runnable
 	public String inputMessage;
 	public String enteredMessage;
 
+	
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void focusGained(FocusEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void focusLost(FocusEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void keyTyped(KeyEvent e) {
+		System.out.println("Key Typed!");
+		
+	}
+
+	public void keyPressed(KeyEvent e)
+	{
+		System.out.println("Key ("+e.getKeyCode()+", "+(char)e.getKeyChar()+") Pressed!");
+		int key = e.getKeyChar();
+        //handleMenuKeyDown(key);
+        keyDown = key;
+        keyDown2 = key;
+        lastActionTimeout = 0;
+        if (key == 1006)
+            keyLeftDown = true;
+        if (key == 1007)
+            keyRightDown = true;
+        if (key == 1004)
+            keyUpDown = true;
+        if (key == 1005)
+            keyDownDown = true;
+        if ((char) key == ' ')
+            keySpaceDown = true;
+        if ((char) key == 'n' || (char) key == 'm')
+            keyNMDown = true;
+        if ((char) key == 'N' || (char) key == 'M')
+            keyNMDown = true;
+        if ((char) key == '{')
+            keyLeftBraceDown = true;
+        if ((char) key == '}')
+            keyRightBraceDown = true;
+        if ((char) key == '\u03F0') // 1008 or F1
+            keyF1Toggle = !keyF1Toggle;
+        boolean validKeyDown = false;
+        for (int j = 0; j < charSet.length(); j++)
+        {
+            if (key != charSet.charAt(j))
+                continue;
+            validKeyDown = true;
+            break;
+        }
+
+        if (validKeyDown && inputText.length() < 20)
+            inputText += (char) key;
+        if (validKeyDown && inputMessage.length() < 80)
+            inputMessage += (char) key;
+        if (key == 8 && inputText.length() > 0) // backspace
+            inputText = inputText.substring(0, inputText.length() - 1);
+        if (key == 8 && inputMessage.length() > 0) // backspace
+            inputMessage = inputMessage.substring(0, inputMessage.length() - 1);
+        if (key == 10 || key == 13)
+        { // enter/return
+            enteredText = inputText;
+            enteredMessage = inputMessage;
+        }
+		
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+		System.out.println("Key released!");
+		int key = e.getKeyChar();
+        keyDown = 0;
+        if (key == 1006)
+            keyLeftDown = false;
+        if (key == 1007)
+            keyRightDown = false;
+        if (key == 1004)
+            keyUpDown = false;
+        if (key == 1005)
+            keyDownDown = false;
+        if ((char) key == ' ')
+            keySpaceDown = false;
+        if ((char) key == 'n' || (char) key == 'm')
+            keyNMDown = false;
+        if ((char) key == 'N' || (char) key == 'M')
+            keyNMDown = false;
+        if ((char) key == '{')
+            keyLeftBraceDown = false;
+        if ((char) key == '}')
+            keyRightBraceDown = false;
+	}
+
+	public void mouseDragged(MouseEvent e)
+	{
+		mouseX = e.getX();
+		mouseY = e.getY() + yOffset;
+		mouseDownButton = e.isMetaDown() ? 2 : 1;
+	}
+
+	public void mouseMoved(MouseEvent e)
+	{
+		mouseX = e.getX();
+		mouseY = e.getY() + yOffset;
+		mouseDownButton = 0;
+		lastActionTimeout = 0;
+		
+	}
+
+	public void mouseClicked(MouseEvent e) {
+		
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+		mouseX = e.getX();
+		mouseY = e.getY() + yOffset;
+		mouseDownButton = e.isMetaDown() ? 2 : 1;
+		lastMouseDownButton = mouseDownButton;
+		lastActionTimeout = 0;
+		//handleMouseDown(mouseDownButton, mouseX, mouseX);
+		
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+		mouseX = e.getX();
+		mouseY = e.getY() + yOffset;
+		mouseDownButton = 0;
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentResized(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }

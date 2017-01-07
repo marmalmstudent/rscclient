@@ -1,4 +1,4 @@
-package org.rscdaemon.client.recorder;
+package org.recorder;
 
 import javax.media.*;
 import javax.media.control.TrackControl;

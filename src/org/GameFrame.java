@@ -1,8 +1,9 @@
-package org.rscdaemon.client;
+package org;
 
 import java.awt.*;
+import javax.swing.*;
 
-public class GameFrame extends Frame
+public class GameFrame extends JFrame
 {
 
     /**
@@ -24,6 +25,7 @@ public class GameFrame extends Frame
         toFront();
         setSize(frameWidth, frameHeight + frameOffset);
         aGraphics49 = getGraphics();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public Graphics getGraphics() {
@@ -35,7 +37,7 @@ public class GameFrame extends Frame
         return g;
     }
 
-	@SuppressWarnings("deprecation")
+    /*
 	public boolean handleEvent(Event event) {
         if (event.id == 401)
             aGameWindow.keyDown(event, event.key);
@@ -58,10 +60,14 @@ public class GameFrame extends Frame
         else if (event.id == 404)
             aGameWindow.keyUp(event, event.key);
         return true;
-    }
+    }*/
 //Create Account
     public final void paint(Graphics g) {
         aGameWindow.paint(g);
+    }
+    
+    public final void update(Graphics g) {
+    	aGameWindow.update(g);
     }
 
     int frameWidth;

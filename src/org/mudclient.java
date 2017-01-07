@@ -1,12 +1,12 @@
-package org.rscdaemon.client;
+package org;
 
-import org.rscdaemon.client.entityhandling.EntityHandler;
-import org.rscdaemon.client.entityhandling.defs.ItemDef;
-import org.rscdaemon.client.entityhandling.defs.NPCDef;
-import org.rscdaemon.client.model.Sprite;
-import org.rscdaemon.client.recorder.Recorder;
-import org.rscdaemon.client.util.Config;
-import org.rscdaemon.client.util.DataConversions;
+import org.entityhandling.EntityHandler;
+import org.entityhandling.defs.ItemDef;
+import org.entityhandling.defs.NPCDef;
+import org.model.Sprite;
+import org.recorder.Recorder;
+import org.util.Config;
+import org.util.DataConversions;
 
 import javax.imageio.ImageIO;
 
@@ -18,10 +18,14 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
-@SuppressWarnings("serial")
-public final class mudclient extends GameWindowMiddleMan {
 
-    public static final int SPRITE_MEDIA_START = 2000;
+public class mudclient extends GameWindowMiddleMan {
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public static final int SPRITE_MEDIA_START = 2000;
     public static final int SPRITE_UTIL_START = 2100;
     public static final int SPRITE_ITEM_START = 2150;
     public static final int SPRITE_LOGO_START = 3150;
@@ -48,8 +52,29 @@ public final class mudclient extends GameWindowMiddleMan {
     private boolean recording = false;
     private LinkedList<BufferedImage> frames = new LinkedList<BufferedImage>();
     private long lastFrame = 0;
+    
+    /* Here are some variable that are added to make the rsc client work with
+     * the mopar wrapper */
+	public boolean graphicsEnabled;
+	public static boolean showhp;
+	public static boolean pkingmap;
+	public static boolean cameratoggle;
+	public static boolean maplock;
+	public static int mapface;
+	public static int portNumber = 43594;
+	public static boolean coords;
+	public static int zoom;
+	public static int fwdbwd;
+	public static int lftrit;
+	public int[] menuActionID;
+	public int[] menuActionCmd1;
+	public int[] menuActionCmd2;
+	public int[] menuActionCmd3;
+	public String loginMessage1;
+	public String loginMessage2;
+    /* EOF */
 
-    public static final void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
         mudclient mc = new mudclient();
@@ -384,8 +409,8 @@ public final class mudclient extends GameWindowMiddleMan {
             if (menuWelcome.hasActivated(loginButtonExistingUser)) {
                 loginScreenNumber = 2;
                 menuLogin.updateText(loginStatusText, "Please enter your username and password");
-                menuLogin.updateText(loginUsernameTextBox, currentUser);
-                menuLogin.updateText(loginPasswordTextBox, currentPass);
+                menuLogin.updateText(loginUsernameTextBox, !currentUser.equals("") ? currentUser : "admin");
+                menuLogin.updateText(loginPasswordTextBox, !currentPass.equals("") ? currentPass : "password");
                 menuLogin.setFocus(loginUsernameTextBox);
                 return;
             }
@@ -853,7 +878,7 @@ public final class mudclient extends GameWindowMiddleMan {
             return;
         }
         try {
-            if (loggedIn == 1) {
+            if (loggedIn) {
                 gameGraphics.drawStringShadows = true;
                 drawGame();
             } else {
@@ -1632,7 +1657,7 @@ public final class mudclient extends GameWindowMiddleMan {
     }
 
     private final void logout() {
-        if (loggedIn == 0) {
+        if (!loggedIn) {
             return;
         }
         if (lastWalkTimeout > 450) {
@@ -2398,11 +2423,11 @@ public final class mudclient extends GameWindowMiddleMan {
             return;
         try {
             loginTimer++;
-            if (loggedIn == 0) {
+            if (!loggedIn) {
                 super.lastActionTimeout = 0;
                 updateLoginScreen();
             }
-            if (loggedIn == 1) {
+            if (loggedIn) {
                 super.lastActionTimeout++;
                 processGame();
             }
@@ -2483,7 +2508,7 @@ public final class mudclient extends GameWindowMiddleMan {
     }
 
     private final void resetLoginVars() {
-        loggedIn = 0;
+        loggedIn = false;
         loginScreenNumber = 0;
         currentUser = "";
         currentPass = "";
@@ -2800,7 +2825,7 @@ public final class mudclient extends GameWindowMiddleMan {
     protected final void resetIntVars() {
         systemUpdate = 0;
         loginScreenNumber = 0;
-        loggedIn = 0;
+        loggedIn = false;
         logoutTimeout = 0;
     }
 
@@ -3930,7 +3955,7 @@ public final class mudclient extends GameWindowMiddleMan {
                 takeScreenshot(true);
                 break;
         }
-        if (loggedIn == 0) {
+        if (!loggedIn) {
             if (loginScreenNumber == 0)
                 menuWelcome.keyDown(key);
             if (loginScreenNumber == 1)
@@ -3938,7 +3963,7 @@ public final class mudclient extends GameWindowMiddleMan {
             if (loginScreenNumber == 2)
                 menuLogin.keyDown(key);
         }
-        if (loggedIn == 1) {
+        if (loggedIn) {
             if (showCharacterLookScreen) {
                 characterDesignMenu.keyDown(key);
                 return;
@@ -4949,7 +4974,7 @@ public final class mudclient extends GameWindowMiddleMan {
         combatStyle = 0;
         logoutTimeout = 0;
         loginScreenNumber = 0;
-        loggedIn = 1;
+        loggedIn = true;
         resetPrivateMessageStrings();
         gameGraphics.method211();
         gameGraphics.drawImage(aGraphics936, 0, 0);
@@ -7083,7 +7108,7 @@ public final class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private mudclient() {
+    public mudclient() {
         combatWindow = false;
         threadSleepTime = 10;
         try {
@@ -7327,7 +7352,7 @@ public final class mudclient extends GameWindowMiddleMan {
     private boolean showQuestionMenu;
     private int anInt718;
     private int magicLoc;
-    private int loggedIn;
+    public boolean loggedIn;
     private int cameraAutoAngle;
     private int cameraRotationBaseAddition;
     private Menu spellMenu;

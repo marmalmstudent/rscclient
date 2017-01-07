@@ -1,6 +1,6 @@
-package org.rscdaemon.client.entityhandling.defs;
+package org.entityhandling.defs;
 
-import org.rscdaemon.client.entityhandling.defs.extras.ItemDropDef;
+import org.entityhandling.defs.extras.ItemDropDef;
 
 /**
  * The definition wrapper for npcs

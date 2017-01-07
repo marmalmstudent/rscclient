@@ -1,4 +1,4 @@
-package org.rscdaemon.client.entityhandling.defs.extras;
+package org.entityhandling.defs.extras;
 
 public class TextureDef {
     public String dataName;
