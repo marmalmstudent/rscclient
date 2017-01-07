@@ -14,21 +14,27 @@ public class AudioReader extends InputStream {
     public void stopAudio() {
     }
 
-    public void loadData(byte[] abyte0, int i, int j) {
+    public void loadData(byte[] abyte0, int start_idx, int sound_length) {
         dataArray = abyte0;
-        offset = i;
-        length = i + j;
+        offset = start_idx;
+        length = start_idx + sound_length;
+        System.out.println("\n\n\n\n[");
+        for (int i =start_idx; i<start_idx+sound_length-1; i++)
+        {
+        	System.out.print(abyte0[i]+", ");
+        }
+        System.out.println(abyte0[start_idx+sound_length]+"]\n\n\n\n");
     }
 
-    public int read(byte[] abyte0, int i, int j) {
-        for (int k = 0; k < j; k++) {
+    public int read(byte[] abyte0, int start_idx, int sound_length) {
+        for (int idx = 0; idx < sound_length; idx++) {
             if (offset < length) {
-                abyte0[i + k] = dataArray[offset++];
+                abyte0[start_idx + idx] = dataArray[offset++];
             } else {
-                abyte0[i + k] = -1;
+                abyte0[start_idx + idx] = -1;
             }
         }
-        return j;
+        return sound_length;
     }
 
     public int read() {

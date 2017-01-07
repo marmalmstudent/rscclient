@@ -29,8 +29,8 @@ public final class mudclient extends GameWindowMiddleMan {
     public static final int SPRITE_TEXTURE_START = 3220;
     
     /* Custom variables */
-    public static int bankSlotWidth = 49;
-    public static int bankSlotHeight = 34;
+    public static int itemSlotWidth = 49;
+    public static int itemSlotHeight = 34;
     public int gameMenuX, gameMenuY;
 
     private long startTime = 0;
@@ -55,7 +55,7 @@ public final class mudclient extends GameWindowMiddleMan {
         mudclient mc = new mudclient();
         mc.appletMode = false;
         mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
-        mc.createWindow(mc.windowWidth, mc.windowHeight + 11, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
+        mc.createWindow(mc.windowWidth + 30, mc.windowHeight + 11+ 39, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
 
     private boolean handleCommand(String s) {
@@ -776,7 +776,7 @@ public final class mudclient extends GameWindowMiddleMan {
             return;
         }
         for (int j = 0; j < EntityHandler.getModelCount(); j++) {
-            int k = DataOperations.method358(EntityHandler.getModelName(j) + ".ob3", models);
+            int k = DataOperations.getDataStartOffset(EntityHandler.getModelName(j) + ".ob3", models);
             if (k == 0) {
                 gameDataModels[j] = new Model(1, 1);
             } else {
@@ -911,8 +911,8 @@ public final class mudclient extends GameWindowMiddleMan {
         int bottomInfoBoxHeight = 47;
         int leftMarginBoxWidth = 8;
         int rightMarginBoxWidth = 8;
-        int bankWidth = leftMarginBoxWidth + nCols*bankSlotWidth + rightMarginBoxWidth;
-        int bankHeight = titleBarHeight + topInfoBoxHeight + nRows*bankSlotHeight + bottomInfoBoxHeight;
+        int bankWidth = leftMarginBoxWidth + nCols*itemSlotWidth + rightMarginBoxWidth;
+        int bankHeight = titleBarHeight + topInfoBoxHeight + nRows*itemSlotHeight + bottomInfoBoxHeight;
         int windowX = windowWidth/2 - bankWidth / 2;
         int windowY = windowHeight/2 - bankHeight / 2;    
         // title bar
@@ -922,15 +922,15 @@ public final class mudclient extends GameWindowMiddleMan {
         int topInfoBoxY = windowY + titleBarHeight;
         gameGraphics.drawBoxAlpha(windowX, topInfoBoxY, bankWidth, topInfoBoxHeight, bankBg, 0xa0);
         // bottom info box (item name & withdraw/deposit amount)
-        int bottomInfoBoxY = topInfoBoxY + topInfoBoxHeight + nRows*bankSlotHeight;
+        int bottomInfoBoxY = topInfoBoxY + topInfoBoxHeight + nRows*itemSlotHeight;
         gameGraphics.drawBoxAlpha(windowX, bottomInfoBoxY, bankWidth, bottomInfoBoxHeight, bankBg, 0xa0);
         // left margin box
         int leftMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-        int leftMarginBoxHeight = nRows*bankSlotHeight;
+        int leftMarginBoxHeight = nRows*itemSlotHeight;
         gameGraphics.drawBoxAlpha(windowX, leftMarginBoxY, leftMarginBoxWidth, leftMarginBoxHeight, bankBg, 0xa0);
         // right margin box
-        int rightMarginBoxHeight = nRows*bankSlotHeight;
-        int rightMarginBoxX = windowX + leftMarginBoxWidth + nCols*bankSlotWidth;
+        int rightMarginBoxHeight = nRows*itemSlotHeight;
+        int rightMarginBoxX = windowX + leftMarginBoxWidth + nCols*itemSlotWidth;
         int rightMarginBoxY = topInfoBoxY + topInfoBoxHeight;
         gameGraphics.drawBoxAlpha(rightMarginBoxX, rightMarginBoxY, rightMarginBoxWidth, rightMarginBoxHeight, bankBg, 0xa0);
         gameGraphics.drawString("Bank", windowX + 1, windowY + 10, 1, 0xffffff);
@@ -1021,10 +1021,10 @@ public final class mudclient extends GameWindowMiddleMan {
                 {
                     for (int col = 0; col < nCols; col++)
                     {
-                        int l6 = leftMarginBoxWidth - 1 + col * bankSlotWidth;
-                        int j7 = titleBarHeight + topInfoBoxHeight - 1 + row * bankSlotHeight;
-                        if (mouseXBankWindow > l6 && mouseXBankWindow < l6 + bankSlotWidth
-                        		&& mouseYBankWindow > j7 && mouseYBankWindow < j7 + bankSlotHeight
+                        int l6 = leftMarginBoxWidth - 1 + col * itemSlotWidth;
+                        int j7 = titleBarHeight + topInfoBoxHeight - 1 + row * itemSlotHeight;
+                        if (mouseXBankWindow > l6 && mouseXBankWindow < l6 + itemSlotWidth
+                        		&& mouseYBankWindow > j7 && mouseYBankWindow < j7 + itemSlotHeight
                         		&& i1 < bankItemCount && bankItems[i1] != -1)
                         {
                             selectedBankItemType = bankItems[i1];
@@ -1264,20 +1264,20 @@ public final class mudclient extends GameWindowMiddleMan {
         {
             for (int col = 0; col < nCols; col++)
             {
-                int slotX = windowX + leftMarginBoxWidth - 1 + col * bankSlotWidth;
-                int slotY = windowY + titleBarHeight + topInfoBoxHeight - 1 + row * bankSlotHeight;
+                int slotX = windowX + leftMarginBoxWidth - 1 + col * itemSlotWidth;
+                int slotY = windowY + titleBarHeight + topInfoBoxHeight - 1 + row * itemSlotHeight;
                 if (selectedBankItem == k7)
-                    gameGraphics.drawBoxAlpha(slotX, slotY, bankSlotWidth, bankSlotHeight, 0xff0000, 160);
+                    gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, 0xff0000, 160);
                 else
-                    gameGraphics.drawBoxAlpha(slotX, slotY, bankSlotWidth, bankSlotHeight, i7, 160);
-                gameGraphics.drawBoxEdge(slotX, slotY, bankSlotWidth+1, bankSlotHeight+1, 0);
+                    gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, i7, 160);
+                gameGraphics.drawBoxEdge(slotX, slotY, itemSlotWidth+1, itemSlotHeight+1, 0);
                 if (k7 < bankItemCount && bankItems[k7] != -1) {
-                    gameGraphics.spriteClip4(slotX, slotY, bankSlotWidth-1, bankSlotHeight-2,
+                    gameGraphics.spriteClip4(slotX, slotY, itemSlotWidth-1, itemSlotHeight-2,
                     		SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(),
                     		EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
                     gameGraphics.drawString(String.valueOf(bankItemsCount[k7]), slotX + 1, slotY + 10, 1, 0x00ff00);
                     gameGraphics.drawBoxTextRight(String.valueOf(inventoryCount(bankItems[k7])),
-                    		slotX + bankSlotWidth - 1, slotY + bankSlotHeight - 5, 1, 0x00ffff);
+                    		slotX + itemSlotWidth - 1, slotY + itemSlotHeight - 5, 1, 0x00ffff);
                 }
                 k7++;
             }
@@ -2756,8 +2756,9 @@ public final class mudclient extends GameWindowMiddleMan {
         Menu.anInt225 = 2;
         gameMenu.drawMenu();
         Menu.anInt225 = 0;
-        /* Menu bar */ 
-        gameGraphics.method232(gameMenuX, gameMenuY, SPRITE_MEDIA_START, 128);
+        // TODO: Menu bar
+        gameGraphics.method232(((GameImage) (gameGraphics)).menuDefaultWidth - 3 - 197, 3,
+        		SPRITE_MEDIA_START, 128);
         drawGameWindowsMenus();
         gameGraphics.drawStringShadows = false;
         drawChatMessageTabs();
@@ -4612,6 +4613,7 @@ public final class mudclient extends GameWindowMiddleMan {
     }
 
     private final void loadSounds() {
+        System.out.println("Reading sounds!");
         try {
             drawLoadingBarText(90, "Unpacking Sound effects");
             sounds = load("sounds1.mem");
@@ -6290,7 +6292,11 @@ public final class mudclient extends GameWindowMiddleMan {
         if (configSoundEffects) {
             return;
         }
-        audioReader.loadData(sounds, DataOperations.method358(s + ".pcm", sounds), DataOperations.method359(s + ".pcm", sounds));
+        System.out.print("\n[");
+        for (byte i : sounds)
+        	System.out.print(i+", ");
+        System.out.print("]\n");
+        audioReader.loadData(sounds, DataOperations.getDataStartOffset(s + ".pcm", sounds), DataOperations.getDataSize(s + ".pcm", sounds));
     }
 
     private final boolean sendWalkCommand(int walkSectionX, int walkSectionY, int x1, int y1, int x2, int y2, boolean stepBoolean, boolean coordsEqual) {
@@ -7241,16 +7247,15 @@ public final class mudclient extends GameWindowMiddleMan {
         windowWidth = 512;
         windowHeight = 334;
         */
-        /* rs2 values
+        /* rs2 values */
         windowWidth = 765;
         windowHeight = 503;
-        */
+        /*
         windowWidth = 1300;
-        windowHeight = 680;
-        cameraSizeInt = 9;
+        widowHeight = 680;
+        */
+        cameraSizeInt = 9; //9
         tradeOtherPlayerName = "";
-        gameMenuX = windowWidth - 3 - 197;
-        gameMenuY = windowHeight-35 - 3;
     }
 
     private boolean combatWindow;
