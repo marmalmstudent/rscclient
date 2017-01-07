@@ -141,7 +141,7 @@ public class DataOperations {
         }
         return s;
     }
-
+    
     public static int method358(String s, byte abyte0[]) {
         int i = getUnsigned2Bytes(abyte0, 0);
         int j = 0;

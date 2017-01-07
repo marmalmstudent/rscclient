@@ -18,12 +18,6 @@ public class AudioReader extends InputStream {
         dataArray = abyte0;
         offset = start_idx;
         length = start_idx + sound_length;
-        System.out.println("\n\n\n\n[");
-        for (int i =start_idx; i<start_idx+sound_length-1; i++)
-        {
-        	System.out.print(abyte0[i]+", ");
-        }
-        System.out.println(abyte0[start_idx+sound_length]+"]\n\n\n\n");
     }
 
     public int read(byte[] abyte0, int start_idx, int sound_length) {

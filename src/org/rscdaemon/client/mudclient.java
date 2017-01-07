@@ -776,7 +776,7 @@ public final class mudclient extends GameWindowMiddleMan {
             return;
         }
         for (int j = 0; j < EntityHandler.getModelCount(); j++) {
-            int k = DataOperations.getDataStartOffset(EntityHandler.getModelName(j) + ".ob3", models);
+            int k = DataOperations.method358(EntityHandler.getModelName(j) + ".ob3", models);
             if (k == 0) {
                 gameDataModels[j] = new Model(1, 1);
             } else {
@@ -4613,7 +4613,6 @@ public final class mudclient extends GameWindowMiddleMan {
     }
 
     private final void loadSounds() {
-        System.out.println("Reading sounds!");
         try {
             drawLoadingBarText(90, "Unpacking Sound effects");
             sounds = load("sounds1.mem");
@@ -6292,11 +6291,13 @@ public final class mudclient extends GameWindowMiddleMan {
         if (configSoundEffects) {
             return;
         }
+        /*
         System.out.print("\n[");
         for (byte i : sounds)
         	System.out.print(i+", ");
         System.out.print("]\n");
-        audioReader.loadData(sounds, DataOperations.getDataStartOffset(s + ".pcm", sounds), DataOperations.getDataSize(s + ".pcm", sounds));
+        */
+        audioReader.loadData(sounds, DataOperations.method358(s + ".pcm", sounds), DataOperations.method359(s + ".pcm", sounds));
     }
 
     private final boolean sendWalkCommand(int walkSectionX, int walkSectionY, int x1, int y1, int x2, int y2, boolean stepBoolean, boolean coordsEqual) {
