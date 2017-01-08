@@ -409,8 +409,8 @@ public class mudclient extends GameWindowMiddleMan {
             if (menuWelcome.hasActivated(loginButtonExistingUser)) {
                 loginScreenNumber = 2;
                 menuLogin.updateText(loginStatusText, "Please enter your username and password");
-                menuLogin.updateText(loginUsernameTextBox, !currentUser.equals("") ? currentUser : "admin");
-                menuLogin.updateText(loginPasswordTextBox, !currentPass.equals("") ? currentPass : "password");
+                menuLogin.updateText(loginUsernameTextBox, currentUser);
+                menuLogin.updateText(loginPasswordTextBox, currentPass);
                 menuLogin.setFocus(loginUsernameTextBox);
                 return;
             }
@@ -3926,21 +3926,25 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    protected final void handleMenuKeyDown(int key) {
-        switch (key) {
-            case 1004: // Up Arrow
+    protected final void handleMenuKeyDown(int keyCode, int keyChar)
+    {
+        switch (keyCode)
+        {
+            case 38: // Up Arrow
                 gameMenu.updateText(chatHandle, lastMessage);
                 break;
-            case 1005: // Down Arrow
+            case 40: // Down Arrow
                 gameMenu.updateText(chatHandle, "");
                 break;
-            case 1018: // F11
+            case 122: // F11
                 recording = !recording;
                 if (recording) {
                     try {
                         frames.clear();
                         File file = getEmptyFile(true);
-                        Recorder recorder = new Recorder(windowWidth, windowHeight + 11, Config.MOVIE_FPS, frames, file.getAbsolutePath(), "video.quicktime");
+                        Recorder recorder = new Recorder(windowWidth, windowHeight + 11,
+                        		Config.MOVIE_FPS, frames, file.getAbsolutePath(),
+                        		"video.quicktime");
                         displayMessage("Recording movie to " + file.getName(), 3, 0);
                         new Thread(recorder).start();
                     }
@@ -3951,25 +3955,28 @@ public class mudclient extends GameWindowMiddleMan {
                     displayMessage("Movie saved.", 3, 0);
                 }
                 break;
-            case 1019: // F12
+            case 123: // F12
                 takeScreenshot(true);
                 break;
         }
-        if (!loggedIn) {
+        if (!loggedIn)
+        {
             if (loginScreenNumber == 0)
-                menuWelcome.keyDown(key);
+                menuWelcome.keyDown(keyCode, keyChar);
             if (loginScreenNumber == 1)
-                menuNewUser.keyDown(key);
+                menuNewUser.keyDown(keyCode, keyChar);
             if (loginScreenNumber == 2)
-                menuLogin.keyDown(key);
+                menuLogin.keyDown(keyCode, keyChar);
         }
-        if (loggedIn) {
-            if (showCharacterLookScreen) {
-                characterDesignMenu.keyDown(key);
+        if (loggedIn)
+        {
+            if (showCharacterLookScreen)
+            {
+                characterDesignMenu.keyDown(keyCode, keyChar);
                 return;
             }
             if (inputBoxType == 0 && showAbuseWindow == 0)
-                gameMenu.keyDown(key);
+                gameMenu.keyDown(keyCode, keyChar);
         }
     }
 

@@ -1,0 +1,4 @@
+Exception in thread "Thread-0" java.lang.NullPointerException
+	at org.GameWindow.drawLoadingLogo(GameWindow.java:220)
+	at org.GameWindow.run(GameWindow.java:131)
+	at java.lang.Thread.run(Thread.java:745)

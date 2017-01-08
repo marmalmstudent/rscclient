@@ -1,49 +1,18 @@
 package mopar;
-import java.awt.BorderLayout;
-import java.awt.Checkbox;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.*;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequencer;
-import javax.swing.JApplet;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.sound.midi.*;
+import javax.swing.*;
 import mopar.sign.signlink;
 import org.mudclient;
 
-public class Bot extends mudclient implements ActionListener, ItemListener, FocusListener {
+public class Bot extends mudclient implements ActionListener, ItemListener, FocusListener, KeyListener {
 	public JFrame frame;
 	public int altInterfaceID;
 	private static String newsKey = "ih87h9889h";
@@ -343,7 +312,8 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 		return menuBar;
 	}
 
-	public void actionPerformed(ActionEvent evt) {
+	public void actionPerformed(ActionEvent evt)
+	{
 		String cmd = evt.getActionCommand();
 		if(cmd != null) {
 			if(cmd.equalsIgnoreCase("Hide")) {
@@ -509,14 +479,29 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 		}
 
 	}
-	
+
+	public void keyTyped(KeyEvent e)
+	{
+		System.out.println("Key Typed!");
+	}
+
+	public void keyPressed(KeyEvent e)
+	{
+		System.out.println("Key Pressed!");
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+		System.out.println("Key Released!");
+	}
+	/*
 	public void keyPressed(KeyEvent evt) {
 		System.out.println("Key pressed!");
 		int i = evt.getKeyCode();
 		if(i == 113) {
 			//log("Interface ID: " + am.getInterface());
 		} else {
-			if(i == 114) {/*
+			if(i == 114) {*//*
 				for(int t = 0; t < am.getInventory().length; ++t) {
 					if(am.getInventory()[t] != -1) {
 						log("Inventory #" + t + " = " + am.getInventory()[t]);
@@ -527,7 +512,7 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 				Tile var4 = am.getPosition(am.myPlayer());
 				log("Your position: new Tile(" + var4 + ")");
 			} else if(i == 116) {
-				log("Your animation (" + am.myPlayer().anim + ")");*/
+				log("Your animation (" + am.myPlayer().anim + ")");*//*
 			} else if(i == 117) {
 				debugActions = !debugActions;
 				log("Action debugging set to " + (debugActions?"on":"off"));
@@ -562,7 +547,7 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 
 			//super.keyPressed(evt);
 		}
-	}
+	}*/
 
 	public void focusGained(FocusEvent evt) {
 		if(evt.getID() == 31337) {

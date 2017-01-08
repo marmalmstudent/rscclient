@@ -40,21 +40,36 @@ public class Menu {
         anInt214 = convertRGBToLongWithModifier(86, 100, 136);
     }
 
-    public int convertRGBToLongWithModifier(int red, int green, int blue) {
-        return GameImage.convertRGBToLong((redModifier * red) / 114, (greeModifier * green) / 114, (blueModifier * blue) / 176);
+    public int convertRGBToLongWithModifier(int red, int green, int blue)
+    {
+        return GameImage.convertRGBToLong((redModifier * red) / 114,
+        		(greeModifier * green) / 114, (blueModifier * blue) / 176);
     }
 
-    public void updateActions(int x, int y, int lastMouseDownButton, int mouseDownButton) {
+    public void updateActions(int x, int y, int lastMouseDownButton, int mouseDownButton)
+    {
         mouseX = x;
         mouseY = y;
         mouseButton = mouseDownButton;
         if (lastMouseDownButton != 0)
             lastMouseButton = lastMouseDownButton;
-        if (lastMouseDownButton == 1) {
-            for (int menuObject = 0; menuObject < menuObjectCount; menuObject++) {
-                if (menuObjectCanAcceptActions[menuObject] && menuObjectType[menuObject] == 10 && mouseX >= menuObjectX[menuObject] && mouseY >= menuObjectY[menuObject] && mouseX <= menuObjectX[menuObject] + menuObjectWidth[menuObject] && mouseY <= menuObjectY[menuObject] + menuObjectHeight[menuObject])
+        if (lastMouseDownButton == 1)
+        {
+            for (int menuObject = 0; menuObject < menuObjectCount; menuObject++)
+            {
+                if (menuObjectCanAcceptActions[menuObject]
+                		&& menuObjectType[menuObject] == 10
+                		&& mouseX >= menuObjectX[menuObject]
+                		&& mouseY >= menuObjectY[menuObject]
+                		&& mouseX <= menuObjectX[menuObject] + menuObjectWidth[menuObject]
+                		&& mouseY <= menuObjectY[menuObject] + menuObjectHeight[menuObject])
                     menuObjectHasAction[menuObject] = true; // if it's a button and clicked
-                if (menuObjectCanAcceptActions[menuObject] && menuObjectType[menuObject] == 14 && mouseX >= menuObjectX[menuObject] && mouseY >= menuObjectY[menuObject] && mouseX <= menuObjectX[menuObject] + menuObjectWidth[menuObject] && mouseY <= menuObjectY[menuObject] + menuObjectHeight[menuObject])
+                if (menuObjectCanAcceptActions[menuObject]
+                		&& menuObjectType[menuObject] == 14
+                		&& mouseX >= menuObjectX[menuObject]
+                		&& mouseY >= menuObjectY[menuObject]
+                		&& mouseX <= menuObjectX[menuObject] + menuObjectWidth[menuObject]
+                		&& mouseY <= menuObjectY[menuObject] + menuObjectHeight[menuObject])
                     anIntArray189[menuObject] = 1 - anIntArray189[menuObject]; // no idea what this is, there is no object of type 14
             }
 
@@ -63,17 +78,19 @@ public class Menu {
             mouseClicksConsecutive++;
         else
             mouseClicksConsecutive = 0;
-        if (lastMouseDownButton == 1 || mouseClicksConsecutive > 20) {
+        if (lastMouseDownButton == 1 || mouseClicksConsecutive > 20)
+        {
             for (int j1 = 0; j1 < menuObjectCount; j1++)
                 if (menuObjectCanAcceptActions[j1] && menuObjectType[j1] == 15 && mouseX >= menuObjectX[j1] && mouseY >= menuObjectY[j1] && mouseX <= menuObjectX[j1] + menuObjectWidth[j1] && mouseY <= menuObjectY[j1] + menuObjectHeight[j1])
                     menuObjectHasAction[j1] = true;
-
             mouseClicksConsecutive -= 5;
         }
     }
 
-    public boolean hasActivated(int i) {
-        if (menuObjectCanAcceptActions[i] && menuObjectHasAction[i]) {
+    public boolean hasActivated(int i)
+    {
+        if (menuObjectCanAcceptActions[i] && menuObjectHasAction[i])
+        {
             menuObjectHasAction[i] = false;
             return true;
         } else {
@@ -81,25 +98,34 @@ public class Menu {
         }
     }
 
-    public void keyDown(int key) {
-        if (key == 0)
+    public void keyDown(int keyCode, int keyChar)
+    {
+        if (keyCode == 0) // perhaps this should be keyChar
             return;
-        if (currentFocusHandle != -1 && menuObjectText[currentFocusHandle] != null && menuObjectCanAcceptActions[currentFocusHandle]) {
+        if (currentFocusHandle != -1 && menuObjectText[currentFocusHandle] != null
+        		&& menuObjectCanAcceptActions[currentFocusHandle])
+        {
             int textLength = menuObjectText[currentFocusHandle].length();
-            if (key == 8 && textLength > 0) // backspace
-                menuObjectText[currentFocusHandle] = menuObjectText[currentFocusHandle].substring(0, textLength - 1);
-            if ((key == 10 || key == 13) && textLength > 0) // enter/return
+            if (keyCode == 8 && textLength > 0) // backspace
+            {
+                menuObjectText[currentFocusHandle]
+                		= menuObjectText[currentFocusHandle].substring(0, textLength - 1);
+            }
+            if ((keyCode == 10 || keyCode == 13) && textLength > 0) // enter/return
                 menuObjectHasAction[currentFocusHandle] = true;
             String validCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
-            if (textLength < handleMaxTextLength[currentFocusHandle]) {
+            if (textLength < handleMaxTextLength[currentFocusHandle])
+            {
                 for (int k = 0; k < validCharSet.length(); k++)
-                    if (key == validCharSet.charAt(k))
-                        menuObjectText[currentFocusHandle] += (char) key;
+                    if (keyChar == validCharSet.charAt(k))
+                        menuObjectText[currentFocusHandle] += (char) keyChar;
 
             }
-            if (key == 9)
-                do currentFocusHandle = (currentFocusHandle + 1) % menuObjectCount;
-                while (menuObjectType[currentFocusHandle] != 5 && menuObjectType[currentFocusHandle] != 6);
+            if (keyCode == 9)
+                do
+                	currentFocusHandle = (currentFocusHandle + 1) % menuObjectCount;
+                while (menuObjectType[currentFocusHandle] != 5
+                		& menuObjectType[currentFocusHandle] != 6);
         }
     }
 
@@ -145,7 +171,6 @@ public class Menu {
                 gameImage.drawLineX(j + j1, k + j1, 1, 0);
                 gameImage.drawLineX((j + l) - 1 - j1, k + j1, 1, 0);
             }
-
         }
     }
 

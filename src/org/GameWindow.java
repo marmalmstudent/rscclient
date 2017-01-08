@@ -331,8 +331,7 @@ public class GameWindow extends JApplet
         }
     }
 
-    /*
- 	protected void handleMenuKeyDown(int key)
+ 	protected void handleMenuKeyDown(int keyCode, int keyChar)
 	{
 		
 	}
@@ -341,7 +340,7 @@ public class GameWindow extends JApplet
 	{
 		
 	}
-	
+	/*
     public final synchronized boolean keyDown(Event event, int key)
     {
         handleMenuKeyDown(key);
@@ -653,56 +652,58 @@ public class GameWindow extends JApplet
 	}
 
 	public void keyTyped(KeyEvent e) {
-		System.out.println("Key Typed!");
 		
 	}
 
 	public void keyPressed(KeyEvent e)
 	{
-		System.out.println("Key ("+e.getKeyCode()+", "+(char)e.getKeyChar()+") Pressed!");
-		int key = e.getKeyChar();
-        //handleMenuKeyDown(key);
-        keyDown = key;
-        keyDown2 = key;
+		System.out.println("Key ("+e.getKeyCode()+", "+(char)e.getKeyChar()+", "+(int)e.getKeyChar()+") Pressed!");
+		int keyCode = e.getKeyCode();
+		int keyChar = e.getKeyChar();
+        handleMenuKeyDown(keyCode, keyChar);
+        keyDown = keyCode;
+        keyDown2 = keyChar;
         lastActionTimeout = 0;
-        if (key == 1006)
+        if (keyCode == 37)
             keyLeftDown = true;
-        if (key == 1007)
+        if (keyCode == 39)
             keyRightDown = true;
-        if (key == 1004)
+        if (keyCode == 38)
             keyUpDown = true;
-        if (key == 1005)
+        if (keyCode == 40)
             keyDownDown = true;
-        if ((char) key == ' ')
+        if ((char) keyCode == ' ') // 32
             keySpaceDown = true;
-        if ((char) key == 'n' || (char) key == 'm')
+        if ((char) keyCode == 77 || (char) keyCode == 78) // m or n
             keyNMDown = true;
-        if ((char) key == 'N' || (char) key == 'M')
-            keyNMDown = true;
-        if ((char) key == '{')
+        if ((char) keyCode == 55) // { (123)
             keyLeftBraceDown = true;
-        if ((char) key == '}')
+        if ((char) keyCode == 48) // } (125)
             keyRightBraceDown = true;
-        if ((char) key == '\u03F0') // 1008 or F1
+        if ((char) keyCode == 112) //  F1
             keyF1Toggle = !keyF1Toggle;
         boolean validKeyDown = false;
         for (int j = 0; j < charSet.length(); j++)
         {
-            if (key != charSet.charAt(j))
+            if (keyChar != charSet.charAt(j)) {
+            	System.out.print(charSet.charAt(j));
                 continue;
+            }
+        	System.out.print("Found match: "+ keyChar + " = " +charSet.charAt(j));
             validKeyDown = true;
             break;
         }
-
+        System.out.print("Text len before: "+inputText.length()+"\n"+inputMessage.length());
         if (validKeyDown && inputText.length() < 20)
-            inputText += (char) key;
+            inputText += (char) keyChar;
         if (validKeyDown && inputMessage.length() < 80)
-            inputMessage += (char) key;
-        if (key == 8 && inputText.length() > 0) // backspace
+            inputMessage += (char) keyChar;
+        if (keyCode == 8 && inputText.length() > 0) // backspace
             inputText = inputText.substring(0, inputText.length() - 1);
-        if (key == 8 && inputMessage.length() > 0) // backspace
+        if (keyCode == 8 && inputMessage.length() > 0) // backspace
             inputMessage = inputMessage.substring(0, inputMessage.length() - 1);
-        if (key == 10 || key == 13)
+        System.out.print("Text len after: "+inputText.length()+"\n"+inputMessage.length());
+        if (keyCode == 10 || keyCode == 13)
         { // enter/return
             enteredText = inputText;
             enteredMessage = inputMessage;
@@ -712,16 +713,15 @@ public class GameWindow extends JApplet
 
 	public void keyReleased(KeyEvent e)
 	{
-		System.out.println("Key released!");
-		int key = e.getKeyChar();
+		int key = e.getKeyCode();
         keyDown = 0;
-        if (key == 1006)
+        if (key == 37)
             keyLeftDown = false;
-        if (key == 1007)
+        if (key == 39)
             keyRightDown = false;
-        if (key == 1004)
+        if (key == 38)
             keyUpDown = false;
-        if (key == 1005)
+        if (key == 40)
             keyDownDown = false;
         if ((char) key == ' ')
             keySpaceDown = false;
@@ -762,7 +762,7 @@ public class GameWindow extends JApplet
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
 		lastActionTimeout = 0;
-		//handleMouseDown(mouseDownButton, mouseX, mouseX);
+		handleMouseDown(mouseDownButton, mouseX, mouseX);
 		
 	}
 
