@@ -11,6 +11,7 @@ import org.util.DataConversions;
 import javax.imageio.ImageIO;
 
 import java.awt.*;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,6 @@ public class mudclient extends GameWindowMiddleMan {
     /* Custom variables */
     public static int itemSlotWidth = 49;
     public static int itemSlotHeight = 34;
-    public int gameMenuX, gameMenuY;
 
     private long startTime = 0;
     private long serverStartTime = 0;
@@ -72,15 +72,17 @@ public class mudclient extends GameWindowMiddleMan {
 	public int[] menuActionCmd3;
 	public String loginMessage1;
 	public String loginMessage2;
+	public JPanel jPanel;
     /* EOF */
 
     public static void main(String[] args) throws Exception {
         Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
         mudclient mc = new mudclient();
+        mc.jPanel = new JPanel();
         mc.appletMode = false;
         mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
-        mc.createWindow(mc.windowWidth + 30, mc.windowHeight + 11+ 39, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
+        mc.createWindow(mc, mc.windowWidth + 30, mc.windowHeight + 11+ 39, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
 
     private boolean handleCommand(String s) {
@@ -434,12 +436,20 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final void drawLoginScreen() {
+    private final void drawLoginScreen()
+    {
+    	Sprite sprite;
         hasReceivedWelcomeBoxDetails = false;
         gameGraphics.f1Toggle = false;
         gameGraphics.method211();
-        if (loginScreenNumber == 0 || loginScreenNumber == 1 || loginScreenNumber == 2 || loginScreenNumber == 3) {
-            gameGraphics.drawPicture(0, 0, SPRITE_LOGO_START);
+        sprite = ((GameImage) (gameGraphics)).sprites[2010];
+        if (loginScreenNumber == 0
+        		|| loginScreenNumber == 1
+        		|| loginScreenNumber == 2 
+        		|| loginScreenNumber == 3)
+        {
+            //gameGraphics.drawPicture(0, 0, SPRITE_LOGO_START);
+            gameGraphics.drawPicture((windowWidth - sprite.getWidth())/2, 50, 2010);
         }
         if (loginScreenNumber == 0)
             menuWelcome.drawMenu();
@@ -447,7 +457,18 @@ public class mudclient extends GameWindowMiddleMan {
             menuNewUser.drawMenu();
         if (loginScreenNumber == 2)
             menuLogin.drawMenu();
-        gameGraphics.drawPicture(0, windowHeight, SPRITE_MEDIA_START + 22);
+        // blue bar at the botom
+        sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
+        int nSprites = windowWidth / sprite.getWidth();
+        int currentOffset = 0;
+        for (int i=0; i < nSprites; i++)
+        {
+        	gameGraphics.drawPicture(currentOffset, windowHeight, SPRITE_MEDIA_START + 22);
+        	currentOffset += sprite.getWidth();
+        }
+        gameGraphics.spriteClip1(nSprites*sprite.getWidth(), windowHeight,
+        		windowWidth-nSprites*sprite.getWidth(),
+        		sprite.getHeight(), SPRITE_MEDIA_START + 22);
         gameGraphics.drawImage(aGraphics936, 0, 0);
     }
 
@@ -633,9 +654,10 @@ public class mudclient extends GameWindowMiddleMan {
     }
 
     public final Graphics getGraphics() {
+    	/*
         if (GameWindow.gameFrame != null) {
             return GameWindow.gameFrame.getGraphics();
-        }
+        }*/
         return super.getGraphics();
     }
 
@@ -776,6 +798,7 @@ public class mudclient extends GameWindowMiddleMan {
     private final void loadConfigFilter() {
         drawLoadingBarText(15, "Unpacking Configuration");
         EntityHandler.load();
+        System.out.println("Here!");
     }
 
     private final void loadModels() {
@@ -837,8 +860,10 @@ public class mudclient extends GameWindowMiddleMan {
 
     }
 
-    protected final void method4() {
-        if (lastLoadedNull) {
+    protected final void method4()
+    {
+        if (lastLoadedNull)
+        {
             Graphics g = getGraphics();
             g.setColor(Color.black);
             g.fillRect(0, 0, 512, 356);
@@ -864,7 +889,8 @@ public class mudclient extends GameWindowMiddleMan {
             changeThreadSleepModifier(1);
             return;
         }
-        if (memoryError) {
+        if (memoryError)
+        {
             Graphics g2 = getGraphics();
             g2.setColor(Color.black);
             g2.fillRect(0, 0, 512, 356);
@@ -1528,33 +1554,49 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final void drawChatMessageTabs() {
-        gameGraphics.drawPicture(0, windowHeight - 4, SPRITE_MEDIA_START + 23);
+    private final void drawChatMessageTabs()
+    {
+        // blue bar at the botom
+    	Sprite sprite;
+        sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
+        int nSprites = windowWidth / sprite.getWidth();
+        int currentOffset = 0;
+        for (int i=0; i < nSprites; i++)
+        {
+        	gameGraphics.drawPicture(currentOffset, windowHeight, SPRITE_MEDIA_START + 22);
+        	currentOffset += sprite.getWidth();
+        }
+        gameGraphics.spriteClip1(nSprites*sprite.getWidth(), windowHeight,
+        		windowWidth-nSprites*sprite.getWidth(),
+        		sprite.getHeight(), SPRITE_MEDIA_START + 22);
+        sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 23];
+        gameGraphics.drawPicture((windowWidth - sprite.getWidth())/2, windowHeight - 4, SPRITE_MEDIA_START + 23);
+    	
         int i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 0)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt952 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("All messages", 54, windowHeight + 6, 0, i);
+        gameGraphics.drawText("All messages", windowHalfWidth - 202, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 1)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt953 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Chat history", 155, windowHeight + 6, 0, i);
+        gameGraphics.drawText("Chat history", windowHalfWidth - 101, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 2)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt954 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Quest history", 255, windowHeight + 6, 0, i);
+        gameGraphics.drawText("Quest history", windowHalfWidth - 1, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 3)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt955 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Private history", 355, windowHeight + 6, 0, i);
-        gameGraphics.drawText("Report abuse", 457, windowHeight + 6, 0, 0xffffff);
+        gameGraphics.drawText("Private history", windowHalfWidth + 99, windowHeight + 6, 0, i);
+        gameGraphics.drawText("Report abuse", windowHalfWidth + 201, windowHeight + 6, 0, 0xffffff);
     }
 
     private final void method62() {
@@ -1614,17 +1656,18 @@ public class mudclient extends GameWindowMiddleMan {
         return mob;
     }
 
-    private final void drawWelcomeBox() {
-        int i = 65;
+    private final void drawWelcomeBox()
+    {
+        int boxHeight = 65;
         if (!lastLoggedInAddress.equals("0.0.0.0"))
-            i += 30;
+            boxHeight += 30;
         if (subscriptionLeftDays > 0)
-            i += 15;
-        int j = 167 - i / 2;
-        gameGraphics.drawBox(56, 167 - i / 2, 400, i, 0);
-        gameGraphics.drawBoxEdge(56, 167 - i / 2, 400, i, 0xffffff);
+            boxHeight += 15;
+        int j = windowHalfHeight - boxHeight / 2;
+        gameGraphics.drawBox(windowHalfWidth - 200, windowHalfHeight - boxHeight / 2, 400, boxHeight, 0);
+        gameGraphics.drawBoxEdge(windowHalfWidth - 200, windowHalfHeight - boxHeight / 2, 400, boxHeight, 0xffffff);
         j += 20;
-        gameGraphics.drawText("Welcome to TestServer " + currentUser, 256, j, 4, 0xffff00);
+        gameGraphics.drawText("Welcome to TestServer " + currentUser, windowHalfWidth, j, 4, 0xffff00);
         j += 30;
         String s;
         if (lastLoggedInDays == 0)
@@ -1634,23 +1677,28 @@ public class mudclient extends GameWindowMiddleMan {
         else
             s = lastLoggedInDays + " days ago";
         if (!lastLoggedInAddress.equals("0.0.0.0")) {
-            gameGraphics.drawText("You last logged in " + s, 256, j, 1, 0xffffff);
+            gameGraphics.drawText("You last logged in " + s, windowHalfWidth, j, 1, 0xffffff);
             j += 15;
-            gameGraphics.drawText("from: " + lastLoggedInAddress, 256, j, 1, 0xffffff);
+            gameGraphics.drawText("from: " + lastLoggedInAddress, windowHalfWidth, j, 1, 0xffffff);
             j += 15;
         }
         if (subscriptionLeftDays > 0) {
-            gameGraphics.drawText("Subscription Left: " + subscriptionLeftDays + " days", 256, j, 1, 0xffffff);
+            gameGraphics.drawText("Subscription Left: " + subscriptionLeftDays + " days", windowHalfWidth, j, 1, 0xffffff);
             j += 15;
         }
         int l = 0xffffff;
-        if (super.mouseY > j - 12 && super.mouseY <= j && super.mouseX > 106 && super.mouseX < 406)
+        if (super.mouseY > j - 12 && super.mouseY <= j
+        		&& super.mouseX > windowHalfWidth - 150
+        		&& super.mouseX < windowHalfWidth + 150)
             l = 0xff0000;
-        gameGraphics.drawText("Click here to close window", 256, j, 1, l);
+        gameGraphics.drawText("Click here to close window", windowHalfWidth, j, 1, l);
         if (mouseButtonClick == 1) {
             if (l == 0xff0000)
                 showWelcomeBox = false;
-            if ((super.mouseX < 86 || super.mouseX > 426) && (super.mouseY < 167 - i / 2 || super.mouseY > 167 + i / 2))
+            if ((super.mouseX < windowHalfWidth - 170
+            		|| super.mouseX > windowHalfWidth + 170)
+            		&& (super.mouseY < windowHalfHeight - boxHeight / 2
+            				|| super.mouseY > windowHalfHeight + boxHeight / 2))
                 showWelcomeBox = false;
         }
         mouseButtonClick = 0;
@@ -2717,10 +2765,10 @@ public class mudclient extends GameWindowMiddleMan {
             if (configAutoCameraAngle && !zoomCamera)
                 autoRotateCamera();
             if (!super.keyF1Toggle) {
-                gameCamera.zoom1 = 2400;
-                gameCamera.zoom2 = 2400;
+                gameCamera.zoom1 = 2400+10000;
+                gameCamera.zoom2 = 2400+10000;
                 gameCamera.zoom3 = 1;
-                gameCamera.zoom4 = 2300;
+                gameCamera.zoom4 = 2300+10000;
             } else {
                 gameCamera.zoom1 = 2200;
                 gameCamera.zoom2 = 2200;
@@ -3661,76 +3709,78 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final boolean loadSection(int i, int j) {
+    private final boolean loadSection(int xPos, int yPos)
+    {
         if (playerAliveTimeout != 0) {
             engineHandle.playerIsAlive = false;
             return false;
         }
         notInWilderness = false;
-        i += wildX;
-        j += wildY;
-        if (lastWildYSubtract == wildYSubtract && i > anInt789 && i < anInt791 && j > anInt790 && j < anInt792) {
+        xPos += wildX;
+        yPos += wildY;
+        if (lastWildYSubtract == wildYSubtract && xPos > anInt789 && xPos < anInt791 && yPos > anInt790 && yPos < anInt792) {
             engineHandle.playerIsAlive = true;
             return false;
         }
-        gameGraphics.drawText("Loading... Please wait", 256, 192, 1, 0xffffff);
+        gameGraphics.drawText("Loading... Please wait", windowHalfWidth, windowHalfHeight + 25, 1, 0xffffff);
         drawChatMessageTabs();
         gameGraphics.drawImage(aGraphics936, 0, 0);
-        int k = areaX;
-        int l = areaY;
-        int i1 = (i + 24) / 48;
-        int j1 = (j + 24) / 48;
+        int oldAreaX = areaX;
+        int oldAreaY = areaY;
+        int i1 = (xPos + 24) / 48; // tilex (or y)
+        int j1 = (yPos + 24) / 48; // tiley (or x)
         lastWildYSubtract = wildYSubtract;
-        areaX = i1 * 48 - 48;
-        areaY = j1 * 48 - 48;
-        anInt789 = i1 * 48 - 32;
-        anInt790 = j1 * 48 - 32;
-        anInt791 = i1 * 48 + 32;
-        anInt792 = j1 * 48 + 32;
-        engineHandle.method401(i, j, lastWildYSubtract);
+        areaX = i1 * 48 - 48; // next areaX
+        areaY = j1 * 48 - 48; // next areaY
+        anInt789 = i1 * 48 - 32; // lowerAreaXTile
+        anInt790 = j1 * 48 - 32; // lowerAreaYTile
+        anInt791 = i1 * 48 + 32; // upperAreaXTile
+        anInt792 = j1 * 48 + 32; // upperAreaYTile
+        engineHandle.method401(xPos, yPos, lastWildYSubtract);
         areaX -= wildX;
         areaY -= wildY;
-        int k1 = areaX - k;
-        int l1 = areaY - l;
-        for (int i2 = 0; i2 < objectCount; i2++) {
-            objectX[i2] -= k1;
-            objectY[i2] -= l1;
-            int j2 = objectX[i2];
-            int l2 = objectY[i2];
-            int k3 = objectType[i2];
-            int m4 = objectID[i2];
-            Model model = objectModelArray[i2];
+        int areaXDiff = areaX - oldAreaX;
+        int areaYDiff = areaY - oldAreaY;
+        for (int objIdx = 0; objIdx < objectCount; objIdx++)
+        {
+            objectX[objIdx] -= areaXDiff;
+            objectY[objIdx] -= areaYDiff;
+            int currObjX = objectX[objIdx];
+            int currObjY = objectY[objIdx];
+            int currObjType = objectType[objIdx];
+            int currObjId = objectID[objIdx];
+            Model model = objectModelArray[objIdx];
             try {
-                int l4 = objectID[i2];
-                int k5;
-                int i6;
-                if (l4 == 0 || l4 == 4) {
-                    k5 = EntityHandler.getObjectDef(k3).getWidth();
-                    i6 = EntityHandler.getObjectDef(k3).getHeight();
+                int currObjId2 = objectID[objIdx];
+                int currObjWidth;
+                int currObjeHeight;
+                if (currObjId2 == 0 || currObjId2 == 4) {
+                    currObjWidth = EntityHandler.getObjectDef(currObjType).getWidth();
+                    currObjeHeight = EntityHandler.getObjectDef(currObjType).getHeight();
                 } else {
-                    i6 = EntityHandler.getObjectDef(k3).getWidth();
-                    k5 = EntityHandler.getObjectDef(k3).getHeight();
+                    currObjeHeight = EntityHandler.getObjectDef(currObjType).getWidth();
+                    currObjWidth = EntityHandler.getObjectDef(currObjType).getHeight();
                 }
-                int j6 = ((j2 + j2 + k5) * magicLoc) / 2;
-                int k6 = ((l2 + l2 + i6) * magicLoc) / 2;
-                if (j2 >= 0 && l2 >= 0 && j2 < 96 && l2 < 96) {
+                int j6 = ((currObjX + currObjX + currObjWidth) * magicLoc) / 2;
+                int k6 = ((currObjY + currObjY + currObjeHeight) * magicLoc) / 2;
+                if (currObjX >= 0 && currObjY >= 0 && currObjX < 96 && currObjY < 96) {
                     gameCamera.addModel(model);
                     model.method191(j6, -engineHandle.getAveragedElevation(j6, k6), k6);
-                    engineHandle.method412(j2, l2, k3, m4);
-                    if (k3 == 74)
+                    engineHandle.method412(currObjX, currObjY, currObjType, currObjId);
+                    if (currObjType == 74)
                         model.method190(0, -480, 0);
                 }
             }
             catch (RuntimeException runtimeexception) {
                 System.out.println("Loc Error: " + runtimeexception.getMessage());
-                System.out.println("i:" + i2 + " obj:" + model);
+                System.out.println("i:" + objIdx + " obj:" + model);
                 runtimeexception.printStackTrace();
             }
         }
 
         for (int k2 = 0; k2 < doorCount; k2++) {
-            doorX[k2] -= k1;
-            doorY[k2] -= l1;
+            doorX[k2] -= areaXDiff;
+            doorY[k2] -= areaYDiff;
             int i3 = doorX[k2];
             int l3 = doorY[k2];
             int j4 = doorType[k2];
@@ -3747,28 +3797,28 @@ public class mudclient extends GameWindowMiddleMan {
         }
 
         for (int j3 = 0; j3 < groundItemCount; j3++) {
-            groundItemX[j3] -= k1;
-            groundItemY[j3] -= l1;
+            groundItemX[j3] -= areaXDiff;
+            groundItemY[j3] -= areaYDiff;
         }
 
         for (int i4 = 0; i4 < playerCount; i4++) {
             Mob mob = playerArray[i4];
-            mob.currentX -= k1 * magicLoc;
-            mob.currentY -= l1 * magicLoc;
+            mob.currentX -= areaXDiff * magicLoc;
+            mob.currentY -= areaYDiff * magicLoc;
             for (int j5 = 0; j5 <= mob.waypointCurrent; j5++) {
-                mob.waypointsX[j5] -= k1 * magicLoc;
-                mob.waypointsY[j5] -= l1 * magicLoc;
+                mob.waypointsX[j5] -= areaXDiff * magicLoc;
+                mob.waypointsY[j5] -= areaYDiff * magicLoc;
             }
 
         }
 
         for (int k4 = 0; k4 < npcCount; k4++) {
             Mob mob_1 = npcArray[k4];
-            mob_1.currentX -= k1 * magicLoc;
-            mob_1.currentY -= l1 * magicLoc;
+            mob_1.currentX -= areaXDiff * magicLoc;
+            mob_1.currentY -= areaYDiff * magicLoc;
             for (int l5 = 0; l5 <= mob_1.waypointCurrent; l5++) {
-                mob_1.waypointsX[l5] -= k1 * magicLoc;
-                mob_1.waypointsY[l5] -= l1 * magicLoc;
+                mob_1.waypointsX[l5] -= areaXDiff * magicLoc;
+                mob_1.waypointsY[l5] -= areaYDiff * magicLoc;
             }
 
         }
@@ -4489,22 +4539,35 @@ public class mudclient extends GameWindowMiddleMan {
         if (anInt658 > 20) {
             anInt658 = 0;
         }
-        if (super.mouseY > windowHeight - 4) {
-            if (super.mouseX > 15 && super.mouseX < 96 && super.lastMouseDownButton == 1)
+        if (super.mouseY > windowHeight - 4)
+        { // botom bar; chat tabs & report abuse
+            if (super.mouseX > windowHalfWidth - 241
+            		&& super.mouseX < windowHalfWidth - 160
+            		&& super.lastMouseDownButton == 1) {
                 messagesTab = 0;
-            if (super.mouseX > 110 && super.mouseX < 194 && super.lastMouseDownButton == 1) {
+            }
+            if (super.mouseX > windowHalfWidth - 146
+            		&& super.mouseX < windowHalfWidth - 62
+            		&& super.lastMouseDownButton == 1) {
                 messagesTab = 1;
                 gameMenu.anIntArray187[messagesHandleType2] = 0xf423f;
             }
-            if (super.mouseX > 215 && super.mouseX < 295 && super.lastMouseDownButton == 1) {
+            if (super.mouseX > windowHalfWidth - 41
+            		&& super.mouseX < windowHalfWidth + 39
+            		&& super.lastMouseDownButton == 1) {
                 messagesTab = 2;
                 gameMenu.anIntArray187[messagesHandleType5] = 0xf423f;
             }
-            if (super.mouseX > 315 && super.mouseX < 395 && super.lastMouseDownButton == 1) {
+            if (super.mouseX > windowHalfWidth + 59
+            		&& super.mouseX < windowHalfWidth + 139
+            		&& super.lastMouseDownButton == 1) {
                 messagesTab = 3;
                 gameMenu.anIntArray187[messagesHandleType6] = 0xf423f;
             }
-            if (super.mouseX > 417 && super.mouseX < 497 && super.lastMouseDownButton == 1) {
+            if (super.mouseX > windowHalfWidth + 161
+            		&& super.mouseX < windowHalfWidth + 241
+            		&& super.lastMouseDownButton == 1)
+            {
                 showAbuseWindow = 1;
                 abuseSelectedType = 0;
                 super.inputText = "";
@@ -4513,7 +4576,8 @@ public class mudclient extends GameWindowMiddleMan {
             super.lastMouseDownButton = 0;
             super.mouseDownButton = 0;
         }
-        gameMenu.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
+        gameMenu.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
         if (messagesTab > 0 && super.mouseX >= 494 && super.mouseY >= windowHeight - 66)
             super.lastMouseDownButton = 0;
         if (gameMenu.hasActivated(chatHandle)) {
@@ -6754,49 +6818,46 @@ public class mudclient extends GameWindowMiddleMan {
         mouseButtonClick = 0;
     }
 
-    private final void makeLoginMenus() {
-        System.out.println("test1");
-        try {
-        	Thread.sleep(3000);
-        }
-        catch (InterruptedException ex) {
-        	System.out.println("Error");
-        }
+    private final void makeLoginMenus()
+    {
+        int screenHalfWidth = windowWidth/2;
+        int screenHalfHeight = windowHeight/2;
+        System.out.println("mudclient, method: makeLoginMenus()");
         menuWelcome = new Menu(gameGraphics, 50);
         int i = 40;
-        menuWelcome.drawText(256, 200 + i, "Welcome to TestServer", 4, true);
-        menuWelcome.drawText(256, 215 + i, "TestServer is still in beta", 4, true);
-        menuWelcome.drawBox(256, 250 + i, 200, 35);
-        menuWelcome.drawText(256, 250 + i, "Click here to login", 5, false);
-        loginButtonExistingUser = menuWelcome.makeButton(256, 250 + i, 200, 35);
+        menuWelcome.drawText(screenHalfWidth, 200 + i, "Welcome to TestServer", 4, true);
+        menuWelcome.drawText(screenHalfWidth, 215 + i, "TestServer is still in beta", 4, true);
+        menuWelcome.drawBox(screenHalfWidth, 250 + i, 200, 35);
+        menuWelcome.drawText(screenHalfWidth, 250 + i, "Click here to login", 5, false);
+        loginButtonExistingUser = menuWelcome.makeButton(screenHalfWidth, 250 + i, 200, 35);
         menuNewUser = new Menu(gameGraphics, 50);
         i = 230;
-        menuNewUser.drawText(256, i + 8, "To create an account please go back to the", 4, true);
+        menuNewUser.drawText(screenHalfWidth, i + 8, "To create an account please go back to the", 4, true);
         i += 20;
-        menuNewUser.drawText(256, i + 8, "localhost front page, and choose 'register'", 4, true);
+        menuNewUser.drawText(screenHalfWidth, i + 8, "localhost front page, and choose 'register'", 4, true);
         i += 30;
-        menuNewUser.drawBox(256, i + 17, 150, 34);
-        menuNewUser.drawText(256, i + 17, "Ok", 5, false);
-        newUserOkButton = menuNewUser.makeButton(256, i + 17, 150, 34);
+        menuNewUser.drawBox(screenHalfWidth, i + 17, 150, 34);
+        menuNewUser.drawText(screenHalfWidth, i + 17, "Ok", 5, false);
+        newUserOkButton = menuNewUser.makeButton(screenHalfWidth, i + 17, 150, 34);
         menuLogin = new Menu(gameGraphics, 50);
         i = 230;
-        loginStatusText = menuLogin.drawText(256, i - 10, "Please enter your username and password", 4, true);
+        loginStatusText = menuLogin.drawText(screenHalfWidth, i - 10, "Please enter your username and password", 4, true);
         i += 28;
-        menuLogin.drawBox(140, i, 200, 40);
-        menuLogin.drawText(140, i - 10, "Username:", 4, false);
-        loginUsernameTextBox = menuLogin.makeTextBox(140, i + 10, 200, 40, 4, 12, false, false);
+        menuLogin.drawBox(screenHalfWidth - 116, i, 200, 40);
+        menuLogin.drawText(screenHalfWidth - 116, i - 10, "Username:", 4, false);
+        loginUsernameTextBox = menuLogin.makeTextBox(screenHalfWidth - 116, i + 10, 200, 40, 4, 12, false, false);
         i += 47;
-        menuLogin.drawBox(190, i, 200, 40);
-        menuLogin.drawText(190, i - 10, "Password:", 4, false);
-        loginPasswordTextBox = menuLogin.makeTextBox(190, i + 10, 200, 40, 4, 20, true, false);
+        menuLogin.drawBox(screenHalfWidth - 66, i, 200, 40);
+        menuLogin.drawText(screenHalfWidth - 66, i - 10, "Password:", 4, false);
+        loginPasswordTextBox = menuLogin.makeTextBox(screenHalfWidth - 66, i + 10, 200, 40, 4, 20, true, false);
         i -= 55;
-        menuLogin.drawBox(410, i, 120, 25);
-        menuLogin.drawText(410, i, "Ok", 4, false);
-        loginOkButton = menuLogin.makeButton(410, i, 120, 25);
+        menuLogin.drawBox(screenHalfWidth + 154, i, 120, 25);
+        menuLogin.drawText(screenHalfWidth + 154, i, "Ok", 4, false);
+        loginOkButton = menuLogin.makeButton(screenHalfWidth + 154, i, 120, 25);
         i += 30;
-        menuLogin.drawBox(410, i, 120, 25);
-        menuLogin.drawText(410, i, "Cancel", 4, false);
-        loginCancelButton = menuLogin.makeButton(410, i, 120, 25);
+        menuLogin.drawBox(screenHalfWidth + 154, i, 120, 25);
+        menuLogin.drawText(screenHalfWidth + 154, i, "Cancel", 4, false);
+        loginCancelButton = menuLogin.makeButton(screenHalfWidth + 154, i, 120, 25);
         i += 30;
         menuLogin.setFocus(loginUsernameTextBox);
     }
@@ -6863,34 +6924,43 @@ public class mudclient extends GameWindowMiddleMan {
         sendWalkCommand(i, j, k, l, k, l, false, flag);
     }
 
-    private final void drawInputBox() {
+    private final void drawInputBox()
+    {
+        //int i = 145;
+        int i = windowHalfHeight - 22;
         if (mouseButtonClick != 0) {
             mouseButtonClick = 0;
-            if (inputBoxType == 1 && (super.mouseX < 106 || super.mouseY < 145 || super.mouseX > 406 || super.mouseY > 215)) {
+            if (inputBoxType == 1
+            		&& (super.mouseX < windowHalfWidth - 150 || super.mouseY < i
+            				|| super.mouseX > windowHalfWidth + 150 || super.mouseY > i + 70)) {
                 inputBoxType = 0;
                 return;
             }
-            if (inputBoxType == 2 && (super.mouseX < 6 || super.mouseY < 145 || super.mouseX > 506 || super.mouseY > 215)) {
+            if (inputBoxType == 2
+            		&& (super.mouseX < windowHalfWidth - 250 || super.mouseY < i
+            				|| super.mouseX > windowHalfWidth + 250 || super.mouseY > i + 70)) {
                 inputBoxType = 0;
                 return;
             }
-            if (inputBoxType == 3 && (super.mouseX < 106 || super.mouseY < 145 || super.mouseX > 406 || super.mouseY > 215)) {
+            if (inputBoxType == 3
+            		&& (super.mouseX < windowHalfWidth - 150 || super.mouseY < i
+            				|| super.mouseX > windowHalfWidth + 150 || super.mouseY > i + 70)) {
                 inputBoxType = 0;
                 return;
             }
-            if (super.mouseX > 236 && super.mouseX < 276 && super.mouseY > 193 && super.mouseY < 213) {
+            if (super.mouseX > windowHalfWidth - 20 && super.mouseX < windowHalfWidth + 20
+            		&& super.mouseY > windowHalfHeight + 26 && super.mouseY < windowHalfHeight + 46) {
                 inputBoxType = 0;
                 return;
             }
         }
-        int i = 145;
         if (inputBoxType == 1) {
-            gameGraphics.drawBox(106, i, 300, 70, 0);
-            gameGraphics.drawBoxEdge(106, i, 300, 70, 0xffffff);
+            gameGraphics.drawBox(windowHalfWidth - 150, i, 300, 70, 0);
+            gameGraphics.drawBoxEdge(windowHalfWidth - 150, i, 300, 70, 0xffffff);
             i += 20;
-            gameGraphics.drawText("Enter name to add to friends list", 256, i, 4, 0xffffff);
+            gameGraphics.drawText("Enter name to add to friends list", windowHalfWidth, i, 4, 0xffffff);
             i += 20;
-            gameGraphics.drawText(super.inputText + "*", 256, i, 4, 0xffffff);
+            gameGraphics.drawText(super.inputText + "*", windowHalfWidth, i, 4, 0xffffff);
             if (super.enteredText.length() > 0) {
                 String s = super.enteredText.trim();
                 super.inputText = "";
@@ -6901,12 +6971,12 @@ public class mudclient extends GameWindowMiddleMan {
             }
         }
         if (inputBoxType == 2) {
-            gameGraphics.drawBox(6, i, 500, 70, 0);
-            gameGraphics.drawBoxEdge(6, i, 500, 70, 0xffffff);
+            gameGraphics.drawBox(windowHalfWidth - 250, i, 500, 70, 0);
+            gameGraphics.drawBoxEdge(windowHalfWidth - 250, i, 500, 70, 0xffffff);
             i += 20;
             gameGraphics.drawText("Enter message to send to " + DataOperations.longToString(privateMessageTarget), 256, i, 4, 0xffffff);
             i += 20;
-            gameGraphics.drawText(super.inputMessage + "*", 256, i, 4, 0xffffff);
+            gameGraphics.drawText(super.inputMessage + "*", windowHalfWidth, i, 4, 0xffffff);
             if (super.enteredMessage.length() > 0) {
                 String s1 = super.enteredMessage;
                 super.inputMessage = "";
@@ -6919,12 +6989,12 @@ public class mudclient extends GameWindowMiddleMan {
             }
         }
         if (inputBoxType == 3) {
-            gameGraphics.drawBox(106, i, 300, 70, 0);
-            gameGraphics.drawBoxEdge(106, i, 300, 70, 0xffffff);
+            gameGraphics.drawBox(windowHalfWidth - 150, i, 300, 70, 0);
+            gameGraphics.drawBoxEdge(windowHalfWidth - 150, i, 300, 70, 0xffffff);
             i += 20;
-            gameGraphics.drawText("Enter name to add to ignore list", 256, i, 4, 0xffffff);
+            gameGraphics.drawText("Enter name to add to ignore list", windowHalfWidth, i, 4, 0xffffff);
             i += 20;
-            gameGraphics.drawText(super.inputText + "*", 256, i, 4, 0xffffff);
+            gameGraphics.drawText(super.inputText + "*", windowHalfWidth, i, 4, 0xffffff);
             if (super.enteredText.length() > 0) {
                 String s2 = super.enteredText.trim();
                 super.inputText = "";
@@ -6935,9 +7005,10 @@ public class mudclient extends GameWindowMiddleMan {
             }
         }
         int j = 0xffffff;
-        if (super.mouseX > 236 && super.mouseX < 276 && super.mouseY > 193 && super.mouseY < 213)
+        if (super.mouseX > windowHalfWidth - 20 && super.mouseX < windowHalfWidth + 20
+        		&& super.mouseY > windowHalfHeight + 26 && super.mouseY < windowHalfHeight + 46)
             j = 0xffff00;
-        gameGraphics.drawText("Cancel", 256, 208, 1, j);
+        gameGraphics.drawText("Cancel", windowHalfWidth, windowHalfHeight + 41, 1, j);
     }
 
     private final boolean hasRequiredRunes(int i, int j) {
@@ -7281,8 +7352,10 @@ public class mudclient extends GameWindowMiddleMan {
         windowHeight = 334;
         */
         /* rs2 values */
-        windowWidth = 765;
-        windowHeight = 503;
+        windowWidth = 765+507;
+        windowHeight = 503+211;
+        windowHalfWidth = windowWidth/2;
+        windowHalfHeight = windowHeight/2;
         /*
         windowWidth = 1300;
         widowHeight = 680;
@@ -7359,6 +7432,7 @@ public class mudclient extends GameWindowMiddleMan {
     private boolean showQuestionMenu;
     private int anInt718;
     private int magicLoc;
+    private int viewDistance;
     public boolean loggedIn;
     private int cameraAutoAngle;
     private int cameraRotationBaseAddition;
@@ -7597,6 +7671,8 @@ public class mudclient extends GameWindowMiddleMan {
     private int tradeMyItemsCount[];
     private int windowWidth;
     private int windowHeight;
+    private int windowHalfWidth;
+    private int windowHalfHeight;
     private int cameraSizeInt;
     private Menu friendsMenu;
     int friendsMenuHandle;

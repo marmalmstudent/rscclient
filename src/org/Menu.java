@@ -129,34 +129,111 @@ public class Menu {
         }
     }
 
-    public void drawMenu() {
+    public void drawMenu()
+    {
         for (int menuObject = 0; menuObject < menuObjectCount; menuObject++)
+        {
             if (menuObjectCanAcceptActions[menuObject])
-                if (menuObjectType[menuObject] == 0)
-                    drawTextAddHeight(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectText[menuObject], menuObjectTextType[menuObject]);
-                else if (menuObjectType[menuObject] == 1)
-                    drawTextAddHeight(menuObject, menuObjectX[menuObject] - gameImage.textWidth(menuObjectText[menuObject], menuObjectTextType[menuObject]) / 2, menuObjectY[menuObject], menuObjectText[menuObject], menuObjectTextType[menuObject]);
-                else if (menuObjectType[menuObject] == 2)
-                    method146(menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject]);
-                else if (menuObjectType[menuObject] == 3)
-                    method149(menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject]);
-                else if (menuObjectType[menuObject] == 4)
-                    method150(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject], menuObjectTextType[menuObject], menuListText[menuObject], menuListTextCount[menuObject], anIntArray187[menuObject]);
-                else if (menuObjectType[menuObject] == 5 || menuObjectType[menuObject] == 6)
-                    method145(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject], menuObjectText[menuObject], menuObjectTextType[menuObject]);
-                else if (menuObjectType[menuObject] == 7)
-                    method152(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectTextType[menuObject], menuListText[menuObject]);
-                else if (menuObjectType[menuObject] == 8)
-                    method153(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectTextType[menuObject], menuListText[menuObject]);
-                else if (menuObjectType[menuObject] == 9)
-                    method154(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject], menuObjectTextType[menuObject], menuListText[menuObject], menuListTextCount[menuObject], anIntArray187[menuObject]);
-                else if (menuObjectType[menuObject] == 11)
-                    method147(menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject]);
-                else if (menuObjectType[menuObject] == 12)
-                    method148(menuObjectX[menuObject], menuObjectY[menuObject], menuObjectTextType[menuObject]);
-                else if (menuObjectType[menuObject] == 14)
-                    method142(menuObject, menuObjectX[menuObject], menuObjectY[menuObject], menuObjectWidth[menuObject], menuObjectHeight[menuObject]);
-
+            {
+            	switch(menuObjectType[menuObject])
+            	{
+            	case 0:
+            		drawTextAddHeight(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectText[menuObject],
+            				menuObjectTextType[menuObject]);
+            		break;
+            	case 1:
+            		drawTextAddHeight(menuObject,
+            				menuObjectX[menuObject]
+            						- gameImage.textWidth(menuObjectText[menuObject],
+            								menuObjectTextType[menuObject]) / 2,
+            						menuObjectY[menuObject], menuObjectText[menuObject],
+            						menuObjectTextType[menuObject]);
+            		break;
+            	case 2:
+            		method146(menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject]);
+            		break;
+            	case 3:
+            		method149(menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject]);
+            		break;
+            	case 4:
+            		method150(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject],
+            				menuObjectTextType[menuObject],
+            				menuListText[menuObject],
+            				menuListTextCount[menuObject],
+            				anIntArray187[menuObject]);
+            		break;
+            	case 5:
+            	case 6:
+            		method145(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject],
+            				menuObjectText[menuObject],
+            				menuObjectTextType[menuObject]);
+            		break;
+            	case 7:
+            		method152(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectTextType[menuObject],
+            				menuListText[menuObject]);
+            		break;
+            	case 8:
+            		method153(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectTextType[menuObject],
+            				menuListText[menuObject]);
+            		break;
+            	case 9:
+            		method154(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject],
+            				menuObjectTextType[menuObject],
+            				menuListText[menuObject],
+            				menuListTextCount[menuObject],
+            				anIntArray187[menuObject]);
+            		break;
+            	case 10:
+            		break;
+            	case 11:
+            		method147(menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject]);
+            		break;
+            	case 12:
+            		method148(menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectTextType[menuObject]);
+            		break;
+            	case 13:
+            		break;
+            	case 14:
+            		method142(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject]);
+            		break;
+            	}
+            }
+        }
         lastMouseButton = 0;
     }
 

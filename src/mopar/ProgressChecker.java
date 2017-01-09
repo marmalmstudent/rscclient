@@ -27,7 +27,7 @@ class ProgressChecker extends Thread {
             lastfiledone = e;
             e = file.length();
             int percentage1 = (int)((double)e / (double)this.filelength * 100.0D);
-            Bot.bot.drawLoadingBarText(percentage1, "Downloading file - " + percentage1 + "% done");
+            //Bot.bot.drawLoadingBarText(percentage1, "Downloading file - " + percentage1 + "% done");
             //Bot._instance.method13(percentage1, (byte)4, "Downloading file - " + percentage1 + "% done");
          }
       } catch (Exception var7) {

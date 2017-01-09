@@ -11,6 +11,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import javax.swing.*;
 
 public class GameImage implements ImageProducer, ImageObserver {
     public Sprite[] sprites;
@@ -475,50 +476,51 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void spriteClip1(int i, int j, int k, int l, int i1) {
+    public void spriteClip1(int startX, int startY, int newWidth, int newHeight, int spriteId) {
         try {
-            int j1 = sprites[i1].getWidth();
-            int k1 = sprites[i1].getHeight();
+            int spriteWidthInit = sprites[spriteId].getWidth();
+            int spriteHeightInit = sprites[spriteId].getHeight();
             int l1 = 0;
             int i2 = 0;
-            int j2 = (j1 << 16) / k;
-            int k2 = (k1 << 16) / l;
-            if (sprites[i1].requiresShift()) {
-                int l2 = sprites[i1].getSomething1();
-                int j3 = sprites[i1].getSomething2();
-                j2 = (l2 << 16) / k;
-                k2 = (j3 << 16) / l;
-                i += ((sprites[i1].getXShift() * k + l2) - 1) / l2;
-                j += ((sprites[i1].getYShift() * l + j3) - 1) / j3;
-                if ((sprites[i1].getXShift() * k) % l2 != 0)
-                    l1 = (l2 - (sprites[i1].getXShift() * k) % l2 << 16) / k;
-                if ((sprites[i1].getYShift() * l) % j3 != 0)
-                    i2 = (j3 - (sprites[i1].getYShift() * l) % j3 << 16) / l;
-                k = (k * (sprites[i1].getWidth() - (l1 >> 16))) / l2;
-                l = (l * (sprites[i1].getHeight() - (i2 >> 16))) / j3;
+            int j2 = (spriteWidthInit << 16) / newWidth; // instead of using decimals i guess
+            int k2 = (spriteHeightInit << 16) / newHeight; // instead of using decimals i guess
+            if (sprites[spriteId].requiresShift())
+            {
+                int l2 = sprites[spriteId].getSomething1();
+                int j3 = sprites[spriteId].getSomething2();
+                j2 = (l2 << 16) / newWidth;
+                k2 = (j3 << 16) / newHeight;
+                startX += ((sprites[spriteId].getXShift() * newWidth + l2) - 1) / l2;
+                startY += ((sprites[spriteId].getYShift() * newHeight + j3) - 1) / j3;
+                if ((sprites[spriteId].getXShift() * newWidth) % l2 != 0)
+                    l1 = (l2 - (sprites[spriteId].getXShift() * newWidth) % l2 << 16) / newWidth;
+                if ((sprites[spriteId].getYShift() * newHeight) % j3 != 0)
+                    i2 = (j3 - (sprites[spriteId].getYShift() * newHeight) % j3 << 16) / newHeight;
+                newWidth = (newWidth * (sprites[spriteId].getWidth() - (l1 >> 16))) / l2;
+                newHeight = (newHeight * (sprites[spriteId].getHeight() - (i2 >> 16))) / j3;
             }
-            int i3 = i + j * menuDefaultWidth;
-            int k3 = menuDefaultWidth - k;
-            if (j < imageY) {
-                int l3 = imageY - j;
-                l -= l3;
-                j = 0;
+            int i3 = startX + startY * menuDefaultWidth;
+            int k3 = menuDefaultWidth - newWidth;
+            if (startY < imageY) {
+                int l3 = imageY - startY;
+                newHeight -= l3;
+                startY = 0;
                 i3 += l3 * menuDefaultWidth;
                 i2 += k2 * l3;
             }
-            if (j + l >= imageHeight)
-                l -= ((j + l) - imageHeight) + 1;
-            if (i < imageX) {
-                int i4 = imageX - i;
-                k -= i4;
-                i = 0;
+            if (startY + newHeight >= imageHeight)
+                newHeight -= ((startY + newHeight) - imageHeight) + 1;
+            if (startX < imageX) {
+                int i4 = imageX - startX;
+                newWidth -= i4;
+                startX = 0;
                 i3 += i4;
                 l1 += j2 * i4;
                 k3 += i4;
             }
-            if (i + k >= imageWidth) {
-                int j4 = ((i + k) - imageWidth) + 1;
-                k -= j4;
+            if (startX + newWidth >= imageWidth) {
+                int j4 = ((startX + newWidth) - imageWidth) + 1;
+                newWidth -= j4;
                 k3 += j4;
             }
             byte byte0 = 1;
@@ -526,12 +528,12 @@ public class GameImage implements ImageProducer, ImageObserver {
                 byte0 = 2;
                 k3 += menuDefaultWidth;
                 k2 += k2;
-                if ((j & 1) != 0) {
+                if ((startY & 1) != 0) {
                     i3 += menuDefaultWidth;
-                    l--;
+                    newHeight--;
                 }
             }
-            plotSale1(imagePixelArray, sprites[i1].getPixels(), 0, l1, i2, i3, k3, k, l, j2, k2, j1, byte0);
+            plotSale1(imagePixelArray, sprites[spriteId].getPixels(), 0, l1, i2, i3, k3, newWidth, newHeight, j2, k2, spriteWidthInit, byte0);
             return;
         }
         catch (Exception _ex) {
@@ -539,100 +541,111 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void method232(int i, int j, int k, int l) {
-        if (sprites[k].requiresShift()) {
-            i += sprites[k].getXShift();
-            j += sprites[k].getYShift();
+    public void method232(int i, int j, int spriteId, int l) {
+        if (sprites[spriteId].requiresShift()) {
+            i += sprites[spriteId].getXShift();
+            j += sprites[spriteId].getYShift();
         }
         int i1 = i + j * menuDefaultWidth;
         int j1 = 0;
-        int k1 = sprites[k].getHeight();
-        int l1 = sprites[k].getWidth();
-        int i2 = menuDefaultWidth - l1;
+        int spriteHeight = sprites[spriteId].getHeight();
+        int spriteWidth = sprites[spriteId].getWidth();
+        int i2 = menuDefaultWidth - spriteWidth;
         int j2 = 0;
         if (j < imageY) {
             int k2 = imageY - j;
-            k1 -= k2;
+            spriteHeight -= k2;
             j = imageY;
-            j1 += k2 * l1;
+            j1 += k2 * spriteWidth;
             i1 += k2 * menuDefaultWidth;
         }
-        if (j + k1 >= imageHeight)
-            k1 -= ((j + k1) - imageHeight) + 1;
+        if (j + spriteHeight >= imageHeight)
+            spriteHeight -= ((j + spriteHeight) - imageHeight) + 1;
         if (i < imageX) {
             int l2 = imageX - i;
-            l1 -= l2;
+            spriteWidth -= l2;
             i = imageX;
             j1 += l2;
             i1 += l2;
             j2 += l2;
             i2 += l2;
         }
-        if (i + l1 >= imageWidth) {
-            int i3 = ((i + l1) - imageWidth) + 1;
-            l1 -= i3;
+        if (i + spriteWidth >= imageWidth) {
+            int i3 = ((i + spriteWidth) - imageWidth) + 1;
+            spriteWidth -= i3;
             j2 += i3;
             i2 += i3;
         }
-        if (l1 <= 0 || k1 <= 0)
+        if (spriteWidth <= 0 || spriteHeight <= 0)
             return;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
             i2 += menuDefaultWidth;
-            j2 += sprites[k].getWidth();
+            j2 += sprites[spriteId].getWidth();
             if ((j & 1) != 0) {
                 i1 += menuDefaultWidth;
-                k1--;
+                spriteHeight--;
             }
         }
-        method238(imagePixelArray, sprites[k].getPixels(), 0, j1, i1, l1, k1, i2, j2, byte0, l);
+        method238(imagePixelArray, sprites[spriteId].getPixels(), 0, j1, i1, spriteWidth, spriteHeight, i2, j2, byte0, l);
     }
 
-    public void spriteClip2(int i, int j, int k, int l, int i1, int j1) {
-        try {
-            int k1 = sprites[i1].getWidth();
-            int l1 = sprites[i1].getHeight();
+    /**
+     * 
+     * @param startX
+     * @param startY
+     * @param newWidth
+     * @param newHeight
+     * @param spriteId
+     * @param j1
+     */
+    public void spriteClip2(int startX, int startY, int newWidth, int newHeight, int spriteId, int j1)
+    {
+        try
+        {
+            int spriteWidthInit = sprites[spriteId].getWidth();
+            int spriteHeightInit = sprites[spriteId].getHeight();
             int i2 = 0;
             int j2 = 0;
-            int k2 = (k1 << 16) / k;
-            int l2 = (l1 << 16) / l;
-            if (sprites[i1].requiresShift()) {
-                int i3 = sprites[i1].getSomething1();
-                int k3 = sprites[i1].getSomething2();
-                k2 = (i3 << 16) / k;
-                l2 = (k3 << 16) / l;
-                i += ((sprites[i1].getXShift() * k + i3) - 1) / i3;
-                j += ((sprites[i1].getYShift() * l + k3) - 1) / k3;
-                if ((sprites[i1].getXShift() * k) % i3 != 0)
-                    i2 = (i3 - (sprites[i1].getXShift() * k) % i3 << 16) / k;
-                if ((sprites[i1].getYShift() * l) % k3 != 0)
-                    j2 = (k3 - (sprites[i1].getYShift() * l) % k3 << 16) / l;
-                k = (k * (sprites[i1].getWidth() - (i2 >> 16))) / i3;
-                l = (l * (sprites[i1].getHeight() - (j2 >> 16))) / k3;
+            int k2 = (spriteWidthInit << 16) / newWidth;
+            int l2 = (spriteHeightInit << 16) / newHeight;
+            if (sprites[spriteId].requiresShift()) {
+                int i3 = sprites[spriteId].getSomething1();
+                int k3 = sprites[spriteId].getSomething2();
+                k2 = (i3 << 16) / newWidth;
+                l2 = (k3 << 16) / newHeight;
+                startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
+                startY += ((sprites[spriteId].getYShift() * newHeight + k3) - 1) / k3;
+                if ((sprites[spriteId].getXShift() * newWidth) % i3 != 0)
+                    i2 = (i3 - (sprites[spriteId].getXShift() * newWidth) % i3 << 16) / newWidth;
+                if ((sprites[spriteId].getYShift() * newHeight) % k3 != 0)
+                    j2 = (k3 - (sprites[spriteId].getYShift() * newHeight) % k3 << 16) / newHeight;
+                newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
+                newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
             }
-            int j3 = i + j * menuDefaultWidth;
-            int l3 = menuDefaultWidth - k;
-            if (j < imageY) {
-                int i4 = imageY - j;
-                l -= i4;
-                j = 0;
+            int j3 = startX + startY * menuDefaultWidth;
+            int l3 = menuDefaultWidth - newWidth;
+            if (startY < imageY) {
+                int i4 = imageY - startY;
+                newHeight -= i4;
+                startY = 0;
                 j3 += i4 * menuDefaultWidth;
                 j2 += l2 * i4;
             }
-            if (j + l >= imageHeight)
-                l -= ((j + l) - imageHeight) + 1;
-            if (i < imageX) {
-                int j4 = imageX - i;
-                k -= j4;
-                i = 0;
+            if (startY + newHeight >= imageHeight)
+                newHeight -= ((startY + newHeight) - imageHeight) + 1;
+            if (startX < imageX) {
+                int j4 = imageX - startX;
+                newWidth -= j4;
+                startX = 0;
                 j3 += j4;
                 i2 += k2 * j4;
                 l3 += j4;
             }
-            if (i + k >= imageWidth) {
-                int k4 = ((i + k) - imageWidth) + 1;
-                k -= k4;
+            if (startX + newWidth >= imageWidth) {
+                int k4 = ((startX + newWidth) - imageWidth) + 1;
+                newWidth -= k4;
                 l3 += k4;
             }
             byte byte0 = 1;
@@ -640,12 +653,12 @@ public class GameImage implements ImageProducer, ImageObserver {
                 byte0 = 2;
                 l3 += menuDefaultWidth;
                 l2 += l2;
-                if ((j & 1) != 0) {
+                if ((startY & 1) != 0) {
                     j3 += menuDefaultWidth;
-                    l--;
+                    newHeight--;
                 }
             }
-            tranScale(imagePixelArray, sprites[i1].getPixels(), 0, i2, j2, j3, l3, k, l, k2, l2, k1, byte0, j1);
+            tranScale(imagePixelArray, sprites[spriteId].getPixels(), 0, i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, j1);
             return;
         }
         catch (Exception _ex) {
@@ -653,50 +666,60 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void spriteClip3(int i, int j, int k, int l, int i1, int j1) {
+    /**
+     * 
+     * @param startX
+     * @param startY
+     * @param newWidth
+     * @param newHeight
+     * @param spriteId
+     * @param spriteColor
+     */
+    public void spriteClip3(int startX, int startY, int newWidth, int newHeight, int spriteId, int spriteColor)
+    {
         try {
-            int k1 = sprites[i1].getWidth();
-            int l1 = sprites[i1].getHeight();
+            int spriteWidthInit = sprites[spriteId].getWidth();
+            int spriteHeightInit = sprites[spriteId].getHeight();
             int i2 = 0;
             int j2 = 0;
-            int k2 = (k1 << 16) / k;
-            int l2 = (l1 << 16) / l;
-            if (sprites[i1].requiresShift()) {
-                int i3 = sprites[i1].getSomething1();
-                int k3 = sprites[i1].getSomething2();
-                k2 = (i3 << 16) / k;
-                l2 = (k3 << 16) / l;
-                i += ((sprites[i1].getXShift() * k + i3) - 1) / i3;
-                j += ((sprites[i1].getYShift() * l + k3) - 1) / k3;
-                if ((sprites[i1].getXShift() * k) % i3 != 0)
-                    i2 = (i3 - (sprites[i1].getXShift() * k) % i3 << 16) / k;
-                if ((sprites[i1].getYShift() * l) % k3 != 0)
-                    j2 = (k3 - (sprites[i1].getYShift() * l) % k3 << 16) / l;
-                k = (k * (sprites[i1].getWidth() - (i2 >> 16))) / i3;
-                l = (l * (sprites[i1].getHeight() - (j2 >> 16))) / k3;
+            int k2 = (spriteWidthInit << 16) / newWidth;
+            int l2 = (spriteHeightInit << 16) / newHeight;
+            if (sprites[spriteId].requiresShift()) {
+                int i3 = sprites[spriteId].getSomething1();
+                int k3 = sprites[spriteId].getSomething2();
+                k2 = (i3 << 16) / newWidth;
+                l2 = (k3 << 16) / newHeight;
+                startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
+                startY += ((sprites[spriteId].getYShift() * newHeight + k3) - 1) / k3;
+                if ((sprites[spriteId].getXShift() * newWidth) % i3 != 0)
+                    i2 = (i3 - (sprites[spriteId].getXShift() * newWidth) % i3 << 16) / newWidth;
+                if ((sprites[spriteId].getYShift() * newHeight) % k3 != 0)
+                    j2 = (k3 - (sprites[spriteId].getYShift() * newHeight) % k3 << 16) / newHeight;
+                newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
+                newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
             }
-            int j3 = i + j * menuDefaultWidth;
-            int l3 = menuDefaultWidth - k;
-            if (j < imageY) {
-                int i4 = imageY - j;
-                l -= i4;
-                j = 0;
+            int j3 = startX + startY * menuDefaultWidth;
+            int l3 = menuDefaultWidth - newWidth;
+            if (startY < imageY) {
+                int i4 = imageY - startY;
+                newHeight -= i4;
+                startY = 0;
                 j3 += i4 * menuDefaultWidth;
                 j2 += l2 * i4;
             }
-            if (j + l >= imageHeight)
-                l -= ((j + l) - imageHeight) + 1;
-            if (i < imageX) {
-                int j4 = imageX - i;
-                k -= j4;
-                i = 0;
+            if (startY + newHeight >= imageHeight)
+                newHeight -= ((startY + newHeight) - imageHeight) + 1;
+            if (startX < imageX) {
+                int j4 = imageX - startX;
+                newWidth -= j4;
+                startX = 0;
                 j3 += j4;
                 i2 += k2 * j4;
                 l3 += j4;
             }
-            if (i + k >= imageWidth) {
-                int k4 = ((i + k) - imageWidth) + 1;
-                k -= k4;
+            if (startX + newWidth >= imageWidth) {
+                int k4 = ((startX + newWidth) - imageWidth) + 1;
+                newWidth -= k4;
                 l3 += k4;
             }
             byte byte0 = 1;
@@ -704,12 +727,12 @@ public class GameImage implements ImageProducer, ImageObserver {
                 byte0 = 2;
                 l3 += menuDefaultWidth;
                 l2 += l2;
-                if ((j & 1) != 0) {
+                if ((startY & 1) != 0) {
                     j3 += menuDefaultWidth;
-                    l--;
+                    newHeight--;
                 }
             }
-            plotScale2(imagePixelArray, sprites[i1].getPixels(), 0, i2, j2, j3, l3, k, l, k2, l2, k1, byte0, j1);
+            plotScale2(imagePixelArray, sprites[spriteId].getPixels(), 0, i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, spriteColor);
             return;
         }
         catch (Exception _ex) {
@@ -1165,69 +1188,82 @@ public class GameImage implements ImageProducer, ImageObserver {
         spriteClip1(i, j, k, l, i1);
     }
 
-    public void spriteClip4(int i, int j, int k, int l, int i1, int overlay, int k1, int l1, boolean flag) {
+    /**
+     * Looks like this has to do with animations.
+     * @param startX
+     * @param startY
+     * @param newWidth
+     * @param newHeight
+     * @param spriteId
+     * @param hairColor
+     * @param skinColor
+     * @param l1
+     * @param flip
+     */
+    public void spriteClip4(int startX, int startY, int newWidth, int newHeight, int spriteId, int hairColor, int skinColor, int l1, boolean flip)
+    {
         try {
-            if (overlay == 0)
-                overlay = 0xffffff;
-            if (k1 == 0)
-                k1 = 0xffffff;
-            int i2 = sprites[i1].getWidth();
-            int j2 = sprites[i1].getHeight();
+            if (hairColor == 0)
+                hairColor = 0xffffff;
+            if (skinColor == 0)
+                skinColor = 0xffffff;
+            int spriteWidthInit = sprites[spriteId].getWidth();
+            int spriteHeightInit = sprites[spriteId].getHeight();
             int k2 = 0;
             int l2 = 0;
             int i3 = l1 << 16;
-            int j3 = (i2 << 16) / k;
-            int k3 = (j2 << 16) / l;
-            int l3 = -(l1 << 16) / l;
-            if (sprites[i1].requiresShift()) {
-                int i4 = sprites[i1].getSomething1();
-                int k4 = sprites[i1].getSomething2();
-                j3 = (i4 << 16) / k;
-                k3 = (k4 << 16) / l;
-                int j5 = sprites[i1].getXShift();
-                int k5 = sprites[i1].getYShift();
-                if (flag)
-                    j5 = i4 - sprites[i1].getWidth() - j5;
-                i += ((j5 * k + i4) - 1) / i4;
-                int l5 = ((k5 * l + k4) - 1) / k4;
-                j += l5;
+            int j3 = (spriteWidthInit << 16) / newWidth;
+            int k3 = (spriteHeightInit << 16) / newHeight;
+            int l3 = -(l1 << 16) / newHeight;
+            if (sprites[spriteId].requiresShift()) {
+                int i4 = sprites[spriteId].getSomething1();
+                int k4 = sprites[spriteId].getSomething2();
+                j3 = (i4 << 16) / newWidth;
+                k3 = (k4 << 16) / newHeight;
+                int j5 = sprites[spriteId].getXShift();
+                int k5 = sprites[spriteId].getYShift();
+                if (flip)
+                    j5 = i4 - sprites[spriteId].getWidth() - j5;
+                startX += ((j5 * newWidth + i4) - 1) / i4;
+                int l5 = ((k5 * newHeight + k4) - 1) / k4;
+                startY += l5;
                 i3 += l5 * l3;
-                if ((j5 * k) % i4 != 0)
-                    k2 = (i4 - (j5 * k) % i4 << 16) / k;
-                if ((k5 * l) % k4 != 0)
-                    l2 = (k4 - (k5 * l) % k4 << 16) / l;
-                k = ((((sprites[i1].getWidth() << 16) - k2) + j3) - 1) / j3;
-                l = ((((sprites[i1].getHeight() << 16) - l2) + k3) - 1) / k3;
+                if ((j5 * newWidth) % i4 != 0)
+                    k2 = (i4 - (j5 * newWidth) % i4 << 16) / newWidth;
+                if ((k5 * newHeight) % k4 != 0)
+                    l2 = (k4 - (k5 * newHeight) % k4 << 16) / newHeight;
+                newWidth = ((((sprites[spriteId].getWidth() << 16) - k2) + j3) - 1) / j3;
+                newHeight = ((((sprites[spriteId].getHeight() << 16) - l2) + k3) - 1) / k3;
             }
-            int j4 = j * menuDefaultWidth;
-            i3 += i << 16;
-            if (j < imageY) {
-                int l4 = imageY - j;
-                l -= l4;
-                j = imageY;
+            int j4 = startY * menuDefaultWidth;
+            i3 += startX << 16;
+            if (startY < imageY) {
+                int l4 = imageY - startY;
+                newHeight -= l4;
+                startY = imageY;
                 j4 += l4 * menuDefaultWidth;
                 l2 += k3 * l4;
                 i3 += l3 * l4;
             }
-            if (j + l >= imageHeight)
-                l -= ((j + l) - imageHeight) + 1;
+            if (startY + newHeight >= imageHeight)
+                newHeight -= ((startY + newHeight) - imageHeight) + 1;
             int i5 = j4 / menuDefaultWidth & 1;
             if (!f1Toggle)
                 i5 = 2;
-            if (k1 == 0xffffff) {
-                if (!flag) {
-                    spritePlotTransparent(imagePixelArray, sprites[i1].getPixels(), 0, k2, l2, j4, k, l, j3, k3, i2, overlay, i3, l3, i5);
+            if (skinColor == 0xffffff) {
+                if (!flip) {
+                    spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, k2, l2, j4, newWidth, newHeight, j3, k3, spriteWidthInit, hairColor, i3, l3, i5);
                     return;
                 } else {
-                    spritePlotTransparent(imagePixelArray, sprites[i1].getPixels(), 0, (sprites[i1].getWidth() << 16) - k2 - 1, l2, j4, k, l, -j3, k3, i2, overlay, i3, l3, i5);
+                    spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, (sprites[spriteId].getWidth() << 16) - k2 - 1, l2, j4, newWidth, newHeight, -j3, k3, spriteWidthInit, hairColor, i3, l3, i5);
                     return;
                 }
             }
-            if (!flag) {
-                spritePlotTransparent(imagePixelArray, sprites[i1].getPixels(), 0, k2, l2, j4, k, l, j3, k3, i2, overlay, k1, i3, l3, i5);
+            if (!flip) {
+                spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, k2, l2, j4, newWidth, newHeight, j3, k3, spriteWidthInit, hairColor, skinColor, i3, l3, i5);
                 return;
             } else {
-                spritePlotTransparent(imagePixelArray, sprites[i1].getPixels(), 0, (sprites[i1].getWidth() << 16) - k2 - 1, l2, j4, k, l, -j3, k3, i2, overlay, k1, i3, l3, i5);
+                spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, (sprites[spriteId].getWidth() << 16) - k2 - 1, l2, j4, newWidth, newHeight, -j3, k3, spriteWidthInit, hairColor, skinColor, i3, l3, i5);
                 return;
             }
         }

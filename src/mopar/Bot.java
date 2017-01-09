@@ -1,6 +1,7 @@
 package mopar;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.KeyboardFocusManager;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
@@ -10,9 +11,11 @@ import javax.imageio.ImageIO;
 import javax.sound.midi.*;
 import javax.swing.*;
 import mopar.sign.signlink;
-import org.mudclient;
+import org.*;
 
-public class Bot extends mudclient implements ActionListener, ItemListener, FocusListener, KeyListener {
+public class Bot extends JPanel implements ActionListener, ItemListener, MouseListener,
+MouseMotionListener, KeyListener, FocusListener, WindowListener, ComponentListener, KeyEventDispatcher
+{
 	public JFrame frame;
 	public int altInterfaceID;
 	private static String newsKey = "ih87h9889h";
@@ -41,30 +44,78 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 	private String frameTitle;
 	private String[] badLoginStrings;
 	private static boolean debugActions;
+	private org.GameWindow gw;
+	private org.mudclient mc;
+	public Graphics graphics;
 
 	public static void main(String[] args) {
-		bot = new Bot(args);
+		//bot = new Bot(args);
 	}
+    public Graphics getGraphics() {
+        Graphics g = super.getGraphics();
+        return g;
+    }
+    public final void paint(Graphics g) {
+        gw.paint(g);
+    }
+    
+    public final void update(Graphics g) {
+    	gw.update(g);
+    }
 
-	public Bot(String[] args)
+	public Bot(GameWindow gw, mudclient mc, int width, int height, String title,
+			boolean resizable, boolean flag1)
 	{
-		this.mainFrame = new JPanel();
-		this.pause = false;
-		this.forceLogout = -1L;
-		this.forceLogoutStart = -1L;
-		this.frameTitle = "RSC reborn";
-		this.badLoginStrings = new String[]{"disabled", "updated", "members"};
-		boolean startMusic = true;
-		if(args.length > 0) {
-			this.highmem = args[0];
-			if(args.length > 1) {
-				startMusic = false;
-				if(args.length > 2) {
-					this.configFile = args[2];
-				}
-			}
-		}
-		this.setup(startMusic);
+        frame = new JFrame("RSC reborn");
+		frame.setSize(765, 513);
+        frame.setVisible(true);
+        /*
+		setFocusable(true);
+		setPreferredSize(new Dimension(765, 513));
+		addKeyListener(this);
+		addMouseListener(this);
+		addMouseMotionListener(this);
+        frame.add(this, BorderLayout.CENTER);
+        */
+        /*
+        JPanel p = new JPanel();
+        p.setPreferredSize(new Dimension(100, 100));
+        p.setForeground(Color.BLACK);
+        p.setBackground(Color.WHITE);
+        p.setFocusable(true);
+        p.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                System.out.println("Key pressed in Panel");
+            }
+            public void keyReleased(KeyEvent e) {
+                System.out.println("Key released in Panel");
+            }
+            public void keyTyped(KeyEvent e) {
+                System.out.println("Key  typed in Panel");
+            }
+        });*/
+        frame.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                System.out.println("Key pressed in Frame");
+            }
+            public void keyReleased(KeyEvent e) {
+                System.out.println("Key released in Frame");
+            }
+            public void keyTyped(KeyEvent e) {
+                System.out.println("Key  typed in Frame");
+            }
+        });
+		this.gw = gw;
+		this.mc = mc;
+	    //frame.setUndecorated(true);
+	    //frame.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
+		pause = false;
+		forceLogout = -1L;
+		forceLogoutStart = -1L;
+		frameTitle = "RSC reborn";
+		badLoginStrings = new String[]{"disabled", "updated", "members"};
+		setup(true);
+		graphics = getGraphics();
 	}
 
 	private void setup(boolean startMusic)
@@ -74,13 +125,11 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 		} catch (FileNotFoundException var4) {
 			;
 		}
-
-		this.console = new JTextArea(20, 30);
+		console = new JTextArea(10, 30);
 		AccessorMethods.rs = this;
-		this.graphicsEnabled = true;
-		this.setServer("127.0.0.1");
-
-		this.initUI();
+		((mudclient)gw).graphicsEnabled = true;
+		setServer("127.0.0.1");
+		initUI();
 		log("Starting RSC reborn");
 		if(startMusic) {
 			this.midiPlayer("Play");
@@ -166,11 +215,11 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 
 	public void takeScreenShot() {
 		try {
-			Point c = this.getLocationOnScreen();
+			Point c = gw.getLocationOnScreen();
 			int x = c.x;
 			int y = c.y;
-			int width = this.getWidth();
-			int height = this.getHeight();
+			int width = gw.getWidth();
+			int height = gw.getHeight();
 			Rectangle screenRect = new Rectangle(x, y, width, height);
 			Robot robot = new Robot();
 			BufferedImage image = robot.createScreenCapture(screenRect);
@@ -205,8 +254,8 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 		int stateChange = evt.getStateChange();
 		if(cmd != null) {
 			if(cmd.startsWith("HP")) {
-				showhp = stateChange == 1;
-				if(showhp) {
+				((mudclient)gw).showhp = stateChange == 1;
+				if(((mudclient)gw).showhp) {
 					log("HP Above Heads On...");
 				} else {
 					log("HP Above Heads Off...");
@@ -214,8 +263,8 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			}
 
 			if(cmd.startsWith("Pking")) {
-				pkingmap = stateChange == 1;
-				if(pkingmap) {
+				((mudclient)gw).pkingmap = stateChange == 1;
+				if(((mudclient)gw).pkingmap) {
 					log("Pking Minimap On...");
 				} else {
 					log("Pking Minimap Off...");
@@ -223,8 +272,8 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			}
 
 			if(cmd.startsWith("Zoom")) {
-				cameratoggle = stateChange == 1;
-				if(cameratoggle) {
+				((mudclient)gw).cameratoggle = stateChange == 1;
+				if(((mudclient)gw).cameratoggle) {
 					log("Zoom/Camera Movement On...");
 				} else {
 					log("Zoom/Camera Movement Off...");
@@ -237,20 +286,17 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 	private void initUI() {
 		try {
 			JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-			signlink.mainapp = this;
-			this.mainFrame.setLayout(new BorderLayout());
+			signlink.mainapp = gw;
 			if(!isApplet) {
-				JFrame.setDefaultLookAndFeelDecorated(true);
-				this.frame = new JFrame(this.frameTitle);
-				this.frame.setContentPane(this.mainFrame);
-				this.frame.setResizable(false);
-				this.frame.setDefaultCloseOperation(3);
+				frame.setResizable(false);
+				frame.setDefaultCloseOperation(3);
 			}
-
+			/*
 			JPanel e = new JPanel();
 			e.setLayout(new BorderLayout());
-			e.add(this);
+			e.add(gw);
 			e.setPreferredSize(new Dimension(765, 503));
+			*/
 			String[] titles = new String[]{"File", "Console", "Music Player", "Maplock", "Aryan", "Help"};
 			String[][] content = new String[][]{{"New Server", "New Port", "Ping Server", "Quit"}, {"Hide", "Show"}, {"Next Song", "Previous Song", "-", "Play", "Stop", "-", "Info"}, {"North", "South", "East", "West", "-", "Unlock"}, {"Run", "Pause/Resume Scripts", "List Scripts", "Stop Script", "Stop All Scripts", "-", "Reload Scripts", "Reload Randoms"}, {"Website", "Forums", "Server Status", "Key List", "Command List", "-", "Item IDs", "NPC IDs", "Object IDs"}};
 			JMenuBar menuBar = this.makeMenuBar(titles, content);
@@ -264,22 +310,19 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 				menuItem.addItemListener(this);
 				menuBar.add(menuItem);
 			}
-
 			this.scroll = new JScrollPane(this.console, 22, 31);
 			this.scroll.setPreferredSize(new Dimension(765, 150));
 			this.console.setForeground(Color.white);
 			this.console.setBackground(Color.black);
 			Console var12 = new Console(this.console, this.scroll);
 			System.setOut(var12);
-			this.mainFrame.add(menuBar, "North");
-			this.mainFrame.add(e, "Center");
-			this.mainFrame.add(this.scroll, "South");
+			frame.add(this);
+			frame.add(menuBar, BorderLayout.NORTH);
+			frame.add(this.scroll, BorderLayout.SOUTH);
 			if(!isApplet) {
-				this.frame.pack();
-				this.frame.setVisible(true);
+				//frame.pack();
+				frame.setVisible(true);
 			}
-
-			this.init();
 		} catch (Exception var11) {
 			log("A general exception occured in initUI()");
 			var11.printStackTrace();
@@ -320,9 +363,9 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 				if(this.isHidden) {
 					log("The console is already hidden");
 				} else {
-					this.mainFrame.remove(this.scroll);
+					frame.remove(this.scroll);
 					if(!isApplet) {
-						this.frame.pack();
+						frame.pack();
 					}
 
 					this.isHidden = true;
@@ -333,9 +376,9 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 				if(!this.isHidden) {
 					log("The console is already Visible");
 				} else {
-					this.mainFrame.add(this.scroll, "South");
+					frame.add(this.scroll, "South");
 					if(!isApplet) {
-						this.frame.pack();
+						frame.pack();
 					}
 
 					this.isHidden = false;
@@ -359,19 +402,19 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			}
 
 			if(cmd.equalsIgnoreCase("North")) {
-				maplock = true;
-				mapface = 0;
+				((mudclient)gw).maplock = true;
+				((mudclient)gw).mapface = 0;
 			} else if(cmd.equalsIgnoreCase("South")) {
-				maplock = true;
-				mapface = 1030;
+				((mudclient)gw).maplock = true;
+				((mudclient)gw).mapface = 1030;
 			} else if(cmd.equalsIgnoreCase("East")) {
-				maplock = true;
-				mapface = 1545;
+				((mudclient)gw).maplock = true;
+				((mudclient)gw).mapface = 1545;
 			} else if(cmd.equalsIgnoreCase("West")) {
-				maplock = true;
-				mapface = 515;
+				((mudclient)gw).maplock = true;
+				((mudclient)gw).mapface = 515;
 			} else if(cmd.equalsIgnoreCase("Unlock")) {
-				maplock = false;
+				((mudclient)gw).maplock = false;
 			}
 
 			if(cmd.equalsIgnoreCase("Quit")) {
@@ -420,15 +463,15 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			}
 
 			if(cmd.equalsIgnoreCase("Key List")) {
-				JOptionPane.showMessageDialog(this, "F1 = Server Select.\nF2 = Get Interface ID.\nF3 = Print Inventory Contents.\nF4 = Get Position / Toggle coords.\nF5 = Get Animation.\nF6 = Action debugging.\nF7 = Toggle Graphics.\nF8 = Toggle Camera Lock.\nF9 = Take Screenshot.\nF10 = Show HP.\nF11 = Next Song.\nF12 = Previous Song.\n\nThe following move the camera when toggled.\n   Insert = Zoom out.\n   Page Up = Zoom in.\n   Home = Forward.\n   End = Backward.\n   Delete = Left.\n   Page Down = Right.\n", "MoparScape Key List", -1);
+				JOptionPane.showMessageDialog(gw, "F1 = Server Select.\nF2 = Get Interface ID.\nF3 = Print Inventory Contents.\nF4 = Get Position / Toggle coords.\nF5 = Get Animation.\nF6 = Action debugging.\nF7 = Toggle Graphics.\nF8 = Toggle Camera Lock.\nF9 = Take Screenshot.\nF10 = Show HP.\nF11 = Next Song.\nF12 = Previous Song.\n\nThe following move the camera when toggled.\n   Insert = Zoom out.\n   Page Up = Zoom in.\n   Home = Forward.\n   End = Backward.\n   Delete = Left.\n   Page Down = Right.\n", "MoparScape Key List", -1);
 			}
 
 			if(cmd.equalsIgnoreCase("Command List")) {
-				JOptionPane.showMessageDialog(this, "Clientside commands(works with every server):\n     ::clientdrop = Disconnects you quickly.\n     ::lag = Lags your client.\n     ::fpson = Turns on frames per second.\n     ::fpsoff = Turns off above.\n     ::coordson = Shows your current world position.\n     ::coordsoff = Turns off above.\n     ::noclip = walk through walls.\n  For whats below FROM and TO are id numbers.\n     ::setitem FROM TO = Transforms one item to another.\n     ::setnpc FROM TO = Transforms one npc to another.\n     ::setobject FROM TO = Transforms one object to another.\n     ::resetall = Resets all transforms.\n\nPopular Serverside Commands(most servers):\n     ::tele COORD1 COORD2 = Teleports you to new coordinates.\n     ::pickup itemid amount = Spawns requested item(s).\n     ::pass newpassword = Changes your password.\n     ::bank = Opens up your bank from anywhere.", "MoparScape Command List", -1);
+				JOptionPane.showMessageDialog(gw, "Clientside commands(works with every server):\n     ::clientdrop = Disconnects you quickly.\n     ::lag = Lags your client.\n     ::fpson = Turns on frames per second.\n     ::fpsoff = Turns off above.\n     ::coordson = Shows your current world position.\n     ::coordsoff = Turns off above.\n     ::noclip = walk through walls.\n  For whats below FROM and TO are id numbers.\n     ::setitem FROM TO = Transforms one item to another.\n     ::setnpc FROM TO = Transforms one npc to another.\n     ::setobject FROM TO = Transforms one object to another.\n     ::resetall = Resets all transforms.\n\nPopular Serverside Commands(most servers):\n     ::tele COORD1 COORD2 = Teleports you to new coordinates.\n     ::pickup itemid amount = Spawns requested item(s).\n     ::pass newpassword = Changes your password.\n     ::bank = Opens up your bank from anywhere.", "MoparScape Command List", -1);
 			}
 
 			if(cmd.equalsIgnoreCase("Info")) {
-				JOptionPane.showMessageDialog(this, "This Music player can play both midi (.mid) or mp3 formats.\nJust put any songs in the \"Music\" folder to play them.", "MoparScape Music Player Info", -1);
+				JOptionPane.showMessageDialog(gw, "This Music player can play both midi (.mid) or mp3 formats.\nJust put any songs in the \"Music\" folder to play them.", "MoparScape Music Player Info", -1);
 			}
 		}
 
@@ -447,7 +490,7 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			return new URL("http://" + this.server + ":80");
 		} catch (Exception var2) {
 			log("An exception occured in getCodeBase(): " + var2);
-			return super.getCodeBase();
+			return gw.getCodeBase();
 		}
 	}
 
@@ -478,21 +521,6 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 			log("You must enter a numeric value!: " + var2);
 		}
 
-	}
-
-	public void keyTyped(KeyEvent e)
-	{
-		System.out.println("Key Typed!");
-	}
-
-	public void keyPressed(KeyEvent e)
-	{
-		System.out.println("Key Pressed!");
-	}
-
-	public void keyReleased(KeyEvent e)
-	{
-		System.out.println("Key Released!");
 	}
 	/*
 	public void keyPressed(KeyEvent evt) {
@@ -595,11 +623,11 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 
 				log("Your UID is: " + signlink.uid);
 				signlink.mainapp = null;
-				super.login(username, password, lagged);
-				signlink.mainapp = this;
+				((mudclient)gw).login(username, password, lagged);
+				signlink.mainapp = gw;
 				signlink.reporterror = false;
 				if(!isApplet) {
-					this.frame.setTitle((super.loggedIn?this.getUser() + " - World #" + this.server + " - ":"") + this.frameTitle);
+					frame.setTitle((((mudclient)gw).loggedIn?this.getUser() + " - World #" + this.server + " - ":"") + this.frameTitle);
 				}
 
 			}
@@ -633,18 +661,18 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 
 	public void doAction(int i, boolean flag) {
 		if(this.actionJack != null && this.actionJack.length == 4) {
-			this.menuActionID[i] = this.actionJack[0];
-			this.menuActionCmd1[i] = this.actionJack[1];
-			this.menuActionCmd2[i] = this.actionJack[2];
-			this.menuActionCmd3[i] = this.actionJack[3];
+			((mudclient)gw).menuActionID[i] = this.actionJack[0];
+			((mudclient)gw).menuActionCmd1[i] = this.actionJack[1];
+			((mudclient)gw).menuActionCmd2[i] = this.actionJack[2];
+			((mudclient)gw).menuActionCmd3[i] = this.actionJack[3];
 			this.actionJack = null;
 		}
 
 		if(debugActions) {
-			int a = this.menuActionID[i];
-			int b = this.menuActionCmd1[i];
-			int c = this.menuActionCmd2[i];
-			int d = this.menuActionCmd3[i];
+			int a = ((mudclient)gw).menuActionID[i];
+			int b = ((mudclient)gw).menuActionCmd1[i];
+			int c = ((mudclient)gw).menuActionCmd2[i];
+			int d = ((mudclient)gw).menuActionCmd3[i];
 			log(a + "=" + b + "," + c + "," + d);
 		}
 
@@ -710,5 +738,94 @@ public class Bot extends mudclient implements ActionListener, ItemListener, Focu
 	}
 
 	public void mapReset() {
+	}
+	public void componentResized(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Component event!");
+	}
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Component event!");
+	}
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Component event!");
+	}
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Component event!");
+	}
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Window event!");
+	}
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Key typed!");
+	}
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Key pressed!");
+	}
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Key released!");
+	}
+	public void mouseDragged(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse dragged!");
+	}
+	public void mouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse moved!");
+	}
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse clicked!");
+	}
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse pressed!");
+	}
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse released!");
+	}
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse entered!");
+	}
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Mouse exited!");
+	}
+	public boolean dispatchKeyEvent(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("Hierarchy changed");
+		return false;
 	}
 }

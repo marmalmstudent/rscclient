@@ -14,7 +14,10 @@ public class Config {
         MOVIE_FPS = 5;
     }
 
-    public static String SERVER_IP, CONF_DIR, MEDIA_DIR;
-    public static int SERVER_PORT, MOVIE_FPS;
+    public static String SERVER_IP = "127.0.0.1";
+    public static String CONF_DIR = "src/org/conf/client/";
+    public static String MEDIA_DIR = "media";
+    public static int SERVER_PORT = 43594;
+    public static int MOVIE_FPS = 5;
     public static long START_TIME;
 }

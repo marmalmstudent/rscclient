@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import mopar.*;
 
 import org.util.Config;
 
@@ -41,19 +42,20 @@ public class GameWindow extends JApplet
 		
 	}
 
-	protected final void createWindow(int width, int height, String title, boolean resizable)
+	protected final void createWindow(mudclient mc, int width, int height, String title, boolean resizable)
 	{
 		appletMode = false;
 		appletWidth = width;
 		appletHeight = height;
-		gameFrame = new GameFrame(this, width, height, title, resizable, false);
-		graphics = getFrameComponent().getGraphics();
+		gameFrame = new GameFrame(this, width, height, title, resizable, true);
 		loadingScreen = 1;
-		startThread(this);
+		gameWindowThread = new Thread(this);
+		gameWindowThread.start();
+		gameWindowThread.setPriority(1);
 	}
 	
 	public void initCreateWindow(int width, int height)
-	{		
+	{
 		appletMode = true;
 		appletWidth = width;
 		appletHeight = height;
@@ -127,11 +129,11 @@ public class GameWindow extends JApplet
         if (loadingScreen == 1)
         { //very first loginscreen
             loadingScreen = 2; // 2
-            //graphics = getGraphics();
+            graphics = getGraphics();
             drawLoadingLogo();
-            drawLoadingScreen(0, "Loading..."); //this is the screen during load
+            drawLoadingScreen(0, "Loading...");
             startGame();
-            loadingScreen = 0; // dunno what this does
+            loadingScreen = 0; // removes the login screen
         }
         int i = 0;
         int j = 256;
@@ -208,7 +210,9 @@ public class GameWindow extends JApplet
             }
             anInt10--;
             i1 &= 0xff;
+            /**/
             method4();
+            /**/
         }
         if (exitTimeout == -1)
             close();
@@ -456,7 +460,7 @@ public class GameWindow extends JApplet
 	{
         Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
-        setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
+        //setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
         initCreateWindow(512, 344);
 	}
 	
@@ -737,15 +741,15 @@ public class GameWindow extends JApplet
 
 	public void mouseDragged(MouseEvent e)
 	{
-		mouseX = e.getX();
-		mouseY = e.getY() + yOffset;
+		mouseX = e.getX() - GameFrame.offsetY;
+		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 	}
 
 	public void mouseMoved(MouseEvent e)
 	{
-		mouseX = e.getX();
-		mouseY = e.getY() + yOffset;
+		mouseX = e.getX() - GameFrame.offsetX;
+		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
 		lastActionTimeout = 0;
 		
@@ -757,8 +761,9 @@ public class GameWindow extends JApplet
 
 	public void mousePressed(MouseEvent e)
 	{
-		mouseX = e.getX();
-		mouseY = e.getY() + yOffset;
+		mouseX = e.getX() - GameFrame.offsetX;
+		mouseY = e.getY() - GameFrame.offsetY;
+		System.out.println("("+mouseX+", "+mouseY+")");
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
 		lastActionTimeout = 0;
@@ -768,8 +773,8 @@ public class GameWindow extends JApplet
 
 	public void mouseReleased(MouseEvent e)
 	{
-		mouseX = e.getX();
-		mouseY = e.getY() + yOffset;
+		mouseX = e.getX() - GameFrame.offsetX;
+		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
 	}
 
