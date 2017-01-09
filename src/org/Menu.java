@@ -265,26 +265,36 @@ public class Menu {
         gameImage.drawString(text, x, y, type, color);
     }
 
-    protected void method145(int i, int j, int k, int l, int i1, String s, int j1) {
-        if (aBooleanArray185[i]) {
-            int k1 = s.length();
-            s = "";
+    protected void method145(int menuObject, int objectX, int objectY, int objectWidth, int objectHeight, String text, int type)
+    {
+    	//System.out.println(menuObject);
+        if (aBooleanArray185[menuObject]) {
+            int k1 = text.length();
+            text = "";
             for (int i2 = 0; i2 < k1; i2++)
-                s = s + "X";
+                text = text + "X";
 
         }
-        if (menuObjectType[i] == 5) {
-            if (lastMouseButton == 1 && mouseX >= j && mouseY >= k - i1 / 2 && mouseX <= j + l && mouseY <= k + i1 / 2)
-                currentFocusHandle = i;
-        } else if (menuObjectType[i] == 6) {
-            if (lastMouseButton == 1 && mouseX >= j - l / 2 && mouseY >= k - i1 / 2 && mouseX <= j + l / 2 && mouseY <= k + i1 / 2)
-                currentFocusHandle = i;
-            j -= gameImage.textWidth(s, j1) / 2;
+        if (menuObjectType[menuObject] == 5) {
+            if (lastMouseButton == 1
+            		&& mouseX >= objectX && mouseY >= objectY - objectHeight / 2
+            		&& mouseX <= objectX + objectWidth && mouseY <= objectY + objectHeight / 2)
+                currentFocusHandle = menuObject;
+        } else if (menuObjectType[menuObject] == 6) {
+            if (lastMouseButton == 1
+            		&& mouseX >= objectX - objectWidth / 2 && mouseY >= objectY - objectHeight / 2
+            		&& mouseX <= objectX + objectWidth / 2 && mouseY <= objectY + objectHeight / 2)
+                currentFocusHandle = menuObject;
+            objectX -= gameImage.textWidth(text, type) / 2;
         }
-        if (currentFocusHandle == i)
-            s = s + "*";
-        int l1 = k + gameImage.messageFontHeight(j1) / 3;
-        drawTextWithMask(i, j, l1, s, j1);
+        if (currentFocusHandle == menuObject)
+            text = text + "*";
+        int yCorrect = objectY + gameImage.messageFontHeight(type) / 3;
+        if (menuObject == 1)
+        {
+        	yCorrect += mudclient.getWindowHeight()-334;
+        }
+        drawTextWithMask(menuObject, objectX, yCorrect, text, type);
     }
 
     public void method146(int i, int j, int k, int l) {
@@ -330,65 +340,95 @@ public class Menu {
         gameImage.drawLineX(i, j, k, 0);
     }
 
-    protected void method150(int i, int j, int k, int l, int i1, int j1, String as[], int k1, int l1) {
-        int i2 = i1 / gameImage.messageFontHeight(j1);
-        if (l1 > k1 - i2)
-            l1 = k1 - i2;
+    protected void method150(int menuObject, int objectX, int objectY,
+    		int objectWidth, int objectHeight, int objectTextType,
+    		String menuListText[], int menuListTextCount, int l1) {
+    	//System.out.println(menuObject);
+    	if (menuObject == 0)
+    	{
+    		objectHeight = 10*gameImage.messageFontHeight(objectTextType);
+    		objectY = mudclient.getWindowHeight() - objectHeight;
+    	}
+        int nRows = objectHeight / gameImage.messageFontHeight(objectTextType);
+        if (l1 > menuListTextCount - nRows)
+            l1 = menuListTextCount - nRows;
         if (l1 < 0)
             l1 = 0;
-        anIntArray187[i] = l1;
-        if (i2 < k1) {
-            int j2 = (j + l) - 12;
-            int l2 = ((i1 - 27) * i2) / k1;
-            if (l2 < 6)
-                l2 = 6;
-            int j3 = ((i1 - 27 - l2) * l1) / (k1 - i2);
-            if (mouseButton == 1 && mouseX >= j2 && mouseX <= j2 + 12) {
-                if (mouseY > k && mouseY < k + 12 && l1 > 0)
+        anIntArray187[menuObject] = l1;
+        if (nRows < menuListTextCount) {
+            int startX = (objectX + objectWidth) - 12;
+            int sliderMaxSize = ((objectHeight - 27) * nRows) / menuListTextCount;
+            if (sliderMaxSize < 6)
+                sliderMaxSize = 6;
+            int sliderSize = ((objectHeight - 27 - sliderMaxSize) * l1) / (menuListTextCount - nRows);
+            if (mouseButton == 1
+            		&& mouseX >= startX && mouseX <= startX + 12)
+            {
+                if (mouseY > objectY && mouseY < objectY + 12 && l1 > 0)
+                { // scroll up
                     l1--;
-                if (mouseY > (k + i1) - 12 && mouseY < k + i1 && l1 < k1 - i2)
+                }
+                if (mouseY > (objectY + objectHeight) - 12
+                		&& mouseY < objectY + objectHeight
+                		&& l1 < menuListTextCount - nRows)
+                { // scroll down
                     l1++;
-                anIntArray187[i] = l1;
+                }
+                anIntArray187[menuObject] = l1;
             }
-            if (mouseButton == 1 && (mouseX >= j2 && mouseX <= j2 + 12 || mouseX >= j2 - 12 && mouseX <= j2 + 24 && aBooleanArray184[i])) {
-                if (mouseY > k + 12 && mouseY < (k + i1) - 12) {
-                    aBooleanArray184[i] = true;
-                    int l3 = mouseY - k - 12 - l2 / 2;
-                    l1 = (l3 * k1) / (i1 - 24);
-                    if (l1 > k1 - i2)
-                        l1 = k1 - i2;
+            if (mouseButton == 1
+            		&& (mouseX >= startX && mouseX <= startX + 12
+            		|| mouseX >= startX - 12 && mouseX <= startX + 24
+            		&& aBooleanArray184[menuObject]))
+            {
+                if (mouseY > objectY + 12 && mouseY < (objectY + objectHeight) - 12) {
+                    aBooleanArray184[menuObject] = true;
+                    int l3 = mouseY - objectY - 12 - sliderMaxSize / 2;
+                    l1 = (l3 * menuListTextCount) / (objectHeight - 24);
+                    if (l1 > menuListTextCount - nRows)
+                        l1 = menuListTextCount - nRows;
                     if (l1 < 0)
                         l1 = 0;
-                    anIntArray187[i] = l1;
+                    anIntArray187[menuObject] = l1;
                 }
             } else {
-                aBooleanArray184[i] = false;
+                aBooleanArray184[menuObject] = false;
             }
-            j3 = ((i1 - 27 - l2) * l1) / (k1 - i2);
-            method151(j, k, l, i1, j3, l2);
+            sliderSize = ((objectHeight - 27 - sliderMaxSize) * l1) / (menuListTextCount - nRows);
+            drawScrollBar(objectX, objectY, objectWidth, objectHeight, sliderSize, sliderMaxSize);
         }
-        int k2 = i1 - i2 * gameImage.messageFontHeight(j1);
-        int i3 = k + (gameImage.messageFontHeight(j1) * 5) / 6 + k2 / 2;
-        for (int k3 = l1; k3 < k1; k3++) {
-            drawTextWithMask(i, j + 2, i3, as[k3], j1);
-            i3 += gameImage.messageFontHeight(j1) - anInt225;
-            if (i3 >= k + i1)
+        int k2 = objectHeight - nRows * gameImage.messageFontHeight(objectTextType);
+        int i3 = objectY + (gameImage.messageFontHeight(objectTextType) * 5) / 6 + k2 / 2;
+        for (int k3 = l1; k3 < menuListTextCount; k3++) {
+            drawTextWithMask(menuObject, objectX + 2, i3, menuListText[k3], objectTextType);
+            i3 += gameImage.messageFontHeight(objectTextType) - anInt225;
+            if (i3 >= objectY + objectHeight)
                 return;
         }
 
     }
 
-    protected void method151(int i, int j, int k, int l, int i1, int j1) {
-        int k1 = (i + k) - 12;
-        gameImage.drawBoxEdge(k1, j, 12, l, 0);
-        gameImage.drawPicture(k1 + 1, j + 1, mudclient.SPRITE_UTIL_START);
-        gameImage.drawPicture(k1 + 1, (j + l) - 12, 1 + mudclient.SPRITE_UTIL_START);
-        gameImage.drawLineX(k1, j + 13, 12, 0);
-        gameImage.drawLineX(k1, (j + l) - 13, 12, 0);
-        gameImage.method214(k1 + 1, j + 14, 11, l - 27, anInt207, anInt208);
-        gameImage.drawBox(k1 + 3, i1 + j + 14, 7, j1, anInt210);
-        gameImage.drawLineY(k1 + 2, i1 + j + 14, j1, anInt209);
-        gameImage.drawLineY(k1 + 2 + 8, i1 + j + 14, j1, anInt211);
+    /**
+     * Draws the scroll bar in menus
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param i1
+     * @param j1
+     */
+    protected void drawScrollBar(int x, int y, int width, int height, int i1, int j1)
+    {
+        int xCorr = (x + width) - 12;
+        gameImage.drawBoxEdge(xCorr, y, 12, height, 0);
+        gameImage.drawPicture(xCorr + 1, y + 1, mudclient.SPRITE_UTIL_START); // upp
+        gameImage.drawPicture(xCorr + 1, (y + height) - 12, 1 + mudclient.SPRITE_UTIL_START); // down
+        gameImage.drawLineX(xCorr, y + 13, 12, 0);
+        gameImage.drawLineX(xCorr, (y + height) - 13, 12, 0);
+        gameImage.method214(xCorr + 1, y + 14, 11, height - 27, anInt207, anInt208); // scroll bar slider
+        gameImage.drawBox(xCorr + 3, i1 + y + 14, 7, j1, anInt210);
+        gameImage.drawLineY(xCorr + 2, i1 + y + 14, j1, anInt209);
+        gameImage.drawLineY(xCorr + 2 + 8, i1 + y + 14, j1, anInt211);
     }
 
     protected void method152(int i, int j, int k, int l, String as[]) {
@@ -460,27 +500,27 @@ public class Menu {
 
     }
 
-    protected void method154(int i, int j, int k, int l, int i1, int j1, String as[],
+    protected void method154(int i, int x, int y, int width, int height, int j1, String as[],
                              int k1, int l1) {
-        int i2 = i1 / gameImage.messageFontHeight(j1);
+        int i2 = height / gameImage.messageFontHeight(j1);
         if (i2 < k1) {
-            int j2 = (j + l) - 12;
-            int l2 = ((i1 - 27) * i2) / k1;
+            int j2 = (x + width) - 12;
+            int l2 = ((height - 27) * i2) / k1;
             if (l2 < 6)
                 l2 = 6;
-            int j3 = ((i1 - 27 - l2) * l1) / (k1 - i2);
+            int j3 = ((height - 27 - l2) * l1) / (k1 - i2);
             if (mouseButton == 1 && mouseX >= j2 && mouseX <= j2 + 12) {
-                if (mouseY > k && mouseY < k + 12 && l1 > 0)
+                if (mouseY > y && mouseY < y + 12 && l1 > 0)
                     l1--;
-                if (mouseY > (k + i1) - 12 && mouseY < k + i1 && l1 < k1 - i2)
+                if (mouseY > (y + height) - 12 && mouseY < y + height && l1 < k1 - i2)
                     l1++;
                 anIntArray187[i] = l1;
             }
             if (mouseButton == 1 && (mouseX >= j2 && mouseX <= j2 + 12 || mouseX >= j2 - 12 && mouseX <= j2 + 24 && aBooleanArray184[i])) {
-                if (mouseY > k + 12 && mouseY < (k + i1) - 12) {
+                if (mouseY > y + 12 && mouseY < (y + height) - 12) {
                     aBooleanArray184[i] = true;
-                    int l3 = mouseY - k - 12 - l2 / 2;
-                    l1 = (l3 * k1) / (i1 - 24);
+                    int l3 = mouseY - y - 12 - l2 / 2;
+                    l1 = (l3 * k1) / (height - 24);
                     if (l1 < 0)
                         l1 = 0;
                     if (l1 > k1 - i2)
@@ -490,22 +530,22 @@ public class Menu {
             } else {
                 aBooleanArray184[i] = false;
             }
-            j3 = ((i1 - 27 - l2) * l1) / (k1 - i2);
-            method151(j, k, l, i1, j3, l2);
+            j3 = ((height - 27 - l2) * l1) / (k1 - i2);
+            drawScrollBar(x, y, width, height, j3, l2);
         } else {
             l1 = 0;
             anIntArray187[i] = 0;
         }
         anIntArray190[i] = -1;
-        int k2 = i1 - i2 * gameImage.messageFontHeight(j1);
-        int i3 = k + (gameImage.messageFontHeight(j1) * 5) / 6 + k2 / 2;
+        int k2 = height - i2 * gameImage.messageFontHeight(j1);
+        int i3 = y + (gameImage.messageFontHeight(j1) * 5) / 6 + k2 / 2;
         for (int k3 = l1; k3 < k1; k3++) {
             int i4;
             if (menuObjectColourMask[i])
                 i4 = 0xffffff;
             else
                 i4 = 0;
-            if (mouseX >= j + 2 && mouseX <= j + 2 + gameImage.textWidth(as[k3], j1) && mouseY - 2 <= i3 && mouseY - 2 > i3 - gameImage.messageFontHeight(j1)) {
+            if (mouseX >= x + 2 && mouseX <= x + 2 + gameImage.textWidth(as[k3], j1) && mouseY - 2 <= i3 && mouseY - 2 > i3 - gameImage.messageFontHeight(j1)) {
                 if (menuObjectColourMask[i])
                     i4 = 0x808080;
                 else
@@ -518,9 +558,9 @@ public class Menu {
             }
             if (anIntArray189[i] == k3 && redStringColour)
                 i4 = 0xff0000;
-            gameImage.drawString(as[k3], j + 2, i3, j1, i4);
+            gameImage.drawString(as[k3], x + 2, i3, j1, i4);
             i3 += gameImage.messageFontHeight(j1);
-            if (i3 >= k + i1)
+            if (i3 >= y + height)
                 return;
         }
 

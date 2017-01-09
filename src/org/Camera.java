@@ -1,8 +1,10 @@
 package org;
 
 public class Camera {
+	private mudclient mc;
 
-    public Camera(GameImage gameImage, int maxModels, int maxCameraModels, int k) {
+    public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int k) {
+    	this.mc = mc;
         anInt374 = 50;
         anIntArray375 = new int[anInt374];
         anIntArrayArray376 = new int[anInt374][256];

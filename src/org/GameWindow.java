@@ -661,7 +661,6 @@ public class GameWindow extends JApplet
 
 	public void keyPressed(KeyEvent e)
 	{
-		System.out.println("Key ("+e.getKeyCode()+", "+(char)e.getKeyChar()+", "+(int)e.getKeyChar()+") Pressed!");
 		int keyCode = e.getKeyCode();
 		int keyChar = e.getKeyChar();
         handleMenuKeyDown(keyCode, keyChar);
@@ -690,14 +689,11 @@ public class GameWindow extends JApplet
         for (int j = 0; j < charSet.length(); j++)
         {
             if (keyChar != charSet.charAt(j)) {
-            	System.out.print(charSet.charAt(j));
                 continue;
             }
-        	System.out.print("Found match: "+ keyChar + " = " +charSet.charAt(j));
             validKeyDown = true;
             break;
         }
-        System.out.print("Text len before: "+inputText.length()+"\n"+inputMessage.length());
         if (validKeyDown && inputText.length() < 20)
             inputText += (char) keyChar;
         if (validKeyDown && inputMessage.length() < 80)
@@ -706,7 +702,6 @@ public class GameWindow extends JApplet
             inputText = inputText.substring(0, inputText.length() - 1);
         if (keyCode == 8 && inputMessage.length() > 0) // backspace
             inputMessage = inputMessage.substring(0, inputMessage.length() - 1);
-        System.out.print("Text len after: "+inputText.length()+"\n"+inputMessage.length());
         if (keyCode == 10 || keyCode == 13)
         { // enter/return
             enteredText = inputText;
