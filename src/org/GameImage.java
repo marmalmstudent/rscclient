@@ -5,17 +5,22 @@ import org.util.Config;
 import org.util.DataConversions;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GameImage implements ImageProducer, ImageObserver {
     public Sprite[] sprites;
     private ZipFile spriteArchive;
+    public BufferedImage loginScreen;
 
     public GameImage(int width, int height, int k, Component component) {
         f1Toggle = false;
@@ -46,6 +51,12 @@ public class GameImage implements ImageProducer, ImageObserver {
         catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        try {
+        	loginScreen = ImageIO.read(new File("src/org/conf/client/Loading.png"));
+        } catch (IOException e)
+        {
+        	e.printStackTrace();
         }
     }
 
@@ -739,46 +750,122 @@ public class GameImage implements ImageProducer, ImageObserver {
             System.out.println("error in sprite clipping routine");
         }
     }
+    
+    /**
+     * Plots an image to the gamewindow.
+     * @param imageRaw
+     * @param width
+     * @param height
+     * @param resize
+     */
+    public void imageToPixArray(BufferedImage imageRaw, int imgXPos, int imgYPos,
+    		int width, int height, boolean resize)
+    {
+    	final int unScaledWidth = imageRaw.getWidth();
+    	final int unScaledHeight = imageRaw.getHeight();
+    	BufferedImage image;
+		if (resize && unScaledWidth != width && unScaledHeight != height)
+		{
+			image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			AffineTransform at = new AffineTransform();
+			at.scale(((double)(width))/unScaledWidth, ((double)(height))/unScaledHeight);
+			AffineTransformOp scaleOp = 
+			   new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+			image = scaleOp.filter(imageRaw, image);
+		}
+		else
+		{
+			image = imageRaw;
+		}
+		final int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+    	method235(imagePixelArray, pixels, 0, 0,
+    			imgYPos*imageWidth+imgXPos, image.getWidth(),
+    			image.getHeight(), imageWidth-image.getWidth(), 0, 1);
+    }
 
-    private void method235(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1) {
-        int i2 = -(l >> 2);
-        l = -(l & 3);
-        for (int j2 = -i1; j2 < 0; j2 += l1) {
-            for (int k2 = i2; k2 < 0; k2++) {
-                i = ai1[j++];
-                if (i != 0)
-                    ai[k++] = i;
+    private void method235(int pixelArray[], int imagePixels[], int imagePixVal,
+    		int imageArrayIdx, int pixelArrayIdx, int imageWidth, int imageHeight,
+    		int skipNLastPixEachRowPixArray, int skipNLastPixEachRowImgArray, int l1)
+    {
+        int oneFourthImageWidth = -(imageWidth >> 2);
+        imageWidth = -(imageWidth & 3);
+        for (int j2 = -imageHeight; j2 < 0; j2 += l1)
+        {
+            for (int k2 = oneFourthImageWidth; k2 < 0; k2++)
+            {
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
                 else
-                    k++;
-                i = ai1[j++];
-                if (i != 0)
-                    ai[k++] = i;
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
                 else
-                    k++;
-                i = ai1[j++];
-                if (i != 0)
-                    ai[k++] = i;
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
                 else
-                    k++;
-                i = ai1[j++];
-                if (i != 0)
-                    ai[k++] = i;
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
                 else
-                    k++;
+                    pixelArrayIdx++;
+            }
+            
+            for (int l2 = imageWidth; l2 < 0; l2++) {
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
             }
 
-            for (int l2 = l; l2 < 0; l2++) {
-                i = ai1[j++];
-                if (i != 0)
-                    ai[k++] = i;
-                else
-                    k++;
-            }
-
-            k += j1;
-            j += k1;
+            pixelArrayIdx += skipNLastPixEachRowPixArray;
+            imageArrayIdx += skipNLastPixEachRowImgArray;
         }
+    	/*
+        int oneFourthImageWidth = -(imageWidth >> 2);
+        imageWidth = -(imageWidth & 3);
+        for (int j2 = -imageHeight; j2 < 0; j2 += l1)
+        {
+            for (int k2 = oneFourthImageWidth; k2 < 0; k2++)
+            {
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
+            }
+
+            for (int l2 = imageWidth; l2 < 0; l2++) {
+                imagePixVal = imagePixels[imageArrayIdx++];
+                if (imagePixVal != 0)
+                    pixelArray[pixelArrayIdx++] = imagePixVal;
+                else
+                    pixelArrayIdx++;
+            }
+
+            pixelArrayIdx += skipNLastPixEachRowPixArray;
+            imageArrayIdx += skipNLastPixEachRowImgArray;
+        }*/
 
     }
 

@@ -2,10 +2,10 @@ package org;
 
 
 public class Menu {
-    public static final int COLOUR_BOX_GRADIENT_TOP = 0x8792B3; //0x90C040
-    public static final int COLOUR_BOX_GRADIENT_BOTTOM = 0x586688; //0x729932
-    public static final int COLOUR_BOX_BORDER1 = 0x586688; //0x729932
-    public static final int COLOUR_BOX_BORDER2 = 0x545D78; //0x557326
+    public static final int COLOUR_BOX_GRADIENT_TOP = 0xB29287;//0x8792B3;
+    public static final int COLOUR_BOX_GRADIENT_BOTTOM = 0x886658;//0x586688;
+    public static final int COLOUR_BOX_BORDER1 = 0x886658;//0x586688;
+    public static final int COLOUR_BOX_BORDER2 = 0x785D54;//0x545D78;
 
     public Menu(GameImage gi, int i) {
         currentFocusHandle = -1;
@@ -72,7 +72,6 @@ public class Menu {
                 		&& mouseY <= menuObjectY[menuObject] + menuObjectHeight[menuObject])
                     anIntArray189[menuObject] = 1 - anIntArray189[menuObject]; // no idea what this is, there is no object of type 14
             }
-
         }
         if (mouseDownButton == 1)
             mouseClicksConsecutive++;
@@ -163,7 +162,8 @@ public class Menu {
             				menuObjectY[menuObject],
             				menuObjectWidth[menuObject]);
             		break;
-            	case 4:
+            	case 4: // Chat history, quest history, private history
+            		
             		method150(menuObject,
             				menuObjectX[menuObject],
             				menuObjectY[menuObject],
@@ -265,9 +265,21 @@ public class Menu {
         gameImage.drawString(text, x, y, type, color);
     }
 
+    /**
+     * Player message in chat before they are sent as well at login input
+     * (username and password) are displayed with this method.
+     * @param menuObject
+     * @param objectX
+     * @param objectY
+     * @param objectWidth
+     * @param objectHeight
+     * @param text
+     * @param type
+     */
     protected void method145(int menuObject, int objectX, int objectY, int objectWidth, int objectHeight, String text, int type)
     {
-    	//System.out.println(menuObject);
+    	gameImage.drawBoxAlpha(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x232323, 0xc0);
+    	gameImage.drawBoxEdge(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x000000);
         if (aBooleanArray185[menuObject]) {
             int k1 = text.length();
             text = "";
@@ -285,15 +297,11 @@ public class Menu {
             		&& mouseX >= objectX - objectWidth / 2 && mouseY >= objectY - objectHeight / 2
             		&& mouseX <= objectX + objectWidth / 2 && mouseY <= objectY + objectHeight / 2)
                 currentFocusHandle = menuObject;
-            objectX -= gameImage.textWidth(text, type) / 2;
+            //objectX -= gameImage.textWidth(text, type) / 2;
         }
         if (currentFocusHandle == menuObject)
             text = text + "*";
-        int yCorrect = objectY + gameImage.messageFontHeight(type) / 3;
-        if (menuObject == 1)
-        {
-        	yCorrect += mudclient.getWindowHeight()-334;
-        }
+        int yCorrect = objectY + gameImage.messageFontHeight(type);// / 3;
         drawTextWithMask(menuObject, objectX, yCorrect, text, type);
     }
 
@@ -342,20 +350,18 @@ public class Menu {
 
     protected void method150(int menuObject, int objectX, int objectY,
     		int objectWidth, int objectHeight, int objectTextType,
-    		String menuListText[], int menuListTextCount, int l1) {
-    	//System.out.println(menuObject);
-    	if (menuObject == 0)
-    	{
-    		objectHeight = 10*gameImage.messageFontHeight(objectTextType);
-    		objectY = mudclient.getWindowHeight() - objectHeight;
-    	}
+    		String menuListText[], int menuListTextCount, int l1)
+    {
+        gameImage.drawBoxAlpha(objectX, objectY, objectWidth, objectHeight, 0x232323, 0xc0);
+        gameImage.drawBoxEdge(objectX, objectY, objectWidth, objectHeight, 0x000000);
         int nRows = objectHeight / gameImage.messageFontHeight(objectTextType);
         if (l1 > menuListTextCount - nRows)
             l1 = menuListTextCount - nRows;
         if (l1 < 0)
             l1 = 0;
         anIntArray187[menuObject] = l1;
-        if (nRows < menuListTextCount) {
+        if (nRows < menuListTextCount)
+        {
             int startX = (objectX + objectWidth) - 12;
             int sliderMaxSize = ((objectHeight - 27) * nRows) / menuListTextCount;
             if (sliderMaxSize < 6)
@@ -419,16 +425,23 @@ public class Menu {
      */
     protected void drawScrollBar(int x, int y, int width, int height, int i1, int j1)
     {
-        int xCorr = (x + width) - 12;
-        gameImage.drawBoxEdge(xCorr, y, 12, height, 0);
+        int xCorr = (x + width) - mudclient.SCROLL_BAR_WIDTH-2;
+        gameImage.drawBoxEdge(xCorr, y, mudclient.SCROLL_BAR_WIDTH+2,
+        		height, 0x000000);
         gameImage.drawPicture(xCorr + 1, y + 1, mudclient.SPRITE_UTIL_START); // upp
-        gameImage.drawPicture(xCorr + 1, (y + height) - 12, 1 + mudclient.SPRITE_UTIL_START); // down
-        gameImage.drawLineX(xCorr, y + 13, 12, 0);
-        gameImage.drawLineX(xCorr, (y + height) - 13, 12, 0);
-        gameImage.method214(xCorr + 1, y + 14, 11, height - 27, anInt207, anInt208); // scroll bar slider
-        gameImage.drawBox(xCorr + 3, i1 + y + 14, 7, j1, anInt210);
-        gameImage.drawLineY(xCorr + 2, i1 + y + 14, j1, anInt209);
-        gameImage.drawLineY(xCorr + 2 + 8, i1 + y + 14, j1, anInt211);
+        gameImage.drawPicture(xCorr + 1, (y + height) - mudclient.SCROLL_BAR_WIDTH-2,
+        		1 + mudclient.SPRITE_UTIL_START); // down
+        gameImage.drawLineX(xCorr, y + mudclient.SCROLL_BAR_HEIGHT+1,
+        		mudclient.SCROLL_BAR_WIDTH+2, 0);
+        gameImage.drawLineX(xCorr, y + height - mudclient.SCROLL_BAR_HEIGHT-1,
+        		mudclient.SCROLL_BAR_WIDTH+2, 0);
+        gameImage.method214(xCorr + 1, y + mudclient.SCROLL_BAR_HEIGHT+2,
+        		mudclient.SCROLL_BAR_WIDTH, height - 2*mudclient.SCROLL_BAR_HEIGHT-3,
+        		anInt207, anInt208); // scroll bar slider
+        gameImage.drawBox(xCorr + 3, i1 + y + mudclient.SCROLL_BAR_HEIGHT+2,
+        		mudclient.SCROLL_BAR_WIDTH-4, j1, anInt210);
+        //gameImage.drawLineY(xCorr + 2, i1 + y + 14, j1, anInt209);
+        //gameImage.drawLineY(xCorr + 2 + 8, i1 + y + 14, j1, anInt211);
     }
 
     protected void method152(int i, int j, int k, int l, String as[]) {
@@ -614,36 +627,39 @@ public class Menu {
         return menuObjectCount++;
     }
 
-    public int method159(int i, int j, int k, int l, int i1, int j1, boolean flag) {
+    public int createChatHist(int x, int y, int width, int height,
+    		int textType, int maxTxtLen, boolean colorMask)
+    {
         menuObjectType[menuObjectCount] = 4;
         menuObjectCanAcceptActions[menuObjectCount] = true;
         menuObjectHasAction[menuObjectCount] = false;
-        menuObjectX[menuObjectCount] = i;
-        menuObjectY[menuObjectCount] = j;
-        menuObjectWidth[menuObjectCount] = k;
-        menuObjectHeight[menuObjectCount] = l;
-        menuObjectColourMask[menuObjectCount] = flag;
-        menuObjectTextType[menuObjectCount] = i1;
-        handleMaxTextLength[menuObjectCount] = j1;
+        menuObjectX[menuObjectCount] = x;
+        menuObjectY[menuObjectCount] = y;
+        menuObjectWidth[menuObjectCount] = width;
+        menuObjectHeight[menuObjectCount] = height;
+        menuObjectColourMask[menuObjectCount] = colorMask;
+        menuObjectTextType[menuObjectCount] = textType;
+        handleMaxTextLength[menuObjectCount] = maxTxtLen;
         menuListTextCount[menuObjectCount] = 0;
         anIntArray187[menuObjectCount] = 0;
-        menuListText[menuObjectCount] = new String[j1];
+        menuListText[menuObjectCount] = new String[maxTxtLen];
         return menuObjectCount++;
     }
 
-    public int method160(int i, int j, int k, int l, int i1, int j1, boolean flag,
-                         boolean flag1) {
+    public int createPlayerChatEntry(int x, int y, int width, int height,
+    		int textType, int maxTextLength, boolean flag, boolean colorMask)
+    {
         menuObjectType[menuObjectCount] = 5;
         menuObjectCanAcceptActions[menuObjectCount] = true;
         aBooleanArray185[menuObjectCount] = flag;
         menuObjectHasAction[menuObjectCount] = false;
-        menuObjectTextType[menuObjectCount] = i1;
-        menuObjectColourMask[menuObjectCount] = flag1;
-        menuObjectX[menuObjectCount] = i;
-        menuObjectY[menuObjectCount] = j;
-        menuObjectWidth[menuObjectCount] = k;
-        menuObjectHeight[menuObjectCount] = l;
-        handleMaxTextLength[menuObjectCount] = j1;
+        menuObjectTextType[menuObjectCount] = textType;
+        menuObjectColourMask[menuObjectCount] = colorMask;
+        menuObjectX[menuObjectCount] = x;
+        menuObjectY[menuObjectCount] = y;
+        menuObjectWidth[menuObjectCount] = width;
+        menuObjectHeight[menuObjectCount] = height;
+        handleMaxTextLength[menuObjectCount] = maxTextLength;
         menuObjectText[menuObjectCount] = "";
         return menuObjectCount++;
     }

@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
@@ -72,7 +73,6 @@ public class mudclient extends GameWindowMiddleMan {
 	public int[] menuActionCmd3;
 	public String loginMessage1;
 	public String loginMessage2;
-	public JPanel jPanel;
 	public static mudclient mc;
     /* EOF */
 
@@ -80,10 +80,9 @@ public class mudclient extends GameWindowMiddleMan {
         Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
         mc = new mudclient();
-        mc.jPanel = new JPanel();
         mc.appletMode = false;
         mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
-        mc.createWindow(mc, mc.windowWidth + 30, mc.windowHeight + 11+ 39, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
+        mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
     
     /**
@@ -420,14 +419,17 @@ public class mudclient extends GameWindowMiddleMan {
         return amount;
     }
 
-    private final void updateLoginScreen() {
+    private final void updateLoginScreen()
+    {
         if (super.socketTimeout > 0)
             super.socketTimeout--;
-        if (loginScreenNumber == 0) {
+        if (loginScreenNumber == 0)
+        { // welcome menu
             menuWelcome.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
             if (menuWelcome.hasActivated(loginButtonNewUser))
                 loginScreenNumber = 1;
-            if (menuWelcome.hasActivated(loginButtonExistingUser)) {
+            if (menuWelcome.hasActivated(loginButtonExistingUser))
+            {
                 loginScreenNumber = 2;
                 menuLogin.updateText(loginStatusText, "Please enter your username and password");
                 menuLogin.updateText(loginUsernameTextBox, currentUser);
@@ -435,13 +437,15 @@ public class mudclient extends GameWindowMiddleMan {
                 menuLogin.setFocus(loginUsernameTextBox);
                 return;
             }
-        } else if (loginScreenNumber == 1) {
+        } else if (loginScreenNumber == 1)
+        {
             menuNewUser.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
             if (menuNewUser.hasActivated(newUserOkButton)) {
                 loginScreenNumber = 0;
                 return;
             }
-        } else if (loginScreenNumber == 2) {
+        } else if (loginScreenNumber == 2)
+        {
             menuLogin.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
             if (menuLogin.hasActivated(loginCancelButton))
             	 loginScreenNumber = 0;  
@@ -467,8 +471,11 @@ public class mudclient extends GameWindowMiddleMan {
         		|| loginScreenNumber == 2 
         		|| loginScreenNumber == 3)
         {
-            //gameGraphics.drawPicture(0, 0, SPRITE_LOGO_START);
-            gameGraphics.drawPicture((windowWidth - sprite.getWidth())/2, 50, 2010);
+        	gameGraphics.imageToPixArray(gameGraphics.loginScreen, 0, 0,
+    				windowWidth, windowHeight, true);
+        	gameGraphics.drawPicture(windowWidth - sprite.getWidth() - sprite.getXShift(),
+        			windowHeight - sprite.getHeight() - sprite.getYShift(), 2010);
+        	
         }
         if (loginScreenNumber == 0)
             menuWelcome.drawMenu();
@@ -2866,22 +2873,22 @@ public class mudclient extends GameWindowMiddleMan {
                 wildernessType = 1;
         }
         if (messagesTab == 0) {
-            for (int k6 = 0; k6 < messagesRows; k6++)
+            for (int k6 = 0; k6 < chatBoxVisRows; k6++)
                 if (messagesTimeout[k6] > 0) {
                     String s = messagesArray[k6];
-                    gameGraphics.drawString(s, 7, windowHeight - 18 - k6 * 12, 1, 0xffff00);
+                    gameGraphics.drawString(s, 7, chatBoxY + chatBoxHeight-9 - k6 * 12, 1, 0xffff00);
                 }
 
         }
-        gameMenu.method171(messagesHandleType2);
-        gameMenu.method171(messagesHandleType5);
-        gameMenu.method171(messagesHandleType6);
+        gameMenu.method171(messagesHandleChatHist);
+        gameMenu.method171(messagesHandleQuestHist);
+        gameMenu.method171(messagesHandlePrivHist);
         if (messagesTab == 1)
-            gameMenu.method170(messagesHandleType2);
+            gameMenu.method170(messagesHandleChatHist);
         else if (messagesTab == 2)
-            gameMenu.method170(messagesHandleType5);
+            gameMenu.method170(messagesHandleQuestHist);
         else if (messagesTab == 3)
-            gameMenu.method170(messagesHandleType6);
+            gameMenu.method170(messagesHandlePrivHist);
         Menu.anInt225 = 2;
         gameMenu.drawMenu();
         Menu.anInt225 = 0;
@@ -4052,10 +4059,10 @@ public class mudclient extends GameWindowMiddleMan {
         switch (keyCode)
         {
             case 38: // Up Arrow
-                gameMenu.updateText(chatHandle, lastMessage);
+                gameMenu.updateText(chatHandlePlayerEntry, lastMessage);
                 break;
             case 40: // Down Arrow
-                gameMenu.updateText(chatHandle, "");
+                gameMenu.updateText(chatHandlePlayerEntry, "");
                 break;
             case 122: // F11
                 recording = !recording;
@@ -4214,13 +4221,18 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final void drawGameMenu() {
+    private final void drawGameMenu()
+    {
         gameMenu = new Menu(gameGraphics, 10);
-        messagesHandleType2 = gameMenu.method159(5, 269, 502, 56, 1, 20, true);
-        chatHandle = gameMenu.method160(7, 324, 498, 14, 1, 80, false, true);
-        messagesHandleType5 = gameMenu.method159(5, 269, 502, 56, 1, 20, true);
-        messagesHandleType6 = gameMenu.method159(5, 269, 502, 56, 1, 20, true);
-        gameMenu.setFocus(chatHandle);
+        messagesHandleChatHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+        		chatBoxWidth, chatBoxHeight, 1, 20, true);
+        chatHandlePlayerEntry = gameMenu.createPlayerChatEntry(chatPlayerEntryX, chatPlayerEntryY,
+        		chatPlayerEntryWidth, chatPlayerEntryHeight, 1, 80, false, true);
+        messagesHandleQuestHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+        		chatBoxWidth, chatBoxHeight, 1, 20, true);
+        messagesHandlePrivHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+        		chatBoxWidth, chatBoxHeight, 1, 20, true);
+        gameMenu.setFocus(chatHandlePlayerEntry);
     }
 
     protected final byte[] load(String filename) {
@@ -4625,19 +4637,19 @@ public class mudclient extends GameWindowMiddleMan {
             		&& super.mouseX < windowHalfWidth - 62
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 1;
-                gameMenu.anIntArray187[messagesHandleType2] = 0xf423f;
+                gameMenu.anIntArray187[messagesHandleChatHist] = 0xf423f;
             }
             if (super.mouseX > windowHalfWidth - 41
             		&& super.mouseX < windowHalfWidth + 39
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 2;
-                gameMenu.anIntArray187[messagesHandleType5] = 0xf423f;
+                gameMenu.anIntArray187[messagesHandleQuestHist] = 0xf423f;
             }
             if (super.mouseX > windowHalfWidth + 59
             		&& super.mouseX < windowHalfWidth + 139
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 3;
-                gameMenu.anIntArray187[messagesHandleType6] = 0xf423f;
+                gameMenu.anIntArray187[messagesHandlePrivHist] = 0xf423f;
             }
             if (super.mouseX > windowHalfWidth + 161
             		&& super.mouseX < windowHalfWidth + 241
@@ -4653,16 +4665,17 @@ public class mudclient extends GameWindowMiddleMan {
         }
         gameMenu.updateActions(super.mouseX, super.mouseY,
         		super.lastMouseDownButton, super.mouseDownButton);
-        if (messagesTab > 0 && super.mouseX >= 494
-        		&& super.mouseY >= windowHeight - 66-44-30)
+        if (messagesTab > 0
+        		&& super.mouseX >= chatBoxX + this.chatBoxWidth - SCROLL_BAR_WIDTH-2
+        		&& super.mouseX <= chatBoxX + this.chatBoxWidth
+        		&& super.mouseY >= chatBoxY
+        		&& super.mouseY <= chatBoxY + chatBoxHeight)
         {
-        	/* TODO: fix the clicking at scroll bar in chat and maybe create a panel
-        	 * arround the chat to make it look more like a traditional chat box */
             super.lastMouseDownButton = 0;
         }
-        if (gameMenu.hasActivated(chatHandle)) {
-            String s = lastMessage = gameMenu.getText(chatHandle);
-            gameMenu.updateText(chatHandle, "");
+        if (gameMenu.hasActivated(chatHandlePlayerEntry)) {
+            String s = lastMessage = gameMenu.getText(chatHandlePlayerEntry);
+            gameMenu.updateText(chatHandlePlayerEntry, "");
             if (s.startsWith("::")) {
                 s = s.substring(2);
                 if (!handleCommand(s)) {
@@ -4677,8 +4690,9 @@ public class mudclient extends GameWindowMiddleMan {
                 displayMessage(ourPlayer.name + ": " + s, 2, ourPlayer.admin);
             }
         }
-        if (messagesTab == 0) {
-            for (int l1 = 0; l1 < 5; l1++)
+        if (messagesTab == 0)
+        {
+            for (int l1 = 0; l1 < chatBoxVisRows; l1++)
                 if (messagesTimeout[l1] > 0)
                     messagesTimeout[l1]--;
 
@@ -5038,7 +5052,8 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    private final void displayMessage(String message, int type, int status) {
+    private final void displayMessage(String message, int type, int status)
+    {
         if (type == 2 || type == 4 || type == 6) {
             for (; message.length() > 5 && message.charAt(0) == '@' && message.charAt(4) == '@'; message = message.substring(5))
                 ;
@@ -5072,7 +5087,8 @@ public class mudclient extends GameWindowMiddleMan {
             if (type == 6 && messagesTab != 3 && messagesTab != 0)
                 messagesTab = 0;
         }
-        for (int k = messagesRows-1; k > 0; k--) {
+        for (int k = chatBoxVisRows-1; k > 0; k--)
+        {
             messagesArray[k] = messagesArray[k - 1];
             messagesTimeout[k] = messagesTimeout[k - 1];
         }
@@ -5081,23 +5097,23 @@ public class mudclient extends GameWindowMiddleMan {
         messagesTimeout[0] = 300;
         if (type == 2)
         {
-        	System.out.println("asdsd: "+messagesHandleType2);
-            if (gameMenu.anIntArray187[messagesHandleType2] == gameMenu.menuListTextCount[messagesHandleType2] - messagesRows + 1)
-                gameMenu.addString(messagesHandleType2, message, true);
+        	System.out.println("asdsd: "+messagesHandleChatHist);
+            if (gameMenu.anIntArray187[messagesHandleChatHist] == gameMenu.menuListTextCount[messagesHandleChatHist] - chatBoxVisRows + 1)
+                gameMenu.addString(messagesHandleChatHist, message, true);
             else
-                gameMenu.addString(messagesHandleType2, message, false);
+                gameMenu.addString(messagesHandleChatHist, message, false);
         }
         if (type == 5)
-            if (gameMenu.anIntArray187[messagesHandleType5] == gameMenu.menuListTextCount[messagesHandleType5] - messagesRows + 1)
-                gameMenu.addString(messagesHandleType5, message, true);
+            if (gameMenu.anIntArray187[messagesHandleQuestHist] == gameMenu.menuListTextCount[messagesHandleQuestHist] - chatBoxVisRows + 1)
+                gameMenu.addString(messagesHandleQuestHist, message, true);
             else
-                gameMenu.addString(messagesHandleType5, message, false);
+                gameMenu.addString(messagesHandleQuestHist, message, false);
         if (type == 6) {
-            if (gameMenu.anIntArray187[messagesHandleType6] == gameMenu.menuListTextCount[messagesHandleType6] - messagesRows + 1) {
-                gameMenu.addString(messagesHandleType6, message, true);
+            if (gameMenu.anIntArray187[messagesHandlePrivHist] == gameMenu.menuListTextCount[messagesHandlePrivHist] - chatBoxVisRows + 1) {
+                gameMenu.addString(messagesHandlePrivHist, message, true);
                 return;
             }
-            gameMenu.addString(messagesHandleType6, message, false);
+            gameMenu.addString(messagesHandlePrivHist, message, false);
         }
     }
 
@@ -6671,53 +6687,109 @@ public class mudclient extends GameWindowMiddleMan {
 
     private final void drawTradeConfirmWindow()
     {
-        int byte0 = 22;
-        int byte1 = 36;
-        gameGraphics.drawBox(byte0, byte1, 468, 16, 192);
-        int i = 0x989898;
-        gameGraphics.drawBoxAlpha(byte0, byte1 + 16, 468, 246, i, 160);
-        gameGraphics.drawText("Please confirm your trade with @yel@" + DataOperations.longToString(tradeConfirmOtherNameLong), byte0 + 234, byte1 + 12, 1, 0xffffff);
-        gameGraphics.drawText("You are about to give:", byte0 + 117, byte1 + 30, 1, 0xffff00);
-        for (int j = 0; j < tradeConfirmItemCount; j++) {
-            String s = EntityHandler.getItemDef(tradeConfirmItems[j]).getName();
-            if (EntityHandler.getItemDef(tradeConfirmItems[j]).isStackable())
-                s = s + " x " + method74(tradeConfirmItemsCount[j]);
-            gameGraphics.drawText(s, byte0 + 117, byte1 + 42 + j * 12, 1, 0xffffff);
+    	int nInventoryCols = 5;
+    	int nTradeCols = 4;
+    	int nTradeRows = 3;
+        int leftMarginWidth = 8;
+        int middleMarginWidth = 11;
+        int rightMarginWidth = 6;
+        int titleBarHeight = 12;
+        int plrTextBoxHeight = 18;
+        int opntTextBoxHeight = 22;
+        int btmLeftMargiBoxHeight = 20;
+        int tradeCfrmBgHeight = plrTextBoxHeight + 2*(nTradeRows*itemSlotHeight+1)
+        		+ opntTextBoxHeight + btmLeftMargiBoxHeight;
+        int tradeWindowWidth = leftMarginWidth + (nTradeCols*itemSlotWidth+1)
+        		+ middleMarginWidth + (nInventoryCols*itemSlotWidth+1) + rightMarginWidth;
+        int tradeWindowHeight = titleBarHeight + tradeCfrmBgHeight;
+    	int tradeWindowHalfWidth = tradeWindowWidth/2;
+    	int tradeWidnowHalfHeight = tradeWindowHeight/2;
+        int tradeWindowX = (windowHalfWidth - tradeWindowHalfWidth);
+        int tradeWindowY = (windowHalfHeight - tradeWidnowHalfHeight);
+        int tradeBgClr = 0x989898;
+        int tradeWindowAlpha = 0xa0;
+        int[] titleBar = {tradeWindowX, tradeWindowY, tradeWindowWidth,
+        		titleBarHeight, 0x0000c0, 0x00};
+        int[] tradeBgBox = {titleBar[0], titleBar[1]+titleBar[3], titleBar[2],
+        		tradeCfrmBgHeight, tradeBgClr, tradeWindowAlpha};
+        Sprite dclnBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26];
+        Sprite accptBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25];
+        int[] accptBtn = {tradeBgBox[0]+tradeBgBox[2]/4-accptBtnSprite.getWidth()/2,
+        		tradeBgBox[1]+tradeBgBox[3]-24, accptBtnSprite.getWidth(),
+        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 25};
+        int[] dclnBtn = {tradeBgBox[0]+3*tradeBgBox[2]/4-dclnBtnSprite.getWidth()/2,
+        		tradeBgBox[1]+tradeBgBox[3]-24, dclnBtnSprite.getWidth(),
+        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 26};
+        gameGraphics.drawBox(titleBar[0], titleBar[1], titleBar[2], titleBar[3], titleBar[4]);
+        gameGraphics.drawBoxAlpha(tradeBgBox[0], tradeBgBox[1], tradeBgBox[2],
+        		tradeBgBox[3], tradeBgBox[4], tradeBgBox[5]);
+        gameGraphics.drawText("Please confirm your trade with @yel@" + DataOperations.longToString(tradeConfirmOtherNameLong),
+        		titleBar[0]+titleBar[2]/2, titleBar[1]+titleBar[3] - 3, 1, 0xffffff);
+        int itemsTitleHeight = tradeBgBox[1] + plrTextBoxHeight;
+        gameGraphics.drawText("You are about to give:", tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight, 1, 0xffff00);
+        for (int line = 0; line < tradeConfirmItemCount; line++) {
+            String s = EntityHandler.getItemDef(tradeConfirmItems[line]).getName();
+            if (EntityHandler.getItemDef(tradeConfirmItems[line]).isStackable())
+                s = s + " x " + method74(tradeConfirmItemsCount[line]);
+            gameGraphics.drawText(s, tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
         }
 
         if (tradeConfirmItemCount == 0)
-            gameGraphics.drawText("Nothing!", byte0 + 117, byte1 + 42, 1, 0xffffff);
-        gameGraphics.drawText("In return you will receive:", byte0 + 351, byte1 + 30, 1, 0xffff00);
-        for (int k = 0; k < tradeConfirmOtherItemCount; k++) {
-            String s1 = EntityHandler.getItemDef(tradeConfirmOtherItems[k]).getName();
-            if (EntityHandler.getItemDef(tradeConfirmOtherItems[k]).isStackable())
-                s1 = s1 + " x " + method74(tradeConfirmOtherItemsCount[k]);
-            gameGraphics.drawText(s1, byte0 + 351, byte1 + 42 + k * 12, 1, 0xffffff);
+            gameGraphics.drawText("Nothing!", tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight + 12, 1, 0xffffff);
+        gameGraphics.drawText("In return you will receive:", tradeBgBox[0]+3*tradeBgBox[2]/4, itemsTitleHeight, 1, 0xffff00);
+        for (int line = 0; line < tradeConfirmOtherItemCount; line++) {
+            String s1 = EntityHandler.getItemDef(tradeConfirmOtherItems[line]).getName();
+            if (EntityHandler.getItemDef(tradeConfirmOtherItems[line]).isStackable())
+                s1 = s1 + " x " + method74(tradeConfirmOtherItemsCount[line]);
+            gameGraphics.drawText(s1, tradeBgBox[0]+3*tradeBgBox[2]/4, itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
         }
 
         if (tradeConfirmOtherItemCount == 0)
-            gameGraphics.drawText("Nothing!", byte0 + 351, byte1 + 42, 1, 0xffffff);
-        gameGraphics.drawText("Are you sure you want to do this?", byte0 + 234, byte1 + 200, 4, 65535);
-        gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.", byte0 + 234, byte1 + 215, 1, 0xffffff);
-        gameGraphics.drawText("Remember that not all players are trustworthy", byte0 + 234, byte1 + 230, 1, 0xffffff);
-        if (!tradeConfirmAccepted) {
-            gameGraphics.drawPicture((byte0 + 118) - 35, byte1 + 238, SPRITE_MEDIA_START + 25);
-            gameGraphics.drawPicture((byte0 + 352) - 35, byte1 + 238, SPRITE_MEDIA_START + 26);
-        } else {
-            gameGraphics.drawText("Waiting for other player...", byte0 + 234, byte1 + 250, 1, 0xffff00);
+            gameGraphics.drawText("Nothing!", tradeBgBox[0]+3*tradeBgBox[2]/4,
+            		itemsTitleHeight + 12, 1, 0xffffff);
+        gameGraphics.drawText("Are you sure you want to do this?",
+        		tradeBgBox[0]+tradeBgBox[2]/2,
+        		tradeBgBox[1]+tradeBgBox[3]-62, 4, 65535);
+        gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.",
+        		tradeBgBox[0]+tradeBgBox[2]/2,
+        		tradeBgBox[1]+tradeBgBox[3]-47, 1, 0xffffff);
+        gameGraphics.drawText("Remember that not all players are trustworthy",
+        		tradeBgBox[0]+tradeBgBox[2]/2,
+        		tradeBgBox[1]+tradeBgBox[3]-32, 1, 0xffffff);
+        if (!tradeConfirmAccepted)
+        {
+            gameGraphics.drawPicture(accptBtn[0], accptBtn[1], accptBtn[4]);
+            gameGraphics.drawPicture(dclnBtn[0], dclnBtn[1], dclnBtn[4]);
         }
-        if (mouseButtonClick == 1) {
-            if (super.mouseX < byte0 || super.mouseY < byte1 || super.mouseX > byte0 + 468 || super.mouseY > byte1 + 262) {
+        else
+        {
+            gameGraphics.drawText("Waiting for other player...", tradeBgBox[0]+tradeBgBox[2]/2, tradeBgBox[1]+tradeBgBox[3]-12, 1, 0xffff00);
+        }
+        if (mouseButtonClick == 1)
+        {
+            if (super.mouseX < tradeBgBox[0]
+            		|| super.mouseY < tradeBgBox[1]
+            		|| super.mouseX > tradeBgBox[0] + tradeBgBox[2]
+            		|| super.mouseY > tradeBgBox[2] + tradeBgBox[3])
+            {
                 showTradeConfirmWindow = false;
                 super.streamClass.createPacket(216);
                 super.streamClass.formatPacket();
             }
-            if (super.mouseX >= (byte0 + 118) - 35 && super.mouseX <= byte0 + 118 + 70 && super.mouseY >= byte1 + 238 && super.mouseY <= byte1 + 238 + 21) {
+            if (super.mouseX >= accptBtn[0]
+            		&& super.mouseX <= accptBtn[0]+accptBtn[2]
+            		&& super.mouseY >= accptBtn[1]
+            		&& super.mouseY <= accptBtn[1]+accptBtn[3])
+            {
                 tradeConfirmAccepted = true;
                 super.streamClass.createPacket(53);
                 super.streamClass.formatPacket();
             }
-            if (super.mouseX >= (byte0 + 352) - 35 && super.mouseX <= byte0 + 353 + 70 && super.mouseY >= byte1 + 238 && super.mouseY <= byte1 + 238 + 21) {
+            if (super.mouseX >= dclnBtn[0]
+            		&& super.mouseX <= dclnBtn[0]+dclnBtn[2]
+            		&& super.mouseY >= dclnBtn[1]
+            		&& super.mouseY <= dclnBtn[1]+dclnBtn[3])
+            {
                 showTradeConfirmWindow = false;
                 super.streamClass.createPacket(216);
                 super.streamClass.formatPacket();
@@ -7074,42 +7146,55 @@ public class mudclient extends GameWindowMiddleMan {
     {
         int screenHalfWidth = windowWidth/2;
         int screenHalfHeight = windowHeight/2;
+        
         menuWelcome = new Menu(gameGraphics, 50);
-        int i = 40;
-        menuWelcome.drawText(screenHalfWidth, 200 + i, "Welcome to TestServer", 4, true);
-        menuWelcome.drawText(screenHalfWidth, 215 + i, "TestServer is still in beta", 4, true);
-        menuWelcome.drawBox(screenHalfWidth, 250 + i, 200, 35);
-        menuWelcome.drawText(screenHalfWidth, 250 + i, "Click here to login", 5, false);
-        loginButtonExistingUser = menuWelcome.makeButton(screenHalfWidth, 250 + i, 200, 35);
+        int entryY = screenHalfHeight-50;
+        menuWelcome.drawText(screenHalfWidth, entryY,
+        		"Welcome to TestServer", 4, false);
+        entryY += 15;
+        menuWelcome.drawText(screenHalfWidth, entryY,
+        		"TestServer is still in beta", 4, false);
+        entryY += 35;
+        menuWelcome.drawBox(screenHalfWidth, entryY, 200, 35);
+        menuWelcome.drawText(screenHalfWidth, entryY,
+        		"Click here to login", 5, false);
+        loginButtonExistingUser = menuWelcome.makeButton(screenHalfWidth,
+        		entryY, 200, 35);
+        
         menuNewUser = new Menu(gameGraphics, 50);
-        i = 230;
-        menuNewUser.drawText(screenHalfWidth, i + 8, "To create an account please go back to the", 4, true);
-        i += 20;
-        menuNewUser.drawText(screenHalfWidth, i + 8, "localhost front page, and choose 'register'", 4, true);
-        i += 30;
-        menuNewUser.drawBox(screenHalfWidth, i + 17, 150, 34);
-        menuNewUser.drawText(screenHalfWidth, i + 17, "Ok", 5, false);
-        newUserOkButton = menuNewUser.makeButton(screenHalfWidth, i + 17, 150, 34);
+        entryY = screenHalfHeight-50;
+        menuNewUser.drawText(screenHalfWidth, entryY,
+        		"To create an account please go back to the", 4, false);
+        entryY += 20;
+        menuNewUser.drawText(screenHalfWidth, entryY,
+        		"localhost front page, and choose 'register'", 4, false);
+        entryY += 47;
+        menuNewUser.drawBox(screenHalfWidth, entryY, 150, 34);
+        menuNewUser.drawText(screenHalfWidth, entryY, "Ok", 5, false);
+        newUserOkButton = menuNewUser.makeButton(screenHalfWidth,
+        		entryY, 150, 34);
+        
         menuLogin = new Menu(gameGraphics, 50);
-        i = 230;
-        loginStatusText = menuLogin.drawText(screenHalfWidth, i - 10, "Please enter your username and password", 4, true);
-        i += 28;
-        menuLogin.drawBox(screenHalfWidth - 116, i, 200, 40);
-        menuLogin.drawText(screenHalfWidth - 116, i - 10, "Username:", 4, false);
-        loginUsernameTextBox = menuLogin.makeTextBox(screenHalfWidth - 116, i + 10, 200, 40, 4, 12, false, false);
-        i += 47;
-        menuLogin.drawBox(screenHalfWidth - 66, i, 200, 40);
-        menuLogin.drawText(screenHalfWidth - 66, i - 10, "Password:", 4, false);
-        loginPasswordTextBox = menuLogin.makeTextBox(screenHalfWidth - 66, i + 10, 200, 40, 4, 20, true, false);
-        i -= 55;
-        menuLogin.drawBox(screenHalfWidth + 154, i, 120, 25);
-        menuLogin.drawText(screenHalfWidth + 154, i, "Ok", 4, false);
-        loginOkButton = menuLogin.makeButton(screenHalfWidth + 154, i, 120, 25);
-        i += 30;
-        menuLogin.drawBox(screenHalfWidth + 154, i, 120, 25);
-        menuLogin.drawText(screenHalfWidth + 154, i, "Cancel", 4, false);
-        loginCancelButton = menuLogin.makeButton(screenHalfWidth + 154, i, 120, 25);
-        i += 30;
+        entryY = screenHalfHeight-50;
+        loginStatusText = menuLogin.drawText(screenHalfWidth, entryY, "Please enter your username and password", 4, true);
+        entryY += 45;
+        menuLogin.drawBox(screenHalfWidth, entryY, 200, 20);
+        menuLogin.drawText(screenHalfWidth-50, entryY - 18, "Username:", 4, false);
+        loginUsernameTextBox = menuLogin.makeTextBox(screenHalfWidth-98, entryY-13,
+        		198, 18, 5, 12, false, false);
+        entryY += 47;
+        menuLogin.drawBox(screenHalfWidth, entryY, 200, 21);
+        menuLogin.drawText(screenHalfWidth-50, entryY - 18, "Password:", 4, false);
+        loginPasswordTextBox = menuLogin.makeTextBox(screenHalfWidth-98, entryY-13,
+        		198, 18, 5, 20, true, false);
+        entryY += 30;
+        menuLogin.drawBox(screenHalfWidth - 52, entryY, 96, 25);
+        menuLogin.drawText(screenHalfWidth - 52, entryY, "Ok", 4, false);
+        loginOkButton = menuLogin.makeButton(screenHalfWidth - 52, entryY, 96, 25);
+        menuLogin.drawBox(screenHalfWidth + 52, entryY, 96, 25);
+        menuLogin.drawText(screenHalfWidth + 52, entryY, "Cancel", 4, false);
+        loginCancelButton = menuLogin.makeButton(screenHalfWidth + 52,
+        		entryY, 96, 25);
         menuLogin.setFocus(loginUsernameTextBox);
     }
 
@@ -7437,12 +7522,14 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    public mudclient() {
+    public mudclient()
+    {
         combatWindow = false;
         threadSleepTime = 10;
         try {
             localhost = InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e) {
+        } catch (UnknownHostException uhe)
+        {
             localhost = "unknown";
         }
         startTime = System.currentTimeMillis();
@@ -7593,9 +7680,6 @@ public class mudclient extends GameWindowMiddleMan {
         groundItemObjectVar = new int[8000];
         selectedShopItemIndex = -1;
         selectedShopItemType = -2;
-        messagesRows = 10;
-        messagesArray = new String[messagesRows];
-        messagesTimeout = new int[messagesRows];
         showTradeWindow = false;
         aBooleanArray970 = new boolean[500];
         tradeMyItems = new int[14];
@@ -7605,8 +7689,8 @@ public class mudclient extends GameWindowMiddleMan {
         windowHeight = 334;
         */
         /* rs2 values */
-        windowWidth = 1300;
-        windowHeight = 700;
+        windowWidth = 1200;
+        windowHeight = 650;
         windowHalfWidth = windowWidth/2;
         windowHalfHeight = windowHeight/2;
         /*
@@ -7615,6 +7699,17 @@ public class mudclient extends GameWindowMiddleMan {
         */
         cameraSizeInt = 9; //9
         tradeOtherPlayerName = "";
+        chatBoxVisRows = 7;
+        messagesArray = new String[chatBoxVisRows];
+        messagesTimeout = new int[chatBoxVisRows];
+        chatPlayerEntryHeight = 14;
+        chatBoxHeight = chatPlayerEntryHeight*chatBoxVisRows;
+        chatBoxWidth = 502;
+        chatBoxX = 5;
+        chatBoxY = windowHeight - chatBoxHeight - chatPlayerEntryHeight-10;
+        chatPlayerEntryX = chatBoxX + 2;
+        chatPlayerEntryY = chatBoxY + chatBoxHeight;
+        chatPlayerEntryWidth = chatBoxWidth - (chatPlayerEntryX - chatBoxX);
     }
 
     private boolean combatWindow;
@@ -7756,10 +7851,10 @@ public class mudclient extends GameWindowMiddleMan {
     private int cameraRotation;
     private int logoutTimeout;
     private Menu gameMenu;
-    int messagesHandleType2;
-    int chatHandle;
-    int messagesHandleType5;
-    int messagesHandleType6;
+    int messagesHandleChatHist;
+    int chatHandlePlayerEntry;
+    int messagesHandleQuestHist;
+    int messagesHandlePrivHist;
     int messagesTab;
     private boolean showWelcomeBox;
     private int characterHeadType;
@@ -7800,7 +7895,6 @@ public class mudclient extends GameWindowMiddleMan {
             {11, 4, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3},
             {11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4, 3}
     };
-    private Windows gameWindows;
     private int bankItemCount;
     private int characterDesignHeadButton1;
     private int characterDesignHeadButton2;
@@ -7937,4 +8031,8 @@ public class mudclient extends GameWindowMiddleMan {
     protected String tradeOtherPlayerName;
     private int anInt985;
     private int anInt986;
+    public int chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, chatBoxVisRows,
+    chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight;
+    public static int SCROLL_BAR_WIDTH = 11;
+    public static int SCROLL_BAR_HEIGHT = 12;
 }
