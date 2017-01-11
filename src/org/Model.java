@@ -1054,7 +1054,6 @@ public class Model {
             anIntArray266[j] = (int) (Math.sin((double) j * 0.00613592315D) * 32768D);
             anIntArray266[j + 1024] = (int) (Math.cos((double) j * 0.00613592315D) * 32768D);
         }
-
         for (int k = 0; k < 10; k++)
             aByteArray267[k] = (byte) (48 + k);
 

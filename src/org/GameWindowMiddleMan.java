@@ -99,7 +99,7 @@ public abstract class GameWindowMiddleMan extends GameWindow {
             // 0 = Valid
             // 1 = Reconnecting
             if (loginResponse == 2) {
-                loginScreenPrint("Invalid username or password.", "Try again, or create a new account");
+                loginScreenPrint("Invalid username or password.", "");
                 return;
             }
             if (loginResponse == 3) {

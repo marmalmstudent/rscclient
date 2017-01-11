@@ -26,6 +26,9 @@ public class Menu {
         menuObjectType = new int[i];
         menuObjectWidth = new int[i];
         menuObjectHeight = new int[i];
+        menuObjectBoxColor = new int[i];
+        menuObjectBorderColor = new int[i];
+        menuObjectBoxAlpha = new int[i];
         handleMaxTextLength = new int[i];
         menuObjectTextType = new int[i];
         menuObjectText = new String[i];
@@ -155,7 +158,10 @@ public class Menu {
             		method146(menuObjectX[menuObject],
             				menuObjectY[menuObject],
             				menuObjectWidth[menuObject],
-            				menuObjectHeight[menuObject]);
+            				menuObjectHeight[menuObject],
+            		        menuObjectBoxColor[menuObject],
+            		        menuObjectBorderColor[menuObject],
+            		        menuObjectBoxAlpha[menuObject]);
             		break;
             	case 3:
             		method149(menuObjectX[menuObject],
@@ -253,7 +259,40 @@ public class Menu {
 
     protected void drawTextAddHeight(int menuObject, int x, int y, String text, int type) {
         int i1 = y + gameImage.messageFontHeight(type) / 3;
-        drawTextWithMask(menuObject, x, i1, text, type);
+        int maxLineLen = 25;
+        int row = 0;
+    	StringBuilder sb = new StringBuilder();
+    	String[] txt = text.split(" ");
+        if (text.length() > maxLineLen)
+        {
+        	for (int i = 0; i < txt.length; i++)
+        	{
+        		if (sb.length() + txt[i].length() > maxLineLen)
+        		{
+        			drawTextWithMask(menuObject,
+        					menuObjectX[menuObject]
+        							- gameImage.textWidth(sb.toString(), menuObjectTextType[menuObject]) / 2,
+        							i1+row*gameImage.messageFontHeight(type),
+        							sb.toString(), type);
+        			sb.delete(0, sb.length());
+        			row++;
+        		}
+        		sb.append(txt[i]+" ");
+        	}
+    		drawTextWithMask(menuObject,
+    				menuObjectX[menuObject]
+							- gameImage.textWidth(sb.toString(), menuObjectTextType[menuObject]) / 2,
+							i1+row*gameImage.messageFontHeight(type),
+							sb.toString(), type);
+        }
+        else
+        {
+		drawTextWithMask(menuObject,
+				menuObjectX[menuObject]
+						- gameImage.textWidth(text, menuObjectTextType[menuObject]) / 2,
+						i1+row*gameImage.messageFontHeight(type),
+				text, type);
+        }
     }
 
     protected void drawTextWithMask(int menuObject, int x, int y, String text, int type) {
@@ -278,8 +317,10 @@ public class Menu {
      */
     protected void method145(int menuObject, int objectX, int objectY, int objectWidth, int objectHeight, String text, int type)
     {
+    	/*
     	gameImage.drawBoxAlpha(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x232323, 0xc0);
     	gameImage.drawBoxEdge(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x000000);
+    	*/
         if (aBooleanArray185[menuObject]) {
             int k1 = text.length();
             text = "";
@@ -305,27 +346,39 @@ public class Menu {
         drawTextWithMask(menuObject, objectX, yCorrect, text, type);
     }
 
-    public void method146(int i, int j, int k, int l) {
-        gameImage.setDimensions(i, j, i + k, j + l);
-        gameImage.method214(i, j, k, l, COLOUR_BOX_BORDER2, COLOUR_BOX_GRADIENT_TOP);
-        if (aBoolean220) {
-            for (int i1 = i - (j & 0x3f); i1 < i + k; i1 += 128) {
-                for (int j1 = j - (j & 0x1f); j1 < j + l; j1 += 128)
-                    gameImage.method232(i1, j1, 6 + mudclient.SPRITE_UTIL_START, 128);
-            }
-        }
-        gameImage.drawLineX(i, j, k, COLOUR_BOX_GRADIENT_TOP);
-        gameImage.drawLineX(i + 1, j + 1, k - 2, COLOUR_BOX_GRADIENT_TOP);
-        gameImage.drawLineX(i + 2, j + 2, k - 4, COLOUR_BOX_GRADIENT_BOTTOM);
-        gameImage.drawLineY(i, j, l, COLOUR_BOX_GRADIENT_TOP);
-        gameImage.drawLineY(i + 1, j + 1, l - 2, COLOUR_BOX_GRADIENT_TOP);
-        gameImage.drawLineY(i + 2, j + 2, l - 4, COLOUR_BOX_GRADIENT_BOTTOM);
-        gameImage.drawLineX(i, (j + l) - 1, k, COLOUR_BOX_BORDER2);
-        gameImage.drawLineX(i + 1, (j + l) - 2, k - 2, COLOUR_BOX_BORDER2);
-        gameImage.drawLineX(i + 2, (j + l) - 3, k - 4, COLOUR_BOX_BORDER1);
-        gameImage.drawLineY((i + k) - 1, j, l, COLOUR_BOX_BORDER2);
-        gameImage.drawLineY((i + k) - 2, j + 1, l - 2, COLOUR_BOX_BORDER2);
-        gameImage.drawLineY((i + k) - 3, j + 2, l - 4, COLOUR_BOX_BORDER1);
+    
+    public void method146(int x, int y, int width, int height,
+    		int boxColor, int borderColor, int alpha)
+    {
+		gameImage.setDimensions(x, y, x + width, y + height);
+    	if (boxColor == -1 && borderColor == -1 && alpha == -1)
+    	{
+    		gameImage.drawGradientBox(x, y, width, height, COLOUR_BOX_BORDER2, COLOUR_BOX_GRADIENT_TOP);
+    		if (aBoolean220) {
+    			for (int i1 = x - (y & 0x3f); i1 < x + width; i1 += 128)
+    			{
+    				for (int j1 = y - (y & 0x1f); j1 < y + height; j1 += 128)
+    					gameImage.method232(i1, j1, 6 + mudclient.SPRITE_UTIL_START, 128);
+    			}
+    		}
+    		gameImage.drawLineX(x, y, width, COLOUR_BOX_GRADIENT_TOP);
+    		gameImage.drawLineX(x + 1, y + 1, width - 2, COLOUR_BOX_GRADIENT_TOP);
+    		gameImage.drawLineX(x + 2, y + 2, width - 4, COLOUR_BOX_GRADIENT_BOTTOM);
+    		gameImage.drawLineY(x, y, height, COLOUR_BOX_GRADIENT_TOP);
+    		gameImage.drawLineY(x + 1, y + 1, height - 2, COLOUR_BOX_GRADIENT_TOP);
+    		gameImage.drawLineY(x + 2, y + 2, height - 4, COLOUR_BOX_GRADIENT_BOTTOM);
+    		gameImage.drawLineX(x, (y + height) - 1, width, COLOUR_BOX_BORDER2);
+    		gameImage.drawLineX(x + 1, (y + height) - 2, width - 2, COLOUR_BOX_BORDER2);
+    		gameImage.drawLineX(x + 2, (y + height) - 3, width - 4, COLOUR_BOX_BORDER1);
+    		gameImage.drawLineY((x + width) - 1, y, height, COLOUR_BOX_BORDER2);
+    		gameImage.drawLineY((x + width) - 2, y + 1, height - 2, COLOUR_BOX_BORDER2);
+    		gameImage.drawLineY((x + width) - 3, y + 2, height - 4, COLOUR_BOX_BORDER1);
+    	}
+    	else
+    	{
+    		gameImage.drawBoxAlpha(x, y, width, height, boxColor, alpha);
+    		gameImage.drawBoxEdge(x, y, width, height, borderColor);
+    	}
         gameImage.resetDimensions();
     }
 
@@ -435,7 +488,7 @@ public class Menu {
         		mudclient.SCROLL_BAR_WIDTH+2, 0);
         gameImage.drawLineX(xCorr, y + height - mudclient.SCROLL_BAR_HEIGHT-1,
         		mudclient.SCROLL_BAR_WIDTH+2, 0);
-        gameImage.method214(xCorr + 1, y + mudclient.SCROLL_BAR_HEIGHT+2,
+        gameImage.drawGradientBox(xCorr + 1, y + mudclient.SCROLL_BAR_HEIGHT+2,
         		mudclient.SCROLL_BAR_WIDTH, height - 2*mudclient.SCROLL_BAR_HEIGHT-3,
         		anInt207, anInt208); // scroll bar slider
         gameImage.drawBox(xCorr + 3, i1 + y + mudclient.SCROLL_BAR_HEIGHT+2,
@@ -591,14 +644,34 @@ public class Menu {
         return menuObjectCount++;
     }
 
-    public int drawBox(int i, int j, int k, int l) {
+    public int drawBox(int x, int y, int width, int height)
+    {
         menuObjectType[menuObjectCount] = 2;
         menuObjectCanAcceptActions[menuObjectCount] = true;
         menuObjectHasAction[menuObjectCount] = false;
-        menuObjectX[menuObjectCount] = i - k / 2;
-        menuObjectY[menuObjectCount] = j - l / 2;
-        menuObjectWidth[menuObjectCount] = k;
-        menuObjectHeight[menuObjectCount] = l;
+        menuObjectX[menuObjectCount] = x - width / 2;
+        menuObjectY[menuObjectCount] = y - height / 2;
+        menuObjectWidth[menuObjectCount] = width;
+        menuObjectHeight[menuObjectCount] = height;
+        menuObjectBoxColor[menuObjectCount] = -1;
+        menuObjectBorderColor[menuObjectCount] = -1;
+        menuObjectBoxAlpha[menuObjectCount] = -1;
+        return menuObjectCount++;
+    }
+
+    public int drawBox(int x, int y, int width, int height,
+    		int boxColor, int borderColor, int alpha)
+    {
+        menuObjectType[menuObjectCount] = 2;
+        menuObjectCanAcceptActions[menuObjectCount] = true;
+        menuObjectHasAction[menuObjectCount] = false;
+        menuObjectX[menuObjectCount] = x - width / 2;
+        menuObjectY[menuObjectCount] = y - height / 2;
+        menuObjectWidth[menuObjectCount] = width;
+        menuObjectHeight[menuObjectCount] = height;
+        menuObjectBoxColor[menuObjectCount] = boxColor;
+        menuObjectBorderColor[menuObjectCount] = borderColor;
+        menuObjectBoxAlpha[menuObjectCount] = alpha;
         return menuObjectCount++;
     }
 
@@ -789,6 +862,9 @@ public class Menu {
     int menuObjectType[];
     int menuObjectWidth[];
     int menuObjectHeight[];
+    int menuObjectBoxColor[];
+    int menuObjectBorderColor[];
+    int menuObjectBoxAlpha[];
     int handleMaxTextLength[];
     int menuObjectTextType[];
     String menuObjectText[];

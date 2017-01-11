@@ -97,7 +97,19 @@ public class GameWindow extends JApplet
 			gameFrame.dispose();
 		System.exit(0);
 	}
-    
+
+	private void loadFonts()
+	{
+		GameImage.loadFont("Nimbus Sans", 13, Font.PLAIN, false, 0, this); //h11p //??
+		GameImage.loadFont("Nimbus Sans", 12, Font.PLAIN/*Font.BOLD*/, false, 1, this); //h12b spells/stats/character creation/duel interface etc.
+		GameImage.loadFont("Nimbus Sans", 14, Font.PLAIN, false, 2, this); //h12p player names in chat?
+		GameImage.loadFont("Nimbus Sans", 15, Font.PLAIN/*Font.BOLD*/, false, 3, this); //h13b //chat/error text
+		GameImage.loadFont("Nimbus Sans", 16, Font.PLAIN/*Font.BOLD*/, false, 4, this); //used for login screen text
+		GameImage.loadFont("Nimbus Sans", 18, Font.PLAIN/*Font.BOLD*/, false, 5, this); //used for login screen button
+		GameImage.loadFont("Nimbus Sans", 20, Font.PLAIN, false, 6, this); //h20b //right-clicking menu?
+		GameImage.loadFont("Nimbus Sans", 24, Font.PLAIN/*Font.BOLD*/, false, 7, this); //h24b //used on display msg when you die
+	}
+	/*
 	private void loadFonts()
 	{
 		GameImage.loadFont("h11p", 0, this); //h11p //??
@@ -108,7 +120,7 @@ public class GameWindow extends JApplet
 		GameImage.loadFont("h16b", 5, this); //used for login screen button
 		GameImage.loadFont("h20", 6, this); //h20b //right-clicking menu?
 		GameImage.loadFont("h24b", 7, this); //h24b //used on display msg when you die
-	}
+	}*/
 
     public Component getFrameComponent()
     {
@@ -758,7 +770,7 @@ public class GameWindow extends JApplet
 	{
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
-		System.out.println("("+mouseX+", "+mouseY+")");
+		//System.out.println("("+mouseX+", "+mouseY+")");
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
 		lastActionTimeout = 0;

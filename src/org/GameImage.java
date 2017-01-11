@@ -237,41 +237,41 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void method214(int i, int j, int k, int l, int i1, int j1) {
-        if (i < imageX) {
-            k -= imageX - i;
-            i = imageX;
+    public void drawGradientBox(int x, int y, int width, int height, int colorTop, int colorBottom) {
+        if (x < imageX) {
+            width -= imageX - x;
+            x = imageX;
         }
-        if (i + k > imageWidth)
-            k = imageWidth - i;
-        int k1 = j1 >> 16 & 0xff;
-        int l1 = j1 >> 8 & 0xff;
-        int i2 = j1 & 0xff;
-        int j2 = i1 >> 16 & 0xff;
-        int k2 = i1 >> 8 & 0xff;
-        int l2 = i1 & 0xff;
-        int i3 = menuDefaultWidth - k;
+        if (x + width > imageWidth)
+            width = imageWidth - x;
+        int clrBtmRed = colorBottom >> 16 & 0xff;
+        int clrBtmGre = colorBottom >> 8 & 0xff;
+        int clrBtmBlu = colorBottom & 0xff;
+        int clrTopRed = colorTop >> 16 & 0xff;
+        int clrTopGre = colorTop >> 8 & 0xff;
+        int clrTopBlu = colorTop & 0xff;
+        int skipNLastPixels = menuDefaultWidth - width;
         byte byte0 = 1;
-        if (f1Toggle) {
+        if (f1Toggle)
+        {
             byte0 = 2;
-            i3 += menuDefaultWidth;
-            if ((j & 1) != 0) {
-                j++;
-                l--;
+            skipNLastPixels += menuDefaultWidth;
+            if ((y & 1) != 0) {
+                y++;
+                height--;
             }
         }
-        int j3 = i + j * menuDefaultWidth;
-        for (int k3 = 0; k3 < l; k3 += byte0)
-            if (k3 + j >= imageY && k3 + j < imageHeight) {
-                int l3 = ((k1 * k3 + j2 * (l - k3)) / l << 16) + ((l1 * k3 + k2 * (l - k3)) / l << 8) + (i2 * k3 + l2 * (l - k3)) / l;
-                for (int i4 = -k; i4 < 0; i4++)
-                    imagePixelArray[j3++] = l3;
-
-                j3 += i3;
+        int xyCoord = x + y * menuDefaultWidth;
+        for (int y_idx = 0; y_idx < height; y_idx += byte0)
+            if (y_idx + y >= imageY && y_idx + y < imageHeight) 
+            {
+                int pixelClr = ((clrBtmRed * y_idx + clrTopRed * (height - y_idx)) / height << 16) + ((clrBtmGre * y_idx + clrTopGre * (height - y_idx)) / height << 8) + (clrBtmBlu * y_idx + clrTopBlu * (height - y_idx)) / height;
+                for (int i4 = -width; i4 < 0; i4++)
+                    imagePixelArray[xyCoord++] = pixelClr;
+                xyCoord += skipNLastPixels;
             } else {
-                j3 += menuDefaultWidth;
+                xyCoord += menuDefaultWidth;
             }
-
     }
 
     public void drawBox(int x, int y, int width, int height, int colour) {
@@ -1294,6 +1294,12 @@ public class GameImage implements ImageProducer, ImageObserver {
                 hairColor = 0xffffff;
             if (skinColor == 0)
                 skinColor = 0xffffff;
+            /*
+            System.out.println(spriteId+", "+hairColor+", "+skinColor);
+            if (spriteId >= 350 || spriteId == 450)
+            {
+                hairColor = 0xff0044; // dragon items color
+            }*/
             int spriteWidthInit = sprites[spriteId].getWidth();
             int spriteHeightInit = sprites[spriteId].getHeight();
             int k2 = 0;
@@ -1570,34 +1576,17 @@ public class GameImage implements ImageProducer, ImageObserver {
             System.out.println("error in transparent sprite plot routine");
         }
     }
-
-    public static void loadFont(String smallName, int fontNumber, GameWindow gameWindow) {
-        boolean flag = false;
-        boolean addCharWidth = false;
-        smallName = smallName.toLowerCase();
-        if (smallName.startsWith("helvetica"))
-            smallName = smallName.substring(9);
-        if (smallName.startsWith("h"))
-            smallName = smallName.substring(1);
-        if (smallName.startsWith("f")) {
-            smallName = smallName.substring(1);
-            flag = true;
-        }
-        if (smallName.startsWith("d")) {
-            smallName = smallName.substring(1);
-            addCharWidth = false; //true
-        }
-        if (smallName.endsWith(".jf"))
-            smallName = smallName.substring(0, smallName.length() - 3);
-        int style = 0;
-        if (smallName.endsWith("b")) {
-            style = 1;
-            smallName = smallName.substring(0, smallName.length() - 1);
-        }
-        if (smallName.endsWith("p"))
-            smallName = smallName.substring(0, smallName.length() - 1);
-        int size = Integer.parseInt(smallName);
-        Font font = new Font("Helvetica", style, size);
+    public static void loadFont(String fontName, int fontSize,
+    		int fontStyle, boolean addCharWidth, int fontNumber,
+    		GameWindow gameWindow)
+    {
+    	/*
+    	String fnts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    	for (String str : fnts)
+    	{
+    		System.out.println(str);
+    	}*/
+        Font font = new Font(fontName, fontStyle, fontSize);
         FontMetrics fontmetrics = gameWindow.getFontMetrics(font);
         String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
         anInt350 = 885; //855
@@ -1607,17 +1596,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         aByteArrayArray336[fontNumber] = new byte[anInt350];
         for (int i1 = 0; i1 < anInt350; i1++)
             aByteArrayArray336[fontNumber][i1] = aByteArray351[i1];
-
-        if (style == 1 && aBooleanArray349[fontNumber]) {
-            aBooleanArray349[fontNumber] = false;
-            loadFont("f" + size + "p", fontNumber, gameWindow);
-        }
-        if (flag && !aBooleanArray349[fontNumber]) {
-            aBooleanArray349[fontNumber] = false;
-            loadFont("d" + size + "p", fontNumber, gameWindow);
-        }
     }
-
+    
     public static void drawLetter(Font font, FontMetrics fontmetrics, char letter, int charSetOffset, GameWindow gameWindow, int fontNumber, boolean addCharWidth) {
         int charWidth = fontmetrics.charWidth(letter);
         int oldCharWidth = charWidth;
@@ -1957,19 +1937,20 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public int messageFontHeight(int messageType) {
+    public int messageFontHeight(int messageType)
+    {    	 
         if (messageType == 0)
-            return 12;
+            return 14;
         if (messageType == 1)
-            return 14;
+            return 16;
         if (messageType == 2)
-            return 14;
+            return 16;
         if (messageType == 3)
-            return 15;
+            return 17;
         if (messageType == 4)
-            return 15;
+            return 17;
         if (messageType == 5)
-            return 19;
+            return 21;
         if (messageType == 6)
             return 24;
         if (messageType == 7)
