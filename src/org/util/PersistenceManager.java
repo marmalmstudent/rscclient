@@ -36,6 +36,7 @@ public class PersistenceManager {
 
     public static Object load(File file) {
         try {
+        	//InputStream is = new ZipInputStream(new FileInputStream(file));
             InputStream is = new GZIPInputStream(new FileInputStream(file));
             Object rv = xstream.fromXML(is);
             return rv;
@@ -48,6 +49,7 @@ public class PersistenceManager {
 
     public static void write(File file, Object o) {
         try {
+        	//OutputStream os = new ZipOutputStream(new FileOutputStream(file));
             OutputStream os = new GZIPOutputStream(new FileOutputStream(file));
             xstream.toXML(o, os);
         }

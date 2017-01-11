@@ -46,7 +46,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             component.prepareImage(image, component);
         }
         try {
-            spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.rscd"));
+            spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.zip"));
+            //spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.rscd"));
         }
         catch (Exception e) {
             e.printStackTrace();

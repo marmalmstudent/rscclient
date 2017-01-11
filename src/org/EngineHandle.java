@@ -1274,7 +1274,8 @@ public class EngineHandle {
         sectors = new Sector[4];
 
         try {
-            tileArchive = new ZipFile(new File(Config.CONF_DIR + "/Landscape.rscd"));
+            tileArchive = new ZipFile(new File(Config.CONF_DIR + "/Landscape.zip"));
+            //tileArchive = new ZipFile(new File(Config.CONF_DIR + "/Landscape.rscd"));
         }
         catch (Exception e) {
             e.printStackTrace();

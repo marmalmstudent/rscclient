@@ -81,7 +81,7 @@ public class mudclient extends GameWindowMiddleMan {
         GameWindowMiddleMan.clientVersion = 25;
         mc = new mudclient();
         mc.appletMode = false;
-        mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
+        //mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
         mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
     
@@ -7987,7 +7987,7 @@ public class mudclient extends GameWindowMiddleMan {
         windowWidth = 512;
         windowHeight = 334;
         */
-        windowWidth = 1200;
+        windowWidth = 1300;
         windowHeight = 650;
         windowHalfWidth = windowWidth/2;
         windowHalfHeight = windowHeight/2;
