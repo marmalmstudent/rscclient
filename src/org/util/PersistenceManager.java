@@ -6,6 +6,26 @@ import java.io.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.entityhandling.defs.DoorDef;
+import org.entityhandling.defs.ElevationDef;
+import org.entityhandling.defs.GameObjectDef;
+import org.entityhandling.defs.ItemDef;
+import org.entityhandling.defs.NPCDef;
+import org.entityhandling.defs.PrayerDef;
+import org.entityhandling.defs.SpellDef;
+import org.entityhandling.defs.TileDef;
+import org.entityhandling.defs.extras.AnimationDef;
+import org.entityhandling.defs.extras.TextureDef;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
 
 public class PersistenceManager {
     private static final XStream xstream = new XStream();
@@ -33,10 +53,9 @@ public class PersistenceManager {
             e.printStackTrace();
         }
     }
-
+    /*
     public static Object load(File file) {
         try {
-        	//InputStream is = new ZipInputStream(new FileInputStream(file));
             InputStream is = new GZIPInputStream(new FileInputStream(file));
             Object rv = xstream.fromXML(is);
             return rv;
@@ -45,13 +64,19 @@ public class PersistenceManager {
             System.err.println(ioe.getMessage());
         }
         return null;
+    }*/
+
+    public static Object load(String file, int dataType) {
+        //fromXML(file, dataType);
+        return new Object();
     }
 
     public static void write(File file, Object o) {
         try {
         	//OutputStream os = new ZipOutputStream(new FileOutputStream(file));
             OutputStream os = new GZIPOutputStream(new FileOutputStream(file));
-            xstream.toXML(o, os);
+            //xstream.toXML(o, os);
+            //parseOutput(o, os);
         }
         catch (IOException ioe) {
             System.err.println(ioe.getMessage());

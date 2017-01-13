@@ -109,18 +109,6 @@ public class GameWindow extends JApplet
 		GameImage.loadFont("Nimbus Sans", 20, Font.PLAIN, false, 6, this); //h20b //right-clicking menu?
 		GameImage.loadFont("Nimbus Sans", 24, Font.PLAIN/*Font.BOLD*/, false, 7, this); //h24b //used on display msg when you die
 	}
-	/*
-	private void loadFonts()
-	{
-		GameImage.loadFont("h11p", 0, this); //h11p //??
-		GameImage.loadFont("h10b", 1, this); //h12b spells/stats/character creation/duel interface etc.
-		GameImage.loadFont("h12p", 2, this); //h12p player names in chat?
-		GameImage.loadFont("h13b", 3, this); //h13b //chat/error text
-		GameImage.loadFont("h14b", 4, this); //used for login screen text
-		GameImage.loadFont("h16b", 5, this); //used for login screen button
-		GameImage.loadFont("h20", 6, this); //h20b //right-clicking menu?
-		GameImage.loadFont("h24b", 7, this); //h24b //used on display msg when you die
-	}*/
 
     public Component getFrameComponent()
     {

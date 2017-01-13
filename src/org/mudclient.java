@@ -103,7 +103,8 @@ public class mudclient extends GameWindowMiddleMan {
     	return mc.windowWidth;
     }
 
-    private boolean handleCommand(String s) {
+    private boolean handleCommand(String s)
+    {
         int firstSpace = s.indexOf(" ");
         String cmd = s;
         String[] args = new String[0];
@@ -111,7 +112,8 @@ public class mudclient extends GameWindowMiddleMan {
             cmd = s.substring(0, firstSpace).trim();
             args = s.substring(firstSpace + 1).trim().split(" ");
         }
-        if (cmd.equals("offer")) {
+        if (cmd.equals("offer"))
+        {
             int id, amount;
             try {
                 id = Integer.parseInt(args[0]);
@@ -842,7 +844,6 @@ public class mudclient extends GameWindowMiddleMan {
     private final void loadConfigFilter() {
         drawLoadingBarText(15, "Unpacking Configuration");
         EntityHandler.load();
-        System.out.println("Here!");
     }
 
     private final void loadModels() {
@@ -1562,7 +1563,7 @@ public class mudclient extends GameWindowMiddleMan {
             int yInInv = super.mouseY - inventoryY;
             int currentInventorySlot = xInInv / itemSlotWidth
             		+ (yInInv / itemSlotHeight) * nInventoryCols;
-            if (currentInventorySlot < inventoryCount)
+            if (currentInventorySlot < nInventoryCols*nInventoryRows/*inventoryCount*/)
             {
                 int i2 = inventoryItems[currentInventorySlot];
                 ItemDef itemDef = EntityHandler.getItemDef(i2);
@@ -1626,6 +1627,10 @@ public class mudclient extends GameWindowMiddleMan {
                     menuActionType[menuLength] = i2;
                     menuLength++;
                 }
+            }
+            else
+            { // we don't want to click through empty inventory slots
+                menuLength++;
             }
         }
     }
@@ -7872,7 +7877,7 @@ public class mudclient extends GameWindowMiddleMan {
         bankItemsMax = 48;
         showQuestionMenu = false;
         magicLoc = 128;
-        viewDistance = 32;
+        viewDistance = 320;
         cameraAutoAngle = 1;
         anInt727 = 2;
         showServerMessageBox = false;
@@ -7943,7 +7948,7 @@ public class mudclient extends GameWindowMiddleMan {
         tradeConfirmAccepted = false;
         playerArray = new Mob[500];
         serverMessageBoxTop = false;
-        cameraHeight = 550;
+        cameraHeight = 550-200; // TODO
         bankItems = new int[256];
         bankItemsCount = new int[256];
         notInWilderness = false;

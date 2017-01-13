@@ -1296,9 +1296,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             if (skinColor == 0)
                 skinColor = 0xffffff;
             /*
-            System.out.println(spriteId+", "+hairColor+", "+skinColor);
-            if (spriteId >= 350 || spriteId == 450)
-            {
+            if ((spriteId >= 297 && spriteId <= 314) || (spriteId >= 351 && spriteId <= 395))
+            { // large helmet, platebody and platelegs
                 hairColor = 0xff0044; // dragon items color
             }*/
             int spriteWidthInit = sprites[spriteId].getWidth();
