@@ -268,7 +268,7 @@ public class mudclient extends GameWindowMiddleMan {
 
     final void method45(int i, int j, int k, int l, int i1, int j1, int k1) {
         Mob mob = npcArray[i1];
-        int l1 = mob.currentSprite + (cameraRotation + 16) / 32 & 7;
+        int l1 = mob.currentSprite + (cameraRotationLeftRight + 16) / 32 & 7;
         boolean flag = false;
         int i2 = l1;
         if (i2 == 5) {
@@ -711,7 +711,7 @@ public class mudclient extends GameWindowMiddleMan {
         Mob mob = playerArray[i1];
         if (mob.colourBottomType == 255)
             return;
-        int l1 = mob.currentSprite + (cameraRotation + 16) / 32 & 7;
+        int l1 = mob.currentSprite + (cameraRotationLeftRight + 16) / 32 & 7;
         boolean flag = false;
         int i2 = l1;
         if (i2 == 5) {
@@ -1501,7 +1501,22 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
     
-    private final void drawInfoBox(int x, int y, int width, int height, int color,
+    /**
+     * I might use this to make login information be drawn in an info box
+     * rather than be written on the background
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param color
+     * @param border
+     * @param borderThick
+     * @param borderColor
+     * @param textType
+     * @param textColor
+     * @param text
+     */
+    public final void drawInfoBox(int x, int y, int width, int height, int color,
     		boolean border, int borderThick, int borderColor, int textType, int textColor,
     		String text)
     {
@@ -1948,7 +1963,7 @@ public class mudclient extends GameWindowMiddleMan {
             	if (true)
             	{ // quest complete
             		s1 = "@gre@";
-            	}
+            	}/*
             	else if (true || false)
             	{ // quest started
             		s1 = "@yel@";
@@ -1956,7 +1971,7 @@ public class mudclient extends GameWindowMiddleMan {
             	else
             	{ // quest not started
             		s1 = "@red@";
-            	}
+            	}*/
                 questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
             }
             questMenu.drawMenu();
@@ -2638,8 +2653,9 @@ public class mudclient extends GameWindowMiddleMan {
         };
         model.method181(4, ai, j2, k2);
         model.method184(false, 60, 24, -50, -10, -50);
-        if (x >= 0 && y >= 0 && x < 96 && y < 96)
+        if (x >= 0 && y >= 0 && x < 96 && y < 96) {
             gameCamera.addModel(model);
+        }
         model.anInt257 = i1 + 10000;
         return model;
     }
@@ -2691,6 +2707,7 @@ public class mudclient extends GameWindowMiddleMan {
             return;
         }
         for (int i = 0; i < 64; i++) {
+        	
             gameCamera.removeModel(engineHandle.aModelArrayArray598[lastWildYSubtract][i]);
             if (lastWildYSubtract == 0) {
                 gameCamera.removeModel(engineHandle.aModelArrayArray580[1][i]);
@@ -2801,7 +2818,6 @@ public class mudclient extends GameWindowMiddleMan {
             if (npc.currentSprite == 9)
                 gameCamera.setCombat(i9, 30);
         }
-
         for (int j2 = 0; j2 < groundItemCount; j2++) {
             int j3 = groundItemX[j2] * magicLoc + 64;
             int k4 = groundItemY[j2] * magicLoc + 64;
@@ -2843,31 +2859,32 @@ public class mudclient extends GameWindowMiddleMan {
                     lastAutoCameraRotatePlayerY = ourPlayer.currentY;
                 }
             }
-            gameCamera.zoom1 = 3000;
-            gameCamera.zoom2 = 3000;
+            gameCamera.drawModelMaxDist = 3000;
+            gameCamera.drawSpriteMaxDist = 3000;
             gameCamera.zoom3 = 1;
-            gameCamera.zoom4 = 2800;
-            cameraRotation = cameraAutoAngle * 32;
+            gameCamera.fadeDist = 2800;
+            cameraRotationLeftRight = cameraAutoAngle * 32;
             int k5 = lastAutoCameraRotatePlayerX + screenRotationX;
             int l7 = lastAutoCameraRotatePlayerY + screenRotationY;
-            gameCamera.setCamera(k5, -engineHandle.getAveragedElevation(k5, l7), l7, 912, cameraRotation * 4, 0, 2000);
+            gameCamera.setCamera(k5, -engineHandle.getAveragedElevation(k5, l7), l7, cameraRotationUpDown, cameraRotationLeftRight * 4, 0+10, 2000, cameraZoom);
         } else {
             if (configAutoCameraAngle && !zoomCamera)
                 autoRotateCamera();
             if (!super.keyF1Toggle) {
-                gameCamera.zoom1 = 2400; // has to do with view distance
-                gameCamera.zoom2 = 2400; // has to do with drawing npc's and players
+            	//TODO: clean this up. these values are changed when the mouse wheel moves
+                //gameCamera.drawModelMaxDist = 2400;
+                //gameCamera.drawSpriteMaxDist = 2400;
                 gameCamera.zoom3 = 1;
-                gameCamera.zoom4 = 2300;
+                //gameCamera.fadeDist = 2300;
             } else {
-                gameCamera.zoom1 = 2200;
-                gameCamera.zoom2 = 2200;
+                gameCamera.drawModelMaxDist = 2200;
+                gameCamera.drawSpriteMaxDist = 2200;
                 gameCamera.zoom3 = 1;
-                gameCamera.zoom4 = 2100;
+                gameCamera.fadeDist = 2100;
             }
             int l5 = lastAutoCameraRotatePlayerX + screenRotationX;
             int i8 = lastAutoCameraRotatePlayerY + screenRotationY;
-            gameCamera.setCamera(l5, -engineHandle.getAveragedElevation(l5, i8), i8, 912, cameraRotation * 4, 0, cameraHeight * 2);
+            gameCamera.setCamera(l5, -engineHandle.getAveragedElevation(l5, i8), i8, cameraRotationUpDown, cameraRotationLeftRight * 4, 0+10, cameraHeight * 2, cameraZoom);
         }
         gameCamera.finishCamera();
         method119();
@@ -3456,10 +3473,10 @@ public class mudclient extends GameWindowMiddleMan {
         gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
         gameCamera.setCameraSize(windowWidth / 2, windowHeight / 2, windowWidth / 2,
         		windowHeight / 2, windowWidth, cameraSizeInt);
-        gameCamera.zoom1 = 2400;
-        gameCamera.zoom2 = 2400;
+        gameCamera.drawModelMaxDist = viewDistance;
+        gameCamera.drawSpriteMaxDist = viewDistance;
         gameCamera.zoom3 = 1;
-        gameCamera.zoom4 = 2300;
+        gameCamera.fadeDist = (int) (viewDistance*2.3/2.4);
         gameCamera.method303(-50, -10, -50);
         engineHandle = new EngineHandle(gameCamera, gameGraphics);
         loadTextures(); // 60%
@@ -3921,11 +3938,11 @@ public class mudclient extends GameWindowMiddleMan {
         gameGraphics.drawImage(aGraphics936, 0, 0);
         int oldAreaX = areaX;
         int oldAreaY = areaY;
-        int i1 = (xPos + 24) / 48; // tilex (or y)
-        int j1 = (yPos + 24) / 48; // tiley (or x)
+        int i1 = (xPos + EngineHandle.SECTOR_WIDTH/2) / EngineHandle.SECTOR_WIDTH; // tile x (or y)
+        int j1 = (yPos + EngineHandle.SECTOR_HEIGHT/2) / EngineHandle.SECTOR_HEIGHT; // tile y (or x)
         lastWildYSubtract = wildYSubtract;
-        areaX = i1 * 48 - 48; // next areaX
-        areaY = j1 * 48 - 48; // next areaY
+        areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
+        areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
         anInt789 = i1 * 48 - 32; // lowerAreaXTile
         anInt790 = j1 * 48 - 32; // lowerAreaYTile
         anInt791 = i1 * 48 + 32; // upperAreaXTile
@@ -3958,9 +3975,9 @@ public class mudclient extends GameWindowMiddleMan {
                 int j6 = ((currObjX + currObjX + currObjWidth) * magicLoc) / 2;
                 int k6 = ((currObjY + currObjY + currObjeHeight) * magicLoc) / 2;
                 if (currObjX >= 0 && currObjY >= 0 && currObjX < 96 && currObjY < 96) {
-                    gameCamera.addModel(model);
+                    gameCamera.addModel(model); // objects
                     model.method191(j6, -engineHandle.getAveragedElevation(j6, k6), k6);
-                    engineHandle.method412(currObjX, currObjY, currObjType, currObjId);
+                    engineHandle.method412(currObjX, currObjY, currObjType, currObjId); // shadows
                     if (currObjType == 74)
                         model.method190(0, -480, 0);
                 }
@@ -4825,7 +4842,7 @@ public class mudclient extends GameWindowMiddleMan {
                 lastAutoCameraRotatePlayerY += (ourPlayer.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 500) / 15);
             if (configAutoCameraAngle) {
                 int k1 = cameraAutoAngle * 32;
-                int j3 = k1 - cameraRotation;
+                int j3 = k1 - cameraRotationLeftRight;
                 byte byte0 = 1;
                 if (j3 != 0) {
                     cameraRotationBaseAddition++;
@@ -4841,8 +4858,8 @@ public class mudclient extends GameWindowMiddleMan {
                         byte0 = -1;
                         j3 = -j3;
                     }
-                    cameraRotation += ((cameraRotationBaseAddition * j3 + 255) / 256) * byte0;
-                    cameraRotation &= 0xff;
+                    cameraRotationLeftRight += ((cameraRotationBaseAddition * j3 + 255) / 256) * byte0;
+                    cameraRotationLeftRight &= 0xff;
                 } else {
                     cameraRotationBaseAddition = 0;
                 }
@@ -4985,9 +5002,27 @@ public class mudclient extends GameWindowMiddleMan {
                 }
             }
         } else if (super.keyLeftDown)
-            cameraRotation = cameraRotation + 2 & 0xff;
+        {
+            cameraRotationLeftRight = cameraRotationLeftRight + 2 & 0xff;
+        }
         else if (super.keyRightDown)
-            cameraRotation = cameraRotation - 2 & 0xff;
+        {
+            cameraRotationLeftRight = cameraRotationLeftRight - 2 & 0xff;
+        }
+        else if (super.keyUpDown)
+        {
+        	if (cameraRotationUpDown > 0x390)
+        	{
+        		cameraRotationUpDown = cameraRotationUpDown - 8 & 0x3ff;
+        	}
+        }
+        else if (super.keyDownDown)
+        {
+        	if (cameraRotationUpDown < 0x3f8)
+        	{
+        		cameraRotationUpDown = cameraRotationUpDown + 8 & 0x3ff;
+        	}
+        }
         if (zoomCamera && cameraHeight > 550)
             cameraHeight -= 4;
         else if (!zoomCamera && cameraHeight < 750)
@@ -5992,6 +6027,7 @@ public class mudclient extends GameWindowMiddleMan {
                             int i42 = ((l19 + l19 + j37) * magicLoc) / 2;
                             int k43 = EntityHandler.getObjectDef(k8).modelID;
                             Model model_1 = gameDataModels[k43].method203();
+                            // TODO: make the server send objects that are further away
                             gameCamera.addModel(model_1);
                             model_1.anInt257 = objectCount;
                             model_1.method188(0, l29 * 32, 0);
@@ -7737,7 +7773,7 @@ public class mudclient extends GameWindowMiddleMan {
         gameGraphics.setDimensions(miniMapX, miniMapY,
         		miniMapX + miniMapWidth, miniMapY + miniMapHeight);
         int k = 192 + anInt986;
-        int i1 = cameraRotation + anInt985 & 0xff;
+        int i1 = cameraRotationLeftRight + anInt985 & 0xff;
         int k1 = ((ourPlayer.currentX - 6040) * 3 * k) / 2048;
         int i3 = ((ourPlayer.currentY - 6040) * 3 * k) / 2048;
         int k4 = Camera.anIntArray384[0x400 - i1 * 4 & 0x3ff];
@@ -7801,7 +7837,7 @@ public class mudclient extends GameWindowMiddleMan {
         gameGraphics.method212(miniMapX + miniMapWidth / 2,
         		miniMapY + miniMapHeight / 2, 2, 0xffffff, 0xff);
         gameGraphics.method242(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
-        		cameraRotation + 128 & 0xff, 128);
+        		cameraRotationLeftRight + 128 & 0xff, 128);
         gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
         if (!flag)
             return;
@@ -7811,7 +7847,7 @@ public class mudclient extends GameWindowMiddleMan {
         		&& super.mouseY < miniMapY + miniMapHeight)
         {
             int l = 192 + anInt986;
-            int j1 = cameraRotation + anInt985 & 0xff;
+            int j1 = cameraRotationLeftRight + anInt985 & 0xff;
             int l2 = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 0x4000) / (3 * l);
             int j4 = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 0x4000) / (3 * l);
             int l4 = Camera.anIntArray384[0x400 - j1 * 4 & 0x3ff];
@@ -7825,6 +7861,37 @@ public class mudclient extends GameWindowMiddleMan {
                 method112(sectionX, sectionY, l2 / 128, j4 / 128, false);
             mouseButtonClick = 0;
         }
+    }
+    
+    protected final void handleScrollEvent(int scrollDirection)
+    {
+    	// cameraZoomFactor = 150.0; // how much further away the camera moves
+    	if (scrollDirection > 0D)
+    	{
+    		if (cameraZoom < 1.41)
+    		{
+    			cameraZoom += 0.1;
+    			gameCamera.drawModelMaxDist += 150.0;
+    	        gameCamera.drawSpriteMaxDist += 150.0;
+    	        if (!super.keyF1Toggle)
+    	        	gameCamera.fadeDist += 150*2.3/2.4;
+    	        else
+    	        	gameCamera.fadeDist += 150*2.1/2.2;
+    		}
+    	}
+    	else if (scrollDirection < 0D)
+    	{
+    		if (cameraZoom > .39)
+    		{
+    			cameraZoom -= 0.1;
+    			gameCamera.drawModelMaxDist -= 150.0;
+    	        gameCamera.drawSpriteMaxDist -= 150.0;
+    	        if (!super.keyF1Toggle)
+    	        	gameCamera.fadeDist -= 150*2.3/2.4;
+    	        else
+    	        	gameCamera.fadeDist -= 150*2.1/2.2;
+    		}
+    	}
     }
 
     public mudclient()
@@ -7877,7 +7944,7 @@ public class mudclient extends GameWindowMiddleMan {
         bankItemsMax = 48;
         showQuestionMenu = false;
         magicLoc = 128;
-        viewDistance = 320;
+        viewDistance = 2400*2;
         cameraAutoAngle = 1;
         anInt727 = 2;
         showServerMessageBox = false;
@@ -7911,7 +7978,8 @@ public class mudclient extends GameWindowMiddleMan {
         anIntArray787 = new int[50];
         anIntArray788 = new int[50];
         objectModelArray = new Model[1500];
-        cameraRotation = 128;
+        cameraRotationLeftRight = 128;
+        cameraRotationUpDown = 912;
         showWelcomeBox = false;
         characterBodyGender = 1;
         character2Colour = 2;
@@ -7948,7 +8016,8 @@ public class mudclient extends GameWindowMiddleMan {
         tradeConfirmAccepted = false;
         playerArray = new Mob[500];
         serverMessageBoxTop = false;
-        cameraHeight = 550-200; // TODO
+        cameraHeight = 550; // TODO
+        cameraZoom = 1.0;
         bankItems = new int[256];
         bankItemsCount = new int[256];
         notInWilderness = false;
@@ -8123,6 +8192,7 @@ public class mudclient extends GameWindowMiddleMan {
     private int anInt718;
     private int magicLoc;
     private int viewDistance;
+    private double cameraZoom;
     public boolean loggedIn;
     private int cameraAutoAngle;
     private int cameraRotationBaseAddition;
@@ -8192,7 +8262,8 @@ public class mudclient extends GameWindowMiddleMan {
     private Model objectModelArray[];
     private Menu menuWelcome;
     private int systemUpdate;
-    private int cameraRotation;
+    private int cameraRotationLeftRight;
+    private int cameraRotationUpDown;
     private int logoutTimeout;
     private Menu gameMenu;
     int messagesHandleChatHist;

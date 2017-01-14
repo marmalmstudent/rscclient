@@ -9,10 +9,10 @@ public class Camera {
         anIntArray375 = new int[anInt374];
         anIntArrayArray376 = new int[anInt374][256];
         anInt379 = 5;
-        zoom1 = 1000;
-        zoom2 = 1000;
+        drawModelMaxDist = 1000;
+        drawSpriteMaxDist = 1000;
         zoom3 = 20;
-        zoom4 = 10;
+        fadeDist = 10;
         aBoolean386 = false;
         aDouble387 = 1.1000000000000001D;
         anInt388 = 1;
@@ -58,11 +58,11 @@ public class Camera {
         anIntArray422 = new int[k];
         if (aByteArray434 == null)
             aByteArray434 = new byte[17691];
-        anInt403 = 0;
-        anInt404 = 0;
-        anInt405 = 0;
-        anInt406 = 0;
-        anInt407 = 0;
+        cameraYPos = 0;
+        cameraZPos = 0;
+        cameraXPos = 0;
+        cameraUpDownRot = 0;
+        cameraLeftRigtRot = 0;
         anInt408 = 0;
         for (int i1 = 0; i1 < 256; i1++) {
             anIntArray385[i1] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D);
@@ -280,8 +280,8 @@ public class Camera {
     }
 
     public void method279(int i, int j, int k) {
-        int l = -anInt406 + 1024 & 0x3ff;
-        int i1 = -anInt407 + 1024 & 0x3ff;
+        int l = -cameraUpDownRot + 1024 & 0x3ff;
+        int i1 = -cameraLeftRigtRot + 1024 & 0x3ff;
         int j1 = -anInt408 + 1024 & 0x3ff;
         if (j1 != 0) {
             int k1 = anIntArray384[j1];
@@ -320,34 +320,34 @@ public class Camera {
 
     public void finishCamera() {
         f1Toggle = gameImage.f1Toggle;
-        int i3 = halfWidth * zoom1 >> cameraSizeInt;
-        int j3 = halfHeight * zoom1 >> cameraSizeInt;
+        int i3 = halfWidth * drawModelMaxDist >> cameraSizeInt;
+        int j3 = halfHeight * drawModelMaxDist >> cameraSizeInt;
         anInt448 = 0;
         anInt449 = 0;
         anInt450 = 0;
         anInt451 = 0;
         anInt452 = 0;
         anInt453 = 0;
-        method279(-i3, -j3, zoom1);
-        method279(-i3, j3, zoom1);
-        method279(i3, -j3, zoom1);
-        method279(i3, j3, zoom1);
+        method279(-i3, -j3, drawModelMaxDist);
+        method279(-i3, j3, drawModelMaxDist);
+        method279(i3, -j3, drawModelMaxDist);
+        method279(i3, j3, drawModelMaxDist);
         method279(-halfWidth, -halfHeight, 0);
         method279(-halfWidth, halfHeight, 0);
         method279(halfWidth, -halfHeight, 0);
         method279(halfWidth, halfHeight, 0);
-        anInt448 += anInt403;
-        anInt449 += anInt403;
-        anInt450 += anInt404;
-        anInt451 += anInt404;
-        anInt452 += anInt405;
-        anInt453 += anInt405;
+        anInt448 += cameraYPos;
+        anInt449 += cameraYPos;
+        anInt450 += cameraZPos;
+        anInt451 += cameraZPos;
+        anInt452 += cameraXPos;
+        anInt453 += cameraXPos;
         modelArray[modelCount] = aModel_423;
         aModel_423.anInt246 = 2;
         for (int i = 0; i < modelCount; i++)
-            modelArray[i].method201(anInt403, anInt404, anInt405, anInt406, anInt407, anInt408, cameraSizeInt, anInt379);
+            modelArray[i].method201(cameraYPos, cameraZPos, cameraXPos, cameraUpDownRot, cameraLeftRigtRot, anInt408, cameraSizeInt, anInt379);
 
-        modelArray[modelCount].method201(anInt403, anInt404, anInt405, anInt406, anInt407, anInt408, cameraSizeInt, anInt379);
+        modelArray[modelCount].method201(cameraYPos, cameraZPos, cameraXPos, cameraUpDownRot, cameraLeftRigtRot, anInt408, cameraSizeInt, anInt379);
         cameraModelCount = 0;
         for (int k3 = 0; k3 < modelCount; k3++) {
             Model model = modelArray[k3];
@@ -358,7 +358,7 @@ public class Camera {
                     boolean flag = false;
                     for (int k4 = 0; k4 < l3; k4++) {
                         int i1 = model.anIntArray229[ai1[k4]];
-                        if (i1 <= anInt379 || i1 >= zoom1)
+                        if (i1 <= anInt379 || i1 >= drawModelMaxDist)
                             continue;
                         flag = true;
                         break;
@@ -423,7 +423,7 @@ public class Camera {
                 int l4 = model_1.anIntArray230[j4];
                 int l5 = model_1.anIntArray231[j4];
                 int i7 = model_1.anIntArray229[j4];
-                if (i7 > anInt379 && i7 < zoom2) {
+                if (i7 > anInt379 && i7 < drawSpriteMaxDist) {
                     int i8 = (anIntArray420[k] << cameraSizeInt) / i7;
                     int i9 = (anIntArray421[k] << cameraSizeInt) / i7;
                     if (l4 - i8 / 2 <= halfWidth && l4 + i8 / 2 >= -halfWidth && l5 - i9 <= halfHeight && l5 >= -halfHeight) {
@@ -493,8 +493,8 @@ public class Camera {
                         anIntArray441[k8] = model_2.anIntArray230[k2];
                         anIntArray442[k8] = model_2.anIntArray231[k2];
                         anIntArray443[k8] = j10;
-                        if (model_2.anIntArray229[k2] > zoom4)
-                            anIntArray443[k8] += (model_2.anIntArray229[k2] - zoom4) / zoom3;
+                        if (model_2.anIntArray229[k2] > fadeDist)
+                            anIntArray443[k8] += (model_2.anIntArray229[k2] - fadeDist) / zoom3;
                         k8++;
                     } else {
                         int k9;
@@ -2287,40 +2287,47 @@ public class Camera {
 
     }
 
-    public void setCamera(int i, int j, int k, int l, int i1, int j1, int k1) {
+    public void setCamera(int playerX, int averageElevation, int playerY,
+    		int l, int i1, int j1, int k1, double cameraZoom) {
         l &= 0x3ff;
         i1 &= 0x3ff;
         j1 &= 0x3ff;
+        cameraUpDownRot = 1024 - l & 0x3ff; // y-axis rotation
+        cameraLeftRigtRot = 1024 - i1 & 0x3ff; // z-axis rotation
+        // very strange variable, maybe has something to do with how sprites are aligned.
+        anInt408 = 1024 - j1 & 0x3ff; 
+        /*
         anInt406 = 1024 - l & 0x3ff;
         anInt407 = 1024 - i1 & 0x3ff;
         anInt408 = 1024 - j1 & 0x3ff;
-        int l1 = 0;
-        int i2 = 0;
-        int j2 = k1;
+        */
+        int cameraXOffset = 0;
+        int cameraHeightOffset = 0;
+        int cameraYOffset = k1;
         if (l != 0) {
             int k2 = anIntArray384[l];
             int j3 = anIntArray384[l + 1024];
-            int i4 = i2 * j3 - j2 * k2 >> 15;
-            j2 = i2 * k2 + j2 * j3 >> 15;
-            i2 = i4;
+            int i4 = cameraHeightOffset * j3 - cameraYOffset * k2 >> 15;
+            cameraYOffset = cameraHeightOffset * k2 + cameraYOffset * j3 >> 15;
+            cameraHeightOffset = i4;
         }
         if (i1 != 0) {
             int l2 = anIntArray384[i1];
             int k3 = anIntArray384[i1 + 1024];
-            int j4 = j2 * l2 + l1 * k3 >> 15;
-            j2 = j2 * k3 - l1 * l2 >> 15;
-            l1 = j4;
+            int j4 = cameraYOffset * l2 + cameraXOffset * k3 >> 15;
+            cameraYOffset = cameraYOffset * k3 - cameraXOffset * l2 >> 15;
+            cameraXOffset = j4;
         }
         if (j1 != 0) {
             int i3 = anIntArray384[j1];
             int l3 = anIntArray384[j1 + 1024];
-            int k4 = i2 * i3 + l1 * l3 >> 15;
-            i2 = i2 * l3 - l1 * i3 >> 15;
-            l1 = k4;
+            int k4 = cameraHeightOffset * i3 + cameraXOffset * l3 >> 15;
+            cameraHeightOffset = cameraHeightOffset * l3 - cameraXOffset * i3 >> 15;
+            cameraXOffset = k4;
         }
-        anInt403 = i - l1;
-        anInt404 = j - i2;
-        anInt405 = k - j2;
+        cameraYPos = playerX - (int)(cameraXOffset*cameraZoom); // camera position
+        cameraZPos = averageElevation - (int)(cameraHeightOffset*cameraZoom)-200; // -200 makes it so we don't zoom in on out feet
+        cameraXPos = playerY - (int)(cameraYOffset*cameraZoom);//(int)(j2*Math.random()); // how the camera rotates when the camera position changes
     }
 
     private void method293(int i) {
@@ -3046,10 +3053,10 @@ public class Camera {
     int anIntArray377[];
     public int lastCameraModelCount;
     public int anInt379;
-    public int zoom1;
-    public int zoom2;
+    public int drawModelMaxDist;
+    public int drawSpriteMaxDist;
     public int zoom3;
-    public int zoom4;
+    public int fadeDist;
     public static int anIntArray384[] = new int[2048];
     private static int anIntArray385[] = new int[512];
     public boolean aBoolean386;
@@ -3069,11 +3076,11 @@ public class Camera {
     private int halfHeight2;
     private int cameraSizeInt;
     private int anInt402;
-    private int anInt403;
-    private int anInt404;
-    private int anInt405;
-    private int anInt406;
-    private int anInt407;
+    private int cameraYPos;
+    private int cameraZPos;
+    private int cameraXPos;
+    private int cameraUpDownRot;
+    private int cameraLeftRigtRot;
     private int anInt408;
     public int modelCount;
     public int maxModelCount;

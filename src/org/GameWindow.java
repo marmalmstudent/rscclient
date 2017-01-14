@@ -17,7 +17,7 @@ import mopar.*;
 import org.util.Config;
 
 public class GameWindow extends JApplet 
-	implements Runnable, MouseListener, MouseMotionListener, KeyListener, FocusListener, WindowListener, ComponentListener
+	implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, WindowListener, ComponentListener
 {
 	public static final Color BAR_COLOUR = new Color(132, 132, 132); //144, 192, 64
 	public static final Font LOADING_FONT = new Font("Helvetica", 0, 12);
@@ -122,6 +122,7 @@ public class GameWindow extends JApplet
     {
     	getFrameComponent().addMouseListener(this);
     	getFrameComponent().addMouseMotionListener(this);
+    	getFrameComponent().addMouseWheelListener(this);
     	getFrameComponent().addKeyListener(this);
     	getFrameComponent().addFocusListener(this);
         if(gameFrame != null)
@@ -210,9 +211,7 @@ public class GameWindow extends JApplet
             }
             anInt10--;
             i1 &= 0xff;
-            /**/
             method4();
-            /**/
         }
         if (exitTimeout == -1)
             close();
@@ -341,6 +340,11 @@ public class GameWindow extends JApplet
 	}
 
 	protected void handleMouseDown(int button, int x, int y)
+	{
+		
+	}
+
+	protected void handleScrollEvent(int scrollDirection)
 	{
 		
 	}
@@ -754,11 +758,16 @@ public class GameWindow extends JApplet
 		
 	}
 
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		int scrollDirection = e.getWheelRotation();
+		handleScrollEvent(scrollDirection);
+	}
+
 	public void mousePressed(MouseEvent e)
 	{
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
-		//System.out.println("("+mouseX+", "+mouseY+")");
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
 		lastActionTimeout = 0;
@@ -778,9 +787,23 @@ public class GameWindow extends JApplet
 		
 	}
 
-	public void mouseExited(MouseEvent e) {
+	public void mouseExited(MouseEvent e)
+	{
 		// TODO Auto-generated method stub
-		
+		// reset keys
+		keyDown = 0;
+		keyLeftDown = false;
+		keyRightDown = false;
+		keyUpDown = false;
+		keyDownDown = false;
+		keySpaceDown = false;
+		keyNMDown = false;
+		keyLeftBraceDown = false;
+		keyRightBraceDown = false;
+		// reset mouse
+		mouseX = e.getX() - GameFrame.offsetX;
+		mouseY = e.getY() - GameFrame.offsetY;
+		mouseDownButton = 0;
 	}
 
 	public void componentResized(ComponentEvent e) {
