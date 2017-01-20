@@ -600,6 +600,8 @@ public class GameWindow extends JApplet
 	public boolean keyDownDown;
 	public boolean keySpaceDown;
 	public boolean keyNMDown;
+	public boolean[] keyDownCode = new boolean[127];
+	public boolean[] keyDownChar = new boolean[0x10000];
 	public int threadSleepTime;
 	public int mouseX;
 	public int mouseY;
@@ -668,6 +670,10 @@ public class GameWindow extends JApplet
 		int keyCode = e.getKeyCode();
 		int keyChar = e.getKeyChar();
         handleMenuKeyDown(keyCode, keyChar);
+        if (keyCode >= 0 && keyCode < keyDownCode.length)
+        	keyDownCode[keyCode] = true;
+        if (keyChar >= 0 && keyChar < keyDownChar.length)
+        	keyDownChar[keyChar] = true;
         keyDown = keyCode;
         keyDown2 = keyChar;
         lastActionTimeout = 0;
@@ -716,25 +722,30 @@ public class GameWindow extends JApplet
 
 	public void keyReleased(KeyEvent e)
 	{
-		int key = e.getKeyCode();
+		int keyCode = e.getKeyCode();
+		int keyChar = e.getKeyChar();
+        if (keyCode >= 0 && keyCode < keyDownCode.length)
+        	keyDownCode[keyCode] = false;
+        if (keyChar >= 0 && keyCode < keyDownChar.length)
+        	keyDownChar[keyChar] = false;
         keyDown = 0;
-        if (key == 37)
+        if (keyCode == 37)
             keyLeftDown = false;
-        if (key == 39)
+        if (keyCode == 39)
             keyRightDown = false;
-        if (key == 38)
+        if (keyCode == 38)
             keyUpDown = false;
-        if (key == 40)
+        if (keyCode == 40)
             keyDownDown = false;
-        if ((char) key == ' ')
+        if ((char) keyCode == ' ')
             keySpaceDown = false;
-        if ((char) key == 'n' || (char) key == 'm')
+        if ((char) keyCode == 'n' || (char) keyCode == 'm')
             keyNMDown = false;
-        if ((char) key == 'N' || (char) key == 'M')
+        if ((char) keyCode == 'N' || (char) keyCode == 'M')
             keyNMDown = false;
-        if ((char) key == '{')
+        if ((char) keyCode == '{')
             keyLeftBraceDown = false;
-        if ((char) key == '}')
+        if ((char) keyCode == '}')
             keyRightBraceDown = false;
 	}
 
@@ -791,6 +802,10 @@ public class GameWindow extends JApplet
 	{
 		// TODO Auto-generated method stub
 		// reset keys
+		for (int i=0; i < keyDownCode.length; i++)
+			keyDownCode[i] = false;
+		for (int i=0; i < keyDownChar.length; i++)
+			keyDownChar[i] = false;
 		keyDown = 0;
 		keyLeftDown = false;
 		keyRightDown = false;

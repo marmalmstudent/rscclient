@@ -20,12 +20,14 @@ public class Camera {
         maxVisibleModelCount = 100;
         visibleModelsArray = new Model[maxVisibleModelCount];
         visibleModelIntArray = new int[maxVisibleModelCount];
+        /*
         width = 512;
         halfWidth = 256;
         halfHeight = 192;
         halfWidth2 = 256;
         halfHeight2 = 256;
         cameraSizeInt = 8;
+        */
         anInt402 = 4;
         anIntArray441 = new int[40];
         anIntArray442 = new int[40];
@@ -443,33 +445,44 @@ public class Camera {
         lastCameraModelCount = cameraModelCount;
         method276(cameraModels, 0, cameraModelCount - 1);
         method277(100, cameraModels, cameraModelCount);
-        for (int i4 = 0; i4 < cameraModelCount; i4++) {
+        for (int i4 = 0; i4 < cameraModelCount; i4++)
+        {
             CameraModel cameraModel = cameraModels[i4];
             Model model_2 = cameraModel.aModel_359;
             int l = cameraModel.anInt360;
-            if (model_2 == aModel_423) {
+            if (model_2 == aModel_423)
+            {
                 int ai2[] = model_2.anIntArrayArray236[l];
                 int i6 = ai2[0];
-                int j7 = model_2.anIntArray230[i6];
-                int j8 = model_2.anIntArray231[i6];
-                int j9 = model_2.anIntArray229[i6];
-                int i10 = (anIntArray420[l] << cameraSizeInt) / j9;
-                int k10 = (anIntArray421[l] << cameraSizeInt) / j9;
+                int j7 = model_2.anIntArray230[i6]; // something with (feet) x-pos on screen
+                int j8 = model_2.anIntArray231[i6]; // something with (feet) y-pos on screen
+                int modelSize = model_2.anIntArray229[i6];
+                int modelWidth = (anIntArray420[l] << cameraSizeInt) / modelSize;
+                int modelHeight = (anIntArray421[l] << cameraSizeInt) / modelSize;
                 int i11 = j8 - model_2.anIntArray231[ai2[1]];
-                int j11 = ((model_2.anIntArray230[ai2[1]] - j7) * i11) / k10;
-                j11 = model_2.anIntArray230[ai2[1]] - j7;
-                int l11 = j7 - i10 / 2;
-                int j12 = (halfHeight2 + j8) - k10;
-                gameImage.method245(l11 + halfWidth2, j12, i10, k10, anIntArray416[l], j11, (256 << cameraSizeInt) / j9);
-                if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount) {
-                    l11 += (anIntArray422[l] << cameraSizeInt) / j9;
-                    if (mouseY >= j12 && mouseY <= j12 + k10 && mouseX >= l11 && mouseX <= l11 + i10 && !model_2.aBoolean263 && model_2.aByteArray259[l] == 0) {
+                /* looks like j11 has to do with an offset between feet position
+                 * and head position to match the camera elevation.
+                 * TODO: make j11 also depend on camera elevation.
+                 */
+                int j11 = ((model_2.anIntArray230[ai2[1]] - j7) * i11) / modelHeight;
+                int modelX = j7 - modelWidth / 2;
+                int modelY = (halfHeight2 + j8) - modelHeight;
+                gameImage.method245(modelX + halfWidth2, modelY, modelWidth, modelHeight, anIntArray416[l], j11, (256 << cameraSizeInt) / modelSize);
+                if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount)
+                {
+                    modelX += (anIntArray422[l] << cameraSizeInt) / modelSize;
+                    if (mouseY >= modelY && mouseY <= modelY + modelHeight
+                    		&& mouseX >= modelX && mouseX <= modelX + modelWidth
+                    		&& !model_2.aBoolean263 && model_2.aByteArray259[l] == 0)
+                    {
                         visibleModelsArray[currentVisibleModelCount] = model_2;
                         visibleModelIntArray[currentVisibleModelCount] = l;
                         currentVisibleModelCount++;
                     }
                 }
-            } else {
+            }
+            else
+            {
                 int k8 = 0;
                 int j10 = 0;
                 int l10 = model_2.anIntArray235[l];
@@ -2296,11 +2309,6 @@ public class Camera {
         cameraLeftRigtRot = 1024 - i1 & 0x3ff; // z-axis rotation
         // very strange variable, maybe has something to do with how sprites are aligned.
         anInt408 = 1024 - j1 & 0x3ff; 
-        /*
-        anInt406 = 1024 - l & 0x3ff;
-        anInt407 = 1024 - i1 & 0x3ff;
-        anInt408 = 1024 - j1 & 0x3ff;
-        */
         int cameraXOffset = 0;
         int cameraHeightOffset = 0;
         int cameraYOffset = k1;
@@ -2327,7 +2335,7 @@ public class Camera {
         }
         cameraYPos = playerX - (int)(cameraXOffset*cameraZoom); // camera position
         cameraZPos = averageElevation - (int)(cameraHeightOffset*cameraZoom)-200; // -200 makes it so we don't zoom in on out feet
-        cameraXPos = playerY - (int)(cameraYOffset*cameraZoom);//(int)(j2*Math.random()); // how the camera rotates when the camera position changes
+        cameraXPos = playerY - (int)(cameraYOffset*cameraZoom); // how the camera rotates when the camera position changes
     }
 
     private void method293(int i) {

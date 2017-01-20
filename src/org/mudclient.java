@@ -266,7 +266,8 @@ public class mudclient extends GameWindowMiddleMan {
         }
     }
 
-    final void method45(int i, int j, int k, int l, int i1, int j1, int k1) {
+    final void method45(int i, int j, int k, int l, int i1, int j1, int k1)
+    {
         Mob mob = npcArray[i1];
         int l1 = mob.currentSprite + (cameraRotationLeftRight + 16) / 32 & 7;
         boolean flag = false;
@@ -485,11 +486,11 @@ public class mudclient extends GameWindowMiddleMan {
         	
         }
         if (loginScreenNumber == 0)
-            menuWelcome.drawMenu();
+            menuWelcome.drawMenu(true);
         if (loginScreenNumber == 1)
-            menuNewUser.drawMenu();
+            menuNewUser.drawMenu(true);
         if (loginScreenNumber == 2)
-            menuLogin.drawMenu();
+            menuLogin.drawMenu(true);
         // blue bar at the botom
         sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
         int nSprites = windowWidth / sprite.getWidth();
@@ -707,11 +708,12 @@ public class mudclient extends GameWindowMiddleMan {
         return super.getGraphics();
     }
 
-    final void method52(int i, int j, int k, int l, int i1, int j1, int k1) {
-        Mob mob = playerArray[i1];
-        if (mob.colourBottomType == 255)
+    final void method52(int i, int j, int k, int l, int playerID, int j1, int k1)
+    {
+        Mob plr = playerArray[playerID];
+        if (plr.colourBottomType == 255)
             return;
-        int l1 = mob.currentSprite + (cameraRotationLeftRight + 16) / 32 & 7;
+        int l1 = plr.currentSprite + (cameraRotationLeftRight + 16) / 32 & 7;
         boolean flag = false;
         int i2 = l1;
         if (i2 == 5) {
@@ -724,14 +726,14 @@ public class mudclient extends GameWindowMiddleMan {
             i2 = 1;
             flag = true;
         }
-        int j2 = i2 * 3 + walkModel[(mob.stepCount / 6) % 4];
-        if (mob.currentSprite == 8) {
+        int j2 = i2 * 3 + walkModel[(plr.stepCount / 6) % 4];
+        if (plr.currentSprite == 8) {
             i2 = 5;
             l1 = 2;
             flag = false;
             i -= (5 * k1) / 100;
             j2 = i2 * 3 + npcCombatModelArray1[(loginTimer / 5) % 8];
-        } else if (mob.currentSprite == 9) {
+        } else if (plr.currentSprite == 9) {
             i2 = 5;
             l1 = 2;
             flag = true;
@@ -740,7 +742,7 @@ public class mudclient extends GameWindowMiddleMan {
         }
         for (int k2 = 0; k2 < 12; k2++) {
             int l2 = npcAnimationArray[l1][k2];
-            int l3 = mob.animationCount[l2] - 1;
+            int l3 = plr.animationCount[l2] - 1;
             if (l3 >= 0) {
                 int k4 = 0;
                 int i5 = 0;
@@ -751,92 +753,95 @@ public class mudclient extends GameWindowMiddleMan {
                     else if (l2 == 4 && i2 == 1) {
                         k4 = -22;
                         i5 = -3;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     } else if (l2 == 4 && i2 == 2) {
                         k4 = 0;
                         i5 = -8;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     } else if (l2 == 4 && i2 == 3) {
                         k4 = 26;
                         i5 = -5;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     } else if (l2 == 3 && i2 == 1) {
                         k4 = 22;
                         i5 = 3;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     } else if (l2 == 3 && i2 == 2) {
                         k4 = 0;
                         i5 = 8;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     } else if (l2 == 3 && i2 == 3) {
                         k4 = -26;
                         i5 = 5;
-                        j5 = i2 * 3 + walkModel[(2 + mob.stepCount / 6) % 4];
+                        j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
                     }
-                if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasA()) {
+                if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasA())
+                {
                     int k5 = j5 + EntityHandler.getAnimationDef(l3).getNumber();
                     k4 = (k4 * k) / ((GameImage) (gameGraphics)).sprites[k5].getSomething1();
                     i5 = (i5 * l) / ((GameImage) (gameGraphics)).sprites[k5].getSomething2();
                     int l5 = (k * ((GameImage) (gameGraphics)).sprites[k5].getSomething1()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getSomething1();
                     k4 -= (l5 - k) / 2;
                     int colour = EntityHandler.getAnimationDef(l3).getCharColour();
-                    int skinColour = characterSkinColours[mob.colourSkinType];
+                    int skinColour = characterSkinColours[plr.colourSkinType];
                     if (colour == 1)
-                        colour = characterHairColours[mob.colourHairType];
+                        colour = characterHairColours[plr.colourHairType];
                     else if (colour == 2)
-                        colour = characterTopBottomColours[mob.colourTopType];
+                        colour = characterTopBottomColours[plr.colourTopType];
                     else if (colour == 3)
-                        colour = characterTopBottomColours[mob.colourBottomType];
+                        colour = characterTopBottomColours[plr.colourBottomType];
                     gameGraphics.spriteClip4(i + k4, j + i5, l5, l, k5, colour, skinColour, j1, flag);
                 }
             }
         }
 
-        if (mob.lastMessageTimeout > 0) {
-            mobMessagesWidth[mobMessageCount] = gameGraphics.textWidth(mob.lastMessage, 1) / 2;
+        if (plr.lastMessageTimeout > 0) {
+            mobMessagesWidth[mobMessageCount] = gameGraphics.textWidth(plr.lastMessage, 1) / 2;
             if (mobMessagesWidth[mobMessageCount] > 150)
                 mobMessagesWidth[mobMessageCount] = 150;
-            mobMessagesHeight[mobMessageCount] = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
+            mobMessagesHeight[mobMessageCount] = (gameGraphics.textWidth(plr.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
             mobMessagesX[mobMessageCount] = i + k / 2;
             mobMessagesY[mobMessageCount] = j;
-            mobMessages[mobMessageCount++] = mob.lastMessage;
+            mobMessages[mobMessageCount++] = plr.lastMessage;
         }
-        if (mob.anInt163 > 0) {
+        if (plr.anInt163 > 0) {
             anIntArray858[anInt699] = i + k / 2;
             anIntArray859[anInt699] = j;
             anIntArray705[anInt699] = k1;
-            anIntArray706[anInt699++] = mob.anInt162;
+            anIntArray706[anInt699++] = plr.anInt162;
         }
-        if (mob.currentSprite == 8 || mob.currentSprite == 9 || mob.combatTimer != 0) {
-            if (mob.combatTimer > 0) {
+        if (plr.currentSprite == 8 || plr.currentSprite == 9 || plr.combatTimer != 0) {
+            if (plr.combatTimer > 0) {
                 int i3 = i;
-                if (mob.currentSprite == 8)
+                if (plr.currentSprite == 8)
                     i3 -= (20 * k1) / 100;
-                else if (mob.currentSprite == 9)
+                else if (plr.currentSprite == 9)
                     i3 += (20 * k1) / 100;
-                int i4 = (mob.hitPointsCurrent * 30) / mob.hitPointsBase;
+                int i4 = (plr.hitPointsCurrent * 30) / plr.hitPointsBase;
                 anIntArray786[anInt718] = i3 + k / 2;
                 anIntArray787[anInt718] = j;
                 anIntArray788[anInt718++] = i4;
             }
-            if (mob.combatTimer > 150) {
+            if (plr.combatTimer > 150) {
                 int j3 = i;
-                if (mob.currentSprite == 8)
+                if (plr.currentSprite == 8)
                     j3 -= (10 * k1) / 100;
-                else if (mob.currentSprite == 9)
+                else if (plr.currentSprite == 9)
                     j3 += (10 * k1) / 100;
+                // red star, i.e. damage >0 was dealt
                 gameGraphics.drawPicture((j3 + k / 2) - 12, (j + l / 2) - 12, SPRITE_MEDIA_START + 11);
-                gameGraphics.drawText(String.valueOf(mob.anInt164), (j3 + k / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
+                gameGraphics.drawText(String.valueOf(plr.anInt164), (j3 + k / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
             }
         }
-        if (mob.anInt179 == 1 && mob.anInt163 == 0) {
+        if (plr.anInt179 == 1 && plr.anInt163 == 0) {
             int k3 = j1 + i + k / 2;
-            if (mob.currentSprite == 8)
+            if (plr.currentSprite == 8)
                 k3 -= (20 * k1) / 100;
-            else if (mob.currentSprite == 9)
+            else if (plr.currentSprite == 9)
                 k3 += (20 * k1) / 100;
             int j4 = (16 * k1) / 100;
             int l4 = (16 * k1) / 100;
+            // wildy skull
             gameGraphics.spriteClip1(k3 - j4 / 2, j - l4 / 2 - (10 * k1) / 100, j4, l4, SPRITE_MEDIA_START + 13);
         }
     }
@@ -1705,7 +1710,7 @@ public class mudclient extends GameWindowMiddleMan {
     {
         gameGraphics.f1Toggle = false;
         gameGraphics.method211();
-        characterDesignMenu.drawMenu();
+        characterDesignMenu.drawMenu(true);
         int i = windowHalfWidth - 116;
         int j = this.windowHalfHeight - 117;
         i += 116;
@@ -1974,7 +1979,7 @@ public class mudclient extends GameWindowMiddleMan {
             	}*/
                 questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
             }
-            questMenu.drawMenu();
+            questMenu.drawMenu(true);
         }
         if (!flag)
         {
@@ -2927,6 +2932,9 @@ public class mudclient extends GameWindowMiddleMan {
                 }
 
         }
+        gameGraphics.drawBoxAlpha(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x232323, 0xc0);
+    	gameGraphics.drawBoxEdge(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x000000);
+        
         gameMenu.method171(messagesHandleChatHist);
         gameMenu.method171(messagesHandleQuestHist);
         gameMenu.method171(messagesHandlePrivHist);
@@ -2937,7 +2945,7 @@ public class mudclient extends GameWindowMiddleMan {
         else if (messagesTab == 3)
             gameMenu.method170(messagesHandlePrivHist);
         Menu.anInt225 = 2;
-        gameMenu.drawMenu();
+        gameMenu.drawMenu(isTyping);
         drawMapMenu(true);
         Menu.anInt225 = 0;
         gameGraphics.method232(gameWindowMenuBarX, gameWindowMenuBarY,
@@ -3770,7 +3778,7 @@ public class mudclient extends GameWindowMiddleMan {
                 		+ DataOperations.longToString(super.ignoreListLongs[j1])
                 		+ "~"+(windowWidth-73)+"~@whi@|   Remove");
         }
-        friendsMenu.drawMenu();
+        friendsMenu.drawMenu(true);
         if (anInt981 == 0)
         {
             int k1 = friendsMenu.selectedListIndex(friendsMenuHandle);
@@ -4086,7 +4094,7 @@ public class mudclient extends GameWindowMiddleMan {
                 spellMenu.drawMenuListText(spellMenuHandle, i1++, s + "Level " + EntityHandler.getSpellDef(spellIndex).getReqLevel() + ": " + EntityHandler.getSpellDef(spellIndex).getName());
             }
 
-            spellMenu.drawMenu();
+            spellMenu.drawMenu(true);
             int selectedSpellIndex = spellMenu.selectedListIndex(spellMenuHandle);
             if (selectedSpellIndex != -1) {
                 gameGraphics.drawString("Level " + EntityHandler.getSpellDef(selectedSpellIndex).getReqLevel()
@@ -4128,7 +4136,7 @@ public class mudclient extends GameWindowMiddleMan {
                     s1 = "@gre@";
                 spellMenu.drawMenuListText(spellMenuHandle, j1++, s1 + "Level " + EntityHandler.getPrayerDef(j2).getReqLevel() + ": " + EntityHandler.getPrayerDef(j2).getName());
             }
-            spellMenu.drawMenu();
+            spellMenu.drawMenu(true);
             int j3 = spellMenu.selectedListIndex(spellMenuHandle);
             if (j3 != -1) {
                 gameGraphics.drawText("Level " + EntityHandler.getPrayerDef(j3).getReqLevel() + ": "
@@ -4224,37 +4232,30 @@ public class mudclient extends GameWindowMiddleMan {
 
     protected final void handleMenuKeyDown(int keyCode, int keyChar)
     {
-        switch (keyCode)
-        {
-            case 38: // Up Arrow
-                gameMenu.updateText(chatHandlePlayerEntry, lastMessage);
-                break;
-            case 40: // Down Arrow
-                gameMenu.updateText(chatHandlePlayerEntry, "");
-                break;
-            case 122: // F11
-                recording = !recording;
-                if (recording) {
-                    try {
-                        frames.clear();
-                        File file = getEmptyFile(true);
-                        Recorder recorder = new Recorder(windowWidth, windowHeight + 11,
-                        		Config.MOVIE_FPS, frames, file.getAbsolutePath(),
-                        		"video.quicktime");
-                        displayMessage("Recording movie to " + file.getName(), 3, 0);
-                        new Thread(recorder).start();
-                    }
-                    catch (Exception e) {
-                    }
-                } else {
-                    frames.add(null);
-                    displayMessage("Movie saved.", 3, 0);
-                }
-                break;
-            case 123: // F12
-                takeScreenshot(true);
-                break;
-        }
+    	if (keyCode == 122)
+    	{ // F11
+        	recording = !recording;
+        	if (recording) {
+        		try {
+        			frames.clear();
+        			File file = getEmptyFile(true);
+        			Recorder recorder = new Recorder(windowWidth, windowHeight + 11,
+        					Config.MOVIE_FPS, frames, file.getAbsolutePath(),
+        					"video.quicktime");
+        			displayMessage("Recording movie to " + file.getName(), 3, 0);
+        			new Thread(recorder).start();
+        		}
+        		catch (Exception e) {
+        		}
+        	} else {
+        		frames.add(null);
+        		displayMessage("Movie saved.", 3, 0);
+        	}
+    	}
+    	else if (keyCode == 123)
+    	{ // F12
+        	takeScreenshot(true);
+    	}
         if (!loggedIn)
         {
             if (loginScreenNumber == 0)
@@ -4264,16 +4265,133 @@ public class mudclient extends GameWindowMiddleMan {
             if (loginScreenNumber == 2)
                 menuLogin.keyDown(keyCode, keyChar);
         }
-        if (loggedIn)
+        else
         {
             if (showCharacterLookScreen)
             {
                 characterDesignMenu.keyDown(keyCode, keyChar);
                 return;
             }
-            if (inputBoxType == 0 && showAbuseWindow == 0)
-                gameMenu.keyDown(keyCode, keyChar);
+            if (isTyping)
+            {
+            	if (inputBoxType == 0 && showAbuseWindow == 0)
+            		handleChatBinds(keyCode, keyChar);
+            }
+            else
+            {
+            	handleKeybinds(keyCode, keyChar);
+            }
         }
+    }
+    
+    private void handleKeybinds(int keyCode, int keyChar)
+    {
+        switch (keyCode)
+        {
+        case 10: // enter
+        	isTyping = !isTyping;
+        	break;
+        case 69: // E
+        	if (super.keyDownCode[87])
+        	{ // W
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
+        				sectionX - 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 160;
+        	}
+        	else if (super.keyDownCode[83])
+        	{ // S
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
+        				sectionX - 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 224;
+        	}
+        	else
+        	{
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY,
+        				sectionX - 1, sectionY, false, true);
+        		cameraRotationLeftRight = 192;
+        	}
+        	break;
+        case 81: // Q
+        	if (super.keyDownCode[87])
+        	{ // W
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
+        				sectionX + 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 96;
+        	}
+        	else if (super.keyDownCode[83])
+        	{ // S
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
+        				sectionX + 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 32;
+        	}
+        	else
+        	{
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY,
+        				sectionX + 1, sectionY, false, true);
+        		cameraRotationLeftRight = 64;
+        	}
+        	break;
+        case 83: // S
+        	if (super.keyDownCode[69])
+        	{ // E
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
+            			sectionX - 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 224;
+        	}
+        	else if (super.keyDownCode[81])
+        	{ // Q
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
+            			sectionX + 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 32;
+        	}
+        	else
+        	{
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY + 1,
+            			sectionX, sectionY + 1, false, true);
+            	cameraRotationLeftRight = 0;
+        	}
+        	break;
+        case 87: // W
+        	if (super.keyDownCode[69])
+        	{ // E
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
+            			sectionX - 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 160;
+        	}
+        	else if (super.keyDownCode[81])
+        	{ // Q
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
+            			sectionX + 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 96;
+        	}
+        	else
+        	{
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY - 1,
+            			sectionX, sectionY - 1, false, true);
+            	cameraRotationLeftRight = 128;
+        	}
+        	break;
+        }
+    }
+    
+    private void handleChatBinds(int keyCode, int keyChar)
+    {
+    	switch(keyCode)
+    	{
+        case 38: // Up Arrow
+        	gameMenu.updateText(chatHandlePlayerEntry, lastMessage);
+        	break;
+        case 40: // Down Arrow
+        	gameMenu.updateText(chatHandlePlayerEntry, "");
+        	break;
+    	default:
+    		gameMenu.keyDown(keyCode, keyChar);
+    		break;
+    	}
+    	if (keyCode == 10)
+    	{ // return key
+        	isTyping = !isTyping;
+    	}
     }
 
     private final void drawShopBox() {
@@ -5355,9 +5473,9 @@ public class mudclient extends GameWindowMiddleMan {
 
         messagesArray[0] = message;
         messagesTimeout[0] = 300;
+        
         if (type == 2)
         {
-        	System.out.println("asdsd: "+messagesHandleChatHist);
             if (gameMenu.anIntArray187[messagesHandleChatHist] == gameMenu.menuListTextCount[messagesHandleChatHist] - chatBoxVisRows + 1)
                 gameMenu.addString(messagesHandleChatHist, message, true);
             else
@@ -6876,26 +6994,93 @@ public class mudclient extends GameWindowMiddleMan {
         */
         audioReader.loadData(sounds, DataOperations.method358(s + ".pcm", sounds), DataOperations.method359(s + ".pcm", sounds));
     }
+    
 
-    private final boolean sendWalkCommand(int walkSectionX, int walkSectionY, int x1, int y1, int x2, int y2, boolean stepBoolean, boolean coordsEqual) {
+    private final boolean sendWalkCommandKeys(int walkSectionX, int walkSectionY,
+    		int x1, int y1, int x2, int y2,
+    		boolean stepBoolean, boolean coordsEqual)
+    {
         // todo: needs checking
-        int stepCount = engineHandle.getStepCount(walkSectionX, walkSectionY, x1, y1, x2, y2, sectionXArray, sectionYArray, stepBoolean);
+        int stepCount = engineHandle.getStepCount(walkSectionX, walkSectionY,
+        		x1, y1, x2, y2, sectionXArray, sectionYArray, stepBoolean);
         if (stepCount == -1)
-            if (coordsEqual) {
+        {
+            if (coordsEqual)
+            {
                 stepCount = 1;
                 sectionXArray[0] = x1;
                 sectionYArray[0] = y1;
             } else {
                 return false;
             }
+        }
         stepCount--;
         walkSectionX = sectionXArray[stepCount];
         walkSectionY = sectionYArray[stepCount];
         stepCount--;
         if (coordsEqual)
+        {
             super.streamClass.createPacket(246);
+        }
         else
+        {
             super.streamClass.createPacket(132);
+        }
+        super.streamClass.add2ByteInt(walkSectionX + areaX);
+        super.streamClass.add2ByteInt(walkSectionY + areaY);
+        if (coordsEqual && stepCount == -1 && (walkSectionX + areaX) % 5 == 0)
+            stepCount = 0;
+        for (int currentStep = stepCount; currentStep >= 0 && currentStep > stepCount - 25; currentStep--) {
+            super.streamClass.addByte(sectionXArray[currentStep] - walkSectionX);
+            super.streamClass.addByte(sectionYArray[currentStep] - walkSectionY);
+        }
+
+        super.streamClass.formatPacket();
+        return true;
+    }
+    
+    /**
+     * Sends the steps that the player should take to move to a new position to the server.
+     * @param walkSectionX
+     * @param walkSectionY
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param stepBoolean
+     * @param coordsEqual
+     * @return
+     */
+    private final boolean sendWalkCommand(int walkSectionX, int walkSectionY,
+    		int x1, int y1, int x2, int y2,
+    		boolean stepBoolean, boolean coordsEqual)
+    {
+        // todo: needs checking
+        int stepCount = engineHandle.getStepCount(walkSectionX, walkSectionY,
+        		x1, y1, x2, y2, sectionXArray, sectionYArray, stepBoolean);
+        if (stepCount == -1)
+        {
+            if (coordsEqual)
+            {
+                stepCount = 1;
+                sectionXArray[0] = x1;
+                sectionYArray[0] = y1;
+            } else {
+                return false;
+            }
+        }
+        stepCount--;
+        walkSectionX = sectionXArray[stepCount];
+        walkSectionY = sectionYArray[stepCount];
+        stepCount--;
+        if (coordsEqual)
+        {
+            super.streamClass.createPacket(246);
+        }
+        else
+        {
+            super.streamClass.createPacket(132);
+        }
         super.streamClass.add2ByteInt(walkSectionX + areaX);
         super.streamClass.add2ByteInt(walkSectionY + areaY);
         if (coordsEqual && stepCount == -1 && (walkSectionX + areaX) % 5 == 0)
@@ -8075,7 +8260,7 @@ public class mudclient extends GameWindowMiddleMan {
         chatBoxWidth = 502;
         chatBoxX = 5;
         chatBoxY = windowHeight - chatBoxHeight - chatPlayerEntryHeight-10;
-        chatPlayerEntryX = chatBoxX + 2;
+        chatPlayerEntryX = chatBoxX;
         chatPlayerEntryY = chatBoxY + chatBoxHeight;
         chatPlayerEntryWidth = chatBoxWidth - (chatPlayerEntryX - chatBoxX);
         gameWindowMenuBarWidth = 197;
@@ -8480,4 +8665,5 @@ public class mudclient extends GameWindowMiddleMan {
     		"Tourist trap (members)", "Watchtower (members)", "Dwarf Cannon (members)",
     		"Murder Mystery (members)", "Digsite (members)", "Gertrude's Cat (members)",
     		"Legend's Quest (members)"};
+    private boolean isTyping;
 }

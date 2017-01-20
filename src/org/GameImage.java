@@ -1288,7 +1288,8 @@ public class GameImage implements ImageProducer, ImageObserver {
      * @param l1
      * @param flip
      */
-    public void spriteClip4(int startX, int startY, int newWidth, int newHeight, int spriteId, int hairColor, int skinColor, int l1, boolean flip)
+    public void spriteClip4(int startX, int startY, int newWidth, int newHeight,
+    		int spriteId, int hairColor, int skinColor, int l1, boolean flip)
     {
         try {
             if (hairColor == 0)
@@ -1833,9 +1834,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    private void method257(int i, int j, int k, int l, byte abyte0[], boolean flag) {
-        int i1 = j + abyte0[i + 5];
-        int j1 = k - abyte0[i + 6];
+    private void method257(int i, int x, int y, int colour, byte abyte0[], boolean flag) {
+        int i1 = x + abyte0[i + 5];
+        int j1 = y - abyte0[i + 6];
         int k1 = abyte0[i + 3];
         int l1 = abyte0[i + 4];
         int i2 = abyte0[i] * 16384 + abyte0[i + 1] * 128 + abyte0[i + 2];
@@ -1868,10 +1869,10 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         if (k1 > 0 && l1 > 0) {
             if (flag) {
-                method259(imagePixelArray, abyte0, l, i2, j2, k1, l1, k2, l2);
+                method259(imagePixelArray, abyte0, colour, i2, j2, k1, l1, k2, l2);
                 return;
             }
-            plotLetter(imagePixelArray, abyte0, l, i2, j2, k1, l1, k2, l2);
+            plotLetter(imagePixelArray, abyte0, colour, i2, j2, k1, l1, k2, l2);
         }
     }
 

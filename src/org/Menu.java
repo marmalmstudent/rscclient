@@ -131,7 +131,7 @@ public class Menu {
         }
     }
 
-    public void drawMenu()
+    public void drawMenu(boolean isTyping)
     {
         for (int menuObject = 0; menuObject < menuObjectCount; menuObject++)
         {
@@ -181,6 +181,15 @@ public class Menu {
             				anIntArray187[menuObject]);
             		break;
             	case 5:
+            		drawPlayerChatText(menuObject,
+            				menuObjectX[menuObject],
+            				menuObjectY[menuObject],
+            				menuObjectWidth[menuObject],
+            				menuObjectHeight[menuObject],
+            				menuObjectText[menuObject],
+            				menuObjectTextType[menuObject],
+            				isTyping);
+            		break;
             	case 6:
             		method145(menuObject,
             				menuObjectX[menuObject],
@@ -303,6 +312,24 @@ public class Menu {
             color = 0;
         gameImage.drawString(text, x, y, type, color);
     }
+    
+
+    protected void drawPlayerChatText(int menuObject, int objectX, int objectY,
+    		int objectWidth, int objectHeight, String text, int type,
+    		boolean isTyping)
+    {
+        if (isTyping)
+        {
+        	if (currentFocusHandle == menuObject)
+        		text = text + "_";
+        }
+        else
+        {
+        	text = "[Press Return to Chat]";
+        }
+        int yCorrect = objectY + gameImage.messageFontHeight(type) -6;// / 3;
+        drawTextWithMask(menuObject, objectX, yCorrect, text, type);
+    }
 
     /**
      * Player message in chat before they are sent as well at login input
@@ -315,12 +342,9 @@ public class Menu {
      * @param text
      * @param type
      */
-    protected void method145(int menuObject, int objectX, int objectY, int objectWidth, int objectHeight, String text, int type)
+    protected void method145(int menuObject, int objectX, int objectY,
+    		int objectWidth, int objectHeight, String text, int type)
     {
-    	/*
-    	gameImage.drawBoxAlpha(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x232323, 0xc0);
-    	gameImage.drawBoxEdge(objectX-2, objectY+3, objectWidth+2, objectHeight+3, 0x000000);
-    	*/
         if (aBooleanArray185[menuObject]) {
             int k1 = text.length();
             text = "";
@@ -341,7 +365,7 @@ public class Menu {
             //objectX -= gameImage.textWidth(text, type) / 2;
         }
         if (currentFocusHandle == menuObject)
-            text = text + "*";
+        	text = text + "*";
         int yCorrect = objectY + gameImage.messageFontHeight(type);// / 3;
         drawTextWithMask(menuObject, objectX, yCorrect, text, type);
     }
@@ -407,7 +431,7 @@ public class Menu {
     {
         gameImage.drawBoxAlpha(objectX, objectY, objectWidth, objectHeight, 0x232323, 0xc0);
         gameImage.drawBoxEdge(objectX, objectY, objectWidth, objectHeight, 0x000000);
-        int nRows = objectHeight / gameImage.messageFontHeight(objectTextType);
+        int nRows = 7;//objectHeight / gameImage.messageFontHeight(objectTextType);
         if (l1 > menuListTextCount - nRows)
             l1 = menuListTextCount - nRows;
         if (l1 < 0)
@@ -456,15 +480,13 @@ public class Menu {
             sliderSize = ((objectHeight - 27 - sliderMaxSize) * l1) / (menuListTextCount - nRows);
             drawScrollBar(objectX, objectY, objectWidth, objectHeight, sliderSize, sliderMaxSize);
         }
-        int k2 = objectHeight - nRows * gameImage.messageFontHeight(objectTextType);
-        int i3 = objectY + (gameImage.messageFontHeight(objectTextType) * 5) / 6 + k2 / 2;
+        int i3 = objectY + (gameImage.messageFontHeight(objectTextType) * 5) / 6 -3;
         for (int k3 = l1; k3 < menuListTextCount; k3++) {
             drawTextWithMask(menuObject, objectX + 2, i3, menuListText[k3], objectTextType);
             i3 += gameImage.messageFontHeight(objectTextType) - anInt225;
             if (i3 >= objectY + objectHeight)
                 return;
         }
-
     }
 
     /**
