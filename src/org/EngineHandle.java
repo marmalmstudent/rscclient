@@ -430,7 +430,7 @@ public class EngineHandle {
             aModel = new Model(18688, 18688, true, true, false, false, true);
         }
         if (flag) {
-            gameImage.method211();
+            gameImage.resetImagePixels();
             for (int xTile = 0; xTile < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; xTile++) {
                 for (int yTile = 0; yTile < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++) {
                     walkableValue[xTile][yTile] = 0;

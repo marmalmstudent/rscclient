@@ -7,6 +7,7 @@ import org.model.Sprite;
 import org.recorder.Recorder;
 import org.util.Config;
 import org.util.DataConversions;
+import org.util.misc;
 
 import javax.imageio.ImageIO;
 
@@ -17,15 +18,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
-
-public class mudclient extends GameWindowMiddleMan {
-
-    /**
-	 * 
-	 */
+/* 80 columns
+--------------------------------------------------------------------------------
+ */
+public class mudclient extends GameWindowMiddleMan
+{
 	private static final long serialVersionUID = 1L;
 	public static final int SPRITE_MEDIA_START = 2000;
     public static final int SPRITE_UTIL_START = 2100;
@@ -76,13 +77,18 @@ public class mudclient extends GameWindowMiddleMan {
 	public static mudclient mc;
     /* EOF */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception
+    {
         Config.initConfig();
         GameWindowMiddleMan.clientVersion = 25;
         mc = new mudclient();
         mc.appletMode = false;
-        //mc.setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
-        mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32, "TestServer v" + GameWindowMiddleMan.clientVersion, false);
+        /*
+        mc.setLogo(Toolkit.getDefaultToolkit().getImage(
+        		Config.CONF_DIR + File.separator + "Loading.rscd"));
+        */
+        mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32,
+        		"TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
     
     /**
@@ -102,166 +108,251 @@ public class mudclient extends GameWindowMiddleMan {
     {
     	return mc.windowWidth;
     }
+    
+    /**
+     * Formats a packet and cleans up necessary variables.
+     * @param packetID The id of the packet.
+     */
+    private void formatPacket(int packetID)
+    {
+    	switch(packetID)
+    	{
+    	case 70:
+            super.streamClass.createPacket(70);
+            super.streamClass.addByte(tradeMyItemCount);
+            for (int i = 0; i < tradeMyItemCount; i++)
+            {
+                super.streamClass.add2ByteInt(tradeMyItems[i]);
+                super.streamClass.add4ByteInt(tradeMyItemsCount[i]);
+            }
+            super.streamClass.formatPacket();
+            tradeOtherAccepted = false;
+            tradeWeAccepted = false;
+    		break;
+    	case 123:
+            super.streamClass.createPacket(123);
+            super.streamClass.addByte(duelMyItemCount);
+            for (int i = 0; i < duelMyItemCount; i++)
+            {
+                super.streamClass.add2ByteInt(duelMyItems[i]);
+                super.streamClass.add4ByteInt(duelMyItemsCount[i]);
+            }
+            super.streamClass.formatPacket();
+            duelOpponentAccepted = false;
+            duelMyAccepted = false;
+            break;
+    	case 218:
+            super.streamClass.createPacket(218);
+            super.streamClass.addByte(chrHeadGender);
+            super.streamClass.addByte(chrHeadType);
+            super.streamClass.addByte(chrBodyGender);
+            super.streamClass.addByte(character2Colour);
+            super.streamClass.addByte(chrHairClr);
+            super.streamClass.addByte(chrTopClr);
+            super.streamClass.addByte(chrBottomClr);
+            super.streamClass.addByte(chrSkinClr);
+            super.streamClass.formatPacket();
+            gameGraphics.resetImagePixels();
+            showCharacterLookScreen = false;
+            break;
+    	}
+    	
+    }
+    
+    /**
+     * Checks for any errors when requesting to add items to the trade.
+     * @param id Item id
+     * @param amount Item amount
+     * @param offerType Type of offer being made; 0 for trade, 1 for duel.
+     * @return True if no errors were found. False if errors were found.
+     */
+    private boolean anyOfferErrors(int id, int amount, int offerType)
+    {
+    	if (offerType == 0 && tradeMyItemCount >= 12)
+        {
+            displayMessage("@cya@Your trade offer is currently full", 3, 0);
+            return false;
+        }
+        if (offerType == 1 && duelMyItemCount >= 12)
+        {
+            displayMessage("@cya@Your duel offer is currently full", 3, 0);
+            return false;
+        }
+        if (inventoryCount(id) < amount)
+        {
+            displayMessage("@cya@You do not have that many"
+            		+ EntityHandler.getItemDef(id).getName()
+            		+ " to offer", 3, 0);
+            return false;
+        }
+        if (!EntityHandler.getItemDef(id).isStackable()
+        		&& amount > 1)
+        {
+            displayMessage("@cya@You can only offer 1 non stackable at a time",
+            		3, 0);
+            return false;
+        }
+    	return true;
+    }
+    
+    /**
+     * Handles adding an item to the trade list of the player items currently offered.
+     * If an error occurs (such as invalid amount or id) no items are added.
+     * @param id Item id.
+     * @param amount Item amount.
+     */
+    private void handleTradeOfferCommand(int id, int amount)
+    {
+        if (anyOfferErrors(id, amount, 0))
+        	return;
+        boolean addNewItem = true;
+        for (int i = 0; i < tradeMyItemCount; ++i)
+        {
+        	if (tradeMyItems[i] != id)
+        		continue;
+        	if (!EntityHandler.getItemDef(id).isStackable())
+        		break;
+            if (inventoryCount(id) < (tradeMyItemsCount[i] + amount))
+            {
+                displayMessage("@cya@You do not have that many"
+                		+ EntityHandler.getItemDef(id).getName()
+                		+ " to offer", 3, 0);
+                return;
+            }
+            tradeMyItemsCount[i] += amount;
+            addNewItem = false;
+            break;
+        }
+        if (addNewItem)
+        {
+            tradeMyItems[tradeMyItemCount] = id;
+            tradeMyItemsCount[tradeMyItemCount] = amount;
+            tradeMyItemCount++;
+        }
+        formatPacket(70);
+    }
+    
+    /**
+     * Handles adding an item to the duel list of the player items currently offered.
+     * If an error occurs (such as invalid amount or id) no items are added.
+     * @param id Item id.
+     * @param amount Item amount.
+     */
+    private void handleDuelOfferCommand(int id, int amount)
+    {
+        if (anyOfferErrors(id, amount, 1))
+        	return;
+        boolean addNewItem = true;
+        for (int i = 0; i < duelMyItemCount; i++)
+        {
+            if (duelMyItems[i] != id)
+            	continue;
+            if (!EntityHandler.getItemDef(id).isStackable())
+            	break;
+            if (inventoryCount(id) < (duelMyItemsCount[i] + amount))
+            {
+                displayMessage("@cya@You do not have that many"
+                		+ EntityHandler.getItemDef(id).getName()
+                		+ " to offer", 3, 0);
+                return;
+            }
+            duelMyItemsCount[i] += amount;
+            addNewItem = false;
+            break;
+        }
+        if (addNewItem)
+        {
+            duelMyItems[duelMyItemCount] = id;
+            duelMyItemsCount[duelMyItemCount] = amount;
+            duelMyItemCount++;
+        }
+        formatPacket(123);
+    }
+    
+    /**
+     * Passes an offer command to the relevant function depending on what offer window
+     * is open.
+     * @param id Item id.
+     * @param amount Item amount.
+     * @return
+     */
+    private boolean handleOfferCommand(int id, int amount)
+    {
+        if (showTradeWindow)
+        	handleTradeOfferCommand(id, amount);
+        else if (showDuelWindow)
+        	handleDuelOfferCommand(id, amount);
+        else {
+            displayMessage("@cya@There is nothing to offer to.", 3, 0);
+        }
+    	return false;
+    }
 
+    /**
+     * Takes a command, formats it and passes it to the relevant function.
+     * The command must be on the form:
+     * 
+     * command args0 args1 args2 ... argsN
+     * 
+     * @param s The command.
+     * @return true if the input string matches a valid command
+     */
     private boolean handleCommand(String s)
     {
-        int firstSpace = s.indexOf(" ");
-        String cmd = s;
-        String[] args = new String[0];
-        if (firstSpace != -1) {
-            cmd = s.substring(0, firstSpace).trim();
-            args = s.substring(firstSpace + 1).trim().split(" ");
-        }
-        if (cmd.equals("offer"))
+        String[] cmd = s.split(" ");
+        if (cmd[0].equalsIgnoreCase("offer") && cmd.length > 3)
         {
-            int id, amount;
-            try {
-                id = Integer.parseInt(args[0]);
-                amount = Integer.parseInt(args[1]);
-                boolean done = false;
-                if (showTradeWindow) {
-                    if (tradeMyItemCount >= 12) {
-                        displayMessage("@cya@Your trade offer is currently full", 3, 0);
-                        return true;
-                    }
-                    if (inventoryCount(id) < amount) {
-                        displayMessage("@cya@You do not have that many" + EntityHandler.getItemDef(id).getName() + " to offer", 3, 0);
-                        return true;
-                    }
-                    if (!EntityHandler.getItemDef(id).isStackable() && amount > 1) {
-                        displayMessage("@cya@You can only offer 1 non stackable at a time", 3, 0);
-                        return true;
-                    }
-
-                    for (int c = 0; c < tradeMyItemCount; c++) {
-                        if (tradeMyItems[c] == id) {
-                            if (EntityHandler.getItemDef(id).isStackable()) {
-                                if (inventoryCount(id) < (tradeMyItemsCount[c] + amount)) {
-                                    displayMessage("@cya@You do not have that many" + EntityHandler.getItemDef(id).getName() + " to offer", 3, 0);
-                                    return true;
-                                }
-                                tradeMyItemsCount[c] += amount;
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-
-                    if (!done) {
-                        tradeMyItems[tradeMyItemCount] = id;
-                        tradeMyItemsCount[tradeMyItemCount] = amount;
-                        tradeMyItemCount++;
-                    }
-
-                    super.streamClass.createPacket(70);
-                    super.streamClass.addByte(tradeMyItemCount);
-                    for (int c = 0; c < tradeMyItemCount; c++) {
-                        super.streamClass.add2ByteInt(tradeMyItems[c]);
-                        super.streamClass.add4ByteInt(tradeMyItemsCount[c]);
-                    }
-                    super.streamClass.formatPacket();
-
-                    tradeOtherAccepted = false;
-                    tradeWeAccepted = false;
-                } else if (showDuelWindow) {
-                    if (duelMyItemCount >= 12) {
-                        displayMessage("@cya@Your duel offer is currently full", 3, 0);
-                        return true;
-                    }
-                    if (inventoryCount(id) < amount) {
-                        displayMessage("@cya@You do not have that many" + EntityHandler.getItemDef(id).getName() + " to offer", 3, 0);
-                        return true;
-                    }
-                    if (!EntityHandler.getItemDef(id).isStackable() && amount > 1) {
-                        displayMessage("@cya@You can only offer 1 non stackable at a time", 3, 0);
-                        return true;
-                    }
-
-                    for (int c = 0; c < duelMyItemCount; c++) {
-                        if (duelMyItems[c] == id) {
-                            if (EntityHandler.getItemDef(id).isStackable()) {
-                                if (inventoryCount(id) < (duelMyItemsCount[c] + amount)) {
-                                    displayMessage("@cya@You do not have that many" + EntityHandler.getItemDef(id).getName() + " to offer", 3, 0);
-                                    return true;
-                                }
-                                duelMyItemsCount[c] += amount;
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-
-                    if (!done) {
-                        duelMyItems[duelMyItemCount] = id;
-                        duelMyItemsCount[duelMyItemCount] = amount;
-                        duelMyItemCount++;
-                    }
-
-                    super.streamClass.createPacket(123);
-                    super.streamClass.addByte(duelMyItemCount);
-                    for (int c = 0; c < duelMyItemCount; c++) {
-                        super.streamClass.add2ByteInt(duelMyItems[c]);
-                        super.streamClass.add4ByteInt(duelMyItemsCount[c]);
-                    }
-                    super.streamClass.formatPacket();
-
-                    duelOpponentAccepted = false;
-                    duelMyAccepted = false;
-                } else {
-                    displayMessage("@cya@You aren't in a trade/stake, there is nothing to offer to.", 3, 0);
-                }
-            }
-            catch (Exception e) {
-                displayMessage("@cya@Invalid args!", 3, 0);
-            }
-            return true;
+    		int id, amount;
+        	try
+        	{
+        		id = Integer.parseInt(cmd[1]);
+        		amount = Integer.parseInt(cmd[2]);
+        	} catch (NumberFormatException nfe)
+        	{
+        		displayMessage("@cya@Arguments must be integers!", 3, 0);
+        		return true;
+        	}
+        	return handleOfferCommand(id, amount);
         }
         return false;
     }
 
-    private static String timeSince(long time) {
-        int seconds = (int) ((System.currentTimeMillis() - time) / 1000);
-        int minutes = (int) (seconds / 60);
-        int hours = (int) (minutes / 60);
-        int days = (int) (hours / 24);
-        return days + " days " + (hours % 24) + " hours " + (minutes % 60) + " mins";
-    }
-
-    private BufferedImage getImage() throws IOException {
-        BufferedImage bufferedImage = new BufferedImage(windowWidth, windowHeight + 11, BufferedImage.TYPE_INT_RGB);
+    /**
+     * Returns the game image. Used to present the game on the screen and take
+     * creenshots.
+     * @return
+     * @throws IOException
+     */
+    private BufferedImage getImage() throws IOException
+    {
+        BufferedImage bufferedImage = new BufferedImage(windowWidth,
+        		windowHeight + 11, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = bufferedImage.createGraphics();
         g2d.drawImage(gameGraphics.image, 0, 0, this);
         g2d.dispose();
         return bufferedImage;
     }
 
-    private File getEmptyFile(boolean movie) throws IOException {
-        String charName = DataOperations.longToString(DataOperations.stringLength12ToLong(currentUser));
-        File file = new File(Config.MEDIA_DIR + File.separator + charName);
-        if (!file.exists() || !file.isDirectory()) {
-            file.mkdir();
-        }
-        String folder = file.getPath() + File.separator;
-        file = null;
-        for (int suffix = 0; file == null || file.exists(); suffix++) {
-            file = movie ? new File(folder + "movie" + suffix + ".mov") : new File(folder + "screenshot" + suffix + ".png");
-        }
-        return file;
-    }
-
-    private boolean takeScreenshot(boolean verbose) {
-        try {
-            File file = getEmptyFile(false);
+    /**
+     * Takes a screenshot and saves it.
+     * @param verbose True if additional information about the process should be
+     * printed.
+     * @return True if a screenshot was successfully taken.
+     */
+    private boolean takeScreenshot(boolean verbose)
+    {
+        try
+        {
+        	File file = misc.getEmptyFile(false, currentUser);
             ImageIO.write(getImage(), "png", file);
-            if (verbose) {
+            if (verbose)
                 handleServerMessage("Screenshot saved as " + file.getName() + ".");
-            }
             return true;
         }
-        catch (IOException e) {
-            if (verbose) {
+        catch (IOException e)
+        {
+            if (verbose)
                 handleServerMessage("Error saving screenshot.");
-            }
             return false;
         }
     }
@@ -282,19 +373,22 @@ public class mudclient extends GameWindowMiddleMan {
             i2 = 1;
             flag = true;
         }
-        int j2 = i2 * 3 + walkModel[(mob.stepCount / EntityHandler.getNpcDef(mob.type).getWalkModel()) % 4];
+        int j2 = i2 * 3 + walkModel[(mob.stepCount
+        		/ EntityHandler.getNpcDef(mob.type).getWalkModel()) % 4];
         if (mob.currentSprite == 8) {
             i2 = 5;
             l1 = 2;
             flag = false;
             i -= (EntityHandler.getNpcDef(mob.type).getCombatSprite() * k1) / 100;
-            j2 = i2 * 3 + npcCombatModelArray1[(loginTimer / (EntityHandler.getNpcDef(mob.type).getCombatModel() - 1)) % 8];
+            j2 = i2 * 3 + npcCombatModelArray1[(loginTimer
+            		/ (EntityHandler.getNpcDef(mob.type).getCombatModel() - 1)) % 8];
         } else if (mob.currentSprite == 9) {
             i2 = 5;
             l1 = 2;
             flag = true;
             i += (EntityHandler.getNpcDef(mob.type).getCombatSprite() * k1) / 100;
-            j2 = i2 * 3 + npcCombatModelArray2[(loginTimer / EntityHandler.getNpcDef(mob.type).getCombatModel()) % 8];
+            j2 = i2 * 3 + npcCombatModelArray2[(loginTimer
+            		/ EntityHandler.getNpcDef(mob.type).getCombatModel()) % 8];
         }
         for (int k2 = 0; k2 < 12; k2++) {
             int l2 = npcAnimationArray[l1][k2];
@@ -303,7 +397,8 @@ public class mudclient extends GameWindowMiddleMan {
                 int i4 = 0;
                 int j4 = 0;
                 int k4 = j2;
-                if (flag && i2 >= 1 && i2 <= 3 && EntityHandler.getAnimationDef(k3).hasF())
+                if (flag && i2 >= 1 && i2 <= 3
+                		&& EntityHandler.getAnimationDef(k3).hasF())
                     k4 += 15;
                 if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasA()) {
                     int l4 = k4 + EntityHandler.getAnimationDef(k3).getNumber();
@@ -360,138 +455,189 @@ public class mudclient extends GameWindowMiddleMan {
             }
         }
     }
-//Ok
-    private final void drawCharacterLookScreen() {
-        characterDesignMenu.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
-        if (characterDesignMenu.hasActivated(characterDesignHeadButton1))
-            do
-                characterHeadType = ((characterHeadType - 1) + EntityHandler.animationCount()) % EntityHandler.animationCount();
-            while ((EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 3) != 1 || (EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 4 * characterHeadGender) == 0);
-        if (characterDesignMenu.hasActivated(characterDesignHeadButton2))
-            do characterHeadType = (characterHeadType + 1) % EntityHandler.animationCount();
-            while ((EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 3) != 1 || (EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 4 * characterHeadGender) == 0);
-        if (characterDesignMenu.hasActivated(characterDesignHairColourButton1))
-            characterHairColour = ((characterHairColour - 1) + characterHairColours.length) % characterHairColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignHairColourButton2))
-            characterHairColour = (characterHairColour + 1) % characterHairColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignGenderButton1) || characterDesignMenu.hasActivated(characterDesignGenderButton2)) {
-            for (characterHeadGender = 3 - characterHeadGender; (EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 3) != 1 || (EntityHandler.getAnimationDef(characterHeadType).getGenderModel() & 4 * characterHeadGender) == 0; characterHeadType = (characterHeadType + 1) % EntityHandler.animationCount())
-                ;
-            for (; (EntityHandler.getAnimationDef(characterBodyGender).getGenderModel() & 3) != 2 || (EntityHandler.getAnimationDef(characterBodyGender).getGenderModel() & 4 * characterHeadGender) == 0; characterBodyGender = (characterBodyGender + 1) % EntityHandler.animationCount())
-                ;
+
+    /**
+     * Draws the character creation/look screen
+     */
+    private final void drawCharacterLookScreen()
+    {
+        chrDesignMenu.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if (chrDesignMenu.hasActivated(chrDesignHeadBtnLeft))
+            do {
+                chrHeadType = ((chrHeadType - 1) + EntityHandler.animationCount())
+                		% EntityHandler.animationCount();
+            } while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+            		|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
+        else if (chrDesignMenu.hasActivated(chrDesignHeadBtnRight))
+            do {
+            	chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount();
+            } while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+            		|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
+        if (chrDesignMenu.hasActivated(chrDesignGenderBtnLeft)
+        		|| chrDesignMenu.hasActivated(chrDesignGenderBtnRight))
+        {
+            for (chrHeadGender = 3 - chrHeadGender;
+            		(EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+            				|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0;
+            		chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount());
+            for (; (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 3) != 2
+            		|| (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 4 * chrHeadGender) == 0;
+            		chrBodyGender = (chrBodyGender + 1) % EntityHandler.animationCount());
         }
-        if (characterDesignMenu.hasActivated(characterDesignTopColourButton1))
-            characterTopColour = ((characterTopColour - 1) + characterTopBottomColours.length) % characterTopBottomColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignTopColourButton2))
-            characterTopColour = (characterTopColour + 1) % characterTopBottomColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignSkinColourButton1))
-            characterSkinColour = ((characterSkinColour - 1) + characterSkinColours.length) % characterSkinColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignSkinColourButton2))
-            characterSkinColour = (characterSkinColour + 1) % characterSkinColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignBottomColourButton1))
-            characterBottomColour = ((characterBottomColour - 1) + characterTopBottomColours.length) % characterTopBottomColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignBottomColourButton2))
-            characterBottomColour = (characterBottomColour + 1) % characterTopBottomColours.length;
-        if (characterDesignMenu.hasActivated(characterDesignAcceptButton)) {
-            super.streamClass.createPacket(218);
-            super.streamClass.addByte(characterHeadGender);
-            super.streamClass.addByte(characterHeadType);
-            super.streamClass.addByte(characterBodyGender);
-            super.streamClass.addByte(character2Colour);
-            super.streamClass.addByte(characterHairColour);
-            super.streamClass.addByte(characterTopColour);
-            super.streamClass.addByte(characterBottomColour);
-            super.streamClass.addByte(characterSkinColour);
-            super.streamClass.formatPacket();
-            gameGraphics.method211();
-            showCharacterLookScreen = false;
-        }
+        if (chrDesignMenu.hasActivated(chrDesignHairClrBtnLeft))
+            chrHairClr = (chrHairClr-1 + chrHairClrs.length)
+            		% chrHairClrs.length;
+        else if (chrDesignMenu.hasActivated(chrDesignHairClrBtnRight))
+            chrHairClr = (chrHairClr + 1) % chrHairClrs.length;
+        if (chrDesignMenu.hasActivated(chrDesignTopClrBtnLeft))
+            chrTopClr = ((chrTopClr - 1) + chrTopBottomClrs.length)
+            		% chrTopBottomClrs.length;
+        else if (chrDesignMenu.hasActivated(chrDesignTopClrBtnRight))
+            chrTopClr = (chrTopClr + 1) % chrTopBottomClrs.length;
+        if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnLeft))
+            chrSkinClr = ((chrSkinClr - 1) + chrSkinClrs.length)
+            		% chrSkinClrs.length;
+        else if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnRight))
+            chrSkinClr = (chrSkinClr + 1) % chrSkinClrs.length;
+        if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnLeft))
+            chrBottomClr = ((chrBottomClr - 1) + chrTopBottomClrs.length)
+            		% chrTopBottomClrs.length;
+        else if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnRight))
+            chrBottomClr = (chrBottomClr + 1) % chrTopBottomClrs.length;
+        if (chrDesignMenu.hasActivated(characterDesignAcceptButton))
+        	formatPacket(218);
     }
 
-    protected final int inventoryCount(int reqID) {
+    /**
+     * Finds the number of occurences of an item id in the player's inventory.
+     * Note: A stack of N items counts as N occurences.
+     * @param reqID Item id.
+     * @return The number of occurences of the item in the player's inventory.
+     */
+    protected final int inventoryCount(int reqID)
+    {
         int amount = 0;
-        for (int index = 0; index < inventoryCount; index++) {
-            if (inventoryItems[index] == reqID) {
-                if (!EntityHandler.getItemDef(reqID).isStackable()) {
-                    amount++;
-                } else {
-                    amount += inventoryItemsCount[index];
-                }
-            }
+        for (int index = 0; index < inventoryCount; index++)
+        {
+            if (inventoryItems[index] == reqID)
+                if (!EntityHandler.getItemDef(reqID).isStackable())
+                    ++amount;
+                else
+                	amount += inventoryItemsCount[index];
         }
         return amount;
     }
+    
+    /**
+     * Handles updating the welcome login screen, displaying the option to
+     * create a new account or login to an existing account.
+     * @return true if the user have clicked on the existing user button.
+     * false if not.
+     */
+    private final boolean updateLoginWelcomeScreen()
+    {
+        menuWelcome.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if (menuWelcome.hasActivated(loginButtonNewUser))
+            loginScreenNumber = 1;
+        if (menuWelcome.hasActivated(loginButtonExistingUser))
+        {
+            loginScreenNumber = 2;
+            menuLogin.updateText(loginStatusText,
+            		"Please enter your username and password");
+            menuLogin.updateText(loginUsernameTextBox, currentUser);
+            menuLogin.updateText(loginPasswordTextBox, currentPass);
+            menuLogin.setFocus(loginUsernameTextBox);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Handles updating the new user login screen, displaying information about how
+     * to create a new account.
+     * @return true if the user clicked on the 'OK' button in the new user menu.
+     * false if not.
+     */
+    private final boolean updateLoginNewScreen()
+    {
+        menuNewUser.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if (menuNewUser.hasActivated(newUserOkButton))
+        {
+            //loginScreenNumber = 0; // menuWelcome
+        	loginScreenNumber = 2;
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Handles updating the exising user login screen, displaying the text fields
+     * where the username and password should be enterd.
+     * @return false.
+     */
+    private final boolean updateExsitingScreen()
+    {
+        menuLogin.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if (menuLogin.hasActivated(loginCancelButton))
+        {
+        	 //loginScreenNumber = 0; // menuwelcome
+        	loginScreenNumber = 1;
+        }
+        if (menuLogin.hasActivated(loginUsernameTextBox))
+            menuLogin.setFocus(loginPasswordTextBox);
+        if (menuLogin.hasActivated(loginPasswordTextBox)
+        		|| menuLogin.hasActivated(loginOkButton))
+        {
+            currentUser = menuLogin.getText(loginUsernameTextBox);
+            currentPass = menuLogin.getText(loginPasswordTextBox);
+            login(currentUser, currentPass, false);
+        }
+    	return false;
+    }
 
+    /**
+     * Invokes the method that handles the current login scren.
+     */
     private final void updateLoginScreen()
     {
         if (super.socketTimeout > 0)
             super.socketTimeout--;
         if (loginScreenNumber == 0)
-        { // welcome menu
-            menuWelcome.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
-            if (menuWelcome.hasActivated(loginButtonNewUser))
-                loginScreenNumber = 1;
-            if (menuWelcome.hasActivated(loginButtonExistingUser))
-            {
-                loginScreenNumber = 2;
-                menuLogin.updateText(loginStatusText, "Please enter your username and password");
-                menuLogin.updateText(loginUsernameTextBox, currentUser);
-                menuLogin.updateText(loginPasswordTextBox, currentPass);
-                menuLogin.setFocus(loginUsernameTextBox);
-                return;
-            }
+        {
+        	if (updateLoginWelcomeScreen())
+        		return;
         } else if (loginScreenNumber == 1)
-        { // new user
-            menuNewUser.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
-            if (menuNewUser.hasActivated(newUserOkButton))
-            {
-                //loginScreenNumber = 0; // menuWelcome
-            	loginScreenNumber = 2;
-                return;
-            }
+        {
+        	if (updateLoginNewScreen())
+        		return;
         } else if (loginScreenNumber == 2)
-        { // existing user
-            menuLogin.updateActions(super.mouseX, super.mouseY, super.lastMouseDownButton, super.mouseDownButton);
-            if (menuLogin.hasActivated(loginCancelButton))
-            {
-            	 //loginScreenNumber = 0; // menuwelcome
-            	loginScreenNumber = 1;
-            }
-            if (menuLogin.hasActivated(loginUsernameTextBox))
-                menuLogin.setFocus(loginPasswordTextBox);
-            if (menuLogin.hasActivated(loginPasswordTextBox) || menuLogin.hasActivated(loginOkButton)) {
-                currentUser = menuLogin.getText(loginUsernameTextBox);
-                currentPass = menuLogin.getText(loginPasswordTextBox);
-                login(currentUser, currentPass, false);
-            }
+        {
+        	if (updateExsitingScreen())
+        		return;
         }
     }
-
-    private final void drawLoginScreen()
+    
+    /**
+     * Draws relevant sprites on the login screens. This includes the background
+     * image itself.
+     */
+    private final void drawLoginScreenSprites()
     {
-    	Sprite sprite;
-        hasReceivedWelcomeBoxDetails = false;
-        gameGraphics.f1Toggle = false;
-        gameGraphics.method211();
-        sprite = ((GameImage) (gameGraphics)).sprites[2010];
-        if (loginScreenNumber == 0
-        		|| loginScreenNumber == 1
-        		|| loginScreenNumber == 2 
-        		|| loginScreenNumber == 3)
+    	Sprite sprite = ((GameImage) (gameGraphics)).sprites[2010];
+        if (loginScreenNumber >= 0 && loginScreenNumber <= 3)
         {
+        	// background image
         	gameGraphics.imageToPixArray(gameGraphics.loginScreen, 0, 0,
     				windowWidth, windowHeight, true);
+        	// bottom right sprite
         	gameGraphics.drawPicture(windowWidth - sprite.getWidth() - sprite.getXShift(),
         			windowHeight - sprite.getHeight() - sprite.getYShift(), 2010);
-        	
         }
-        if (loginScreenNumber == 0)
-            menuWelcome.drawMenu(true);
-        if (loginScreenNumber == 1)
-            menuNewUser.drawMenu(true);
-        if (loginScreenNumber == 2)
-            menuLogin.drawMenu(true);
-        // blue bar at the botom
+        // blue bar at the bottom
         sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
         int nSprites = windowWidth / sprite.getWidth();
         int currentOffset = 0;
@@ -506,6 +652,23 @@ public class mudclient extends GameWindowMiddleMan {
         			windowWidth-nSprites*sprite.getWidth(),
         			sprite.getHeight(), SPRITE_MEDIA_START + 22);
         }
+    }
+
+    /**
+     * Draws the login screen background as well as the appropriate login menu.
+     */
+    private final void drawLoginScreen()
+    {
+        hasReceivedWelcomeBoxDetails = false;
+        gameGraphics.f1Toggle = false;
+        gameGraphics.resetImagePixels();
+        drawLoginScreenSprites();
+        if (loginScreenNumber == 0)
+            menuWelcome.drawMenu(true);
+        if (loginScreenNumber == 1)
+            menuNewUser.drawMenu(true);
+        if (loginScreenNumber == 2)
+            menuLogin.drawMenu(true);
         gameGraphics.drawImage(aGraphics936, 0, 0);
     }
 
@@ -783,13 +946,13 @@ public class mudclient extends GameWindowMiddleMan {
                     int l5 = (k * ((GameImage) (gameGraphics)).sprites[k5].getSomething1()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getSomething1();
                     k4 -= (l5 - k) / 2;
                     int colour = EntityHandler.getAnimationDef(l3).getCharColour();
-                    int skinColour = characterSkinColours[plr.colourSkinType];
+                    int skinColour = chrSkinClrs[plr.colourSkinType];
                     if (colour == 1)
-                        colour = characterHairColours[plr.colourHairType];
+                        colour = chrHairClrs[plr.colourHairType];
                     else if (colour == 2)
-                        colour = characterTopBottomColours[plr.colourTopType];
+                        colour = chrTopBottomClrs[plr.colourTopType];
                     else if (colour == 3)
-                        colour = characterTopBottomColours[plr.colourBottomType];
+                        colour = chrTopBottomClrs[plr.colourBottomType];
                     gameGraphics.spriteClip4(i + k4, j + i5, l5, l, k5, colour, skinColour, j1, flag);
                 }
             }
@@ -1709,21 +1872,21 @@ public class mudclient extends GameWindowMiddleMan {
     private final void method62()
     {
         gameGraphics.f1Toggle = false;
-        gameGraphics.method211();
-        characterDesignMenu.drawMenu(true);
+        gameGraphics.resetImagePixels();
+        chrDesignMenu.drawMenu(true);
         int i = windowHalfWidth - 116;
         int j = this.windowHalfHeight - 117;
         i += 116;
         j -= 25;
-        gameGraphics.spriteClip3(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber(), characterTopBottomColours[characterBottomColour]);
-        gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(characterBodyGender).getNumber(), characterTopBottomColours[characterTopColour], characterSkinColours[characterSkinColour], 0, false);
-        gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(characterHeadType).getNumber(), characterHairColours[characterHairColour], characterSkinColours[characterSkinColour], 0, false);
-        gameGraphics.spriteClip3(i - 32, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 6, characterTopBottomColours[characterBottomColour]);
-        gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(characterBodyGender).getNumber() + 6, characterTopBottomColours[characterTopColour], characterSkinColours[characterSkinColour], 0, false);
-        gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(characterHeadType).getNumber() + 6, characterHairColours[characterHairColour], characterSkinColours[characterSkinColour], 0, false);
-        gameGraphics.spriteClip3((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 12, characterTopBottomColours[characterBottomColour]);
-        gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(characterBodyGender).getNumber() + 12, characterTopBottomColours[characterTopColour], characterSkinColours[characterSkinColour], 0, false);
-        gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(characterHeadType).getNumber() + 12, characterHairColours[characterHairColour], characterSkinColours[characterSkinColour], 0, false);
+        gameGraphics.spriteClip3(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber(), chrTopBottomClrs[chrBottomClr]);
+        gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber(), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+        gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber(), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+        gameGraphics.spriteClip3(i - 32, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 6, chrTopBottomClrs[chrBottomClr]);
+        gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 6, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+        gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 6, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+        gameGraphics.spriteClip3((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 12, chrTopBottomClrs[chrBottomClr]);
+        gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 12, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+        gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 12, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
 
         // blue bar at the botom
         Sprite sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
@@ -2845,7 +3008,7 @@ public class mudclient extends GameWindowMiddleMan {
         }
 
         gameGraphics.f1Toggle = false;
-        gameGraphics.method211();
+        gameGraphics.resetImagePixels();
         gameGraphics.f1Toggle = super.keyF1Toggle;
         if (lastWildYSubtract == 3) {
             int i5 = 40 + (int) (Math.random() * 3D);
@@ -4238,7 +4401,7 @@ public class mudclient extends GameWindowMiddleMan {
         	if (recording) {
         		try {
         			frames.clear();
-        			File file = getEmptyFile(true);
+        			File file = misc.getEmptyFile(true, currentUser);
         			Recorder recorder = new Recorder(windowWidth, windowHeight + 11,
         					Config.MOVIE_FPS, frames, file.getAbsolutePath(),
         					"video.quicktime");
@@ -4269,7 +4432,7 @@ public class mudclient extends GameWindowMiddleMan {
         {
             if (showCharacterLookScreen)
             {
-                characterDesignMenu.keyDown(keyCode, keyChar);
+                chrDesignMenu.keyDown(keyCode, keyChar);
                 return;
             }
             if (isTyping)
@@ -5325,65 +5488,65 @@ public class mudclient extends GameWindowMiddleMan {
 
     private final void makeCharacterDesignMenu()
     {
-        characterDesignMenu = new Menu(gameGraphics, 100);
-        characterDesignMenu.drawText(windowHalfWidth, windowHalfHeight - 157, "Please design Your Character", 4, true);
+        chrDesignMenu = new Menu(gameGraphics, 100);
+        chrDesignMenu.drawText(windowHalfWidth, windowHalfHeight - 157, "Please design Your Character", 4, true);
         int i = windowHalfWidth - 116;
         int j = windowHalfHeight - 133;
         i += 116;
         j -= 10;
-        characterDesignMenu.drawText(i - 55, j + 110, "Front", 3, true);
-        characterDesignMenu.drawText(i, j + 110, "Side", 3, true);
-        characterDesignMenu.drawText(i + 55, j + 110, "Back", 3, true);
+        chrDesignMenu.drawText(i - 55, j + 110, "Front", 3, true);
+        chrDesignMenu.drawText(i, j + 110, "Side", 3, true);
+        chrDesignMenu.drawText(i + 55, j + 110, "Back", 3, true);
         byte byte0 = 54;
         j += 145;
-        characterDesignMenu.method157(i - byte0, j, 53, 41);
-        characterDesignMenu.drawText(i - byte0, j - 8, "Head", 1, true);
-        characterDesignMenu.drawText(i - byte0, j + 8, "Type", 1, true);
-        characterDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignHeadButton1 = characterDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-        characterDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignHeadButton2 = characterDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-        characterDesignMenu.method157(i + byte0, j, 53, 41);
-        characterDesignMenu.drawText(i + byte0, j - 8, "Hair", 1, true);
-        characterDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-        characterDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignHairColourButton1 = characterDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-        characterDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignHairColourButton2 = characterDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+        chrDesignMenu.method157(i - byte0, j, 53, 41);
+        chrDesignMenu.drawText(i - byte0, j - 8, "Head", 1, true);
+        chrDesignMenu.drawText(i - byte0, j + 8, "Type", 1, true);
+        chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignHeadBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+        chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignHeadBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+        chrDesignMenu.method157(i + byte0, j, 53, 41);
+        chrDesignMenu.drawText(i + byte0, j - 8, "Hair", 1, true);
+        chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+        chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignHairClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+        chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignHairClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
         j += 50;
-        characterDesignMenu.method157(i - byte0, j, 53, 41);
-        characterDesignMenu.drawText(i - byte0, j, "Gender", 1, true);
-        characterDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignGenderButton1 = characterDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-        characterDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignGenderButton2 = characterDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-        characterDesignMenu.method157(i + byte0, j, 53, 41);
-        characterDesignMenu.drawText(i + byte0, j - 8, "Top", 1, true);
-        characterDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-        characterDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignTopColourButton1 = characterDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-        characterDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignTopColourButton2 = characterDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+        chrDesignMenu.method157(i - byte0, j, 53, 41);
+        chrDesignMenu.drawText(i - byte0, j, "Gender", 1, true);
+        chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignGenderBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+        chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignGenderBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+        chrDesignMenu.method157(i + byte0, j, 53, 41);
+        chrDesignMenu.drawText(i + byte0, j - 8, "Top", 1, true);
+        chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+        chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignTopClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+        chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignTopClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
         j += 50;
-        characterDesignMenu.method157(i - byte0, j, 53, 41);
-        characterDesignMenu.drawText(i - byte0, j - 8, "Skin", 1, true);
-        characterDesignMenu.drawText(i - byte0, j + 8, "Colour", 1, true);
-        characterDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignSkinColourButton1 = characterDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-        characterDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignSkinColourButton2 = characterDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-        characterDesignMenu.method157(i + byte0, j, 53, 41);
-        characterDesignMenu.drawText(i + byte0, j - 8, "Bottom", 1, true);
-        characterDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-        characterDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-        characterDesignBottomColourButton1 = characterDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-        characterDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-        characterDesignBottomColourButton2 = characterDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+        chrDesignMenu.method157(i - byte0, j, 53, 41);
+        chrDesignMenu.drawText(i - byte0, j - 8, "Skin", 1, true);
+        chrDesignMenu.drawText(i - byte0, j + 8, "Colour", 1, true);
+        chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignSkinClrBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+        chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignSkinClrBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+        chrDesignMenu.method157(i + byte0, j, 53, 41);
+        chrDesignMenu.drawText(i + byte0, j - 8, "Bottom", 1, true);
+        chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+        chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+        chrDesignBottomClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+        chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+        chrDesignBottomClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
         j += 82;
         j -= 35;
-        characterDesignMenu.drawBox(i, j, 200, 30, 0x343434, 0x000000, 0xc0);
-        characterDesignMenu.drawText(i, j, "Accept", 4, false);
-        characterDesignAcceptButton = characterDesignMenu.makeButton(i, j, 200, 30);
+        chrDesignMenu.drawBox(i, j, 200, 30, 0x343434, 0x000000, 0xc0);
+        chrDesignMenu.drawText(i, j, "Accept", 4, false);
+        characterDesignAcceptButton = chrDesignMenu.makeButton(i, j, 200, 30);
     }
 
     private final void drawAbuseWindow2()
@@ -5533,7 +5696,7 @@ public class mudclient extends GameWindowMiddleMan {
         loginScreenNumber = 2;
         loggedIn = true;
         resetPrivateMessageStrings();
-        gameGraphics.method211();
+        gameGraphics.resetImagePixels();
         gameGraphics.drawImage(aGraphics936, 0, 0);
         for (int i = 0; i < objectCount; i++) {
             gameCamera.removeModel(objectModelArray[i]);
@@ -5684,17 +5847,8 @@ public class mudclient extends GameWindowMiddleMan {
                             tradeMyItemCount++;
                             flag = true;
                         }
-                        if (flag) {
-                            super.streamClass.createPacket(70);
-                            super.streamClass.addByte(tradeMyItemCount);
-                            for (int j4 = 0; j4 < tradeMyItemCount; j4++) {
-                                super.streamClass.add2ByteInt(tradeMyItems[j4]);
-                                super.streamClass.add4ByteInt(tradeMyItemsCount[j4]);
-                            }
-                            super.streamClass.formatPacket();
-                            tradeOtherAccepted = false;
-                            tradeWeAccepted = false;
-                        }
+                        if (flag)
+                        	formatPacket(70);
                     }
                 }
                 if (super.mouseX > plrOfferBox[0] && super.mouseY > plrOfferBox[1]
@@ -5724,18 +5878,7 @@ public class mudclient extends GameWindowMiddleMan {
 
                             break;
                         }
-
-                        super.streamClass.createPacket(70);
-                        super.streamClass.addByte(tradeMyItemCount);
-                        for (int i3 = 0; i3 < tradeMyItemCount; i3++)
-                        {
-                            super.streamClass.add2ByteInt(tradeMyItems[i3]);
-                            super.streamClass.add4ByteInt(tradeMyItemsCount[i3]);
-                        }
-
-                        super.streamClass.formatPacket();
-                        tradeOtherAccepted = false;
-                        tradeWeAccepted = false;
+                    	formatPacket(70);
                     }
                 }
                 if (super.mouseX >= accptBtn[0]
@@ -8166,12 +8309,12 @@ public class mudclient extends GameWindowMiddleMan {
         cameraRotationLeftRight = 128;
         cameraRotationUpDown = 912;
         showWelcomeBox = false;
-        characterBodyGender = 1;
+        chrBodyGender = 1;
         character2Colour = 2;
-        characterHairColour = 2;
-        characterTopColour = 8;
-        characterBottomColour = 14;
-        characterHeadGender = 1;
+        chrHairClr = 2;
+        chrTopClr = 8;
+        chrBottomClr = 14;
+        chrHeadGender = 1;
         selectedBankItem = -1;
         selectedBankItemType = -2;
         menuText2 = new String[250];
@@ -8353,7 +8496,7 @@ public class mudclient extends GameWindowMiddleMan {
     private int mobMessagesHeight[];
     private Mob npcArray[];
     private int equipmentStatus[];
-    private final int characterTopBottomColours[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
+    private final int chrTopBottomClrs[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
     private int loginScreenNumber;
     private int anInt699;
     private boolean prayerOn[];
@@ -8443,7 +8586,7 @@ public class mudclient extends GameWindowMiddleMan {
     private int anInt791;
     private int anInt792;
     private Menu menuLogin;
-    private final int characterHairColours[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
+    private final int chrHairClrs[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
     private Model objectModelArray[];
     private Menu menuWelcome;
     private int systemUpdate;
@@ -8457,14 +8600,14 @@ public class mudclient extends GameWindowMiddleMan {
     int messagesHandlePrivHist;
     int messagesTab;
     private boolean showWelcomeBox;
-    private int characterHeadType;
-    private int characterBodyGender;
+    private int chrHeadType;
+    private int chrBodyGender;
     private int character2Colour;
-    private int characterHairColour;
-    private int characterTopColour;
-    private int characterBottomColour;
-    private int characterSkinColour;
-    private int characterHeadGender;
+    private int chrHairClr;
+    private int chrTopClr;
+    private int chrBottomClr;
+    private int chrSkinClr;
+    private int chrHeadGender;
     private int loginStatusText;
     private int loginUsernameTextBox;
     private int loginPasswordTextBox;
@@ -8496,18 +8639,18 @@ public class mudclient extends GameWindowMiddleMan {
             {11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4, 3}
     };
     private int bankItemCount;
-    private int characterDesignHeadButton1;
-    private int characterDesignHeadButton2;
-    private int characterDesignHairColourButton1;
-    private int characterDesignHairColourButton2;
-    private int characterDesignGenderButton1;
-    private int characterDesignGenderButton2;
-    private int characterDesignTopColourButton1;
-    private int characterDesignTopColourButton2;
-    private int characterDesignSkinColourButton1;
-    private int characterDesignSkinColourButton2;
-    private int characterDesignBottomColourButton1;
-    private int characterDesignBottomColourButton2;
+    private int chrDesignHeadBtnLeft;
+    private int chrDesignHeadBtnRight;
+    private int chrDesignHairClrBtnLeft;
+    private int chrDesignHairClrBtnRight;
+    private int chrDesignGenderBtnLeft;
+    private int chrDesignGenderBtnRight;
+    private int chrDesignTopClrBtnLeft;
+    private int chrDesignTopClrBtnRight;
+    private int chrDesignSkinClrBtnLeft;
+    private int chrDesignSkinClrBtnRight;
+    private int chrDesignBottomClrBtnLeft;
+    private int chrDesignBottomClrBtnRight;
     private int characterDesignAcceptButton;
     private int anIntArray858[];
     private int anIntArray859[];
@@ -8588,7 +8731,7 @@ public class mudclient extends GameWindowMiddleMan {
     private int screenRotationTimer;
     private int attackingInt40;
     private int anIntArray944[];
-    private Menu characterDesignMenu;
+    private Menu chrDesignMenu;
     private int shopItemSellPriceModifier;
     private int shopItemBuyPriceModifier;
     private int modelUpdatingTimer;
@@ -8611,7 +8754,7 @@ public class mudclient extends GameWindowMiddleMan {
     private long tradeConfirmOtherNameLong;
     protected boolean showTradeWindow;
     private int playerAliveTimeout;
-    private final int characterSkinColours[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
+    private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
     private byte sounds[];
     private boolean aBooleanArray970[];
     private int objectCount;

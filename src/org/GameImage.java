@@ -139,19 +139,18 @@ public class GameImage implements ImageProducer, ImageObserver {
         g.drawImage(image, x, y, this);
     }
 
-    public void method211() {
+    public void resetImagePixels() {
         int i = menuDefaultWidth * menuDefaultHeight;
         if (!f1Toggle) {
-            for (int j = 0; j < i; j++)
+            for (int j = 0; j < i; ++j)
                 imagePixelArray[j] = 0;
-
             return;
         }
         int k = 0;
-        for (int l = -menuDefaultHeight; l < 0; l += 2) {
+        for (int l = -menuDefaultHeight; l < 0; l += 2)
+        {
             for (int i1 = -menuDefaultWidth; i1 < 0; i1++)
                 imagePixelArray[k++] = 0;
-
             k += menuDefaultWidth;
         }
 
