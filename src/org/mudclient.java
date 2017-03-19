@@ -3,6 +3,7 @@ package org;
 import org.entityhandling.EntityHandler;
 import org.entityhandling.defs.ItemDef;
 import org.entityhandling.defs.NPCDef;
+import org.menus.AbuseWindow;
 import org.model.Sprite;
 import org.recorder.Recorder;
 import org.util.Config;
@@ -15,6 +16,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -671,20 +674,14 @@ public class mudclient extends GameWindowMiddleMan
             menuLogin.drawMenu(true);
         gameGraphics.drawImage(aGraphics936, 0, 0);
     }
-
+    
+    /**
+     * Draws the main report abuse window.
+     */
     private final void drawAbuseWindow1()
     {
-        abuseSelectedType = 0;
-        int i = windowHalfHeight - 32;
-        for (int j = 0; j < 12; j++)
-        {
-            if (super.mouseX > windowHalfWidth - 190
-            		&& super.mouseX < windowHalfWidth + 190
-            		&& super.mouseY >= i - 12 && super.mouseY < i + 3)
-                abuseSelectedType = j + 1;
-            i += 14;
-        }
-
+        abuseSelectedType = 1 + abWin.getSelectedType(super.mouseX, super.mouseY);
+        
         if (mouseButtonClick != 0 && abuseSelectedType != 0) {
             mouseButtonClick = 0;
             showAbuseWindow = 2;
@@ -692,150 +689,63 @@ public class mudclient extends GameWindowMiddleMan
             super.enteredText = "";
             return;
         }
-        i += 15;
         if (mouseButtonClick != 0) {
             mouseButtonClick = 0;
-            if (super.mouseX < windowHalfWidth - 200
-            		|| super.mouseY < windowHalfHeight - 132
-            		|| super.mouseX > windowHalfWidth + 200
-            		|| super.mouseY > windowHalfHeight + 158)
+            if (!abWin.insideWindow(super.mouseX, super.mouseY)
+            		|| abWin.insideCloseBtn(super.mouseX, super.mouseY))
             {
                 showAbuseWindow = 0;
                 return;
             }
-            if (super.mouseX > windowHalfWidth - 190
-            		&& super.mouseX < windowHalfWidth + 190
-            		&& super.mouseY >= i - 15
-            		&& super.mouseY < i + 5) {
-                showAbuseWindow = 0;
-                return;
-            }
         }
-        gameGraphics.drawBox(windowHalfWidth - 200, windowHalfHeight - 132, 400, 290, 0);
-        gameGraphics.drawBoxEdge(windowHalfWidth - 200, windowHalfHeight - 132, 400, 290, 0xffffff);
-        i = windowHalfHeight - 117;
-        gameGraphics.drawText("This form is for reporting players who are breaking our rules", windowHalfWidth, i, 1, 0xffffff);
-        i += 15;
-        gameGraphics.drawText("Using it sends a snapshot of the last 60 secs of activity to us", windowHalfWidth, i, 1, 0xffffff);
-        i += 15;
-        gameGraphics.drawText("If you misuse this form, you will be banned.", windowHalfWidth, i, 1, 0xff8000);
-        i += 15;
-        i += 10;
-        gameGraphics.drawText("First indicate which of our 12 rules is being broken. For a detailed", windowHalfWidth, i, 1, 0xffff00);
-        i += 15;
-        gameGraphics.drawText("explanation of each rule please read the manual on our website.", windowHalfWidth, i, 1, 0xffff00);
-        i += 15;
-        int k;
-        if (abuseSelectedType == 1) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
+        gameGraphics.drawBox(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0);
+        gameGraphics.drawBoxEdge(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0xffffff);
+        String[] info = abWin.getInfo();
+        int rowY = abWin.getFirstLineY();
+        for (String str : info)
+        {
+        	gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffffff);
+        	rowY += abWin.getRowSeparation();
         }
-        gameGraphics.drawText("1: Offensive language", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 2) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
+        String[] reportInfo = abWin.getReportInfo();
+        for (String str : reportInfo)
+        {
+        	gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffff00);
+        	rowY += abWin.getRowSeparation();
         }
-        gameGraphics.drawText("2: Item scamming", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 3) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
+        String[] rules = abWin.getRules();
+        int i = 0;
+        for (String str : rules)
+        {
+        	gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
+        			abWin.getSelectedType(super.mouseX, super.mouseY) == i ? 0xff8000 : 0xffffff);
+        	++i;
+        	rowY += abWin.getRowSeparation();
         }
-        gameGraphics.drawText("3: Password scamming", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 4) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
+        int selectedType = abWin.getSelectedType(super.mouseX, super.mouseY);
+        if (selectedType != -1)
+        {
+        	gameGraphics.drawBoxEdge(abWin.getBoxX(),
+        			abWin.getFirstRuleY() + abWin.getRowYOffset()
+        			+ abWin.getSelectedType(super.mouseX, super.mouseY)*abWin.getRowSeparation(),
+        			abWin.getBoxWidth(), abWin.getRowSeparation(), 0xffffff);
         }
-        gameGraphics.drawText("4: Bug abuse", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 5) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
+        String [] closeText = abWin.getCloseText();
+        for (String str : closeText)
+        {
+        	gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
+        			abWin.insideCloseBtn(super.mouseX, super.mouseY) ? 0xffff00 : 0xffffff);
+        	rowY += abWin.getRowSeparation();
         }
-        gameGraphics.drawText("5: TestServer Staff impersonation", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 6) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("6: Account sharing/trading", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 7) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("7: Macroing", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 8) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("8: Mutiple logging in", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 9) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("9: Encouraging others to break rules", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 10) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("10: Misuse of customer support", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 11) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("11: Advertising / website", windowHalfWidth, i, 1, k);
-        i += 14;
-        if (abuseSelectedType == 12) {
-            gameGraphics.drawBoxEdge(windowHalfWidth - 190, i - 12, 380, 15, 0xffffff);
-            k = 0xff8000;
-        } else {
-            k = 0xffffff;
-        }
-        gameGraphics.drawText("12: Real world item trading", windowHalfWidth, i, 1, k);
-        i += 14;
-        i += 15;
-        k = 0xffffff;
-        if (super.mouseX > windowHalfWidth - 60
-        		&& super.mouseX < windowHalfWidth + 60
-        		&& super.mouseY > i - 15 && super.mouseY < i + 5)
-            k = 0xffff00;
-        gameGraphics.drawText("Click here to cancel", windowHalfWidth, i, 1, k);
     }
 
     private final void autoRotateCamera() {
         if ((cameraAutoAngle & 1) == 1 && enginePlayerVisible(cameraAutoAngle))
             return;
-        if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle)) {
-            if (enginePlayerVisible(cameraAutoAngle + 1 & 7)) {
+        if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
+        {
+            if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
+            {
                 cameraAutoAngle = cameraAutoAngle + 1 & 7;
                 return;
             }
@@ -846,15 +756,18 @@ public class mudclient extends GameWindowMiddleMan
         int ai[] = {
                 1, -1, 2, -2, 3, -3, 4
         };
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 7; ++i)
+        {
             if (!enginePlayerVisible(cameraAutoAngle + ai[i] + 8 & 7))
                 continue;
             cameraAutoAngle = cameraAutoAngle + ai[i] + 8 & 7;
             break;
         }
 
-        if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle)) {
-            if (enginePlayerVisible(cameraAutoAngle + 1 & 7)) {
+        if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
+        {
+            if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
+            {
                 cameraAutoAngle = cameraAutoAngle + 1 & 7;
                 return;
             }
@@ -863,7 +776,8 @@ public class mudclient extends GameWindowMiddleMan
         }
     }
 
-    public final Graphics getGraphics() {
+    public final Graphics getGraphics()
+    {
     	/*
         if (GameWindow.gameFrame != null) {
             return GameWindow.gameFrame.getGraphics();
@@ -1009,12 +923,14 @@ public class mudclient extends GameWindowMiddleMan
         }
     }
 
-    private final void loadConfigFilter() {
+    private final void loadConfigFilter()
+    {
         drawLoadingBarText(15, "Unpacking Configuration");
         EntityHandler.load();
     }
 
-    private final void loadModels() {
+    private final void loadModels()
+    {
         drawLoadingBarText(75, "Loading 3d models");
 
         String[] modelNames = {
@@ -1027,22 +943,29 @@ public class mudclient extends GameWindowMiddleMan
                 "clawspell2", "clawspell3", "clawspell4", "clawspell5",
                 "spellcharge2", "spellcharge3"
         };
-        for (String name : modelNames) {
+        for (String name : modelNames)
             EntityHandler.storeModel(name);
-        }
-
         byte[] models = load("models36.jag");
-        if (models == null) {
+        try
+        {
+        	misc.writeToFile(models, "src/org/conf/models36.dat");
+        } catch (IOException ioe)
+        {
+        	ioe.printStackTrace();
+        }
+        if (models == null)
+        {
             lastLoadedNull = true;
             return;
         }
-        for (int j = 0; j < EntityHandler.getModelCount(); j++) {
-            int k = DataOperations.method358(EntityHandler.getModelName(j) + ".ob3", models);
-            if (k == 0) {
+        for (int j = 0; j < EntityHandler.getModelCount(); j++)
+        {
+            int k = DataOperations.method358(EntityHandler.getModelName(j)
+            		+ ".ob3", models);
+            if (k == 0)
                 gameDataModels[j] = new Model(1, 1);
-            } else {
+            else
                 gameDataModels[j] = new Model(models, k, true);
-            }
             gameDataModels[j].isGiantCrystal = EntityHandler.getModelName(j).equals("giantcrystal");
         }
     }
@@ -3625,6 +3548,7 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics = new GameImageMiddleMan(windowWidth, windowHeight + 12, 4000, this);
         gameGraphics._mudclient = this;
         gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
+        abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(spellsX, spellsY + spellsTabHeight+1,
@@ -5347,6 +5271,13 @@ public class mudclient extends GameWindowMiddleMan
         try {
             drawLoadingBarText(90, "Unpacking Sound effects");
             sounds = load("sounds1.mem");
+            try
+            {
+            	misc.writeToFile(sounds, "src/org/conf/sounds1.dat");
+            } catch (IOException ioe)
+            {
+            	ioe.printStackTrace();
+            }            
             audioReader = new AudioReader();
             return;
         }
@@ -7048,7 +6979,13 @@ public class mudclient extends GameWindowMiddleMan
                 return;
             }
             if (command == 11) {
+            	String[] combat = {
+            			"combat1a", "combat1b", /* blunt weapons/unarmed*/
+            			"combat2a", "combat2b", /* sharp weapons*/
+            			"combat3a", "combat3b", /* spear? goblin sound*/
+            	};
                 String s = new String(data, 1, length - 1);
+                System.out.printf("Sounds from server: %s\n", s);
                 playSound(s);
                 return;
             }
@@ -7143,7 +7080,7 @@ public class mudclient extends GameWindowMiddleMan
     		int x1, int y1, int x2, int y2,
     		boolean stepBoolean, boolean coordsEqual)
     {
-        // todo: needs checking
+        // TODO: needs checking
         int stepCount = engineHandle.getStepCount(walkSectionX, walkSectionY,
         		x1, y1, x2, y2, sectionXArray, sectionYArray, stepBoolean);
         if (stepCount == -1)
@@ -8619,6 +8556,7 @@ public class mudclient extends GameWindowMiddleMan
     int anInt826;
     private boolean aBooleanArray827[];
     private int playerStatBase[];
+    private AbuseWindow abWin;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;

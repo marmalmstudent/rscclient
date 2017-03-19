@@ -151,8 +151,13 @@ public class DataOperations {
 
         int l = 2 + i * 10;
         for (int i1 = 0; i1 < i; i1++) {
-            int j1 = (abyte0[i1 * 10 + 2] & 0xff) * 0x1000000 + (abyte0[i1 * 10 + 3] & 0xff) * 0x10000 + (abyte0[i1 * 10 + 4] & 0xff) * 256 + (abyte0[i1 * 10 + 5] & 0xff);
-            int k1 = (abyte0[i1 * 10 + 9] & 0xff) * 0x10000 + (abyte0[i1 * 10 + 10] & 0xff) * 256 + (abyte0[i1 * 10 + 11] & 0xff);
+            int j1 = (abyte0[i1 * 10 + 2] & 0xff) * 0x1000000
+            		+ (abyte0[i1 * 10 + 3] & 0xff) * 0x10000
+            		+ (abyte0[i1 * 10 + 4] & 0xff) * 256
+            		+ (abyte0[i1 * 10 + 5] & 0xff);
+            int k1 = (abyte0[i1 * 10 + 9] & 0xff) * 0x10000
+            		+ (abyte0[i1 * 10 + 10] & 0xff) * 256
+            		+ (abyte0[i1 * 10 + 11] & 0xff);
             if (j1 == j)
                 return l;
             l += k1;
