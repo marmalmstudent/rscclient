@@ -58,7 +58,8 @@ public class misc {
 		}
 	}
 
-	private static final int RECORDER_SAMPLERATE = 800;
+	// 8000*8; sample_rate*bits_per_sample
+	private static final int RECORDER_SAMPLERATE = 64000;
 	
 	public static void rawToWave(final File rawFile, final File waveFile) throws IOException {
 
@@ -85,8 +86,8 @@ public class misc {
 			writeInt(output, 16); // subchunk 1 size
 			writeShort(output, (short) 1); // audio format (1 = PCM)
 			writeShort(output, (short) 1); // number of channels
-			writeInt(output, 8000/*44100/10*/); // sample rate
-			writeInt(output, RECORDER_SAMPLERATE * 2); // byte rate
+			writeInt(output, 8000); // sample rate
+			writeInt(output, RECORDER_SAMPLERATE); // byte rate
 			writeShort(output, (short) 1/*2*/); // block align
 			writeShort(output, (short) 8/*16*/); // bits per sample
 			writeString(output, "data"); // subchunk 2 id

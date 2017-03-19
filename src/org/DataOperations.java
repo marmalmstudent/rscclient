@@ -2,6 +2,8 @@ package org;
 
 import java.io.*;
 
+import org.util.misc;
+
 public class DataOperations {
 
     public static InputStream streamFromPath(String path) throws IOException {
@@ -142,45 +144,130 @@ public class DataOperations {
         return s;
     }
     
-    public static int method358(String s, byte abyte0[]) {
-        int i = getUnsigned2Bytes(abyte0, 0);
-        int j = 0;
-        s = s.toUpperCase();
-        for (int k = 0; k < s.length(); k++)
-            j = (j * 61 + s.charAt(k)) - 32;
-
-        int l = 2 + i * 10;
-        for (int i1 = 0; i1 < i; i1++) {
-            int j1 = (abyte0[i1 * 10 + 2] & 0xff) * 0x1000000
-            		+ (abyte0[i1 * 10 + 3] & 0xff) * 0x10000
-            		+ (abyte0[i1 * 10 + 4] & 0xff) * 256
-            		+ (abyte0[i1 * 10 + 5] & 0xff);
-            int k1 = (abyte0[i1 * 10 + 9] & 0xff) * 0x10000
-            		+ (abyte0[i1 * 10 + 10] & 0xff) * 256
-            		+ (abyte0[i1 * 10 + 11] & 0xff);
-            if (j1 == j)
-                return l;
-            l += k1;
+    public static int storeDB(String entry, byte database[]) {
+        int nDBEntries = getUnsigned2Bytes(database, 0);
+        int entryIdentifier = 0;
+        entry = entry.toUpperCase();
+        for (int k = 0; k < entry.length(); k++)
+            entryIdentifier = (entryIdentifier * 61 + entry.charAt(k)) - 32;
+        int offset = 2 + nDBEntries * 10;
+        int dbEntryIdentifier, dbEntryLength;
+        byte[] out;
+        for (int i = 0; i < nDBEntries; i++) {
+            dbEntryIdentifier = ((database[i * 10 + 2] & 0xff) << 24)
+            		+ ((database[i * 10 + 3] & 0xff) << 16)
+            		+ ((database[i * 10 + 4] & 0xff) << 8)
+            		+ (database[i * 10 + 5] & 0xff); // data name?
+            dbEntryLength = ((database[i * 10 + 9] & 0xff) << 16)
+            		+ ((database[i * 10 + 10] & 0xff) << 8)
+            		+ (database[i * 10 + 11] & 0xff);  // data length?
+            out = new byte[dbEntryLength];
+            for (int j = 0; j < dbEntryLength; ++j)
+            	out[j] = (byte)(database[offset + j] >> 1);
+            try {
+            	misc.writeToFile(out, "src/org/conf/utils/sounds/sound"+i+".pcm");
+            } catch (IOException ioe) {ioe.printStackTrace();}
+            offset += dbEntryLength; // l is offset i guess?
         }
 
         return 0;
     }
+    
+    private static int getIdentifier(String entry)
+    {
+        int entryIdentifier = 0;
+        entry = entry.toUpperCase();
+        for (int k = 0; k < entry.length(); k++)
+            entryIdentifier = (entryIdentifier * 61 + entry.charAt(k)) - 32;
+        return entryIdentifier;
+    }
+    
+    /**
+     * A database has the following layout (name(bytes)):
+     * HEADER:
+     * nbr_of_entries(2), identifier0(4), length0(3), length0(3),
+     * identifier1(4), length1(3), length1(3),
+     * identifier2(4), length2(3), length2(3),
+     * ...
+     * identifierN(4), lengthN(3), lengthN(3)
+     * 
+     * DATA:
+     * data0(length0)
+     * data1(length1)
+     * data2(length2)
+     * ...
+     * dataN(lengthN)
+     * 
+     * @param entry A sting containing the sought entry
+     * @param database The database where the entry should be found.
+     * @return the offset (i.e. index) in the database where the entry is stored.
+     */
+    public static int getEntryOffset(String entry, byte database[]) {
+        int nDBEntries = getUnsigned2Bytes(database, 0);
+        int entryIdentifier = getIdentifier(entry);
+        int offset = 2 + nDBEntries * 10;
+        int dbEntryIdentifier, dbEntryLength;
+        if (entry.endsWith(".pcm") || entry.endsWith(".PCM"))
+        {
+        	storeDB(entry, database);
+        	System.out.printf("Printing to database\n");
+        }
+        for (int i = 0; i < nDBEntries; i++) {
+            dbEntryIdentifier = ((database[i * 10 + 2] & 0xff) << 24)
+            		+ ((database[i * 10 + 3] & 0xff) << 16)
+            		+ ((database[i * 10 + 4] & 0xff) << 8)
+            		+ (database[i * 10 + 5] & 0xff);
+            dbEntryLength = ((database[i * 10 + 9] & 0xff) << 16)
+            		+ ((database[i * 10 + 10] & 0xff) << 8)
+            		+ (database[i * 10 + 11] & 0xff);
+            if (dbEntryIdentifier == entryIdentifier)
+                return offset;
+            offset += dbEntryLength;
+        }
 
-    public static int method359(String s, byte abyte0[]) {
-        int i = getUnsigned2Bytes(abyte0, 0);
-        int j = 0;
-        s = s.toUpperCase();
-        for (int k = 0; k < s.length(); k++)
-            j = (j * 61 + s.charAt(k)) - 32;
+        return 0;
+    }
+    
+    /**
+     * A database has the following layout (name(bytes)):
+     * HEADER:
+     * nbr_of_entries(2), identifier0(4), length0(3), length0(3),
+     * identifier1(4), length1(3), length1(3),
+     * identifier2(4), length2(3), length2(3),
+     * ...
+     * identifierN(4), lengthN(3), lengthN(3)
+     * 
+     * DATA:
+     * data0(length0)
+     * data1(length1)
+     * data2(length2)
+     * ...
+     * dataN(lengthN)
+     * 
+     * @param entry A sting containing the sought entry
+     * @param database The database where the entry should be found.
+     * @return the the length (in bytes) of the entry.
+     */
+    public static int getEntryLength(String entry, byte database[]) {
+        int nDBEntries = getUnsigned2Bytes(database, 0);
+        int entryIdentifier = getIdentifier(entry);
 
-        int l = 2 + i * 10;
-        for (int i1 = 0; i1 < i; i1++) {
-            int j1 = (abyte0[i1 * 10 + 2] & 0xff) * 0x1000000 + (abyte0[i1 * 10 + 3] & 0xff) * 0x10000 + (abyte0[i1 * 10 + 4] & 0xff) * 256 + (abyte0[i1 * 10 + 5] & 0xff);
-            int k1 = (abyte0[i1 * 10 + 6] & 0xff) * 0x10000 + (abyte0[i1 * 10 + 7] & 0xff) * 256 + (abyte0[i1 * 10 + 8] & 0xff);
-            int l1 = (abyte0[i1 * 10 + 9] & 0xff) * 0x10000 + (abyte0[i1 * 10 + 10] & 0xff) * 256 + (abyte0[i1 * 10 + 11] & 0xff);
-            if (j1 == j)
-                return k1;
-            l += l1;
+        int offset = 2 + nDBEntries * 10;
+        for (int i1 = 0; i1 < nDBEntries; i1++) {
+            int dbEntryIdentifier = ((database[i1 * 10 + 2] & 0xff) << 24)
+            		+ ((database[i1 * 10 + 3] & 0xff) << 16)
+            		+ ((database[i1 * 10 + 4] & 0xff) << 8)
+            		+ (database[i1 * 10 + 5] & 0xff);
+            int dbEntryLength = ((database[i1 * 10 + 6] & 0xff) << 16)
+            		+ ((database[i1 * 10 + 7] & 0xff) << 8)
+            		+ (database[i1 * 10 + 8] & 0xff);
+            // seems to always be the same as dbEntryLength
+            int dbEntryLength2 = ((database[i1 * 10 + 9] & 0xff) << 16)
+            		+ ((database[i1 * 10 + 10] & 0xff) << 8)
+            		+ (database[i1 * 10 + 11] & 0xff);
+            if (dbEntryIdentifier == entryIdentifier)
+                return dbEntryLength;
+            offset += dbEntryLength2;
         }
 
         return 0;

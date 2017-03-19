@@ -960,7 +960,7 @@ public class mudclient extends GameWindowMiddleMan
         }
         for (int j = 0; j < EntityHandler.getModelCount(); j++)
         {
-            int k = DataOperations.method358(EntityHandler.getModelName(j)
+            int k = DataOperations.getEntryOffset(EntityHandler.getModelName(j)
             		+ ".ob3", models);
             if (k == 0)
                 gameDataModels[j] = new Model(1, 1);
@@ -5270,14 +5270,7 @@ public class mudclient extends GameWindowMiddleMan
     private final void loadSounds() {
         try {
             drawLoadingBarText(90, "Unpacking Sound effects");
-            sounds = load("sounds1.mem");
-            try
-            {
-            	misc.writeToFile(sounds, "src/org/conf/sounds1.dat");
-            } catch (IOException ioe)
-            {
-            	ioe.printStackTrace();
-            }            
+            sounds = load("sounds1.mem");   
             audioReader = new AudioReader();
             return;
         }
@@ -7072,7 +7065,7 @@ public class mudclient extends GameWindowMiddleMan
         	System.out.print(i+", ");
         System.out.print("]\n");
         */
-        audioReader.loadData(sounds, DataOperations.method358(s + ".pcm", sounds), DataOperations.method359(s + ".pcm", sounds));
+        audioReader.loadData(sounds, DataOperations.getEntryOffset(s + ".pcm", sounds), DataOperations.getEntryLength(s + ".pcm", sounds));
     }
     
 
