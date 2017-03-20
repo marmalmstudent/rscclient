@@ -958,14 +958,15 @@ public class mudclient extends GameWindowMiddleMan
             lastLoadedNull = true;
             return;
         }
+        int modelOffset;
         for (int j = 0; j < EntityHandler.getModelCount(); j++)
         {
-            int k = DataOperations.getEntryOffset(EntityHandler.getModelName(j)
+            modelOffset = DataOperations.getEntryOffset(EntityHandler.getModelName(j)
             		+ ".ob3", models);
-            if (k == 0)
+            if (modelOffset == 0)
                 gameDataModels[j] = new Model(1, 1);
             else
-                gameDataModels[j] = new Model(models, k, true);
+                gameDataModels[j] = new Model(models, modelOffset, true);
             gameDataModels[j].isGiantCrystal = EntityHandler.getModelName(j).equals("giantcrystal");
         }
     }
@@ -2735,10 +2736,10 @@ public class mudclient extends GameWindowMiddleMan
         modelY *= magicLoc;
         modelX1 *= magicLoc;
         modelX2 *= magicLoc;
-        int i3 = model.method179(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
-        int j3 = model.method179(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - l2, modelY);
-        int k3 = model.method179(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - l2, modelX2);
-        int l3 = model.method179(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
+        int i3 = model.insertCoordPointNoDublicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
+        int j3 = model.insertCoordPointNoDublicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - l2, modelY);
+        int k3 = model.insertCoordPointNoDublicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - l2, modelX2);
+        int l3 = model.insertCoordPointNoDublicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
         int ai[] = {
                 i3, j3, k3, l3
         };

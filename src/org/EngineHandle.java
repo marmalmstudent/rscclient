@@ -310,8 +310,8 @@ public class EngineHandle {
 
     public void method402(int i, int j, int k, int l, int i1) {
         Model model = aModelArray596[i + j * 8];
-        for (int j1 = 0; j1 < model.anInt226; j1++) {
-            if (model.anIntArray272[j1] == k * 128 && model.anIntArray274[j1] == l * 128) {
+        for (int j1 = 0; j1 < model.nbrCoordPoints; j1++) {
+            if (model.xCoords[j1] == k * 128 && model.yCoords[j1] == l * 128) {
                 model.method187(j1, i1);
                 return;
             }
@@ -450,7 +450,7 @@ public class EngineHandle {
                         i4 = 0;
                     if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0 && EntityHandler.getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4)
                         i4 = 0;
-                    int j5 = model.method179(j2 * 128, i4, i3 * 128);
+                    int j5 = model.insertCoordPointNoDublicate(j2 * 128, i4, i3 * 128);
                     int j7 = (int) (Math.random() * 10D) - 5;
                     model.method187(j5, j7);
                 }
@@ -620,10 +620,10 @@ public class EngineHandle {
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() == 4)
                     {
                         int l7 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getColour();
-                        int j10 = model.method179(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int l12 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int i15 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                        int j17 = model.method179(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        int j10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                        int l12 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                        int i15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                        int j17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                         int ai2[] = {
                                 j10, l12, i15, j17
                         };
@@ -640,10 +640,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getUnknown() == 4)
                         {
                             int i8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getColour();
-                            int k10 = model.method179(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int i13 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int j15 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int k17 = model.method179(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int k10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int i13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int j15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int k17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai3[] = {
                                     k10, i13, j15, k17
                             };
@@ -657,10 +657,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getUnknown() == 4)
                         {
                             int j8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getColour();
-                            int l10 = model.method179(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int j13 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int k15 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int l17 = model.method179(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int l10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int j13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int k15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int l17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai4[] = {
                                     l10, j13, k15, l17
                             };
@@ -674,10 +674,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getUnknown() == 4)
                         {
                             int k8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getColour();
-                            int i11 = model.method179(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int k13 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int l15 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int i18 = model.method179(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int i11 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int k13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int l15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int i18 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai5[] = {
                                     i11, k13, l15, i18
                             };
@@ -691,10 +691,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getUnknown() == 4)
                         {
                             int l8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getColour();
-                            int j11 = model.method179(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int l13 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int i16 = model.method179((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int j18 = model.method179(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int j11 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int l13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int i16 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int j18 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai6[] = {
                                     j11, l13, i16, j18
                             };
@@ -947,50 +947,50 @@ public class EngineHandle {
                     		&& getRoofTexture(i7 - 1, k9 - 1) == 0)
                     {
                         int ai8[] = new int[3];
-                        ai8[0] = aModel.method179(l26, l27, i26);
-                        ai8[1] = aModel.method179(j26, i28, i27);
-                        ai8[2] = aModel.method179(k25, k27, k26);
+                        ai8[0] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                        ai8[1] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                        ai8[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
                         aModel.method181(3, ai8, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 12000 && getDiagonalWalls(i7, k9) < 24000
                     		&& getRoofTexture(i7 + 1, k9 + 1) == 0)
                     {
                         int ai9[] = new int[3];
-                        ai9[0] = aModel.method179(k24, j27, i25);
-                        ai9[1] = aModel.method179(k25, k27, k26);
-                        ai9[2] = aModel.method179(j26, i28, i27);
+                        ai9[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                        ai9[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                        ai9[2] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
                         aModel.method181(3, ai9, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
                     		&& getRoofTexture(i7 + 1, k9 - 1) == 0)
                     {
                         int ai10[] = new int[3];
-                        ai10[0] = aModel.method179(j26, i28, i27);
-                        ai10[1] = aModel.method179(k24, j27, i25);
-                        ai10[2] = aModel.method179(l26, l27, i26);
+                        ai10[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                        ai10[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                        ai10[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
                         aModel.method181(3, ai10, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
                     		&& getRoofTexture(i7 - 1, k9 + 1) == 0)
                     {
                         int ai11[] = new int[3];
-                        ai11[0] = aModel.method179(k25, k27, k26);
-                        ai11[1] = aModel.method179(l26, l27, i26);
-                        ai11[2] = aModel.method179(k24, j27, i25);
+                        ai11[0] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                        ai11[1] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                        ai11[2] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
                         aModel.method181(3, ai11, i12, 0xbc614e);
                     } else if (j27 == k27 && l27 == i28) {
                         int ai12[] = new int[4];
-                        ai12[0] = aModel.method179(k24, j27, i25);
-                        ai12[1] = aModel.method179(k25, k27, k26);
-                        ai12[2] = aModel.method179(l26, l27, i26);
-                        ai12[3] = aModel.method179(j26, i28, i27);
+                        ai12[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                        ai12[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                        ai12[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                        ai12[3] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
                         aModel.method181(4, ai12, i12, 0xbc614e);
                     } else if (j27 == i28 && k27 == l27) {
                         int ai13[] = new int[4];
-                        ai13[0] = aModel.method179(j26, i28, i27);
-                        ai13[1] = aModel.method179(k24, j27, i25);
-                        ai13[2] = aModel.method179(k25, k27, k26);
-                        ai13[3] = aModel.method179(l26, l27, i26);
+                        ai13[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                        ai13[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                        ai13[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                        ai13[3] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
                         aModel.method181(4, ai13, i12, 0xbc614e);
                     } else {
                         boolean flag1 = true;
@@ -1002,25 +1002,25 @@ public class EngineHandle {
                         }
                         if (!flag1) {
                             int ai14[] = new int[3];
-                            ai14[0] = aModel.method179(k25, k27, k26);
-                            ai14[1] = aModel.method179(l26, l27, i26);
-                            ai14[2] = aModel.method179(k24, j27, i25);
+                            ai14[0] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                            ai14[1] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                            ai14[2] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
                             aModel.method181(3, ai14, i12, 0xbc614e);
                             int ai16[] = new int[3];
-                            ai16[0] = aModel.method179(j26, i28, i27);
-                            ai16[1] = aModel.method179(k24, j27, i25);
-                            ai16[2] = aModel.method179(l26, l27, i26);
+                            ai16[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                            ai16[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                            ai16[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
                             aModel.method181(3, ai16, i12, 0xbc614e);
                         } else {
                             int ai15[] = new int[3];
-                            ai15[0] = aModel.method179(k24, j27, i25);
-                            ai15[1] = aModel.method179(k25, k27, k26);
-                            ai15[2] = aModel.method179(j26, i28, i27);
+                            ai15[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                            ai15[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                            ai15[2] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
                             aModel.method181(3, ai15, i12, 0xbc614e);
                             int ai17[] = new int[3];
-                            ai17[0] = aModel.method179(l26, l27, i26);
-                            ai17[1] = aModel.method179(j26, i28, i27);
-                            ai17[2] = aModel.method179(k25, k27, k26);
+                            ai17[0] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                            ai17[1] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                            ai17[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
                             aModel.method181(3, ai17, i12, 0xbc614e);
                         }
                     }
@@ -1261,10 +1261,10 @@ public class EngineHandle {
         int j2 = k * 128;
         int k2 = l * 128;
         int l2 = i1 * 128;
-        int i3 = model.method179(i2, -anIntArrayArray581[j][k], j2);
-        int j3 = model.method179(i2, -anIntArrayArray581[j][k] - j1, j2);
-        int k3 = model.method179(k2, -anIntArrayArray581[l][i1] - j1, l2);
-        int l3 = model.method179(k2, -anIntArrayArray581[l][i1], l2);
+        int i3 = model.insertCoordPointNoDublicate(i2, -anIntArrayArray581[j][k], j2);
+        int j3 = model.insertCoordPointNoDublicate(i2, -anIntArrayArray581[j][k] - j1, j2);
+        int k3 = model.insertCoordPointNoDublicate(k2, -anIntArrayArray581[l][i1] - j1, l2);
+        int l3 = model.insertCoordPointNoDublicate(k2, -anIntArrayArray581[l][i1], l2);
         int i4 = model.method181(4, new int[]{i3, j3, k3, l3}, k1, l1);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
             model.anIntArray258[i4] = 30000 + i;

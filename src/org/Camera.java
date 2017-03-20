@@ -128,8 +128,8 @@ public class Camera {
         anIntArray420[anInt415] = i1;
         anIntArray421[anInt415] = j1;
         anIntArray422[anInt415] = 0;
-        int l1 = aModel_423.method180(j, k, l);
-        int i2 = aModel_423.method180(j, k - j1, l);
+        int l1 = aModel_423.insertCoordPoint(j, k, l);
+        int i2 = aModel_423.insertCoordPoint(j, k - j1, l);
         int ai[] = {
                 l1, i2
         };
@@ -354,7 +354,7 @@ public class Camera {
         for (int k3 = 0; k3 < modelCount; k3++) {
             Model model = modelArray[k3];
             if (model.aBoolean247) {
-                for (int j = 0; j < model.anInt234; j++) {
+                for (int j = 0; j < model.nbrSides; j++) {
                     int l3 = model.anIntArray235[j];
                     int ai1[] = model.anIntArrayArray236[j];
                     boolean flag = false;
@@ -397,9 +397,9 @@ public class Camera {
                                 method293(cameraModelCount);
                                 int l8;
                                 if (cameraModel_1.anInt365 < 0)
-                                    l8 = model.anIntArray237[j];
+                                    l8 = model.surfaceTexture1[j];
                                 else
-                                    l8 = model.anIntArray238[j];
+                                    l8 = model.surfaceTexture2[j];
                                 if (l8 != 0xbc614e) {
                                     int j2 = 0;
                                     for (int l9 = 0; l9 < l3; l9++)
@@ -419,7 +419,7 @@ public class Camera {
 
         Model model_1 = aModel_423;
         if (model_1.aBoolean247) {
-            for (int k = 0; k < model_1.anInt234; k++) {
+            for (int k = 0; k < model_1.nbrSides; k++) {
                 int ai[] = model_1.anIntArrayArray236[k];
                 int j4 = ai[0];
                 int l4 = model_1.anIntArray230[j4];

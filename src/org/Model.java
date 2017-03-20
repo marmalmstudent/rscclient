@@ -60,56 +60,56 @@ public class Model {
         method174(i, j);
     }
 
-    private void method174(int i, int j) {
-        anIntArray272 = new int[i];
-        anIntArray273 = new int[i];
-        anIntArray274 = new int[i];
-        anIntArray232 = new int[i];
-        aByteArray233 = new byte[i];
-        anIntArray235 = new int[j];
-        anIntArrayArray236 = new int[j][];
-        anIntArray237 = new int[j];
-        anIntArray238 = new int[j];
-        anIntArray241 = new int[j];
-        anIntArray240 = new int[j];
-        anIntArray239 = new int[j];
+    private void method174(int nbrCoordPoints, int nbrSides) {
+        xCoords = new int[nbrCoordPoints];
+        zCoords = new int[nbrCoordPoints];
+        yCoords = new int[nbrCoordPoints];
+        anIntArray232 = new int[nbrCoordPoints];
+        aByteArray233 = new byte[nbrCoordPoints];
+        anIntArray235 = new int[nbrSides];
+        anIntArrayArray236 = new int[nbrSides][];
+        surfaceTexture1 = new int[nbrSides];
+        surfaceTexture2 = new int[nbrSides];
+        anIntArray241 = new int[nbrSides];
+        anIntArray240 = new int[nbrSides];
+        anIntArray239 = new int[nbrSides];
         if (!aBoolean264) {
-            anIntArray227 = new int[i];
-            anIntArray228 = new int[i];
-            anIntArray229 = new int[i];
-            anIntArray230 = new int[i];
-            anIntArray231 = new int[i];
+            anIntArray227 = new int[nbrCoordPoints];
+            anIntArray228 = new int[nbrCoordPoints];
+            anIntArray229 = new int[nbrCoordPoints];
+            anIntArray230 = new int[nbrCoordPoints];
+            anIntArray231 = new int[nbrCoordPoints];
         }
         if (!aBoolean263) {
-            aByteArray259 = new byte[j];
-            anIntArray258 = new int[j];
+            aByteArray259 = new byte[nbrSides];
+            anIntArray258 = new int[nbrSides];
         }
         if (aBoolean260) {
-            anIntArray275 = anIntArray272;
-            anIntArray276 = anIntArray273;
-            anIntArray277 = anIntArray274;
+            anIntArray275 = xCoords;
+            anIntArray276 = zCoords;
+            anIntArray277 = yCoords;
         } else {
-            anIntArray275 = new int[i];
-            anIntArray276 = new int[i];
-            anIntArray277 = new int[i];
+            anIntArray275 = new int[nbrCoordPoints];
+            anIntArray276 = new int[nbrCoordPoints];
+            anIntArray277 = new int[nbrCoordPoints];
         }
         if (!aBoolean262 || !aBoolean261) {
-            anIntArray242 = new int[j];
-            anIntArray243 = new int[j];
-            anIntArray244 = new int[j];
+            anIntArray242 = new int[nbrSides];
+            anIntArray243 = new int[nbrSides];
+            anIntArray244 = new int[nbrSides];
         }
         if (!aBoolean261) {
-            anIntArray280 = new int[j];
-            anIntArray281 = new int[j];
-            anIntArray282 = new int[j];
-            anIntArray283 = new int[j];
-            anIntArray284 = new int[j];
-            anIntArray285 = new int[j];
+            anIntArray280 = new int[nbrSides];
+            anIntArray281 = new int[nbrSides];
+            anIntArray282 = new int[nbrSides];
+            anIntArray283 = new int[nbrSides];
+            anIntArray284 = new int[nbrSides];
+            anIntArray285 = new int[nbrSides];
         }
-        anInt234 = 0;
-        anInt226 = 0;
-        anInt271 = i;
-        anInt278 = j;
+        this.nbrSides = 0;
+        this.nbrCoordPoints = 0;
+        anInt271 = nbrCoordPoints;
+        anInt278 = nbrSides;
         anInt286 = anInt287 = anInt288 = 0;
         anInt289 = anInt290 = anInt291 = 0;
         anInt292 = anInt293 = anInt294 = 256;
@@ -118,28 +118,28 @@ public class Model {
     }
 
     public void method175() {
-        anIntArray227 = new int[anInt226];
-        anIntArray228 = new int[anInt226];
-        anIntArray229 = new int[anInt226];
-        anIntArray230 = new int[anInt226];
-        anIntArray231 = new int[anInt226];
+        anIntArray227 = new int[nbrCoordPoints];
+        anIntArray228 = new int[nbrCoordPoints];
+        anIntArray229 = new int[nbrCoordPoints];
+        anIntArray230 = new int[nbrCoordPoints];
+        anIntArray231 = new int[nbrCoordPoints];
     }
 
     public void method176() {
-        anInt234 = 0;
-        anInt226 = 0;
+        nbrSides = 0;
+        nbrCoordPoints = 0;
     }
 
     public void method177(int i, int j) {
-        anInt234 -= i;
-        if (anInt234 < 0)
-            anInt234 = 0;
-        anInt226 -= j;
-        if (anInt226 < 0)
-            anInt226 = 0;
+        nbrSides -= i;
+        if (nbrSides < 0)
+            nbrSides = 0;
+        nbrCoordPoints -= j;
+        if (nbrCoordPoints < 0)
+            nbrCoordPoints = 0;
     }
 
-    public Model(byte abyte0[], int i, boolean flag) {
+    public Model(byte database[], int offset, boolean flag) {
         anInt246 = 1;
         aBoolean247 = true;
         aBoolean254 = true;
@@ -159,66 +159,80 @@ public class Model {
         anInt306 = 256;
         anInt307 = 512;
         anInt308 = 32;
-        int j = DataOperations.getUnsigned2Bytes(abyte0, i);
-        i += 2;
-        int k = DataOperations.getUnsigned2Bytes(abyte0, i);
-        i += 2;
-        method174(j, k);
-        anIntArrayArray279 = new int[k][1];
-        for (int l = 0; l < j; l++) {
-            anIntArray272[l] = DataOperations.getSigned2Bytes(abyte0, i);
-            i += 2;
+        int nbrCoordPoints = DataOperations.getUnsigned2Bytes(database, offset);
+        offset += 2;
+        // number of sides on the object, used when drawing textures onto sides.
+        int nbrSides = DataOperations.getUnsigned2Bytes(database, offset);
+        offset += 2;
+        method174(nbrCoordPoints, nbrSides);
+        anIntArrayArray279 = new int[nbrSides][1];
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            xCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+            offset += 2;
+        }
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            zCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+            offset += 2;
+        }
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            yCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+            offset += 2;
         }
 
-        for (int i1 = 0; i1 < j; i1++) {
-            anIntArray273[i1] = DataOperations.getSigned2Bytes(abyte0, i);
-            i += 2;
+        this.nbrCoordPoints = nbrCoordPoints;
+        for (int i = 0; i < nbrSides; i++) {
+        	// can't manage to figure out this one
+            anIntArray235[i] = database[offset++] & 0xff;
         }
 
-        for (int j1 = 0; j1 < j; j1++) {
-            anIntArray274[j1] = DataOperations.getSigned2Bytes(abyte0, i);
-            i += 2;
+        for (int i = 0; i < nbrSides; i++) {
+        	/* Part of the texture.
+        	 * Setting this to 0 correspond to sprite 3220 being used as texture.
+        	 * Setting this to 1 correspond to sprite 3221 being used as texture.
+        	 */
+            surfaceTexture1[i] = DataOperations.getSigned2Bytes(database, offset);
+            offset += 2;
+            if (surfaceTexture1[i] == 32767)
+                surfaceTexture1[i] = anInt270;
         }
 
-        anInt226 = j;
-        for (int k1 = 0; k1 < k; k1++)
-            anIntArray235[k1] = abyte0[i++] & 0xff;
-
-        for (int l1 = 0; l1 < k; l1++) {
-            anIntArray237[l1] = DataOperations.getSigned2Bytes(abyte0, i);
-            i += 2;
-            if (anIntArray237[l1] == 32767)
-                anIntArray237[l1] = anInt270;
+        for (int i = 0; i < nbrSides; i++) {
+        	/* Part of the texture.
+        	 * Setting this to 0 correspond to sprite 3220 being used as texture.
+        	 * Setting this to 1 correspond to sprite 3221 being used as texture.
+        	 * 
+        	 */
+            surfaceTexture2[i] = DataOperations.getSigned2Bytes(database, offset);
+            offset += 2;
+            if (surfaceTexture2[i] == 32767)
+                surfaceTexture2[i] = anInt270;
         }
 
-        for (int i2 = 0; i2 < k; i2++) {
-            anIntArray238[i2] = DataOperations.getSigned2Bytes(abyte0, i);
-            i += 2;
-            if (anIntArray238[i2] == 32767)
-                anIntArray238[i2] = anInt270;
-        }
-
-        for (int j2 = 0; j2 < k; j2++) {
-            int k2 = abyte0[i++] & 0xff;
+        for (int i = 0; i < nbrSides; i++) {
+        	// can't manage to figure out this one
+            int k2 = database[offset++] & 0xff;
             if (k2 == 0)
-                anIntArray241[j2] = 0;
+                anIntArray241[i] = 0;
             else
-                anIntArray241[j2] = anInt270;
+                anIntArray241[i] = anInt270;
         }
 
-        for (int l2 = 0; l2 < k; l2++) {
-            anIntArrayArray236[l2] = new int[anIntArray235[l2]];
-            for (int i3 = 0; i3 < anIntArray235[l2]; i3++)
-                if (j < 256) {
-                    anIntArrayArray236[l2][i3] = abyte0[i++] & 0xff;
+        for (int i = 0; i < nbrSides; i++) {
+            anIntArrayArray236[i] = new int[anIntArray235[i]];
+            for (int j = 0; j < anIntArray235[i]; j++)
+                if (nbrCoordPoints < 256) {
+                    anIntArrayArray236[i][j] = database[offset++] & 0xff;
                 } else {
-                    anIntArrayArray236[l2][i3] = DataOperations.getUnsigned2Bytes(abyte0, i);
-                    i += 2;
+                    anIntArrayArray236[i][j] = DataOperations.getUnsigned2Bytes(database, offset);
+                    offset += 2;
                 }
 
         }
 
-        anInt234 = k;
+        this.nbrSides = nbrSides;
         anInt246 = 1;
     }
 
@@ -258,8 +272,8 @@ public class Model {
             datainputstream.close();
         }
         catch (IOException _ex) {
-            anInt226 = 0;
-            anInt234 = 0;
+            nbrCoordPoints = 0;
+            nbrSides = 0;
             return;
         }
         int l = method206(abyte0);
@@ -270,7 +284,7 @@ public class Model {
             int j1 = method206(abyte0);
             int k1 = method206(abyte0);
             int l1 = method206(abyte0);
-            method179(j1, k1, l1);
+            insertCoordPointNoDublicate(j1, k1, l1);
         }
 
         for (int k3 = 0; k3 < i1; k3++) {
@@ -354,8 +368,8 @@ public class Model {
         int j = 0;
         int k = 0;
         for (int l = 0; l < i; l++) {
-            j += models[l].anInt234;
-            k += models[l].anInt226;
+            j += models[l].nbrSides;
+            k += models[l].nbrCoordPoints;
         }
 
         method174(k, j);
@@ -370,13 +384,13 @@ public class Model {
             anInt304 = model.anInt304;
             anInt305 = model.anInt305;
             anInt306 = model.anInt306;
-            for (int j1 = 0; j1 < model.anInt234; j1++) {
+            for (int j1 = 0; j1 < model.nbrSides; j1++) {
                 int ai[] = new int[model.anIntArray235[j1]];
                 int ai1[] = model.anIntArrayArray236[j1];
                 for (int k1 = 0; k1 < model.anIntArray235[j1]; k1++)
-                    ai[k1] = method179(model.anIntArray272[ai1[k1]], model.anIntArray273[ai1[k1]], model.anIntArray274[ai1[k1]]);
+                    ai[k1] = insertCoordPointNoDublicate(model.xCoords[ai1[k1]], model.zCoords[ai1[k1]], model.yCoords[ai1[k1]]);
 
-                int l1 = method181(model.anIntArray235[j1], ai, model.anIntArray237[j1], model.anIntArray238[j1]);
+                int l1 = method181(model.anIntArray235[j1], ai, model.surfaceTexture1[j1], model.surfaceTexture2[j1]);
                 anIntArray241[l1] = model.anIntArray241[j1];
                 anIntArray240[l1] = model.anIntArray240[j1];
                 anIntArray239[l1] = model.anIntArray239[j1];
@@ -400,42 +414,50 @@ public class Model {
         anInt246 = 1;
     }
 
-    public int method179(int i, int j, int k) {
-        for (int l = 0; l < anInt226; l++)
-            if (anIntArray272[l] == i && anIntArray273[l] == j && anIntArray274[l] == k)
-                return l;
+    /**
+     * Inserts a new coordinate point and returns the index of the point.
+     * If the point already exists it will instead return the intex of that point.
+     * @param x
+     * @param z
+     * @param y
+     * @return
+     */
+    public int insertCoordPointNoDublicate(int x, int z, int y) {
+        for (int i = 0; i < nbrCoordPoints; i++)
+            if (xCoords[i] == x && zCoords[i] == z && yCoords[i] == y)
+                return i;
 
-        if (anInt226 >= anInt271) {
+        if (nbrCoordPoints >= anInt271) {
             return -1;
         } else {
-            anIntArray272[anInt226] = i;
-            anIntArray273[anInt226] = j;
-            anIntArray274[anInt226] = k;
-            return anInt226++;
+            xCoords[nbrCoordPoints] = x;
+            zCoords[nbrCoordPoints] = z;
+            yCoords[nbrCoordPoints] = y;
+            return nbrCoordPoints++;
         }
     }
 
-    public int method180(int i, int j, int k) {
-        if (anInt226 >= anInt271) {
+    public int insertCoordPoint(int x, int z, int y) {
+        if (nbrCoordPoints >= anInt271) {
             return -1;
         } else {
-            anIntArray272[anInt226] = i;
-            anIntArray273[anInt226] = j;
-            anIntArray274[anInt226] = k;
-            return anInt226++;
+            xCoords[nbrCoordPoints] = x;
+            zCoords[nbrCoordPoints] = z;
+            yCoords[nbrCoordPoints] = y;
+            return nbrCoordPoints++;
         }
     }
 
     public int method181(int i, int ai[], int j, int k) {
-        if (anInt234 >= anInt278) {
+        if (nbrSides >= anInt278) {
             return -1;
         } else {
-            anIntArray235[anInt234] = i;
-            anIntArrayArray236[anInt234] = ai;
-            anIntArray237[anInt234] = j;
-            anIntArray238[anInt234] = k;
+            anIntArray235[nbrSides] = i;
+            anIntArrayArray236[nbrSides] = ai;
+            surfaceTexture1[nbrSides] = j;
+            surfaceTexture2[nbrSides] = k;
             anInt246 = 1;
-            return anInt234++;
+            return nbrSides++;
         }
     }
 
@@ -449,14 +471,14 @@ public class Model {
             ai1[l1] = 0;
         }
 
-        for (int i2 = 0; i2 < anInt234; i2++) {
+        for (int i2 = 0; i2 < nbrSides; i2++) {
             int j2 = 0;
             int k2 = 0;
             int i3 = anIntArray235[i2];
             int ai2[] = anIntArrayArray236[i2];
             for (int i4 = 0; i4 < i3; i4++) {
-                j2 += anIntArray272[ai2[i4]];
-                k2 += anIntArray274[ai2[i4]];
+                j2 += xCoords[ai2[i4]];
+                k2 += yCoords[ai2[i4]];
             }
 
             int k4 = j2 / (i3 * k) + (k2 / (i3 * l)) * i1;
@@ -473,14 +495,14 @@ public class Model {
             models[l2].anInt308 = anInt308;
         }
 
-        for (int j3 = 0; j3 < anInt234; j3++) {
+        for (int j3 = 0; j3 < nbrSides; j3++) {
             int k3 = 0;
             int j4 = 0;
             int l4 = anIntArray235[j3];
             int ai3[] = anIntArrayArray236[j3];
             for (int i5 = 0; i5 < l4; i5++) {
-                k3 += anIntArray272[ai3[i5]];
-                j4 += anIntArray274[ai3[i5]];
+                k3 += xCoords[ai3[i5]];
+                j4 += yCoords[ai3[i5]];
             }
 
             int j5 = k3 / (l4 * k) + (j4 / (l4 * l)) * i1;
@@ -496,12 +518,12 @@ public class Model {
     public void method183(Model model, int ai[], int i, int j) {
         int ai1[] = new int[i];
         for (int k = 0; k < i; k++) {
-            int l = ai1[k] = model.method179(anIntArray272[ai[k]], anIntArray273[ai[k]], anIntArray274[ai[k]]);
+            int l = ai1[k] = model.insertCoordPointNoDublicate(xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
             model.anIntArray232[l] = anIntArray232[ai[k]];
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }
 
-        int i1 = model.method181(i, ai1, anIntArray237[j], anIntArray238[j]);
+        int i1 = model.method181(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
         if (!model.aBoolean263 && !aBoolean263)
             model.anIntArray258[i1] = anIntArray258[j];
         model.anIntArray241[i1] = anIntArray241[j];
@@ -514,7 +536,7 @@ public class Model {
         anInt307 = (64 - j) * 16 + 128;
         if (aBoolean262)
             return;
-        for (int j1 = 0; j1 < anInt234; j1++)
+        for (int j1 = 0; j1 < nbrSides; j1++)
             if (flag)
                 anIntArray241[j1] = anInt270;
             else
@@ -614,7 +636,7 @@ public class Model {
     }
 
     private void method193(int i, int j, int k) {
-        for (int l = 0; l < anInt226; l++) {
+        for (int l = 0; l < nbrCoordPoints; l++) {
             anIntArray275[l] += i;
             anIntArray276[l] += j;
             anIntArray277[l] += k;
@@ -623,7 +645,7 @@ public class Model {
     }
 
     private void method194(int i, int j, int k) {
-        for (int i3 = 0; i3 < anInt226; i3++) {
+        for (int i3 = 0; i3 < nbrCoordPoints; i3++) {
             if (k != 0) {
                 int l = anIntArray265[k];
                 int k1 = anIntArray265[k + 256];
@@ -650,7 +672,7 @@ public class Model {
     }
 
     private void method195(int i, int j, int k, int l, int i1, int j1) {
-        for (int k1 = 0; k1 < anInt226; k1++) {
+        for (int k1 = 0; k1 < nbrCoordPoints; k1++) {
             if (i != 0)
                 anIntArray275[k1] += anIntArray276[k1] * i >> 8;
             if (j != 0)
@@ -668,7 +690,7 @@ public class Model {
     }
 
     private void method196(int i, int j, int k) {
-        for (int l = 0; l < anInt226; l++) {
+        for (int l = 0; l < nbrCoordPoints; l++) {
             anIntArray275[l] = anIntArray275[l] * i >> 8;
             anIntArray276[l] = anIntArray276[l] * j >> 8;
             anIntArray277[l] = anIntArray277[l] * k >> 8;
@@ -679,7 +701,7 @@ public class Model {
     private void method197() {
         anInt248 = anInt250 = anInt252 = 0xf423f;
         anInt302 = anInt249 = anInt251 = anInt253 = 0xfff0bdc1;
-        for (int i = 0; i < anInt234; i++) {
+        for (int i = 0; i < nbrSides; i++) {
             int ai[] = anIntArrayArray236[i];
             int k = ai[0];
             int i1 = anIntArray235[i];
@@ -739,22 +761,22 @@ public class Model {
         if (aBoolean262)
             return;
         int i = anInt307 * anInt306 >> 8;
-        for (int j = 0; j < anInt234; j++)
+        for (int j = 0; j < nbrSides; j++)
             if (anIntArray241[j] != anInt270)
                 anIntArray241[j] = (anIntArray242[j] * anInt303 + anIntArray243[j] * anInt304 + anIntArray244[j] * anInt305) / i;
 
-        int ai[] = new int[anInt226];
-        int ai1[] = new int[anInt226];
-        int ai2[] = new int[anInt226];
-        int ai3[] = new int[anInt226];
-        for (int k = 0; k < anInt226; k++) {
+        int ai[] = new int[nbrCoordPoints];
+        int ai1[] = new int[nbrCoordPoints];
+        int ai2[] = new int[nbrCoordPoints];
+        int ai3[] = new int[nbrCoordPoints];
+        for (int k = 0; k < nbrCoordPoints; k++) {
             ai[k] = 0;
             ai1[k] = 0;
             ai2[k] = 0;
             ai3[k] = 0;
         }
 
-        for (int l = 0; l < anInt234; l++)
+        for (int l = 0; l < nbrSides; l++)
             if (anIntArray241[l] == anInt270) {
                 for (int i1 = 0; i1 < anIntArray235[l]; i1++) {
                     int k1 = anIntArrayArray236[l][i1];
@@ -766,7 +788,7 @@ public class Model {
 
             }
 
-        for (int j1 = 0; j1 < anInt226; j1++)
+        for (int j1 = 0; j1 < nbrCoordPoints; j1++)
             if (ai3[j1] > 0)
                 anIntArray232[j1] = (ai[j1] * anInt303 + ai1[j1] * anInt304 + ai2[j1] * anInt305) / (i * ai3[j1]);
 
@@ -775,7 +797,7 @@ public class Model {
     public void method199() {
         if (aBoolean262 && aBoolean261)
             return;
-        for (int i = 0; i < anInt234; i++) {
+        for (int i = 0; i < nbrSides; i++) {
             int ai[] = anIntArrayArray236[i];
             int j = anIntArray275[ai[0]];
             int k = anIntArray276[ai[0]];
@@ -810,10 +832,10 @@ public class Model {
     public void method200() {
         if (anInt246 == 2) {
             anInt246 = 0;
-            for (int i = 0; i < anInt226; i++) {
-                anIntArray275[i] = anIntArray272[i];
-                anIntArray276[i] = anIntArray273[i];
-                anIntArray277[i] = anIntArray274[i];
+            for (int i = 0; i < nbrCoordPoints; i++) {
+                anIntArray275[i] = xCoords[i];
+                anIntArray276[i] = zCoords[i];
+                anIntArray277[i] = yCoords[i];
             }
 
             anInt248 = anInt250 = anInt252 = 0xff676981;
@@ -822,10 +844,10 @@ public class Model {
         }
         if (anInt246 == 1) {
             anInt246 = 0;
-            for (int j = 0; j < anInt226; j++) {
-                anIntArray275[j] = anIntArray272[j];
-                anIntArray276[j] = anIntArray273[j];
-                anIntArray277[j] = anIntArray274[j];
+            for (int j = 0; j < nbrCoordPoints; j++) {
+                anIntArray275[j] = xCoords[j];
+                anIntArray276[j] = zCoords[j];
+                anIntArray277[j] = yCoords[j];
             }
 
             if (anInt301 >= 2)
@@ -867,7 +889,7 @@ public class Model {
             j3 = anIntArray266[l];
             k3 = anIntArray266[l + 1024];
         }
-        for (int j4 = 0; j4 < anInt226; j4++) {
+        for (int j4 = 0; j4 < nbrCoordPoints; j4++) {
             int k4 = anIntArray275[j4] - i;
             int l4 = anIntArray276[j4] - j;
             int i5 = anIntArray277[j4] - k;
@@ -903,10 +925,10 @@ public class Model {
 
     public void method202() {
         method200();
-        for (int i = 0; i < anInt226; i++) {
-            anIntArray272[i] = anIntArray275[i];
-            anIntArray273[i] = anIntArray276[i];
-            anIntArray274[i] = anIntArray277[i];
+        for (int i = 0; i < nbrCoordPoints; i++) {
+            xCoords[i] = anIntArray275[i];
+            zCoords[i] = anIntArray276[i];
+            yCoords[i] = anIntArray277[i];
         }
 
         anInt286 = anInt287 = anInt288 = 0;
@@ -956,7 +978,7 @@ public class Model {
         return l;
     }
 
-    public int anInt226;
+    public int nbrCoordPoints;
     public int anIntArray227[];
     public int anIntArray228[];
     public int anIntArray229[];
@@ -964,11 +986,11 @@ public class Model {
     public int anIntArray231[];
     public int anIntArray232[];
     public byte aByteArray233[];
-    public int anInt234;
+    public int nbrSides;
     public int anIntArray235[];
     public int anIntArrayArray236[][];
-    public int anIntArray237[];
-    public int anIntArray238[];
+    public int surfaceTexture1[];
+    public int surfaceTexture2[];
     public int anIntArray239[];
     public int anIntArray240[];
     public int anIntArray241[];
@@ -1001,9 +1023,9 @@ public class Model {
     private static int anIntArray268[];
     private int anInt270;
     public int anInt271;
-    public int anIntArray272[];
-    public int anIntArray273[];
-    public int anIntArray274[];
+    public int xCoords[];
+    public int zCoords[];
+    public int yCoords[];
     public int anIntArray275[];
     public int anIntArray276[];
     public int anIntArray277[];
