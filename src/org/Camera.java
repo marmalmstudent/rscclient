@@ -353,7 +353,7 @@ public class Camera {
         cameraModelCount = 0;
         for (int k3 = 0; k3 < modelCount; k3++) {
             Model model = modelArray[k3];
-            if (model.aBoolean247) {
+            if (model.visible) {
                 for (int j = 0; j < model.nbrSides; j++) {
                     int l3 = model.anIntArray235[j];
                     int ai1[] = model.anIntArrayArray236[j];
@@ -418,7 +418,7 @@ public class Camera {
         }
 
         Model model_1 = aModel_423;
-        if (model_1.aBoolean247) {
+        if (model_1.visible) {
             for (int k = 0; k < model_1.nbrSides; k++) {
                 int ai[] = model_1.anIntArrayArray236[k];
                 int j4 = ai[0];

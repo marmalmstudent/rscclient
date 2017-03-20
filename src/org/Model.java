@@ -7,7 +7,7 @@ public class Model {
 
     public Model(int i, int j) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -34,7 +34,7 @@ public class Model {
 
     public Model(int i, int j, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -141,7 +141,7 @@ public class Model {
 
     public Model(byte database[], int offset, boolean flag) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -238,7 +238,7 @@ public class Model {
 
     public Model(String path) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -316,7 +316,7 @@ public class Model {
 
     public Model(Model model[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -343,7 +343,7 @@ public class Model {
 
     public Model(Model models[], int i) {
         anInt246 = 1;
-        aBoolean247 = true;
+        visible = true;
         aBoolean254 = true;
         aBoolean255 = false;
         isGiantCrystal = false;
@@ -550,6 +550,7 @@ public class Model {
     }
 
     public void method185(int i, int j, int k, int l, int i1) {
+    	
         anInt308 = 256 - i * 4;
         anInt307 = (64 - j) * 16 + 128;
         if (aBoolean262) {
@@ -863,59 +864,65 @@ public class Model {
         }
     }
 
-    public void method201(int i, int j, int k, int l, int i1, int j1, int k1,
-                          int l1) {
+    public void method201(
+    		int cameraYPos, int cameraZPos, int cameraXPos,
+    		int cameraUpDownRot, int cameraLeftRightRot, int j1,
+    		int cameraSieInt, int l1)
+    {
         method200();
-        if (anInt252 > Camera.anInt453 || anInt253 < Camera.anInt452 || anInt248 > Camera.anInt449 || anInt249 < Camera.anInt448 || anInt250 > Camera.anInt451 || anInt251 < Camera.anInt450) {
-            aBoolean247 = false;
+        if (anInt252 > Camera.anInt453 || anInt253 < Camera.anInt452
+        		|| anInt248 > Camera.anInt449 || anInt249 < Camera.anInt448
+        		|| anInt250 > Camera.anInt451 || anInt251 < Camera.anInt450)
+        {
+            visible = false;
             return;
         }
-        aBoolean247 = true;
+        visible = true;
         int l2 = 0;
         int i3 = 0;
-        int j3 = 0;
-        int k3 = 0;
-        int l3 = 0;
-        int i4 = 0;
         if (j1 != 0) {
             l2 = anIntArray266[j1];
             i3 = anIntArray266[j1 + 1024];
         }
-        if (i1 != 0) {
-            l3 = anIntArray266[i1];
-            i4 = anIntArray266[i1 + 1024];
+        int l3 = 0;
+        int i4 = 0;
+        if (cameraLeftRightRot != 0) {
+            l3 = anIntArray266[cameraLeftRightRot];
+            i4 = anIntArray266[cameraLeftRightRot + 1024];
         }
-        if (l != 0) {
-            j3 = anIntArray266[l];
-            k3 = anIntArray266[l + 1024];
+        int j3 = 0;
+        int k3 = 0;
+        if (cameraUpDownRot != 0) {
+            j3 = anIntArray266[cameraUpDownRot];
+            k3 = anIntArray266[cameraUpDownRot + 1024];
         }
         for (int j4 = 0; j4 < nbrCoordPoints; j4++) {
-            int k4 = anIntArray275[j4] - i;
-            int l4 = anIntArray276[j4] - j;
-            int i5 = anIntArray277[j4] - k;
+            int k4 = anIntArray275[j4] - cameraYPos;
+            int l4 = anIntArray276[j4] - cameraZPos;
+            int i5 = anIntArray277[j4] - cameraXPos;
             if (j1 != 0) {
                 int i2 = l4 * l2 + k4 * i3 >> 15;
                 l4 = l4 * i3 - k4 * l2 >> 15;
                 k4 = i2;
             }
-            if (i1 != 0) {
+            if (cameraLeftRightRot != 0) {
                 int j2 = i5 * l3 + k4 * i4 >> 15;
                 i5 = i5 * i4 - k4 * l3 >> 15;
                 k4 = j2;
             }
-            if (l != 0) {
+            if (cameraUpDownRot != 0) {
                 int k2 = l4 * k3 - i5 * j3 >> 15;
                 i5 = l4 * j3 + i5 * k3 >> 15;
                 l4 = k2;
             }
             if (i5 >= l1)
-                anIntArray230[j4] = (k4 << k1) / i5;
+                anIntArray230[j4] = (k4 << cameraSieInt) / i5;
             else
-                anIntArray230[j4] = k4 << k1;
+                anIntArray230[j4] = k4 << cameraSieInt;
             if (i5 >= l1)
-                anIntArray231[j4] = (l4 << k1) / i5;
+                anIntArray231[j4] = (l4 << cameraSieInt) / i5;
             else
-                anIntArray231[j4] = l4 << k1;
+                anIntArray231[j4] = l4 << cameraSieInt;
             anIntArray227[j4] = k4;
             anIntArray228[j4] = l4;
             anIntArray229[j4] = i5;
@@ -999,7 +1006,7 @@ public class Model {
     private int anIntArray244[];
     public int anInt245;
     public int anInt246;
-    public boolean aBoolean247;
+    public boolean visible;
     public int anInt248;
     public int anInt249;
     public int anInt250;

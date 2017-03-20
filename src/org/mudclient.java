@@ -4,6 +4,7 @@ import org.entityhandling.EntityHandler;
 import org.entityhandling.defs.ItemDef;
 import org.entityhandling.defs.NPCDef;
 import org.menus.AbuseWindow;
+import org.menus.BankWindow;
 import org.model.Sprite;
 import org.recorder.Recorder;
 import org.util.Config;
@@ -116,10 +117,15 @@ public class mudclient extends GameWindowMiddleMan
      * Formats a packet and cleans up necessary variables.
      * @param packetID The id of the packet.
      */
-    private void formatPacket(int packetID)
+    private void formatPacket(int packetID, int itemID, int itemAmt)
     {
     	switch(packetID)
     	{
+    	case 48: // close bank
+            super.streamClass.createPacket(48);
+            super.streamClass.formatPacket();
+            showBank = false;
+    		break;
     	case 70:
             super.streamClass.createPacket(70);
             super.streamClass.addByte(tradeMyItemCount);
@@ -143,6 +149,18 @@ public class mudclient extends GameWindowMiddleMan
             super.streamClass.formatPacket();
             duelOpponentAccepted = false;
             duelMyAccepted = false;
+            break;
+    	case 183: // bank withdraw
+            super.streamClass.createPacket(183);
+            super.streamClass.add2ByteInt(itemID);
+            super.streamClass.add4ByteInt(itemAmt);
+            super.streamClass.formatPacket();
+    		break;
+    	case 198: // bank deposit
+            super.streamClass.createPacket(198);
+            super.streamClass.add2ByteInt(itemID);
+            super.streamClass.add4ByteInt(itemAmt);
+            super.streamClass.formatPacket();
             break;
     	case 218:
             super.streamClass.createPacket(218);
@@ -232,7 +250,7 @@ public class mudclient extends GameWindowMiddleMan
             tradeMyItemsCount[tradeMyItemCount] = amount;
             tradeMyItemCount++;
         }
-        formatPacket(70);
+        formatPacket(70, -1, -1);
     }
     
     /**
@@ -269,7 +287,7 @@ public class mudclient extends GameWindowMiddleMan
             duelMyItemsCount[duelMyItemCount] = amount;
             duelMyItemCount++;
         }
-        formatPacket(123);
+        formatPacket(123, -1, -1);
     }
     
     /**
@@ -427,13 +445,13 @@ public class mudclient extends GameWindowMiddleMan
         }
 
         if (mob.lastMessageTimeout > 0) {
-            mobMessagesWidth[mobMessageCount] = gameGraphics.textWidth(mob.lastMessage, 1) / 2;
-            if (mobMessagesWidth[mobMessageCount] > 150)
-                mobMessagesWidth[mobMessageCount] = 150;
-            mobMessagesHeight[mobMessageCount] = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
-            mobMessagesX[mobMessageCount] = i + k / 2;
-            mobMessagesY[mobMessageCount] = j;
-            mobMessages[mobMessageCount++] = mob.lastMessage;
+            mobMsgWidth[mobMessageCount] = gameGraphics.textWidth(mob.lastMessage, 1) / 2;
+            if (mobMsgWidth[mobMessageCount] > 150)
+                mobMsgWidth[mobMessageCount] = 150;
+            mobMsgHeight[mobMessageCount] = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
+            mobMsgX[mobMessageCount] = i + k / 2;
+            mobMsgY[mobMessageCount] = j;
+            mobMsg[mobMessageCount++] = mob.lastMessage;
         }
         if (mob.currentSprite == 8 || mob.currentSprite == 9 || mob.combatTimer != 0) {
             if (mob.combatTimer > 0) {
@@ -509,7 +527,7 @@ public class mudclient extends GameWindowMiddleMan
         else if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnRight))
             chrBottomClr = (chrBottomClr + 1) % chrTopBottomClrs.length;
         if (chrDesignMenu.hasActivated(characterDesignAcceptButton))
-        	formatPacket(218);
+        	formatPacket(218, -1, -1);
     }
 
     /**
@@ -581,7 +599,7 @@ public class mudclient extends GameWindowMiddleMan
      * where the username and password should be enterd.
      * @return false.
      */
-    private final boolean updateExsitingScreen()
+    private final boolean updateExistingScreen()
     {
         menuLogin.updateActions(super.mouseX, super.mouseY,
         		super.lastMouseDownButton, super.mouseDownButton);
@@ -619,7 +637,7 @@ public class mudclient extends GameWindowMiddleMan
         		return;
         } else if (loginScreenNumber == 2)
         {
-        	if (updateExsitingScreen())
+        	if (updateExistingScreen())
         		return;
         }
     }
@@ -739,7 +757,8 @@ public class mudclient extends GameWindowMiddleMan
         }
     }
 
-    private final void autoRotateCamera() {
+    private final void autoRotateCamera()
+    {
         if ((cameraAutoAngle & 1) == 1 && enginePlayerVisible(cameraAutoAngle))
             return;
         if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
@@ -753,10 +772,8 @@ public class mudclient extends GameWindowMiddleMan
                 cameraAutoAngle = cameraAutoAngle + 7 & 7;
             return;
         }
-        int ai[] = {
-                1, -1, 2, -2, 3, -3, 4
-        };
-        for (int i = 0; i < 7; ++i)
+        int ai[] = {1, -1, 2, -2, 3, -3, 4};
+        for (int i = 0; i < ai.length; ++i)
         {
             if (!enginePlayerVisible(cameraAutoAngle + ai[i] + 8 & 7))
                 continue;
@@ -817,7 +834,8 @@ public class mudclient extends GameWindowMiddleMan
             i += (5 * k1) / 100;
             j2 = i2 * 3 + npcCombatModelArray2[(loginTimer / 6) % 8];
         }
-        for (int k2 = 0; k2 < 12; k2++) {
+        for (int k2 = 0; k2 < 12; k2++)
+        {
             int l2 = npcAnimationArray[l1][k2];
             int l3 = plr.animationCount[l2] - 1;
             if (l3 >= 0) {
@@ -872,14 +890,17 @@ public class mudclient extends GameWindowMiddleMan
             }
         }
 
-        if (plr.lastMessageTimeout > 0) {
-            mobMessagesWidth[mobMessageCount] = gameGraphics.textWidth(plr.lastMessage, 1) / 2;
-            if (mobMessagesWidth[mobMessageCount] > 150)
-                mobMessagesWidth[mobMessageCount] = 150;
-            mobMessagesHeight[mobMessageCount] = (gameGraphics.textWidth(plr.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
-            mobMessagesX[mobMessageCount] = i + k / 2;
-            mobMessagesY[mobMessageCount] = j;
-            mobMessages[mobMessageCount++] = plr.lastMessage;
+        if (plr.lastMessageTimeout > 0)
+        {
+            mobMsgWidth[mobMessageCount] = gameGraphics.textWidth(plr.lastMessage, 1) / 2;
+            if (mobMsgWidth[mobMessageCount] > 150)
+                mobMsgWidth[mobMessageCount] = 150;
+            mobMsgHeight[mobMessageCount] = (
+            		(gameGraphics.textWidth(plr.lastMessage, 1) / 300)
+            		* gameGraphics.messageFontHeight(1));
+            mobMsgX[mobMessageCount] = i + k / 2;
+            mobMsgY[mobMessageCount] = j;
+            mobMsg[mobMessageCount++] = plr.lastMessage;
         }
         if (plr.anInt163 > 0) {
             anIntArray858[anInt699] = i + k / 2;
@@ -887,30 +908,36 @@ public class mudclient extends GameWindowMiddleMan
             anIntArray705[anInt699] = k1;
             anIntArray706[anInt699++] = plr.anInt162;
         }
-        if (plr.currentSprite == 8 || plr.currentSprite == 9 || plr.combatTimer != 0) {
-            if (plr.combatTimer > 0) {
+        if (plr.currentSprite == 8
+        		|| plr.currentSprite == 9
+        		|| plr.combatTimer != 0)
+        {
+            if (plr.combatTimer > 0)
+            {
                 int i3 = i;
                 if (plr.currentSprite == 8)
                     i3 -= (20 * k1) / 100;
                 else if (plr.currentSprite == 9)
                     i3 += (20 * k1) / 100;
                 int i4 = (plr.hitPointsCurrent * 30) / plr.hitPointsBase;
-                anIntArray786[anInt718] = i3 + k / 2;
+                anIntArray786[anInt718] = i3 + k / 2; //player hitpointsbar x-position
                 anIntArray787[anInt718] = j;
                 anIntArray788[anInt718++] = i4;
             }
-            if (plr.combatTimer > 150) {
+            if (plr.combatTimer > 150)
+            {
                 int j3 = i;
                 if (plr.currentSprite == 8)
                     j3 -= (10 * k1) / 100;
                 else if (plr.currentSprite == 9)
                     j3 += (10 * k1) / 100;
-                // red star, i.e. damage >0 was dealt
+                // red star, i.e. damage was dealt to player
                 gameGraphics.drawPicture((j3 + k / 2) - 12, (j + l / 2) - 12, SPRITE_MEDIA_START + 11);
                 gameGraphics.drawText(String.valueOf(plr.anInt164), (j3 + k / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
             }
         }
-        if (plr.anInt179 == 1 && plr.anInt163 == 0) {
+        if (plr.anInt179 == 1 && plr.anInt163 == 0)
+        {
             int k3 = j1 + i + k / 2;
             if (plr.currentSprite == 8)
                 k3 -= (20 * k1) / 100;
@@ -929,6 +956,9 @@ public class mudclient extends GameWindowMiddleMan
         EntityHandler.load();
     }
 
+    /**
+     * Loads 3D models
+     */
     private final void loadModels()
     {
         drawLoadingBarText(75, "Loading 3d models");
@@ -946,13 +976,6 @@ public class mudclient extends GameWindowMiddleMan
         for (String name : modelNames)
             EntityHandler.storeModel(name);
         byte[] models = load("models36.jag");
-        try
-        {
-        	misc.writeToFile(models, "src/org/conf/models36.dat");
-        } catch (IOException ioe)
-        {
-        	ioe.printStackTrace();
-        }
         if (models == null)
         {
             lastLoadedNull = true;
@@ -971,20 +994,21 @@ public class mudclient extends GameWindowMiddleMan
         }
     }
 
-    protected final void handleMouseDown(int button, int x, int y) {
-        mouseClickXArray[mouseClickArrayOffset] = x;
-        mouseClickYArray[mouseClickArrayOffset] = y;
-        mouseClickArrayOffset = mouseClickArrayOffset + 1 & 0x1fff;
+    protected final void handleMouseDown(int button, int x, int y)
+    {
+        mouseClickX[mouseClickOffset] = x;
+        mouseClickYArray[mouseClickOffset] = y;
+        mouseClickOffset = mouseClickOffset + 1 & 0x1fff;
         for (int l = 10; l < 4000; l++) {
-            int i1 = mouseClickArrayOffset - l & 0x1fff;
-            if (mouseClickXArray[i1] == x && mouseClickYArray[i1] == y) {
+            int i1 = mouseClickOffset - l & 0x1fff;
+            if (mouseClickX[i1] == x && mouseClickYArray[i1] == y) {
                 boolean flag = false;
                 for (int j1 = 1; j1 < l; j1++) {
-                    int k1 = mouseClickArrayOffset - j1 & 0x1fff;
+                    int k1 = mouseClickOffset - j1 & 0x1fff;
                     int l1 = i1 - j1 & 0x1fff;
-                    if (mouseClickXArray[l1] != x || mouseClickYArray[l1] != y)
+                    if (mouseClickX[l1] != x || mouseClickYArray[l1] != y)
                         flag = true;
-                    if (mouseClickXArray[k1] != mouseClickXArray[l1] || mouseClickYArray[k1] != mouseClickYArray[l1])
+                    if (mouseClickX[k1] != mouseClickX[l1] || mouseClickYArray[k1] != mouseClickYArray[l1])
                         break;
                     if (j1 == l - 1 && flag && lastWalkTimeout == 0 && logoutTimeout == 0) {
                         logout();
@@ -996,77 +1020,101 @@ public class mudclient extends GameWindowMiddleMan
         }
 
     }
+    
+    private final void displayLastLoadedNull()
+    {
+        Graphics g = getGraphics();
+        g.setColor(Color.black);
+        g.fillRect(0, 0, 512, 356);
+        g.setFont(new Font("Helvetica", 1, 16));
+        g.setColor(Color.yellow);
+        int i = 35;
+        g.drawString("Sorry, an error has occured whilst loading TestServer", 30, i);
+        i += 50;
+        g.setColor(Color.white);
+        g.drawString("To fix this try the following (in order):", 30, i);
+        i += 50;
+        g.setColor(Color.white);
+        g.setFont(new Font("Helvetica", 1, 12));
+        g.drawString("1: Try closing ALL open web-browser windows, and reloading", 30, i);
+        i += 30;
+        g.drawString("2: Try clearing your web-browsers cache from tools->internet options", 30, i);
+        i += 30;
+        g.drawString("3: Try using a different game-world", 30, i);
+        i += 30;
+        g.drawString("4: Try rebooting your computer", 30, i);
+        i += 30;
+        g.drawString("5: Try selecting a different version of Java from the play-game menu", 30, i);
+        changeThreadSleepModifier(1);
+        return;
+    }
+    
+    private void displayMemoryError()
+    {
+        Graphics g2 = getGraphics();
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, 512, 356);
+        g2.setFont(new Font("Helvetica", 1, 20));
+        g2.setColor(Color.white);
+        g2.drawString("Error - out of memory!", 50, 50);
+        g2.drawString("Close ALL unnecessary programs", 50, 100);
+        g2.drawString("and windows before loading the game", 50, 150);
+        g2.drawString("TestServer needs about 100mb of spare RAM", 50, 200);
+        changeThreadSleepModifier(1);
+        return;
+    }
 
     protected final void method4()
     {
         if (lastLoadedNull)
         {
-            Graphics g = getGraphics();
-            g.setColor(Color.black);
-            g.fillRect(0, 0, 512, 356);
-            g.setFont(new Font("Helvetica", 1, 16));
-            g.setColor(Color.yellow);
-            int i = 35;
-            g.drawString("Sorry, an error has occured whilst loading TestServer", 30, i);
-            i += 50;
-            g.setColor(Color.white);
-            g.drawString("To fix this try the following (in order):", 30, i);
-            i += 50;
-            g.setColor(Color.white);
-            g.setFont(new Font("Helvetica", 1, 12));
-            g.drawString("1: Try closing ALL open web-browser windows, and reloading", 30, i);
-            i += 30;
-            g.drawString("2: Try clearing your web-browsers cache from tools->internet options", 30, i);
-            i += 30;
-            g.drawString("3: Try using a different game-world", 30, i);
-            i += 30;
-            g.drawString("4: Try rebooting your computer", 30, i);
-            i += 30;
-            g.drawString("5: Try selecting a different version of Java from the play-game menu", 30, i);
-            changeThreadSleepModifier(1);
+        	displayLastLoadedNull();
             return;
         }
         if (memoryError)
         {
-            Graphics g2 = getGraphics();
-            g2.setColor(Color.black);
-            g2.fillRect(0, 0, 512, 356);
-            g2.setFont(new Font("Helvetica", 1, 20));
-            g2.setColor(Color.white);
-            g2.drawString("Error - out of memory!", 50, 50);
-            g2.drawString("Close ALL unnecessary programs", 50, 100);
-            g2.drawString("and windows before loading the game", 50, 150);
-            g2.drawString("TestServer needs about 100mb of spare RAM", 50, 200);
-            changeThreadSleepModifier(1);
+        	displayMemoryError();
             return;
         }
-        try {
-            if (loggedIn) {
+        try
+        {
+            if (loggedIn)
+            {
                 gameGraphics.drawStringShadows = true;
                 drawGame();
-            } else {
+            }
+            else
+            {
                 gameGraphics.drawStringShadows = false;
                 drawLoginScreen();
             }
         }
-        catch (OutOfMemoryError e) {
+        catch (OutOfMemoryError e)
+        {
             garbageCollect();
             memoryError = true;
         }
     }
 
-    private final void walkToObject(int x, int y, int id, int type) {
+    private final void walkToObject(int x, int y, int id, int type)
+    {
         int i1;
         int j1;
-        if (id == 0 || id == 4) {
+        if (id == 0 || id == 4)
+        {
             i1 = EntityHandler.getObjectDef(type).getWidth();
             j1 = EntityHandler.getObjectDef(type).getHeight();
-        } else {
+        }
+        else
+        {
             j1 = EntityHandler.getObjectDef(type).getWidth();
             i1 = EntityHandler.getObjectDef(type).getHeight();
         }
-        if (EntityHandler.getObjectDef(type).getType() == 2 || EntityHandler.getObjectDef(type).getType() == 3) {
-            if (id == 0) {
+        if (EntityHandler.getObjectDef(type).getType() == 2
+        		|| EntityHandler.getObjectDef(type).getType() == 3)
+        {
+            if (id == 0)
+            {
                 x--;
                 i1++;
             }
@@ -1074,386 +1122,76 @@ public class mudclient extends GameWindowMiddleMan
                 j1++;
             if (id == 4)
                 i1++;
-            if (id == 6) {
+            if (id == 6)
+            {
                 y--;
                 j1++;
             }
-            sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1, (y + j1) - 1, false, true);
+            sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
+            		(y + j1) - 1, false, true);
             return;
-        } else {
-            sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1, (y + j1) - 1, true, true);
+        }
+        else
+        {
+            sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
+            		(y + j1) - 1, true, true);
             return;
         }
     }
-
-    private final void drawBankBox()
+    
+    /**
+     * Draws the bank frame, i.e. the title bar (and title) as well as
+     * top, bottom, left and right margins.
+     */
+    private void drawBankFrame()
     {
-        //char bankWidth = '\u0198'; // bank window width
-        //char bankHeight = '\u014E'; // bank window height
-        //int bankWidth = 408;
-        //int bankHeight = 280;
-        int nRows = 6; // TODO: make this depend on frame size
-        int nCols = 8; // TODO: make this depend on frame size
-        int titleBarHeight = 12;
-        int topInfoBoxHeight = 17;
-        int bottomInfoBoxHeight = 47;
-        int leftMarginBoxWidth = 8;
-        int rightMarginBoxWidth = 8;
-        int bankWidth = leftMarginBoxWidth + nCols*itemSlotWidth + rightMarginBoxWidth;
-        int bankHeight = titleBarHeight + topInfoBoxHeight + nRows*itemSlotHeight + bottomInfoBoxHeight;
-        int windowX = windowWidth/2 - bankWidth / 2;
-        int windowY = windowHeight/2 - bankHeight / 2;    
-        // title bar
-        gameGraphics.drawBox(windowX, windowY, bankWidth, titleBarHeight, 0x0000c0);
-        int bankBg = 0x989898;
-        // top info box
-        int topInfoBoxY = windowY + titleBarHeight;
-        gameGraphics.drawBoxAlpha(windowX, topInfoBoxY, bankWidth, topInfoBoxHeight, bankBg, 0xa0);
-        // bottom info box (item name & withdraw/deposit amount)
-        int bottomInfoBoxY = topInfoBoxY + topInfoBoxHeight + nRows*itemSlotHeight;
-        gameGraphics.drawBoxAlpha(windowX, bottomInfoBoxY, bankWidth, bottomInfoBoxHeight, bankBg, 0xa0);
-        // left margin box
-        int leftMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-        int leftMarginBoxHeight = nRows*itemSlotHeight;
-        gameGraphics.drawBoxAlpha(windowX, leftMarginBoxY, leftMarginBoxWidth, leftMarginBoxHeight, bankBg, 0xa0);
-        // right margin box
-        int rightMarginBoxHeight = nRows*itemSlotHeight;
-        int rightMarginBoxX = windowX + leftMarginBoxWidth + nCols*itemSlotWidth;
-        int rightMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-        gameGraphics.drawBoxAlpha(rightMarginBoxX, rightMarginBoxY, rightMarginBoxWidth, rightMarginBoxHeight, bankBg, 0xa0);
-        gameGraphics.drawString("Bank", windowX + 1, windowY + 10, 1, 0xffffff);
-        int[] buttonWithOne = {
-        		windowX + bankWidth - 180 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - 150 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonWith10 = {
-        		windowX + bankWidth - 150 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - 120 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonWith100 = {
-        		windowX + bankWidth - 120 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - 95 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonWith1k = {
-        		windowX + bankWidth - 95 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - 65 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonWith10k = {
-        		windowX + bankWidth - 65 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - 32 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonWithAll = {
-        		windowX + bankWidth - 30 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 5,
-        		windowX + bankWidth - rightMarginBoxWidth,
-        		bottomInfoBoxY + 16};
-        int[] buttonDepOne = {
-        		windowX + bankWidth - 180 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - 150 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        int[] buttonDep10 = {
-        		windowX + bankWidth - 150 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - 120 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        int[] buttonDep100 = {
-        		windowX + bankWidth - 120 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - 95 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        int[] buttonDep1k = {
-        		windowX + bankWidth - 95 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - 65 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        int[] buttonDep10k = {
-        		windowX + bankWidth - 65 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - 32 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        int[] buttonDepAll = {
-        		windowX + bankWidth - 30 - rightMarginBoxWidth,
-        		bottomInfoBoxY + 30,
-        		windowX + bankWidth - rightMarginBoxWidth,
-        		bottomInfoBoxY + 41};
-        if (mouseOverBankPageText > 0 && bankItemCount <= nRows*nCols)
-            mouseOverBankPageText = 0;
-        if (mouseOverBankPageText > 1 && bankItemCount <= 2*nRows*nCols)
-            mouseOverBankPageText = 1;
-        if (mouseOverBankPageText > 2 && bankItemCount <= 3*nRows*nCols)
-            mouseOverBankPageText = 2;
-        if (selectedBankItem >= bankItemCount || selectedBankItem < 0)
-            selectedBankItem = -1;
-        if (selectedBankItem != -1
-        		&& bankItems[selectedBankItem] != selectedBankItemType)
-        {
-            selectedBankItem = -1;
-            selectedBankItemType = -2;
-        }
-        if (mouseButtonClick != 0)
-        {
-            mouseButtonClick = 0;
-            int mouseXBankWindow = super.mouseX - (windowWidth/2 - bankWidth / 2);
-            int mouseYBankWindow = super.mouseY - (windowHeight/2 - bankHeight / 2);
-            if (mouseXBankWindow >= 0 && mouseYBankWindow >= titleBarHeight
-            		&& mouseXBankWindow < bankWidth && mouseYBankWindow < bankHeight)
-            {
-                int i1 = mouseOverBankPageText * nRows*nCols;
-                for (int row = 0; row < nRows; row++)
-                {
-                    for (int col = 0; col < nCols; col++)
-                    {
-                        int l6 = leftMarginBoxWidth - 1 + col * itemSlotWidth;
-                        int j7 = titleBarHeight + topInfoBoxHeight - 1 + row * itemSlotHeight;
-                        if (mouseXBankWindow > l6 && mouseXBankWindow < l6 + itemSlotWidth
-                        		&& mouseYBankWindow > j7 && mouseYBankWindow < j7 + itemSlotHeight
-                        		&& i1 < bankItemCount && bankItems[i1] != -1)
-                        {
-                            selectedBankItemType = bankItems[i1];
-                            selectedBankItem = i1;
-                        }
-                        i1++;
-                    }
-
-                }
-
-                mouseXBankWindow = windowWidth/2 - bankWidth / 2;
-                mouseYBankWindow = windowHeight/2 - bankHeight / 2;
-                int selectedBankItemId;
-                if (selectedBankItem < 0)
-                    selectedBankItemId = -1;
-                else
-                    selectedBankItemId = bankItems[selectedBankItem];
-                if (selectedBankItemId != -1)
-                {
-                    int selectedBankItemCount = bankItemsCount[selectedBankItem];
-                    if (selectedBankItemCount >= 1
-                    		&& super.mouseX >= buttonWithOne[0]
-                    		&& super.mouseY >= buttonWithOne[1]
-                    		&& super.mouseX < buttonWithOne[2]
-                    		&& super.mouseY <= buttonWithOne[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(1);
-                        super.streamClass.formatPacket();
-                    }
-                    if (selectedBankItemCount >= 10
-                    		&& super.mouseX >= buttonWith10[0]
-                    		&& super.mouseY >= buttonWith10[1]
-                    		&& super.mouseX < buttonWith10[2]
-                    		&& super.mouseY <= buttonWith10[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(10);
-                        super.streamClass.formatPacket();
-                    }
-                    if (selectedBankItemCount >= 100
-                    		&& super.mouseX >= buttonWith100[0]
-                    		&& super.mouseY >= buttonWith100[1]
-                    		&& super.mouseX < buttonWith100[2]
-                    		&& super.mouseY <= buttonWith100[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(100);
-                        super.streamClass.formatPacket();
-                    }
-                    if (selectedBankItemCount >= 1000
-                    		&& super.mouseX >= buttonWith1k[0]
-                    		&& super.mouseY >= buttonWith1k[1]
-                    		&& super.mouseX < buttonWith1k[2]
-                    		&& super.mouseY <= buttonWith1k[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(1000);
-                        super.streamClass.formatPacket();
-                    }
-                    if (selectedBankItemCount >= 10000
-                    		&& super.mouseX >= buttonWith10k[0]
-                    		&& super.mouseY >= buttonWith10k[1]
-                    		&& super.mouseX < buttonWith10k[2]
-                    		&& super.mouseY <= buttonWith10k[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(10000);
-                        super.streamClass.formatPacket();
-                    }
-                    if (super.mouseX >= buttonWithAll[0]
-                    		&& super.mouseY >= buttonWithAll[1]
-                    		&& super.mouseX < buttonWithAll[2]
-                    		&& super.mouseY <= buttonWithAll[3])
-                    {
-                        super.streamClass.createPacket(183);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(selectedBankItemCount);
-                        super.streamClass.formatPacket();
-                    }
-                    if (inventoryCount(selectedBankItemId) >= 1
-                    		&& super.mouseX >= buttonDepOne[0]
-                    		&& super.mouseY >= buttonDepOne[1]
-                    		&& super.mouseX < buttonDepOne[2]
-                    		&& super.mouseY <= buttonDepOne[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(1);
-                        super.streamClass.formatPacket();
-                    }
-                    if (inventoryCount(selectedBankItemId) >= 10
-                    		&& super.mouseX >= buttonDep10[0]
-                    		&& super.mouseY >= buttonDep10[1]
-                    		&& super.mouseX < buttonDep10[2]
-                    		&& super.mouseY <= buttonDep10[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(10);
-                        super.streamClass.formatPacket();
-                    }
-                    if (inventoryCount(selectedBankItemId) >= 100
-                    		&& super.mouseX >= buttonDep100[0]
-                    		&& super.mouseY >= buttonDep100[1]
-                    		&& super.mouseX < buttonDep100[2]
-                    		&& super.mouseY <= buttonDep100[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(100);
-                        super.streamClass.formatPacket();
-                    }
-                    if (inventoryCount(selectedBankItemId) >= 1000
-                    		&& super.mouseX >= buttonDep1k[0]
-                    		&& super.mouseY >= buttonDep1k[1]
-                    		&& super.mouseX < buttonDep1k[2]
-                    		&& super.mouseY <= buttonDep1k[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(1000);
-                        super.streamClass.formatPacket();
-                    }
-                    if (inventoryCount(selectedBankItemId) >= 10000
-                    		&& super.mouseX >= buttonDep10k[0]
-                    		&& super.mouseY >= buttonDep10k[1]
-                    		&& super.mouseX < buttonDep10k[2]
-                    		&& super.mouseY <= buttonDep10k[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(10000);
-                        super.streamClass.formatPacket();
-                    }
-                    if (super.mouseX >= buttonDepAll[0]
-                    		&& super.mouseY >= buttonDepAll[1]
-                    		&& super.mouseX < buttonDepAll[2]
-                    		&& super.mouseY <= buttonDepAll[3])
-                    {
-                        super.streamClass.createPacket(198);
-                        super.streamClass.add2ByteInt(selectedBankItemId);
-                        super.streamClass.add4ByteInt(inventoryCount(selectedBankItemId));
-                        super.streamClass.formatPacket();
-                    }
-                }
-            }
-            else if (bankItemCount > nRows*nCols && mouseXBankWindow >= 50
-            		&& mouseXBankWindow <= 115 && mouseYBankWindow <= 12)
-                mouseOverBankPageText = 0;
-            else if (bankItemCount > nRows*nCols && mouseXBankWindow >= 115
-            		&& mouseXBankWindow <= 180 && mouseYBankWindow <= 12)
-                mouseOverBankPageText = 1;
-            else if (bankItemCount > 2*nRows*nCols && mouseXBankWindow >= 180
-            		&& mouseXBankWindow <= 245 && mouseYBankWindow <= 12)
-                mouseOverBankPageText = 2;
-            else if (bankItemCount > 3*nRows*nCols && mouseXBankWindow >= 245
-            		&& mouseXBankWindow <= 310 && mouseYBankWindow <= 12)
-            {
-                mouseOverBankPageText = 3;
-            }
-            else
-            {
-                super.streamClass.createPacket(48);
-                super.streamClass.formatPacket();
-                showBank = false;
-                return;
-            }
-        }
-        int i2 = 50;
-        if (bankItemCount > nRows*nCols)
-        {
-            int l2 = 0xffffff;
-            if (mouseOverBankPageText == 0)
-                l2 = 0xff0000;
-            else if (super.mouseX > windowX + i2
-            		&& super.mouseY >= windowY
-            		&& super.mouseX < windowX + i2 + 65
-            		&& super.mouseY < windowY + 12)
-                l2 = 0xffff00;
-            gameGraphics.drawString("<page 1>", windowX + i2, windowY + 10, 1, l2);
-            i2 += 65;
-            l2 = 0xffffff;
-            if (mouseOverBankPageText == 1)
-                l2 = 0xff0000;
-            else if (super.mouseX > windowX + i2
-            		&& super.mouseY >= windowY
-            		&& super.mouseX < windowX + i2 + 65
-            		&& super.mouseY < windowY + 12)
-                l2 = 0xffff00;
-            gameGraphics.drawString("<page 2>", windowX + i2, windowY + 10, 1, l2);
-            i2 += 65;
-        }
-        if (bankItemCount > 2*nRows*nCols)
-        {
-            int i3 = 0xffffff;
-            if (mouseOverBankPageText == 2)
-                i3 = 0xff0000;
-            else if (super.mouseX > windowX + i2
-            		&& super.mouseY >= windowY
-            		&& super.mouseX < windowX + i2 + 65
-            		&& super.mouseY < windowY + 12)
-                i3 = 0xffff00;
-            gameGraphics.drawString("<page 3>", windowX + i2, windowY + 10, 1, i3);
-            i2 += 65;
-        }
-        if (bankItemCount > 3*nRows*nCols)
-        {
-            int j3 = 0xffffff;
-            if (mouseOverBankPageText == 3)
-                j3 = 0xff0000;
-            else if (super.mouseX > windowX + i2
-            		&& super.mouseY >= windowY
-            		&& super.mouseX < windowX + i2 + 65
-            		&& super.mouseY < windowY + 12)
-                j3 = 0xffff00;
-            gameGraphics.drawString("<page 4>", windowX + i2, windowY + 10, 1, j3);
-            i2 += 65;
-        }
-        int k3 = 0xffffff;
-        if (super.mouseX > windowX + bankWidth - 88
-        		&& super.mouseY >= windowY
-        		&& super.mouseX < windowX + bankWidth
-        		&& super.mouseY < windowY + titleBarHeight)
-            k3 = 0xff0000;
-        gameGraphics.drawBoxTextRight("Close window", windowX + bankWidth - 2, windowY + 10, 1, k3);
-        gameGraphics.drawString("Number in bank in green", windowX + 7, windowY + titleBarHeight + 12, 1, 0x00ff00);
-        gameGraphics.drawString("Number held in blue", windowX + bankWidth - 119, windowY + titleBarHeight + 12, 1, 0x00ffff);
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getTitleBarX(), bankWin.getTitleBarY(),
+        		bankWin.getTitleBarWidth(), bankWin.getTitleBarHeight(),
+        		bankWin.getTitleBarColor(), bankWin.getTitleBarAlpha());
+        gameGraphics.drawString("Bank", bankWin.getTitleBarX() + 1,
+        		bankWin.getTitleBarY() + 10, 1, 0xffffff);
+        int clr = 0xffffff;
+        if (super.mouseX > bankWin.getCloseButtonX()
+        		&& super.mouseY >= bankWin.getCloseButtonY()
+        		&& super.mouseX < bankWin.getCloseButtonX() + bankWin.getCloseButtonWidth()
+        		&& super.mouseY < bankWin.getCloseButtonY() + bankWin.getCloseButtonHeight())
+            clr = 0xff0000;
+        gameGraphics.drawBoxTextRight("Close window",
+        		bankWin.getCloseButtonX() + bankWin.getCloseButtonWidth() - 2,
+        		bankWin.getCloseButtonY() + 10, 1, clr);
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getTopMarginX(), bankWin.getTopMarginY(),
+        		bankWin.getTopMarginWidth(), bankWin.getTopMarginHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getBottomMarginX(), bankWin.getBottomMarginY(),
+        		bankWin.getBottomMarginWidth(), bankWin.getBottomMarginHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getLeftMarginX(), bankWin.getLeftMarginY(),
+        		bankWin.getLeftMarginWidth(), bankWin.getLeftMarginHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getRightMarginX(), bankWin.getRightMarginY(),
+        		bankWin.getRightMarginWidth(), bankWin.getRightMarginHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+    }
+    
+    /**
+     * Draws the banked items (as a grid) in the current tab as well as the amount
+     * of the items that are in the inventory as well as in the bank.
+     */
+    private void drawBankGrid()
+    {
         int i7 = 0xd0d0d0;
-        int k7 = mouseOverBankPageText * nRows*nCols;
-        for (int row = 0; row < nRows; row++)
+        int k7 = mouseOverBankPageText * bankWin.getRows()*bankWin.getCols();
+        for (int row = 0; row < bankWin.getRows(); row++)
         {
-            for (int col = 0; col < nCols; col++)
+            for (int col = 0; col < bankWin.getCols(); col++)
             {
-                int slotX = windowX + leftMarginBoxWidth - 1 + col * itemSlotWidth;
-                int slotY = windowY + titleBarHeight + topInfoBoxHeight - 1 + row * itemSlotHeight;
+                int slotX = bankWin.getBankGridX() - 1 + col * itemSlotWidth;
+                int slotY = bankWin.getBankGridY() - 1 + row * itemSlotHeight;
                 if (selectedBankItem == k7)
                     gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, 0xff0000, 160);
                 else
@@ -1463,18 +1201,112 @@ public class mudclient extends GameWindowMiddleMan
                     gameGraphics.spriteClip4(slotX, slotY, itemSlotWidth-1, itemSlotHeight-2,
                     		SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(),
                     		EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
-                    gameGraphics.drawString(String.valueOf(bankItemsCount[k7]), slotX + 1, slotY + 10, 1, 0x00ff00);
-                    gameGraphics.drawBoxTextRight(String.valueOf(inventoryCount(bankItems[k7])),
+                    gameGraphics.drawString(getAbbreviatedValue(bankItemsCount[k7]),
+                    		slotX + 1, slotY + 10, 1, 0x00ff00);
+                    gameGraphics.drawBoxTextRight(getAbbreviatedValue(inventoryCount(bankItems[k7])),
                     		slotX + itemSlotWidth - 1, slotY + itemSlotHeight - 5, 1, 0x00ffff);
                 }
                 k7++;
             }
-
         }
-        gameGraphics.drawLineX(windowX + 5, bottomInfoBoxY + 23, bankWidth-10, 0);
+    }
+    
+    /**
+     * Draws the text that allows users to withdraw a selected item from the bank.
+     * @param selectedBankItemCount Item id of the selected item.
+     */
+    private void drawBankWithText(int selectedBankItemCount)
+    {
+    	int yOffset = 10;
+        int withAmt = bankWin.getWithAmt(super.mouseX, super.mouseY,
+        		selectedBankItemCount);
+        gameGraphics.drawString(
+        		"One", bankWin.getButtonWithOneX() + 2,
+        		bankWin.getButtonWithOneY() + yOffset, 1,
+        		(withAmt == 1) ? 0xff0000 : 0xffffff);
+        if (selectedBankItemCount >= 10)
+            gameGraphics.drawString(
+            		"10", bankWin.getButtonWith10X() + 2,
+            		bankWin.getButtonWith10Y() + yOffset, 1,
+            		(withAmt == 10) ? 0xff0000 : 0xffffff);
+        if (selectedBankItemCount >= 100)
+            gameGraphics.drawString(
+            		"100", bankWin.getButtonWith100X() + 2,
+            		bankWin.getButtonWith100Y() + yOffset, 1,
+            		(withAmt == 100) ? 0xff0000 : 0xffffff);
+        if (selectedBankItemCount >= 1000)
+            gameGraphics.drawString(
+            		"1k", bankWin.getButtonWith1kX() + 2,
+            		bankWin.getButtonWith1kY() + yOffset, 1,
+            		(withAmt == 1000) ? 0xff0000 : 0xffffff);
+        if (selectedBankItemCount >= 10000)
+            gameGraphics.drawString(
+            		"10k", bankWin.getButtonWith10kX() + 2,
+            		bankWin.getButtonWith10kY() + yOffset, 1,
+            		(withAmt == 10000) ? 0xff0000 : 0xffffff);
+        gameGraphics.drawString(
+        		"All", bankWin.getButtonWithAllX(),
+        		bankWin.getButtonWithAllY() + yOffset, 1,
+        		(withAmt == selectedBankItemCount) ? 0xff0000 : 0xffffff);
+    }
+    
+    /**
+     * Draws the text that allows users to deposit a selected item to the bank.
+     * @param selectedBankItemId Item id of the selected item.
+     */
+    private void drawBankDepText(int selectedBankItemId)
+    {
+    	int yOffset = 10;
+        int depAmt = bankWin.getDepAmt(super.mouseX, super.mouseY,
+        		inventoryCount(selectedBankItemId));
+        gameGraphics.drawString(
+        		"One", bankWin.getButtonDepOneX() + 2,
+        		bankWin.getButtonDepOneY() + yOffset, 1,
+        		(depAmt == 1) ? 0xff0000 : 0xffffff);
+        if (inventoryCount(selectedBankItemId) >= 10)
+            gameGraphics.drawString(
+            		"10", bankWin.getButtonDep10X() + 2,
+            		bankWin.getButtonDep10Y() + yOffset, 1,
+            		(depAmt == 10) ? 0xff0000 : 0xffffff);
+        if (inventoryCount(selectedBankItemId) >= 100)
+            gameGraphics.drawString(
+            		"100", bankWin.getButtonDep100X() + 2,
+            		bankWin.getButtonDep100Y() + yOffset, 1,
+            		(depAmt == 100) ? 0xff0000 : 0xffffff);
+        if (inventoryCount(selectedBankItemId) >= 1000)
+            gameGraphics.drawString(
+            		"1k", bankWin.getButtonDep1kX() + 2,
+            		bankWin.getButtonDep1kY() + yOffset, 1,
+            		(depAmt == 1000) ? 0xff0000 : 0xffffff);
+        if (inventoryCount(selectedBankItemId) >= 10000)
+            gameGraphics.drawString(
+            		"10k", bankWin.getButtonDep10kX() + 2,
+            		bankWin.getButtonDep10kY() + yOffset, 1,
+            		(depAmt == 10000) ? 0xff0000 : 0xffffff);
+        gameGraphics.drawString(
+        		"All", bankWin.getButtonDepAllX(),
+        		bankWin.getButtonDepAllY() + yOffset, 1,
+        		(depAmt == inventoryCount(selectedBankItemId)) ? 0xff0000 : 0xffffff);
+    }
+    
+    /**
+     * Draws the panel that displays item name and the amount to deposit or withdraw.
+     */
+    private void drawBankDepWithPanel()
+    {
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getBottomInfoBoxX(), bankWin.getBottomInfoBoxY(),
+        		bankWin.getBottomInfoBoxWidth(), bankWin.getBottomInfoBoxHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        gameGraphics.drawLineX(
+        		bankWin.getBottomInfoBoxX(),
+        		bankWin.getBottomInfoBoxY() + bankWin.getBottomInfoBoxHeight()/2,
+        		bankWin.getBottomInfoBoxWidth(), 0);
         if (selectedBankItem == -1)
         {
-            gameGraphics.drawText("Select an object to withdraw or deposit", windowX + bankWidth/2, bottomInfoBoxY + 15, 3, 0xffff00);
+            gameGraphics.drawText("Select an object to withdraw or deposit",
+            		bankWin.getBottomInfoBoxX() + bankWin.getBottomInfoBoxWidth()/2,
+            		bankWin.getBottomInfoBoxY() + 15, 3, 0xffff00);
             return;
         }
         int selectedBankItemId;
@@ -1485,142 +1317,256 @@ public class mudclient extends GameWindowMiddleMan
         if (selectedBankItemId != -1) {
             int selectedBankItemCount = bankItemsCount[selectedBankItem];
             if (selectedBankItemCount > 0) {
-                gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(), windowX + 2, bottomInfoBoxY + 15, 1, 0xffffff);
-                int l3 = 0xffffff;
-                if (super.mouseX >= buttonWithOne[0]
-                		&& super.mouseY >= buttonWithOne[1]
-                		&& super.mouseX < buttonWithOne[2]
-                		&& super.mouseY <= buttonWithOne[3])
-                    l3 = 0xff0000;
-                gameGraphics.drawString("One", buttonWithOne[0] + 2, buttonWithOne[3] - 1, 1, l3);
-                if (selectedBankItemCount >= 10) {
-                    int i4 = 0xffffff;
-                    if (super.mouseX >= buttonWith10[0]
-                    		&& super.mouseY >= buttonWith10[1]
-                    		&& super.mouseX < buttonWith10[2]
-                    		&& super.mouseY <= buttonWith10[3])
-                        i4 = 0xff0000;
-                    gameGraphics.drawString("10", buttonWith10[0] + 2, buttonWith10[3] - 1, 1, i4);
-                }
-                if (selectedBankItemCount >= 100) {
-                    int j4 = 0xffffff;
-                    if (super.mouseX >= buttonWith100[0]
-                    		&& super.mouseY >= buttonWith100[1]
-                    		&& super.mouseX < buttonWith100[2]
-                    		&& super.mouseY <= buttonWith100[3])
-                        j4 = 0xff0000;
-                    gameGraphics.drawString("100", buttonWith100[0] + 2, buttonWith100[3] - 1, 1, j4);
-                }
-                if (selectedBankItemCount >= 1000) {
-                    int k4 = 0xffffff;
-                    if (super.mouseX >= buttonWith1k[0]
-                    		&& super.mouseY >= buttonWith1k[1]
-                    		&& super.mouseX < buttonWith1k[2]
-                    		&& super.mouseY <= buttonWith1k[3])
-                        k4 = 0xff0000;
-                    gameGraphics.drawString("1k", buttonWith1k[0] + 2, buttonWith1k[3] - 1, 1, k4);
-                }
-                if (selectedBankItemCount >= 10000) {
-                    int l4 = 0xffffff;
-                    if (super.mouseX >= buttonWith10k[0]
-                    		&& super.mouseY >= buttonWith10k[1]
-                    		&& super.mouseX < buttonWith10k[2]
-                    		&& super.mouseY <= buttonWith10k[3])
-                        l4 = 0xff0000;
-                    gameGraphics.drawString("10k", buttonWith10k[0] + 2, buttonWith10k[3] - 1, 1, l4);
-                }
-                int i5 = 0xffffff;
-                if (super.mouseX >= buttonWithAll[0]
-                		&& super.mouseY >= buttonWithAll[1]
-                		&& super.mouseX < buttonWithAll[2]
-                		&& super.mouseY <= buttonWithAll[3])
-                    i5 = 0xff0000;
-                gameGraphics.drawString("All", buttonWithAll[0], buttonWithAll[3] - 1, 1, i5);
+                gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
+                		bankWin.getBottomInfoBoxX() + 2, bankWin.getBottomInfoBoxY() + 15, 1, 0xffffff);
+                drawBankWithText(selectedBankItemCount);
             }
             if (inventoryCount(selectedBankItemId) > 0) {
-                gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(), windowX + 2, bottomInfoBoxY + 40, 1, 0xffffff);
-                int j5 = 0xffffff;
-                if (super.mouseX >= buttonDepOne[0]
-                		&& super.mouseY >= buttonDepOne[1]
-                		&& super.mouseX < buttonDepOne[2]
-                		&& super.mouseY <= buttonDepOne[3])
-                    j5 = 0xff0000;
-                gameGraphics.drawString("One", buttonDepOne[0] + 2, buttonDepOne[3] - 1, 1, j5);
-                if (inventoryCount(selectedBankItemId) >= 10) {
-                    int k5 = 0xffffff;
-                    if (super.mouseX >= buttonDep10[0]
-                    		&& super.mouseY >= buttonDep10[1]
-                    		&& super.mouseX < buttonDep10[2]
-                    		&& super.mouseY <= buttonDep10[3])
-                        k5 = 0xff0000;
-                    gameGraphics.drawString("10", buttonDep10[0] + 2, buttonDep10[3] - 1, 1, k5);
-                }
-                if (inventoryCount(selectedBankItemId) >= 100) {
-                    int l5 = 0xffffff;
-                    if (super.mouseX >= buttonDep100[0]
-                    		&& super.mouseY >= buttonDep100[1]
-                    		&& super.mouseX < buttonDep100[2]
-                    		&& super.mouseY <= buttonDep100[3])
-                        l5 = 0xff0000;
-                    gameGraphics.drawString("100", buttonDep100[0] + 2, buttonDep100[3] - 1, 1, l5);
-                }
-                if (inventoryCount(selectedBankItemId) >= 1000) {
-                    int i6 = 0xffffff;
-                    if (super.mouseX >= buttonDep1k[0]
-                    		&& super.mouseY >= buttonDep1k[1]
-                    		&& super.mouseX < buttonDep1k[2]
-                    		&& super.mouseY <= buttonDep1k[3])
-                        i6 = 0xff0000;
-                    gameGraphics.drawString("1k", buttonDep1k[0] + 2, buttonDep1k[3] - 1, 1, i6);
-                }
-                if (inventoryCount(selectedBankItemId) >= 10000) {
-                    int j6 = 0xffffff;
-                    if (super.mouseX >= buttonDep10k[0]
-                    		&& super.mouseY >= buttonDep10k[1]
-                    		&& super.mouseX < buttonDep10k[2]
-                    		&& super.mouseY <= buttonDep10k[3])
-                        j6 = 0xff0000;
-                    gameGraphics.drawString("10k", buttonDep10k[0] + 2, buttonDep10k[3] - 1, 1, j6);
-                }
-                int k6 = 0xffffff;
-                if (super.mouseX >= buttonDepAll[0]
-                		&& super.mouseY >= buttonDepAll[1]
-                		&& super.mouseX < buttonDepAll[2]
-                		&& super.mouseY <= buttonDepAll[3])
-                    k6 = 0xff0000;
-                gameGraphics.drawString("All", buttonDepAll[0], buttonDepAll[3] - 1, 1, k6);
+                gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
+                		bankWin.getBottomInfoBoxX() + 2, bankWin.getBottomInfoBoxY() + 40, 1, 0xffffff);
+                drawBankDepText(selectedBankItemId);
             }
         }
     }
     
     /**
-     * I might use this to make login information be drawn in an info box
-     * rather than be written on the background
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @param color
-     * @param border
-     * @param borderThick
-     * @param borderColor
-     * @param textType
-     * @param textColor
-     * @param text
+     * Draws the bank tabs
      */
-    public final void drawInfoBox(int x, int y, int width, int height, int color,
-    		boolean border, int borderThick, int borderColor, int textType, int textColor,
-    		String text)
+    private void drawBankTabs()
+    {
+		int nTabs = bankItemCount/(bankWin.getRows()*bankWin.getCols()) + 1;
+        int tabMouseover = bankWin.getTabMouseover(super.mouseX,
+        		super.mouseY, nTabs);
+        if (nTabs > 1)
+        {
+            int color;
+        	for (int i = 0; i < nTabs; ++i)
+        	{
+        		color = 0xffffff;
+        		if (i == mouseOverBankPageText)
+        			color = 0xff0000;
+        		else if (i+1 == tabMouseover)
+        			color = 0xffff00;
+        		gameGraphics.drawString("<page "+(i+1)+">",
+        				bankWin.getTabButtons()[i][0],
+        				bankWin.getTabButtons()[i][1] + 10, 1, color);
+        	}
+        }
+    }
+    
+    /**
+     * Draws information about the bank interface at the top of the bank panel.
+     */
+    private void drawBankInfo()
+    {
+        gameGraphics.drawBoxAlpha(
+        		bankWin.getTopInfoBoxX(), bankWin.getTopInfoBoxY(),
+        		bankWin.getTopInfoBoxWidth(), bankWin.getTopInfoBoxHeight(),
+        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        gameGraphics.drawString("Number in bank in green",
+        		bankWin.getTopInfoBoxX(),
+        		bankWin.getTopInfoBoxY() + 12, 1, 0x00ff00);
+        gameGraphics.drawString("Number held in blue",
+        		bankWin.getTopInfoBoxX() + bankWin.getTopInfoBoxWidth() - 111,
+        		bankWin.getTopInfoBoxY() + 12, 1, 0x00ffff);
+    }
+    
+    /**
+     * Handles what happens when you click on a bank tab
+     */
+    private void switchBankTab()
+    {
+		int nTabs = bankItemCount/(bankWin.getRows()*bankWin.getCols()) + 1;
+        int tabMouseover = bankWin.getTabMouseover(super.mouseX,
+        		super.mouseY, nTabs);
+        if (tabMouseover > 0)
+        {
+        	mouseOverBankPageText = tabMouseover - 1;
+        }
+    }
+    
+    /**
+     * Handles what happens when you click on an item in the bank.
+     */
+    private void clickBankItem()
+    {
+        int itemIdx = mouseOverBankPageText * bankWin.getRows()*bankWin.getCols();
+        int mouseXGrid = super.mouseX - bankWin.getBankGridX();
+        int mouseYGrid = super.mouseY - bankWin.getBankGridY();
+        for (int row = 0; row < bankWin.getRows(); row++)
+        {
+            for (int col = 0; col < bankWin.getCols(); col++)
+            {
+                int slotXMin = col * itemSlotWidth - 1;
+                int slotYMin = row * itemSlotHeight - 1;
+                if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + itemSlotWidth
+                		&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + itemSlotHeight
+                		&& itemIdx < bankItemCount && bankItems[itemIdx] != -1)
+                {
+                    selectedBankItemType = bankItems[itemIdx];
+                    selectedBankItem = itemIdx;
+                }
+                itemIdx++;
+            }
+
+        }
+    }
+    
+    /**
+     * Handles what happens when you withdraw/deposit an item from/to the bank. 
+     */
+    private void clickBankItemMove()
+    {
+        int selectedBankItemId;
+        if (selectedBankItem < 0)
+            selectedBankItemId = -1;
+        else
+            selectedBankItemId = bankItems[selectedBankItem];
+        if (selectedBankItemId != -1)
+        {
+            int selectedBankItemCount = bankItemsCount[selectedBankItem];
+            int depAmt = bankWin.getDepAmt(super.mouseX, super.mouseY,
+            		inventoryCount(selectedBankItemId));
+            if (depAmt != 0)
+            	formatPacket(198, selectedBankItemId, depAmt);
+            int withAmt = bankWin.getWithAmt(super.mouseX, super.mouseY,
+            		selectedBankItemCount);
+            if (withAmt != 0)
+            	formatPacket(183, selectedBankItemId, withAmt);
+        }
+    }
+    
+    /**
+     * Checks if the number of items changed in bank such that a tab needs to be
+     * removed.
+     */
+    private void updateVisibleBankTabs()
+    {
+        if (mouseOverBankPageText > 0
+        		&& bankItemCount <= bankWin.getRows()*bankWin.getCols())
+            mouseOverBankPageText = 0;
+        if (mouseOverBankPageText > 1
+        		&& bankItemCount <= 2*bankWin.getRows()*bankWin.getCols())
+            mouseOverBankPageText = 1;
+        if (mouseOverBankPageText > 2
+        		&& bankItemCount <= 3*bankWin.getRows()*bankWin.getCols())
+            mouseOverBankPageText = 2;
+    }
+    
+    /**
+     * Checks if an invalid item is selected. If so it will clear the reference.
+     */
+    private void checkSelectedBankItem()
+    {
+        if (selectedBankItem >= bankItemCount || selectedBankItem < 0)
+            selectedBankItem = -1;
+        if (selectedBankItem != -1
+        		&& bankItems[selectedBankItem] != selectedBankItemType)
+        {
+            selectedBankItem = -1;
+            selectedBankItemType = -2;
+        }
+    }
+    
+    private final String getAbbreviatedValue(int amount)
+    {
+        String abbrevVal = String.valueOf(amount);
+        if (amount >= 10000000)
+        	abbrevVal = String.valueOf(amount/1000000) + "M";
+        else if (amount >= 100000)
+        	abbrevVal = String.valueOf(amount/1000) + "K";    	
+        return abbrevVal;
+    }
+
+    /**
+     * Presents the bank on the screen and handles clicking in the bank.
+     */
+    private final void drawBankBox()
+    {
+        updateVisibleBankTabs();
+        checkSelectedBankItem();
+        if (mouseButtonClick != 0)
+        {
+            mouseButtonClick = 0;
+            if (super.mouseX > bankWin.getBankGridX()
+            		&& super.mouseY > bankWin.getBankGridY()
+            		&& super.mouseX < (bankWin.getBankGridX()
+            				+ bankWin.getBankGridWidth())
+            		&& super.mouseY < (bankWin.getBankGridY()
+            				+ bankWin.getBankGridHeight()))
+            	clickBankItem();
+            else if (super.mouseX > bankWin.getBottomInfoBoxX()
+                		&& super.mouseY > bankWin.getBottomInfoBoxY()
+                		&& super.mouseX < (bankWin.getBottomInfoBoxX()
+                				+ bankWin.getBottomInfoBoxWidth())
+                		&& super.mouseY < (bankWin.getBottomInfoBoxY()
+                				+ bankWin.getBottomInfoBoxHeight()))
+            	clickBankItemMove();
+            else if (super.mouseX > bankWin.getTabButtonPanelX()
+            		&& super.mouseY > bankWin.getTabButtonPanelY()
+            		&& super.mouseX < (bankWin.getTabButtonPanelX()
+            				+ bankWin.getTabButtonPanelWidth())
+            		&& super.mouseY < (bankWin.getTabButtonPanelY()
+            				+ bankWin.getTabButtonPanelHeight()))
+            	switchBankTab();
+            else if (super.mouseX < bankWin.getX()
+            		|| super.mouseY < bankWin.getY()
+            		|| super.mouseX > bankWin.getX() + bankWin.getWidth()
+            		|| super.mouseY > bankWin.getY() + bankWin.getHeight()
+            		|| (super.mouseX > bankWin.getCloseButtonX()
+                    		&& super.mouseY > bankWin.getCloseButtonY()
+                    		&& super.mouseX < (bankWin.getCloseButtonX()
+                    				+ bankWin.getCloseButtonWidth())
+                    		&& super.mouseY < (bankWin.getCloseButtonY()
+                    				+ bankWin.getCloseButtonHeight())))
+            {
+            	formatPacket(48, -1, -1);
+            	return;
+            }
+        }
+        drawBankFrame();
+        drawBankTabs();
+    	drawBankInfo();
+        drawBankGrid();
+        drawBankDepWithPanel();
+    }
+    
+    /**
+     * Draws a box on the screen with text in it.
+     * @param x X-position.
+     * @param y Y-position.
+     * @param width Box width.
+     * @param height Box height.
+     * @param color Box color, e.g. 0xffffff.
+     * @param border true if a border should be drawn.
+     * @param borderThick Border thickness.
+     * @param borderColor Border Color, e.g. 0xffffff.
+     * @param textType The type of text. Defined in GameWindow.loadFonts()
+     * @param textColor Text color, e.g. 0xffffff.
+     * @param text The text to be displayed in the box.
+     */
+    public final void drawInfoBox(
+    		int x, int y, int width, int height, int color,
+    		boolean border, int borderThick, int borderColor,
+    		int textType, int textColor, String text)
     {
         gameGraphics.drawBox(x, y, width, height, color);
         gameGraphics.drawBoxEdge(x, y, width, height, borderColor);
-        gameGraphics.drawText(text, x+width/2, y+height/2 + 6, textType, textColor);
+        gameGraphics.drawText(text, x+width/2, y+height/2 + 6,
+        		textType, textColor);
     }
 
-    private final void drawLoggingOutBox() {
-        gameGraphics.drawBox(windowHalfWidth - 130, windowHalfHeight - 30, 260, 60, 0);
-        gameGraphics.drawBoxEdge(windowHalfWidth - 130, windowHalfHeight - 30, 260, 60, 0xffffff);
-        gameGraphics.drawText("Logging out...", windowHalfWidth, windowHalfHeight + 6, 5, 0xffffff);
+    /**
+     * Displays a message that the player is logging out.
+     */
+    private final void drawLoggingOutBox()
+    {
+        gameGraphics.drawBox(windowHalfWidth - 130,
+        		windowHalfHeight - 30, 260, 60, 0);
+        gameGraphics.drawBoxEdge(windowHalfWidth - 130,
+        		windowHalfHeight - 30, 260, 60, 0xffffff);
+        gameGraphics.drawText("Logging out...", windowHalfWidth,
+        		windowHalfHeight + 6, 5, 0xffffff);
     }
 
     private final void drawInventoryMenu(boolean flag)
@@ -1646,8 +1592,10 @@ public class mudclient extends GameWindowMiddleMan
                 		EntityHandler.getItemDef(inventoryItems[j]).getPictureMask(),
                 		0, 0, false);
                 if (EntityHandler.getItemDef(inventoryItems[j]).isStackable())
-                    gameGraphics.drawString(String.valueOf(inventoryItemsCount[j]),
+                {
+                    gameGraphics.drawString(getAbbreviatedValue(inventoryItemsCount[j]),
                     		row + 1, col + 10, 1, 0xffff00);
+                }
             }
         }
 
@@ -3550,6 +3498,7 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics._mudclient = this;
         gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
         abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
+        bankWin = new BankWindow(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(spellsX, spellsY + spellsTabHeight+1,
@@ -5773,7 +5722,7 @@ public class mudclient extends GameWindowMiddleMan
                             flag = true;
                         }
                         if (flag)
-                        	formatPacket(70);
+                        	formatPacket(70, -1, -1);
                     }
                 }
                 if (super.mouseX > plrOfferBox[0] && super.mouseY > plrOfferBox[1]
@@ -5803,7 +5752,7 @@ public class mudclient extends GameWindowMiddleMan
 
                             break;
                         }
-                    	formatPacket(70);
+                    	formatPacket(70, -1, -1);
                     }
                 }
                 if (super.mouseX >= accptBtn[0]
@@ -7978,22 +7927,22 @@ public class mudclient extends GameWindowMiddleMan
     private final void method119() {
         for (int i = 0; i < mobMessageCount; i++) {
             int j = gameGraphics.messageFontHeight(1);
-            int l = mobMessagesX[i];
-            int k1 = mobMessagesY[i];
-            int j2 = mobMessagesWidth[i];
-            int i3 = mobMessagesHeight[i];
+            int l = mobMsgX[i];
+            int k1 = mobMsgY[i];
+            int j2 = mobMsgWidth[i];
+            int i3 = mobMsgHeight[i];
             boolean flag = true;
             while (flag) {
                 flag = false;
                 for (int i4 = 0; i4 < i; i4++)
-                    if (k1 + i3 > mobMessagesY[i4] - j && k1 - j < mobMessagesY[i4] + mobMessagesHeight[i4] && l - j2 < mobMessagesX[i4] + mobMessagesWidth[i4] && l + j2 > mobMessagesX[i4] - mobMessagesWidth[i4] && mobMessagesY[i4] - j - i3 < k1) {
-                        k1 = mobMessagesY[i4] - j - i3;
+                    if (k1 + i3 > mobMsgY[i4] - j && k1 - j < mobMsgY[i4] + mobMsgHeight[i4] && l - j2 < mobMsgX[i4] + mobMsgWidth[i4] && l + j2 > mobMsgX[i4] - mobMsgWidth[i4] && mobMsgY[i4] - j - i3 < k1) {
+                        k1 = mobMsgY[i4] - j - i3;
                         flag = true;
                     }
 
             }
-            mobMessagesY[i] = k1;
-            gameGraphics.drawBoxTextColour(mobMessages[i], l, k1, 1, 0xffff00, 300);
+            mobMsgY[i] = k1;
+            gameGraphics.drawBoxTextColour(mobMsg[i], l, k1, 1, 0xffff00, 300);
         }
 
         for (int k = 0; k < anInt699; k++) {
@@ -8183,13 +8132,13 @@ public class mudclient extends GameWindowMiddleMan
         inventoryItems = new int[35];
         inventoryItemsCount = new int[35];
         wearing = new int[35];
-        mobMessages = new String[50];
+        mobMsg = new String[50];
         showBank = false;
         doorModel = new Model[500];
-        mobMessagesX = new int[50];
-        mobMessagesY = new int[50];
-        mobMessagesWidth = new int[50];
-        mobMessagesHeight = new int[50];
+        mobMsgX = new int[50];
+        mobMsgY = new int[50];
+        mobMsgWidth = new int[50];
+        mobMsgHeight = new int[50];
         npcArray = new Mob[500];
         equipmentStatus = new int[6];
         prayerOn = new boolean[50];
@@ -8294,7 +8243,7 @@ public class mudclient extends GameWindowMiddleMan
         lastLoadedNull = false;
         experienceArray = new int[99];
         showShop = false;
-        mouseClickXArray = new int[8192];
+        mouseClickX = new int[8192];
         mouseClickYArray = new int[8192];
         showDuelConfirmWindow = false;
         duelWeAccept = false;
@@ -8418,13 +8367,13 @@ public class mudclient extends GameWindowMiddleMan
     protected int inventoryItemsCount[];
     private int wearing[];
     private int mobMessageCount;
-    String mobMessages[];
+    String mobMsg[];
     private boolean showBank;
     private Model doorModel[];
-    private int mobMessagesX[];
-    private int mobMessagesY[];
-    private int mobMessagesWidth[];
-    private int mobMessagesHeight[];
+    private int mobMsgX[];
+    private int mobMsgY[];
+    private int mobMsgWidth[];
+    private int mobMsgHeight[];
     private Mob npcArray[];
     private int equipmentStatus[];
     private final int chrTopBottomClrs[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
@@ -8551,6 +8500,7 @@ public class mudclient extends GameWindowMiddleMan
     private boolean aBooleanArray827[];
     private int playerStatBase[];
     private AbuseWindow abWin;
+    private BankWindow bankWin;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;
@@ -8649,8 +8599,8 @@ public class mudclient extends GameWindowMiddleMan
     private int experienceArray[];
     private Camera gameCamera;
     private boolean showShop;
-    private int mouseClickArrayOffset;
-    int mouseClickXArray[];
+    private int mouseClickOffset;
+    int mouseClickX[];
     int mouseClickYArray[];
     private boolean showDuelConfirmWindow;
     private boolean duelWeAccept;

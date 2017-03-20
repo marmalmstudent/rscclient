@@ -7,80 +7,101 @@ public class BankWindow extends GamePanel
 {
     private int nRows, nCols;
     private int topInfoBoxHeight, bottomInfoBoxHeight;
-
-    int topInfoBoxY = y + titleBarHeight;
-    int bottomInfoBoxY = topInfoBoxY + topInfoBoxHeight
-    		+ nRows*mudclient.itemSlotHeight;
-    int leftMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-    int leftMarginBoxHeight = nRows*mudclient.itemSlotHeight;
-    int rightMarginBoxHeight = nRows*mudclient.itemSlotHeight;
-    int rightMarginBoxX = x + leftMarginBoxWidth
-    		+ nCols*mudclient.itemSlotWidth;
-    int rightMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-    int[] buttonWithOne, buttonWith10, buttonWith100, buttonWith1k,
+    private int[] buttonWithOne, buttonWith10, buttonWith100, buttonWith1k,
     buttonWith10k, buttonWithAll;
-    int[] buttonDepOne, buttonDep10, buttonDep100, buttonDep1k,
+    private int[] buttonDepOne, buttonDep10, buttonDep100, buttonDep1k,
     buttonDep10k, buttonDepAll;
+    private int [][] tabButtons;
+    private int[] tab1Button, tab2Button, tab3Button, tab4Button;
     
 	public BankWindow(int xCenter, int yCenter)
 	{
-	    nRows = 6; // TODO: make this depend on frame size
-	    nCols = 8; // TODO: make this depend on frame size
+	    nRows = 6;
+	    nCols = 8;
 	    topInfoBoxHeight = 17;
 	    bottomInfoBoxHeight = 47;
-	    width = leftMarginBoxWidth + nCols*mudclient.itemSlotWidth
-	    		+ rightMarginBoxWidth;
-	    height = titleBarHeight + topInfoBoxHeight
-	    		+ nRows*mudclient.itemSlotHeight + bottomInfoBoxHeight;
+	    height = getTitleBarHeight() + getTopMarginHeight()
+	    + getTopInfoBoxHeight() + getBankGridHeight()
+	    + getBottomInfoBoxHeight() + getBottomMarginHeight();
+	    width = getLeftMarginWidth() + getBankGridWidth() + getRightMarginWidth();
 	    x = xCenter - width / 2;
 	    y = yCenter - height / 2;
-	    
-
-	    topInfoBoxY = y + titleBarHeight;
-	    bottomInfoBoxY = topInfoBoxY + topInfoBoxHeight
-	    		+ nRows*mudclient.itemSlotHeight;
-	    leftMarginBoxY = topInfoBoxY + topInfoBoxHeight;
-	    leftMarginBoxHeight = nRows*mudclient.itemSlotHeight;
-	    rightMarginBoxHeight = nRows*mudclient.itemSlotHeight;
-	    rightMarginBoxX = x + leftMarginBoxWidth
-	    		+ nCols*mudclient.itemSlotWidth;
-	    rightMarginBoxY = topInfoBoxY + topInfoBoxHeight;
+	    closeButton = new int[]{
+	    		getTitleBarX() + getTitleBarWidth() - 88,
+	    		getTitleBarY(),
+	    		getTitleBarX() + getTitleBarWidth(),
+	    		getTitleBarY() + getTitleBarHeight()};
+	    int xJump = 65;
+	    int xStart = x + 50;
+	    tab1Button = new int[] {xStart, y,
+	    		xStart + xJump, y + titleBarHeight};
+	    tab2Button = new int[] {xStart + xJump, y,
+	    		xStart + xJump*2, y + titleBarHeight};
+	    tab3Button = new int[] {xStart + xJump*2, y,
+	    		xStart + xJump*3, y + titleBarHeight};
+	    tab4Button = new int[] {xStart + xJump*3, y,
+	    		xStart + xJump*4, y + titleBarHeight};
+	    tabButtons = new int[][] {tab1Button, tab2Button, tab3Button, tab4Button};
 	    buttonWithOne = new int[]{
-	    		x + width - 180 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - 150 - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 180,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 150,
+	    		getBottomInfoBoxY() + 16};
 	    buttonWith10 = new int[]{
-	    		x + width - 150 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - 120 - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 150,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 120,
+	    		getBottomInfoBoxY() + 16};
 	    buttonWith100 = new int[]{
-	    		x + width - 120 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - 95 - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 120,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 95,
+	    		getBottomInfoBoxY() + 16};
 	    buttonWith1k = new int[]{
-	    		x + width - 95 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - 65 - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 95,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 65,
+	    		getBottomInfoBoxY() + 16};
 	    buttonWith10k = new int[]{
-	    		x + width - 65 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - 32 - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 65,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 32,
+	    		getBottomInfoBoxY() + 16};
 	    buttonWithAll = new int[]{
-	    		x + width - 30 - rightMarginBoxWidth, bottomInfoBoxY + 5,
-	    		x + width - rightMarginBoxWidth, bottomInfoBoxY + 16};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 30,
+	    		getBottomInfoBoxY() + 5,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth(),
+	    		getBottomInfoBoxY() + 16};
 	    buttonDepOne = new int[]{
-	    		x + width - 180 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - 150 - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 180,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 150,
+	    		getBottomInfoBoxY() + 41};
 	    buttonDep10 = new int[]{
-	    		x + width - 150 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - 120 - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 150,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 120,
+	    		getBottomInfoBoxY() + 41};
 	    buttonDep100 = new int[]{
-	    		x + width - 120 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - 95 - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 120,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 95,
+	    		getBottomInfoBoxY() + 41};
 	    buttonDep1k = new int[]{
-	    		x + width - 95 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - 65 - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 95,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 65,
+	    		getBottomInfoBoxY() + 41};
 	    buttonDep10k = new int[]{
-	    		x + width - 65 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - 32 - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 65,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 32,
+	    		getBottomInfoBoxY() + 41};
 	    buttonDepAll = new int[]{
-	    		x + width - 30 - rightMarginBoxWidth, bottomInfoBoxY + 30,
-	    		x + width - rightMarginBoxWidth, bottomInfoBoxY + 41};
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - 30,
+	    		getBottomInfoBoxY() + 30,
+	    		getBottomInfoBoxX() + getBottomInfoBoxWidth(),
+	    		getBottomInfoBoxY() + 41};
 	}
 	
 	public int getWithAmt(int mouseX, int mouseY, int itemCount)
@@ -189,23 +210,85 @@ public class BankWindow extends GamePanel
         return amount;
 	}
 	
-	public int getRows()
+	public int getTabMouseover(int mouseX, int mouseY, int nTabs)
 	{
-		return nRows;
+		if (mouseX < tabButtons[0][0]
+				|| mouseY < tabButtons[0][1]
+				|| mouseX >= tabButtons[tabButtons.length-1][2]
+				|| mouseY >= tabButtons[tabButtons.length-1][3])
+			return 0;
+		if (nTabs > 1)
+			for (int i = 0; i < nTabs; ++i)
+				if (mouseX >= tabButtons[i][0]
+						&& mouseY >= tabButtons[i][1]
+						&& mouseX < tabButtons[i][2]
+						&& mouseY < tabButtons[i][3])
+					return i+1;
+		return 0;
 	}
 	
-	public int getCols()
-	{
-		return nCols;
-	}
+	public int getRows() { return nRows; }
 	
-	public int getTopInfoBoxHeight()
-	{
-		return topInfoBoxHeight;
-	}
+	public int getCols() { return nCols; }
 	
-	public int getBottomInfoBoxHeight()
-	{
-		return bottomInfoBoxHeight;
+	public int getTopInfoBoxHeight() { return topInfoBoxHeight; }
+	public int getTopInfoBoxWidth() {
+		return getWidth() - getLeftMarginWidth() - getRightMarginWidth();
 	}
+	public int getTopInfoBoxX() { return getLeftMarginX() + getLeftMarginWidth(); }
+	public int getTopInfoBoxY() { return getTopMarginY() + getTopMarginHeight(); }
+	
+	public int getBankGridHeight() { return nRows*mudclient.itemSlotHeight; }
+	public int getBankGridWidth() { return nCols*mudclient.itemSlotWidth; }
+	public int getBankGridX() { return getLeftMarginX() + getLeftMarginWidth(); }
+	public int getBankGridY() { return getTopInfoBoxY() + getTopInfoBoxHeight(); }
+	
+	public int getBottomInfoBoxHeight() { return bottomInfoBoxHeight; }
+	public int getBottomInfoBoxWidth() { return getBankGridWidth(); }
+	public int getBottomInfoBoxX() { return getLeftMarginX() + getLeftMarginWidth(); }
+	public int getBottomInfoBoxY() { return getBankGridY() + getBankGridHeight(); }
+	
+	public int getButtonWithOneX() { return buttonWithOne[0]; }
+	public int getButtonWithOneY() { return buttonWithOne[1]; }
+	public int getButtonWith10X() { return buttonWith10[0]; }
+	public int getButtonWith10Y() { return buttonWith10[1]; }
+	public int getButtonWith100X() { return buttonWith100[0]; }
+	public int getButtonWith100Y() { return buttonWith100[1]; }
+	public int getButtonWith1kX() { return buttonWith1k[0]; }
+	public int getButtonWith1kY() { return buttonWith1k[1]; }
+	public int getButtonWith10kX() { return buttonWith10k[0]; }
+	public int getButtonWith10kY() { return buttonWith10k[1]; }
+	public int getButtonWithAllX() { return buttonWithAll[0]; }
+	public int getButtonWithAllY() { return buttonWithAll[1]; }
+
+	public int getButtonDepOneX() { return buttonDepOne[0]; }
+	public int getButtonDepOneY() { return buttonDepOne[1]; }
+	public int getButtonDep10X() { return buttonDep10[0]; }
+	public int getButtonDep10Y() { return buttonDep10[1]; }
+	public int getButtonDep100X() { return buttonDep100[0]; }
+	public int getButtonDep100Y() { return buttonDep100[1]; }
+	public int getButtonDep1kX() { return buttonDep1k[0]; }
+	public int getButtonDep1kY() { return buttonDep1k[1]; }
+	public int getButtonDep10kX() { return buttonDep10k[0]; }
+	public int getButtonDep10kY() { return buttonDep10k[1]; }
+	public int getButtonDepAllX() { return buttonDepAll[0]; }
+	public int getButtonDepAllY() { return buttonDepAll[1]; }
+	
+	public int getTab1ButtonX() { return tab1Button[0]; }
+	public int getTab1ButtonY() { return tab1Button[1]; }
+	public int getTab2ButtonX() { return tab2Button[0]; }
+	public int getTab2ButtonY() { return tab2Button[1]; }
+	public int getTab3ButtonX() { return tab3Button[0]; }
+	public int getTab3ButtonY() { return tab3Button[1]; }
+	public int getTab4ButtonX() { return tab4Button[0]; }
+	public int getTab4ButtonY() { return tab4Button[1]; }
+	public int[][] getTabButtons() { return tabButtons; }
+	public int getTabButtonPanelHeight() {
+		return tabButtons[tabButtons.length-1][3] - tabButtons[0][1];
+	}
+	public int getTabButtonPanelWidth() {
+		return tabButtons[tabButtons.length-1][2] - tabButtons[0][0];
+	}
+	public int getTabButtonPanelX() { return tabButtons[0][0]; }
+	public int getTabButtonPanelY() { return tabButtons[0][1]; }
 }
