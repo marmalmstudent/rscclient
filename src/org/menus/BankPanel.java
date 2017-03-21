@@ -3,7 +3,7 @@ package org.menus;
 import org.entityhandling.EntityHandler;
 import org.mudclient;
 
-public class BankWindow extends GamePanel
+public class BankPanel extends GamePanel
 {
     private int nRows, nCols;
     private int topInfoBoxHeight, bottomInfoBoxHeight;
@@ -14,7 +14,7 @@ public class BankWindow extends GamePanel
     private int [][] tabButtons;
     private int[] tab1Button, tab2Button, tab3Button, tab4Button;
     
-	public BankWindow(int xCenter, int yCenter)
+	public BankPanel(int xCenter, int yCenter)
 	{
 	    nRows = 6;
 	    nCols = 8;

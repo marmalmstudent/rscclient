@@ -4,7 +4,9 @@ import org.entityhandling.EntityHandler;
 import org.entityhandling.defs.ItemDef;
 import org.entityhandling.defs.NPCDef;
 import org.menus.AbuseWindow;
-import org.menus.BankWindow;
+import org.menus.BankPanel;
+import org.menus.InventoryPanel;
+import org.menus.PlayerInfoPanel;
 import org.model.Sprite;
 import org.recorder.Recorder;
 import org.util.Config;
@@ -1146,36 +1148,36 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankFrame()
     {
         gameGraphics.drawBoxAlpha(
-        		bankWin.getTitleBarX(), bankWin.getTitleBarY(),
-        		bankWin.getTitleBarWidth(), bankWin.getTitleBarHeight(),
-        		bankWin.getTitleBarColor(), bankWin.getTitleBarAlpha());
-        gameGraphics.drawString("Bank", bankWin.getTitleBarX() + 1,
-        		bankWin.getTitleBarY() + 10, 1, 0xffffff);
+        		bankPan.getTitleBarX(), bankPan.getTitleBarY(),
+        		bankPan.getTitleBarWidth(), bankPan.getTitleBarHeight(),
+        		bankPan.getTitleBarColor(), bankPan.getTitleBarAlpha());
+        gameGraphics.drawString("Bank", bankPan.getTitleBarX() + 1,
+        		bankPan.getTitleBarY() + 10, 1, 0xffffff);
         int clr = 0xffffff;
-        if (super.mouseX > bankWin.getCloseButtonX()
-        		&& super.mouseY >= bankWin.getCloseButtonY()
-        		&& super.mouseX < bankWin.getCloseButtonX() + bankWin.getCloseButtonWidth()
-        		&& super.mouseY < bankWin.getCloseButtonY() + bankWin.getCloseButtonHeight())
+        if (super.mouseX > bankPan.getCloseButtonX()
+        		&& super.mouseY >= bankPan.getCloseButtonY()
+        		&& super.mouseX < bankPan.getCloseButtonX() + bankPan.getCloseButtonWidth()
+        		&& super.mouseY < bankPan.getCloseButtonY() + bankPan.getCloseButtonHeight())
             clr = 0xff0000;
         gameGraphics.drawBoxTextRight("Close window",
-        		bankWin.getCloseButtonX() + bankWin.getCloseButtonWidth() - 2,
-        		bankWin.getCloseButtonY() + 10, 1, clr);
+        		bankPan.getCloseButtonX() + bankPan.getCloseButtonWidth() - 2,
+        		bankPan.getCloseButtonY() + 10, 1, clr);
         gameGraphics.drawBoxAlpha(
-        		bankWin.getTopMarginX(), bankWin.getTopMarginY(),
-        		bankWin.getTopMarginWidth(), bankWin.getTopMarginHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getTopMarginX(), bankPan.getTopMarginY(),
+        		bankPan.getTopMarginWidth(), bankPan.getTopMarginHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
         gameGraphics.drawBoxAlpha(
-        		bankWin.getBottomMarginX(), bankWin.getBottomMarginY(),
-        		bankWin.getBottomMarginWidth(), bankWin.getBottomMarginHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getBottomMarginX(), bankPan.getBottomMarginY(),
+        		bankPan.getBottomMarginWidth(), bankPan.getBottomMarginHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
         gameGraphics.drawBoxAlpha(
-        		bankWin.getLeftMarginX(), bankWin.getLeftMarginY(),
-        		bankWin.getLeftMarginWidth(), bankWin.getLeftMarginHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getLeftMarginX(), bankPan.getLeftMarginY(),
+        		bankPan.getLeftMarginWidth(), bankPan.getLeftMarginHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
         gameGraphics.drawBoxAlpha(
-        		bankWin.getRightMarginX(), bankWin.getRightMarginY(),
-        		bankWin.getRightMarginWidth(), bankWin.getRightMarginHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getRightMarginX(), bankPan.getRightMarginY(),
+        		bankPan.getRightMarginWidth(), bankPan.getRightMarginHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
     }
     
     /**
@@ -1185,20 +1187,20 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankGrid()
     {
         int i7 = 0xd0d0d0;
-        int k7 = mouseOverBankPageText * bankWin.getRows()*bankWin.getCols();
-        for (int row = 0; row < bankWin.getRows(); row++)
+        int k7 = mouseOverBankPageText * bankPan.getRows()*bankPan.getCols();
+        for (int row = 0; row < bankPan.getRows(); row++)
         {
-            for (int col = 0; col < bankWin.getCols(); col++)
+            for (int col = 0; col < bankPan.getCols(); col++)
             {
-                int slotX = bankWin.getBankGridX() - 1 + col * itemSlotWidth;
-                int slotY = bankWin.getBankGridY() - 1 + row * itemSlotHeight;
+                int slotX = bankPan.getBankGridX() - 1 + col * itemSlotWidth;
+                int slotY = bankPan.getBankGridY() - 1 + row * itemSlotHeight;
                 if (selectedBankItem == k7)
                     gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, 0xff0000, 160);
                 else
                     gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, i7, 160);
                 gameGraphics.drawBoxEdge(slotX, slotY, itemSlotWidth+1, itemSlotHeight+1, 0);
                 if (k7 < bankItemCount && bankItems[k7] != -1) {
-                    gameGraphics.spriteClip4(slotX, slotY, itemSlotWidth-1, itemSlotHeight-2,
+                    gameGraphics.spriteClip4(slotX+1, slotY+1, itemSlotWidth-1, itemSlotHeight-2,
                     		SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(),
                     		EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
                     gameGraphics.drawString(getAbbreviatedValue(bankItemsCount[k7]),
@@ -1218,35 +1220,35 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankWithText(int selectedBankItemCount)
     {
     	int yOffset = 10;
-        int withAmt = bankWin.getWithAmt(super.mouseX, super.mouseY,
+        int withAmt = bankPan.getWithAmt(super.mouseX, super.mouseY,
         		selectedBankItemCount);
         gameGraphics.drawString(
-        		"One", bankWin.getButtonWithOneX() + 2,
-        		bankWin.getButtonWithOneY() + yOffset, 1,
+        		"One", bankPan.getButtonWithOneX() + 2,
+        		bankPan.getButtonWithOneY() + yOffset, 1,
         		(withAmt == 1) ? 0xff0000 : 0xffffff);
         if (selectedBankItemCount >= 10)
             gameGraphics.drawString(
-            		"10", bankWin.getButtonWith10X() + 2,
-            		bankWin.getButtonWith10Y() + yOffset, 1,
+            		"10", bankPan.getButtonWith10X() + 2,
+            		bankPan.getButtonWith10Y() + yOffset, 1,
             		(withAmt == 10) ? 0xff0000 : 0xffffff);
         if (selectedBankItemCount >= 100)
             gameGraphics.drawString(
-            		"100", bankWin.getButtonWith100X() + 2,
-            		bankWin.getButtonWith100Y() + yOffset, 1,
+            		"100", bankPan.getButtonWith100X() + 2,
+            		bankPan.getButtonWith100Y() + yOffset, 1,
             		(withAmt == 100) ? 0xff0000 : 0xffffff);
         if (selectedBankItemCount >= 1000)
             gameGraphics.drawString(
-            		"1k", bankWin.getButtonWith1kX() + 2,
-            		bankWin.getButtonWith1kY() + yOffset, 1,
+            		"1k", bankPan.getButtonWith1kX() + 2,
+            		bankPan.getButtonWith1kY() + yOffset, 1,
             		(withAmt == 1000) ? 0xff0000 : 0xffffff);
         if (selectedBankItemCount >= 10000)
             gameGraphics.drawString(
-            		"10k", bankWin.getButtonWith10kX() + 2,
-            		bankWin.getButtonWith10kY() + yOffset, 1,
+            		"10k", bankPan.getButtonWith10kX() + 2,
+            		bankPan.getButtonWith10kY() + yOffset, 1,
             		(withAmt == 10000) ? 0xff0000 : 0xffffff);
         gameGraphics.drawString(
-        		"All", bankWin.getButtonWithAllX(),
-        		bankWin.getButtonWithAllY() + yOffset, 1,
+        		"All", bankPan.getButtonWithAllX(),
+        		bankPan.getButtonWithAllY() + yOffset, 1,
         		(withAmt == selectedBankItemCount) ? 0xff0000 : 0xffffff);
     }
     
@@ -1257,35 +1259,35 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankDepText(int selectedBankItemId)
     {
     	int yOffset = 10;
-        int depAmt = bankWin.getDepAmt(super.mouseX, super.mouseY,
+        int depAmt = bankPan.getDepAmt(super.mouseX, super.mouseY,
         		inventoryCount(selectedBankItemId));
         gameGraphics.drawString(
-        		"One", bankWin.getButtonDepOneX() + 2,
-        		bankWin.getButtonDepOneY() + yOffset, 1,
+        		"One", bankPan.getButtonDepOneX() + 2,
+        		bankPan.getButtonDepOneY() + yOffset, 1,
         		(depAmt == 1) ? 0xff0000 : 0xffffff);
         if (inventoryCount(selectedBankItemId) >= 10)
             gameGraphics.drawString(
-            		"10", bankWin.getButtonDep10X() + 2,
-            		bankWin.getButtonDep10Y() + yOffset, 1,
+            		"10", bankPan.getButtonDep10X() + 2,
+            		bankPan.getButtonDep10Y() + yOffset, 1,
             		(depAmt == 10) ? 0xff0000 : 0xffffff);
         if (inventoryCount(selectedBankItemId) >= 100)
             gameGraphics.drawString(
-            		"100", bankWin.getButtonDep100X() + 2,
-            		bankWin.getButtonDep100Y() + yOffset, 1,
+            		"100", bankPan.getButtonDep100X() + 2,
+            		bankPan.getButtonDep100Y() + yOffset, 1,
             		(depAmt == 100) ? 0xff0000 : 0xffffff);
         if (inventoryCount(selectedBankItemId) >= 1000)
             gameGraphics.drawString(
-            		"1k", bankWin.getButtonDep1kX() + 2,
-            		bankWin.getButtonDep1kY() + yOffset, 1,
+            		"1k", bankPan.getButtonDep1kX() + 2,
+            		bankPan.getButtonDep1kY() + yOffset, 1,
             		(depAmt == 1000) ? 0xff0000 : 0xffffff);
         if (inventoryCount(selectedBankItemId) >= 10000)
             gameGraphics.drawString(
-            		"10k", bankWin.getButtonDep10kX() + 2,
-            		bankWin.getButtonDep10kY() + yOffset, 1,
+            		"10k", bankPan.getButtonDep10kX() + 2,
+            		bankPan.getButtonDep10kY() + yOffset, 1,
             		(depAmt == 10000) ? 0xff0000 : 0xffffff);
         gameGraphics.drawString(
-        		"All", bankWin.getButtonDepAllX(),
-        		bankWin.getButtonDepAllY() + yOffset, 1,
+        		"All", bankPan.getButtonDepAllX(),
+        		bankPan.getButtonDepAllY() + yOffset, 1,
         		(depAmt == inventoryCount(selectedBankItemId)) ? 0xff0000 : 0xffffff);
     }
     
@@ -1295,18 +1297,18 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankDepWithPanel()
     {
         gameGraphics.drawBoxAlpha(
-        		bankWin.getBottomInfoBoxX(), bankWin.getBottomInfoBoxY(),
-        		bankWin.getBottomInfoBoxWidth(), bankWin.getBottomInfoBoxHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getBottomInfoBoxX(), bankPan.getBottomInfoBoxY(),
+        		bankPan.getBottomInfoBoxWidth(), bankPan.getBottomInfoBoxHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
         gameGraphics.drawLineX(
-        		bankWin.getBottomInfoBoxX(),
-        		bankWin.getBottomInfoBoxY() + bankWin.getBottomInfoBoxHeight()/2,
-        		bankWin.getBottomInfoBoxWidth(), 0);
+        		bankPan.getBottomInfoBoxX(),
+        		bankPan.getBottomInfoBoxY() + bankPan.getBottomInfoBoxHeight()/2,
+        		bankPan.getBottomInfoBoxWidth(), 0);
         if (selectedBankItem == -1)
         {
             gameGraphics.drawText("Select an object to withdraw or deposit",
-            		bankWin.getBottomInfoBoxX() + bankWin.getBottomInfoBoxWidth()/2,
-            		bankWin.getBottomInfoBoxY() + 15, 3, 0xffff00);
+            		bankPan.getBottomInfoBoxX() + bankPan.getBottomInfoBoxWidth()/2,
+            		bankPan.getBottomInfoBoxY() + 15, 3, 0xffff00);
             return;
         }
         int selectedBankItemId;
@@ -1318,12 +1320,12 @@ public class mudclient extends GameWindowMiddleMan
             int selectedBankItemCount = bankItemsCount[selectedBankItem];
             if (selectedBankItemCount > 0) {
                 gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
-                		bankWin.getBottomInfoBoxX() + 2, bankWin.getBottomInfoBoxY() + 15, 1, 0xffffff);
+                		bankPan.getBottomInfoBoxX() + 2, bankPan.getBottomInfoBoxY() + 15, 1, 0xffffff);
                 drawBankWithText(selectedBankItemCount);
             }
             if (inventoryCount(selectedBankItemId) > 0) {
                 gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
-                		bankWin.getBottomInfoBoxX() + 2, bankWin.getBottomInfoBoxY() + 40, 1, 0xffffff);
+                		bankPan.getBottomInfoBoxX() + 2, bankPan.getBottomInfoBoxY() + 40, 1, 0xffffff);
                 drawBankDepText(selectedBankItemId);
             }
         }
@@ -1334,8 +1336,8 @@ public class mudclient extends GameWindowMiddleMan
      */
     private void drawBankTabs()
     {
-		int nTabs = bankItemCount/(bankWin.getRows()*bankWin.getCols()) + 1;
-        int tabMouseover = bankWin.getTabMouseover(super.mouseX,
+		int nTabs = bankItemCount/(bankPan.getRows()*bankPan.getCols()) + 1;
+        int tabMouseover = bankPan.getTabMouseover(super.mouseX,
         		super.mouseY, nTabs);
         if (nTabs > 1)
         {
@@ -1348,8 +1350,8 @@ public class mudclient extends GameWindowMiddleMan
         		else if (i+1 == tabMouseover)
         			color = 0xffff00;
         		gameGraphics.drawString("<page "+(i+1)+">",
-        				bankWin.getTabButtons()[i][0],
-        				bankWin.getTabButtons()[i][1] + 10, 1, color);
+        				bankPan.getTabButtons()[i][0],
+        				bankPan.getTabButtons()[i][1] + 10, 1, color);
         	}
         }
     }
@@ -1360,15 +1362,15 @@ public class mudclient extends GameWindowMiddleMan
     private void drawBankInfo()
     {
         gameGraphics.drawBoxAlpha(
-        		bankWin.getTopInfoBoxX(), bankWin.getTopInfoBoxY(),
-        		bankWin.getTopInfoBoxWidth(), bankWin.getTopInfoBoxHeight(),
-        		bankWin.getBGColor(), bankWin.getBGAlpha());
+        		bankPan.getTopInfoBoxX(), bankPan.getTopInfoBoxY(),
+        		bankPan.getTopInfoBoxWidth(), bankPan.getTopInfoBoxHeight(),
+        		bankPan.getBGColor(), bankPan.getBGAlpha());
         gameGraphics.drawString("Number in bank in green",
-        		bankWin.getTopInfoBoxX(),
-        		bankWin.getTopInfoBoxY() + 12, 1, 0x00ff00);
+        		bankPan.getTopInfoBoxX(),
+        		bankPan.getTopInfoBoxY() + 12, 1, 0x00ff00);
         gameGraphics.drawString("Number held in blue",
-        		bankWin.getTopInfoBoxX() + bankWin.getTopInfoBoxWidth() - 111,
-        		bankWin.getTopInfoBoxY() + 12, 1, 0x00ffff);
+        		bankPan.getTopInfoBoxX() + bankPan.getTopInfoBoxWidth() - 111,
+        		bankPan.getTopInfoBoxY() + 12, 1, 0x00ffff);
     }
     
     /**
@@ -1376,8 +1378,8 @@ public class mudclient extends GameWindowMiddleMan
      */
     private void switchBankTab()
     {
-		int nTabs = bankItemCount/(bankWin.getRows()*bankWin.getCols()) + 1;
-        int tabMouseover = bankWin.getTabMouseover(super.mouseX,
+		int nTabs = bankItemCount/(bankPan.getRows()*bankPan.getCols()) + 1;
+        int tabMouseover = bankPan.getTabMouseover(super.mouseX,
         		super.mouseY, nTabs);
         if (tabMouseover > 0)
         {
@@ -1390,12 +1392,12 @@ public class mudclient extends GameWindowMiddleMan
      */
     private void clickBankItem()
     {
-        int itemIdx = mouseOverBankPageText * bankWin.getRows()*bankWin.getCols();
-        int mouseXGrid = super.mouseX - bankWin.getBankGridX();
-        int mouseYGrid = super.mouseY - bankWin.getBankGridY();
-        for (int row = 0; row < bankWin.getRows(); row++)
+        int itemIdx = mouseOverBankPageText * bankPan.getRows()*bankPan.getCols();
+        int mouseXGrid = super.mouseX - bankPan.getBankGridX();
+        int mouseYGrid = super.mouseY - bankPan.getBankGridY();
+        for (int row = 0; row < bankPan.getRows(); row++)
         {
-            for (int col = 0; col < bankWin.getCols(); col++)
+            for (int col = 0; col < bankPan.getCols(); col++)
             {
                 int slotXMin = col * itemSlotWidth - 1;
                 int slotYMin = row * itemSlotHeight - 1;
@@ -1425,11 +1427,11 @@ public class mudclient extends GameWindowMiddleMan
         if (selectedBankItemId != -1)
         {
             int selectedBankItemCount = bankItemsCount[selectedBankItem];
-            int depAmt = bankWin.getDepAmt(super.mouseX, super.mouseY,
+            int depAmt = bankPan.getDepAmt(super.mouseX, super.mouseY,
             		inventoryCount(selectedBankItemId));
             if (depAmt != 0)
             	formatPacket(198, selectedBankItemId, depAmt);
-            int withAmt = bankWin.getWithAmt(super.mouseX, super.mouseY,
+            int withAmt = bankPan.getWithAmt(super.mouseX, super.mouseY,
             		selectedBankItemCount);
             if (withAmt != 0)
             	formatPacket(183, selectedBankItemId, withAmt);
@@ -1443,13 +1445,13 @@ public class mudclient extends GameWindowMiddleMan
     private void updateVisibleBankTabs()
     {
         if (mouseOverBankPageText > 0
-        		&& bankItemCount <= bankWin.getRows()*bankWin.getCols())
+        		&& bankItemCount <= bankPan.getRows()*bankPan.getCols())
             mouseOverBankPageText = 0;
         if (mouseOverBankPageText > 1
-        		&& bankItemCount <= 2*bankWin.getRows()*bankWin.getCols())
+        		&& bankItemCount <= 2*bankPan.getRows()*bankPan.getCols())
             mouseOverBankPageText = 1;
         if (mouseOverBankPageText > 2
-        		&& bankItemCount <= 3*bankWin.getRows()*bankWin.getCols())
+        		&& bankItemCount <= 3*bankPan.getRows()*bankPan.getCols())
             mouseOverBankPageText = 2;
     }
     
@@ -1488,37 +1490,37 @@ public class mudclient extends GameWindowMiddleMan
         if (mouseButtonClick != 0)
         {
             mouseButtonClick = 0;
-            if (super.mouseX > bankWin.getBankGridX()
-            		&& super.mouseY > bankWin.getBankGridY()
-            		&& super.mouseX < (bankWin.getBankGridX()
-            				+ bankWin.getBankGridWidth())
-            		&& super.mouseY < (bankWin.getBankGridY()
-            				+ bankWin.getBankGridHeight()))
+            if (super.mouseX > bankPan.getBankGridX()
+            		&& super.mouseY > bankPan.getBankGridY()
+            		&& super.mouseX < (bankPan.getBankGridX()
+            				+ bankPan.getBankGridWidth())
+            		&& super.mouseY < (bankPan.getBankGridY()
+            				+ bankPan.getBankGridHeight()))
             	clickBankItem();
-            else if (super.mouseX > bankWin.getBottomInfoBoxX()
-                		&& super.mouseY > bankWin.getBottomInfoBoxY()
-                		&& super.mouseX < (bankWin.getBottomInfoBoxX()
-                				+ bankWin.getBottomInfoBoxWidth())
-                		&& super.mouseY < (bankWin.getBottomInfoBoxY()
-                				+ bankWin.getBottomInfoBoxHeight()))
+            else if (super.mouseX > bankPan.getBottomInfoBoxX()
+                		&& super.mouseY > bankPan.getBottomInfoBoxY()
+                		&& super.mouseX < (bankPan.getBottomInfoBoxX()
+                				+ bankPan.getBottomInfoBoxWidth())
+                		&& super.mouseY < (bankPan.getBottomInfoBoxY()
+                				+ bankPan.getBottomInfoBoxHeight()))
             	clickBankItemMove();
-            else if (super.mouseX > bankWin.getTabButtonPanelX()
-            		&& super.mouseY > bankWin.getTabButtonPanelY()
-            		&& super.mouseX < (bankWin.getTabButtonPanelX()
-            				+ bankWin.getTabButtonPanelWidth())
-            		&& super.mouseY < (bankWin.getTabButtonPanelY()
-            				+ bankWin.getTabButtonPanelHeight()))
+            else if (super.mouseX > bankPan.getTabButtonPanelX()
+            		&& super.mouseY > bankPan.getTabButtonPanelY()
+            		&& super.mouseX < (bankPan.getTabButtonPanelX()
+            				+ bankPan.getTabButtonPanelWidth())
+            		&& super.mouseY < (bankPan.getTabButtonPanelY()
+            				+ bankPan.getTabButtonPanelHeight()))
             	switchBankTab();
-            else if (super.mouseX < bankWin.getX()
-            		|| super.mouseY < bankWin.getY()
-            		|| super.mouseX > bankWin.getX() + bankWin.getWidth()
-            		|| super.mouseY > bankWin.getY() + bankWin.getHeight()
-            		|| (super.mouseX > bankWin.getCloseButtonX()
-                    		&& super.mouseY > bankWin.getCloseButtonY()
-                    		&& super.mouseX < (bankWin.getCloseButtonX()
-                    				+ bankWin.getCloseButtonWidth())
-                    		&& super.mouseY < (bankWin.getCloseButtonY()
-                    				+ bankWin.getCloseButtonHeight())))
+            else if (super.mouseX < bankPan.getX()
+            		|| super.mouseY < bankPan.getY()
+            		|| super.mouseX > bankPan.getX() + bankPan.getWidth()
+            		|| super.mouseY > bankPan.getY() + bankPan.getHeight()
+            		|| (super.mouseX > bankPan.getCloseButtonX()
+                    		&& super.mouseY > bankPan.getCloseButtonY()
+                    		&& super.mouseX < (bankPan.getCloseButtonX()
+                    				+ bankPan.getCloseButtonWidth())
+                    		&& super.mouseY < (bankPan.getCloseButtonY()
+                    				+ bankPan.getCloseButtonHeight())))
             {
             	formatPacket(48, -1, -1);
             	return;
@@ -1568,25 +1570,23 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics.drawText("Logging out...", windowHalfWidth,
         		windowHalfHeight + 6, 5, 0xffffff);
     }
-
-    private final void drawInventoryMenu(boolean flag)
+    
+    private void drawInventoryGrid()
     {
-        gameGraphics.drawPicture(inventoryX - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getXShift(),
-        		inventoryY - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getHeight()
-        		- gameGraphics.sprites[SPRITE_MEDIA_START + 1].getYShift(),
-        		SPRITE_MEDIA_START + 1);
-        for (int j = 0; j < nInventorySlots; j++)
+        for (int j = 0; j < invPan.getSlots(); j++)
         {
-            int row = inventoryX + (j % nInventoryCols) * itemSlotWidth;
-            int col = inventoryY + (j / nInventoryCols) * itemSlotHeight;
+            int row = invPan.getInvGridX()-1 + (j % invPan.getCols()) * itemSlotWidth;
+            int col = invPan.getInvGridY()-1 + (j / invPan.getCols()) * itemSlotHeight;
             if (j < inventoryCount && wearing[j] == 1)
                 gameGraphics.drawBoxAlpha(row, col, itemSlotWidth, itemSlotHeight,
                 		0xff0000, 128);
             else
                 gameGraphics.drawBoxAlpha(row, col, itemSlotWidth, itemSlotHeight,
                 		GameImage.convertRGBToLong(181, 181, 181), 128);
-            if (j < inventoryCount) {
-                gameGraphics.spriteClip4(row, col, itemSlotWidth-1, itemSlotHeight-2,
+            gameGraphics.drawBoxEdge(row, col, itemSlotWidth+1, itemSlotHeight+1, 0);
+            if (j < inventoryCount)
+            {
+                gameGraphics.spriteClip4(row+1, col+1, itemSlotWidth-1, itemSlotHeight-2,
                 		SPRITE_ITEM_START
                 		+ EntityHandler.getItemDef(inventoryItems[j]).getSprite(),
                 		EntityHandler.getItemDef(inventoryItems[j]).getPictureMask(),
@@ -1598,95 +1598,167 @@ public class mudclient extends GameWindowMiddleMan
                 }
             }
         }
-
-        for (int line = 0; line <= nInventoryCols; line++)
-            gameGraphics.drawLineY(inventoryX + line * itemSlotWidth, inventoryY,
-            		inventoryHeight, 0x000000);
-
-        for (int line = 0; line <= nInventoryRows; line++)
-            gameGraphics.drawLineX(inventoryX, inventoryY + line * itemSlotHeight,
-            		inventoryWidth, 0x000000);
-
-        if (!flag)
-            return;
-        if (super.mouseX >= inventoryX
-        		&& super.mouseY >= inventoryY
-        		&& super.mouseX < inventoryX + inventoryWidth 
-        		&& super.mouseY < inventoryY + inventoryHeight)
+    }
+    
+    /**
+     * Draws the inventory frame, i.e. the title bar (and title) as well as
+     * top, bottom, left and right margins.
+     */
+    private void drawInventoryFrame()
+    {
+        gameGraphics.drawBoxAlpha(
+        		invPan.getTitleBarX(), invPan.getTitleBarY(),
+        		invPan.getTitleBarWidth(), invPan.getTitleBarHeight(),
+        		invPan.getTitleBarColor(), invPan.getTitleBarAlpha());
+        gameGraphics.drawString("Inventory", invPan.getTitleBarX() + 1,
+        		invPan.getTitleBarY() + 10, 1, 0xffffff);
+        int clr = 0xffffff;
+        if (super.mouseX > invPan.getCloseButtonX()
+        		&& super.mouseY >= invPan.getCloseButtonY()
+        		&& super.mouseX < invPan.getCloseButtonX() + invPan.getCloseButtonWidth()
+        		&& super.mouseY < invPan.getCloseButtonY() + invPan.getCloseButtonHeight())
+            clr = 0xff0000;
+        gameGraphics.drawBoxTextRight("Close window",
+        		invPan.getCloseButtonX() + invPan.getCloseButtonWidth() - 2,
+        		invPan.getCloseButtonY() + 10, 1, clr);
+        gameGraphics.drawBoxAlpha(
+        		invPan.getTopMarginX(), invPan.getTopMarginY(),
+        		invPan.getTopMarginWidth(), invPan.getTopMarginHeight(),
+        		invPan.getBGColor(), invPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		invPan.getBottomMarginX(), invPan.getBottomMarginY(),
+        		invPan.getBottomMarginWidth(), invPan.getBottomMarginHeight(),
+        		invPan.getBGColor(), invPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		invPan.getLeftMarginX(), invPan.getLeftMarginY(),
+        		invPan.getLeftMarginWidth(), invPan.getLeftMarginHeight(),
+        		invPan.getBGColor(), invPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		invPan.getRightMarginX(), invPan.getRightMarginY(),
+        		invPan.getRightMarginWidth(), invPan.getRightMarginHeight(),
+        		invPan.getBGColor(), invPan.getBGAlpha());
+    }
+    
+    private void drawInventoryMisc()
+    {
+        gameGraphics.drawPicture(invPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getXShift(),
+        		invPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getHeight()
+        		- gameGraphics.sprites[SPRITE_MEDIA_START + 1].getYShift(),
+        		SPRITE_MEDIA_START + 1);
+    }
+    
+    private void handleInventoryMouseover()
+    {
+        int xInInv = super.mouseX - invPan.getInvGridX();
+        int yInInv = super.mouseY - invPan.getInvGridY();
+        int currentInventorySlot = xInInv / itemSlotWidth
+        		+ (yInInv / itemSlotHeight) * invPan.getCols();
+        if (currentInventorySlot < invPan.getCols()*invPan.getRows())
         {
-            int xInInv = super.mouseX - inventoryX;
-            int yInInv = super.mouseY - inventoryY;
-            int currentInventorySlot = xInInv / itemSlotWidth
-            		+ (yInInv / itemSlotHeight) * nInventoryCols;
-            if (currentInventorySlot < nInventoryCols*nInventoryRows/*inventoryCount*/)
-            {
-                int i2 = inventoryItems[currentInventorySlot];
-                ItemDef itemDef = EntityHandler.getItemDef(i2);
-                if (selectedSpell >= 0) {
-                    if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3)
-                    {
-                        menuText1[menuLength] = "Cast "
-                        		+ EntityHandler.getSpellDef(selectedSpell).getName()
-                        		+ " on";
-                        menuText2[menuLength] = "@lre@" + itemDef.getName();
-                        menuID[menuLength] = 600;
-                        menuActionType[menuLength] = currentInventorySlot;
-                        menuActionVariable[menuLength] = selectedSpell;
-                        menuLength++;
-                        return;
-                    }
-                } else {
-                    if (selectedItem >= 0) {
-                        menuText1[menuLength] = "Use " + selectedItemName + " with";
-                        menuText2[menuLength] = "@lre@" + itemDef.getName();
-                        menuID[menuLength] = 610;
-                        menuActionType[menuLength] = currentInventorySlot;
-                        menuActionVariable[menuLength] = selectedItem;
-                        menuLength++;
-                        return;
-                    }
-                    if (wearing[currentInventorySlot] == 1) {
-                        menuText1[menuLength] = "Remove";
-                        menuText2[menuLength] = "@lre@" + itemDef.getName();
-                        menuID[menuLength] = 620;
-                        menuActionType[menuLength] = currentInventorySlot;
-                        menuLength++;
-                    } else if (EntityHandler.getItemDef(i2).isWieldable()) {
-                        menuText1[menuLength] = "Wear";
-                        menuText2[menuLength] = "@lre@" + itemDef.getName();
-                        menuID[menuLength] = 630;
-                        menuActionType[menuLength] = currentInventorySlot;
-                        menuLength++;
-                    }
-                    if (!itemDef.getCommand().equals("")) {
-                        menuText1[menuLength] = itemDef.getCommand();
-                        menuText2[menuLength] = "@lre@" + itemDef.getName();
-                        menuID[menuLength] = 640;
-                        menuActionType[menuLength] = currentInventorySlot;
-                        menuLength++;
-                    }
-                    menuText1[menuLength] = "Use";
+            int i2 = inventoryItems[currentInventorySlot];
+            ItemDef itemDef = EntityHandler.getItemDef(i2);
+            if (selectedSpell >= 0) {
+                if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3)
+                {
+                    menuText1[menuLength] = "Cast "
+                    		+ EntityHandler.getSpellDef(selectedSpell).getName()
+                    		+ " on";
                     menuText2[menuLength] = "@lre@" + itemDef.getName();
-                    menuID[menuLength] = 650;
+                    menuID[menuLength] = 600;
+                    menuActionType[menuLength] = currentInventorySlot;
+                    menuActionVariable[menuLength] = selectedSpell;
+                    menuLength++;
+                    return;
+                }
+            } else {
+                if (selectedItem >= 0) {
+                    menuText1[menuLength] = "Use " + selectedItemName + " with";
+                    menuText2[menuLength] = "@lre@" + itemDef.getName();
+                    menuID[menuLength] = 610;
+                    menuActionType[menuLength] = currentInventorySlot;
+                    menuActionVariable[menuLength] = selectedItem;
+                    menuLength++;
+                    return;
+                }
+                if (wearing[currentInventorySlot] == 1) {
+                    menuText1[menuLength] = "Remove";
+                    menuText2[menuLength] = "@lre@" + itemDef.getName();
+                    menuID[menuLength] = 620;
                     menuActionType[menuLength] = currentInventorySlot;
                     menuLength++;
-                    menuText1[menuLength] = "Drop";
+                } else if (EntityHandler.getItemDef(i2).isWieldable()) {
+                    menuText1[menuLength] = "Wear";
                     menuText2[menuLength] = "@lre@" + itemDef.getName();
-                    menuID[menuLength] = 660;
+                    menuID[menuLength] = 630;
                     menuActionType[menuLength] = currentInventorySlot;
-                    menuLength++;
-                    menuText1[menuLength] = "Examine";
-                    menuText2[menuLength] = "@lre@" + itemDef.getName() +
-                    		(ourPlayer.admin >= 2 ? " @or1@(" + i2 + ")" : "");
-                    menuID[menuLength] = 3600;
-                    menuActionType[menuLength] = i2;
                     menuLength++;
                 }
-            }
-            else
-            { // we don't want to click through empty inventory slots
+                if (!itemDef.getCommand().equals("")) {
+                    menuText1[menuLength] = itemDef.getCommand();
+                    menuText2[menuLength] = "@lre@" + itemDef.getName();
+                    menuID[menuLength] = 640;
+                    menuActionType[menuLength] = currentInventorySlot;
+                    menuLength++;
+                }
+                menuText1[menuLength] = "Use";
+                menuText2[menuLength] = "@lre@" + itemDef.getName();
+                menuID[menuLength] = 650;
+                menuActionType[menuLength] = currentInventorySlot;
+                menuLength++;
+                menuText1[menuLength] = "Drop";
+                menuText2[menuLength] = "@lre@" + itemDef.getName();
+                menuID[menuLength] = 660;
+                menuActionType[menuLength] = currentInventorySlot;
+                menuLength++;
+                menuText1[menuLength] = "Examine";
+                menuText2[menuLength] = "@lre@" + itemDef.getName() +
+                		(ourPlayer.admin >= 2 ? " @or1@(" + i2 + ")" : "");
+                menuID[menuLength] = 3600;
+                menuActionType[menuLength] = i2;
                 menuLength++;
             }
+        }
+        else
+        { // we don't want to click through empty inventory slots
+            menuLength++;
+        }
+    }
+
+    private final void drawInventoryMenu(boolean flag)
+    {
+        drawInventoryFrame();
+        drawInventoryGrid();
+        if (!flag)
+            return;
+        if (super.mouseX >= invPan.getInvGridX()
+        		&& super.mouseY >= invPan.getInvGridY()
+        		&& super.mouseX < invPan.getInvGridX() + invPan.getInvGridWidth() 
+        		&& super.mouseY < invPan.getInvGridY() + invPan.getInvGridHeight())
+        {
+        	handleInventoryMouseover();
+        }
+        else if (super.mouseX > invPan.getCloseButtonX()
+        		&& super.mouseY > invPan.getCloseButtonY()
+        		&& super.mouseX < (invPan.getCloseButtonX()
+        				+ invPan.getCloseButtonWidth())
+        		&& super.mouseY < (invPan.getCloseButtonY()
+        				+ invPan.getCloseButtonHeight()))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		mouseOverMenu = (mouseOverMenu != 1) ? 1 : 0;
+        		mouseButtonClick = 0;
+        	}
+        }
+        else if (!(super.mouseX < invPan.getX()
+        		|| super.mouseY < invPan.getY()
+        		|| super.mouseX > invPan.getX() + invPan.getWidth()
+        		|| super.mouseY > invPan.getY() + invPan.getHeight()))
+        { // click inside inventory but not on the grid or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 
@@ -1879,164 +1951,275 @@ public class mudclient extends GameWindowMiddleMan
         super.streamClass.formatPacket();
         logoutTimeout = 1000;
     }
-
-    private final void drawPlayerInfoMenu(boolean flag)
+    
+    private void drawPlayerInfoFrame()
     {
-        gameGraphics.drawPicture(statsX - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
-        		statsY - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
+        gameGraphics.drawBoxAlpha(
+        		plrPan.getTitleBarX(), plrPan.getTitleBarY(),
+        		plrPan.getTitleBarWidth(), plrPan.getTitleBarHeight(),
+        		plrPan.getTitleBarColor(), plrPan.getTitleBarAlpha());
+        gameGraphics.drawString("Info", plrPan.getTitleBarX() + 1,
+        		plrPan.getTitleBarY() + 10, 1, 0xffffff);
+        int clr = 0xffffff;
+        if (super.mouseX > plrPan.getCloseButtonX()
+        		&& super.mouseY >= plrPan.getCloseButtonY()
+        		&& super.mouseX < plrPan.getCloseButtonX() + plrPan.getCloseButtonWidth()
+        		&& super.mouseY < plrPan.getCloseButtonY() + plrPan.getCloseButtonHeight())
+            clr = 0xff0000;
+        gameGraphics.drawBoxTextRight("Close window",
+        		plrPan.getCloseButtonX() + plrPan.getCloseButtonWidth() - 2,
+        		plrPan.getCloseButtonY() + 10, 1, clr);
+        gameGraphics.drawBoxAlpha(
+        		plrPan.getTopMarginX(), plrPan.getTopMarginY(),
+        		plrPan.getTopMarginWidth(), plrPan.getTopMarginHeight(),
+        		plrPan.getBGColor(), plrPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		plrPan.getBottomMarginX(), plrPan.getBottomMarginY(),
+        		plrPan.getBottomMarginWidth(), plrPan.getBottomMarginHeight(),
+        		plrPan.getBGColor(), plrPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		plrPan.getLeftMarginX(), plrPan.getLeftMarginY(),
+        		plrPan.getLeftMarginWidth(), plrPan.getLeftMarginHeight(),
+        		plrPan.getBGColor(), plrPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(
+        		plrPan.getRightMarginX(), plrPan.getRightMarginY(),
+        		plrPan.getRightMarginWidth(), plrPan.getRightMarginHeight(),
+        		plrPan.getBGColor(), plrPan.getBGAlpha());
+    }
+    
+    private void drawPlayerInfoMisc()
+    {
+        gameGraphics.drawPicture(plrPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
+        		plrPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
         		- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
         		SPRITE_MEDIA_START + 3);
+    }
+    
+    private void drawStatsTab()
+    {
+        int i1 = plrPan.getContentY() + plrPan.getTabHeight() + 12;
+        int k1 = -1;
+        gameGraphics.drawString("Skills", plrPan.getContentX() + 5, i1, 3, 0xffff00);
+        i1 += 13;
+        gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%",
+        		(plrPan.getContentX() + plrPan.getContentWidth() / 2) - 5, i1 - 13, 1, 0xffffff);
+        for (int l1 = 0; l1 < 9; l1++) {
+            int i2 = 0xffffff;
+            if (super.mouseX > plrPan.getContentX() + 3
+            		&& super.mouseY >= i1 - 11
+            		&& super.mouseY < i1 + 2
+            		&& super.mouseX < plrPan.getContentX() + 90)
+            {
+                i2 = 0xff0000;
+                k1 = l1;
+            }
+            gameGraphics.drawString(skillArray[l1] + ":@yel@"
+            		+ playerStatCurrent[l1] + "/" + playerStatBase[l1],
+            		plrPan.getContentX() + 5, i1, 1, i2);
+            i2 = 0xffffff;
+            if (super.mouseX >= plrPan.getContentX() + 90
+            		&& super.mouseY >= i1 - 11
+            		&& super.mouseY < i1 + 2
+            		&& super.mouseX < plrPan.getContentX() + 196)
+            {
+                i2 = 0xff0000;
+                k1 = l1 + 9;
+            }
+            gameGraphics.drawString(skillArray[l1 + 9] + ":@yel@" + playerStatCurrent[l1 + 9]
+            		+ "/" + playerStatBase[l1 + 9], 
+            		(plrPan.getContentX() + plrPan.getContentWidth() / 2) - 5, i1, 1, i2);
+            i1 += 13;
+        }
+
+        i1 += 8;
+        gameGraphics.drawString("Equipment Status", plrPan.getContentX() + 5, i1, 3, 0xffff00);
+        i1 += 12;
+        for (int j2 = 0; j2 < 3; j2++)
+        {
+            gameGraphics.drawString(equipmentStatusName[j2]
+            		+ ":@yel@" + equipmentStatus[j2],
+            		plrPan.getContentX() + 5, i1, 1, 0xffffff);
+            gameGraphics.drawString(equipmentStatusName[j2 + 3]
+            		+ ":@yel@" + equipmentStatus[j2 + 3],
+            		plrPan.getContentX() + plrPan.getContentWidth() / 2 + 25, i1, 1, 0xffffff);
+            i1 += 13;
+        }
+
+        i1 += 6;
+        gameGraphics.drawLineX(plrPan.getContentX(), i1 - 15, plrPan.getContentWidth(), 0);
+        if (k1 != -1) {
+            gameGraphics.drawString(skillArrayLong[k1] + " skill",
+            		plrPan.getContentX() + 5, i1, 1, 0xffff00);
+            i1 += 12;
+            int k2 = experienceArray[0];
+            for (int i3 = 0; i3 < 98; i3++)
+                if (playerStatExperience[k1] >= experienceArray[i3])
+                    k2 = experienceArray[i3 + 1];
+
+            gameGraphics.drawString("Total xp: " + playerStatExperience[k1],
+            		plrPan.getContentX() + 5, i1, 1, 0xffffff);
+            i1 += 12;
+            gameGraphics.drawString("Next level at: " + k2, plrPan.getContentX() + 5,
+            		i1, 1, 0xffffff);
+            i1 += 12;
+            gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]),
+            		plrPan.getContentX() + 5, i1, 1, 0xffffff);
+        } else {
+            gameGraphics.drawString("Overall levels", plrPan.getContentX() + 5, i1, 1, 0xffff00);
+            i1 += 12;
+            int skillTotal = 0;
+            long expTotal = 0;
+            for (int j3 = 0; j3 < 18; j3++) {
+                skillTotal += playerStatBase[j3];
+                expTotal += playerStatExperience[j3];
+            }
+            gameGraphics.drawString("Skill total: " + skillTotal, plrPan.getContentX() + 5, i1, 1, 0xffffff);
+            i1 += 12;
+            gameGraphics.drawString("Total xp: " + expTotal, plrPan.getContentX() + 5, i1, 1, 0xffffff);
+            i1 += 12;
+            gameGraphics.drawString("Combat level: " + ourPlayer.level, plrPan.getContentX() + 5, i1, 1, 0xffffff);
+        }
+    }
+    
+    private void drawQuestsTab()
+    {
+    	/* TODO: if player completed quest; set 0x00ff00,
+    	 * if player started quest, set 0xffff00, else set 0xff0000
+    	 */
+        int i1 = plrPan.getContentY() + plrPan.getTabHeight() + 12;
+        gameGraphics.drawString("Quest-list (green=completed)",
+        		plrPan.getContentX() + 5, i1, 2, 0xffffff);
+        questMenu.resetListTextCount(questMenuHandle);
+        i1 = 0;
+        String s1;
+        for (int idx = 1; idx < quests.length; idx++)
+        {
+        	if (true)
+        	{ // quest complete
+        		s1 = "@gre@";
+        	}/*
+        	else if (true || false)
+        	{ // quest started
+        		s1 = "@yel@";
+        	}
+        	else
+        	{ // quest not started
+        		s1 = "@red@";
+        	}*/
+            questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
+        }
+        questMenu.drawMenu(true);
+    }
+    
+    private void drawInfoPanel()
+    {
         int l;
         int k = l = GameImage.convertRGBToLong(160, 160, 160);
         if (anInt826 == 0)
             k = GameImage.convertRGBToLong(220, 220, 220);
         else
             l = GameImage.convertRGBToLong(220, 220, 220);
-        gameGraphics.drawBoxAlpha(statsX, statsY, statsWidth / 2, statsTabHeight, k, 128);
-        gameGraphics.drawBoxAlpha(statsX + statsWidth / 2, statsY, statsWidth / 2,
-        		statsTabHeight, l, 128);
-        gameGraphics.drawBoxAlpha(statsX, statsY + statsTabHeight, statsWidth,
-        		statsHeight - statsTabHeight, GameImage.convertRGBToLong(220, 220, 220), 128);
-        gameGraphics.drawLineX(statsX, statsY + statsTabHeight, statsWidth, 0);
-        gameGraphics.drawLineY(statsX + statsWidth / 2, statsY, statsTabHeight, 0);
-        gameGraphics.drawText("Stats", statsX + statsWidth / 4,
-        		statsY + statsTabHeight/2+4, 4, 0);
-        gameGraphics.drawText("Quests", statsX + 3 * statsWidth / 4,
-        		statsY + statsTabHeight/2+4, 4, 0);
+        gameGraphics.drawBoxAlpha(plrPan.getContentX(), plrPan.getContentY(),
+        		plrPan.getContentWidth() / 2, plrPan.getTabHeight(), k, 128);
+        gameGraphics.drawBoxAlpha(plrPan.getContentX() + plrPan.getContentWidth() / 2,
+        		plrPan.getContentY(), plrPan.getContentWidth() / 2,
+        		plrPan.getTabHeight(), l, 128);
+        gameGraphics.drawBoxAlpha(plrPan.getContentX(),
+        		plrPan.getContentY() + plrPan.getTabHeight(),
+        		plrPan.getContentWidth(),
+        		plrPan.getContentHeight() - plrPan.getTabHeight(),
+        		GameImage.convertRGBToLong(220, 220, 220), 128);
+        
+        gameGraphics.drawLineX(plrPan.getContentX(),
+        		plrPan.getContentY(),
+        		plrPan.getContentWidth(), 0);
+        gameGraphics.drawLineY(plrPan.getContentX(),
+        		plrPan.getContentY(), plrPan.getTabHeight(), 0);
+        // dunno why i need the extra -1 here.
+        gameGraphics.drawLineY(plrPan.getContentX() + plrPan.getContentWidth()-1,
+        		plrPan.getContentY(), plrPan.getTabHeight(), 0);
+        
+        gameGraphics.drawLineX(plrPan.getContentX(),
+        		plrPan.getContentY() + plrPan.getTabHeight(),
+        		plrPan.getContentWidth(), 0);
+        gameGraphics.drawLineY(plrPan.getContentX() + plrPan.getContentWidth() / 2,
+        		plrPan.getContentY(), plrPan.getTabHeight(), 0);
+        gameGraphics.drawText("Stats",
+        		plrPan.getContentX() + plrPan.getContentWidth() / 4,
+        		plrPan.getContentY() + plrPan.getTabHeight()/2+4, 4, 0);
+        gameGraphics.drawText("Quests",
+        		plrPan.getContentX() + 3 * plrPan.getContentWidth() / 4,
+        		plrPan.getContentY() + plrPan.getTabHeight()/2+4, 4, 0);
+    }
+
+    private final void drawPlayerInfoMenu(boolean flag)
+    {
+    	drawPlayerInfoFrame();
+    	drawInfoPanel();
         if (anInt826 == 0)
-        {
-            int i1 = statsY + statsTabHeight + 12;
-            int k1 = -1;
-            gameGraphics.drawString("Skills", statsX + 5, i1, 3, 0xffff00);
-            i1 += 13;
-            gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%",
-            		(statsX + statsWidth / 2) - 5, i1 - 13, 1, 0xffffff);
-            for (int l1 = 0; l1 < 9; l1++) {
-                int i2 = 0xffffff;
-                if (super.mouseX > statsX + 3
-                		&& super.mouseY >= i1 - 11
-                		&& super.mouseY < i1 + 2
-                		&& super.mouseX < statsX + 90)
-                {
-                    i2 = 0xff0000;
-                    k1 = l1;
-                }
-                gameGraphics.drawString(skillArray[l1] + ":@yel@"
-                		+ playerStatCurrent[l1] + "/" + playerStatBase[l1],
-                		statsX + 5, i1, 1, i2);
-                i2 = 0xffffff;
-                if (super.mouseX >= statsX + 90
-                		&& super.mouseY >= i1 - 11
-                		&& super.mouseY < i1 + 2
-                		&& super.mouseX < statsX + 196)
-                {
-                    i2 = 0xff0000;
-                    k1 = l1 + 9;
-                }
-                gameGraphics.drawString(skillArray[l1 + 9] + ":@yel@" + playerStatCurrent[l1 + 9]
-                		+ "/" + playerStatBase[l1 + 9], 
-                		(statsX + statsWidth / 2) - 5, i1, 1, i2);
-                i1 += 13;
-            }
-
-            i1 += 8;
-            gameGraphics.drawString("Equipment Status", statsX + 5, i1, 3, 0xffff00);
-            i1 += 12;
-            for (int j2 = 0; j2 < 3; j2++)
-            {
-                gameGraphics.drawString(equipmentStatusName[j2]
-                		+ ":@yel@" + equipmentStatus[j2],
-                		statsX + 5, i1, 1, 0xffffff);
-                gameGraphics.drawString(equipmentStatusName[j2 + 3]
-                		+ ":@yel@" + equipmentStatus[j2 + 3],
-                		statsX + statsWidth / 2 + 25, i1, 1, 0xffffff);
-                i1 += 13;
-            }
-
-            i1 += 6;
-            gameGraphics.drawLineX(statsX, i1 - 15, statsWidth, 0);
-            if (k1 != -1) {
-                gameGraphics.drawString(skillArrayLong[k1] + " skill",
-                		statsX + 5, i1, 1, 0xffff00);
-                i1 += 12;
-                int k2 = experienceArray[0];
-                for (int i3 = 0; i3 < 98; i3++)
-                    if (playerStatExperience[k1] >= experienceArray[i3])
-                        k2 = experienceArray[i3 + 1];
-
-                gameGraphics.drawString("Total xp: " + playerStatExperience[k1],
-                		statsX + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Next level at: " + k2, statsX + 5,
-                		i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]),
-                		statsX + 5, i1, 1, 0xffffff);
-            } else {
-                gameGraphics.drawString("Overall levels", statsX + 5, i1, 1, 0xffff00);
-                i1 += 12;
-                int skillTotal = 0;
-                long expTotal = 0;
-                for (int j3 = 0; j3 < 18; j3++) {
-                    skillTotal += playerStatBase[j3];
-                    expTotal += playerStatExperience[j3];
-                }
-                gameGraphics.drawString("Skill total: " + skillTotal, statsX + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Total xp: " + expTotal, statsX + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Combat level: " + ourPlayer.level, statsX + 5, i1, 1, 0xffffff);
-            }
-        }
+        	drawStatsTab();
         if (anInt826 == 1)
-        {
-        	/* TODO: if player completed quest; set 0x00ff00,
-        	 * if player started quest, set 0xffff00, else set 0xff0000
-        	 */
-            int i1 = statsY + statsTabHeight + 12;
-            gameGraphics.drawString("Quest-list (green=completed)", statsX + 5, i1, 2, 0xffffff);
-            questMenu.resetListTextCount(questMenuHandle);
-            i1 = 0;
-            String s1;
-            for (int idx = 1; idx < quests.length; idx++)
-            {
-            	if (true)
-            	{ // quest complete
-            		s1 = "@gre@";
-            	}/*
-            	else if (true || false)
-            	{ // quest started
-            		s1 = "@yel@";
-            	}
-            	else
-            	{ // quest not started
-            		s1 = "@red@";
-            	}*/
-                questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
-            }
-            questMenu.drawMenu(true);
-        }
+        	drawQuestsTab();
         if (!flag)
         {
             return;
         }
-        if (super.mouseX >= statsX
-        		&& super.mouseY >= statsY
-        		&& super.mouseX < statsX + statsWidth
-        		&& super.mouseY < statsY + statsHeight)
+        if (super.mouseX >= plrPan.getContentX()
+        		&& super.mouseY >= plrPan.getContentY()
+        		&& super.mouseX < plrPan.getContentX() + plrPan.getContentWidth()
+        		&& super.mouseY < plrPan.getContentY() + plrPan.getContentHeight())
         {
-            if (super.mouseY <= statsY + 24
-            		&& mouseButtonClick == 1) {
-                if (super.mouseX < statsX + statsWidth/2)
+            if (super.mouseY <= plrPan.getContentY() + plrPan.getTabHeight()
+            		&& mouseButtonClick == 1)
+            {
+        		mouseButtonClick = 0;
+                if (super.mouseX < plrPan.getContentX() + plrPan.getContentWidth()/2)
                 {
                     anInt826 = 0;
                     return;
                 }
-                if (super.mouseX > statsX + statsWidth/2)
+                if (super.mouseX > plrPan.getContentX() + plrPan.getContentWidth()/2)
                 {
                     anInt826 = 1;
                 }
             }
+            else if (super.mouseX > plrPan.getContentX() + plrPan.getContentWidth() - 14*2
+            		&& super.mouseY > plrPan.getContentY() + plrPan.getTabHeight()
+            		&& super.mouseX < plrPan.getContentX() + plrPan.getContentWidth()
+            		&& super.mouseY < plrPan.getContentY() + plrPan.getContentHeight()
+            		&& anInt826 == 1)
+            {
+            	/* TODO: Find out why the scroll bar does not work for quest menu
+            	 * but it does for magic menu. I fixed it now by increasing the
+            	 * visible scroll area to twice the width of the scroll bar.
+            	 */ 
+                questMenu.updateActions(super.mouseX, super.mouseY,
+                		super.lastMouseDownButton, super.mouseDownButton);
+        		mouseButtonClick = 0;
+            }
+        }
+        else if (super.mouseX > plrPan.getCloseButtonX()
+        		&& super.mouseY > plrPan.getCloseButtonY()
+        		&& super.mouseX < (plrPan.getCloseButtonX()
+        				+ plrPan.getCloseButtonWidth())
+        		&& super.mouseY < (plrPan.getCloseButtonY()
+        				+ plrPan.getCloseButtonHeight()))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		mouseOverMenu = (mouseOverMenu != 3) ? 3 : 0;
+        		mouseButtonClick = 0;
+        	}
+        }
+        else if (!(super.mouseX < plrPan.getX()
+        		|| super.mouseY < plrPan.getY()
+        		|| super.mouseX > plrPan.getX() + plrPan.getWidth()
+        		|| super.mouseY > plrPan.getY() + plrPan.getHeight()))
+        { // click inside inventory but not on the grid or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 /*
@@ -2285,44 +2468,6 @@ public class mudclient extends GameWindowMiddleMan
         	mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
             mouseButtonClick = 0;
         }
-        /*
-        if (mouseOverMenu == 1
-        		&& (super.mouseX < inventoryX
-        				|| super.mouseY < inventoryY))
-        { // mouse left inventory
-            mouseOverMenu = 0;
-        }
-        *//* we want to always show the minimap
-        if (mouseOverMenu == 2
-        		&& (super.mouseX < miniMapX
-        				|| super.mouseY < miniMapY))
-        { // mouse left minimap
-            mouseOverMenu = 0;
-        }*//*
-        if (mouseOverMenu == 3
-        		&& (super.mouseX < statsX
-        				|| super.mouseY < statsY))
-        { // mouse left  stats
-            mouseOverMenu = 0;
-        }
-        if (mouseOverMenu == 4
-        		&& (super.mouseX < spellsX
-        				|| super.mouseY < spellsY))
-        { // mouse left  spells
-            mouseOverMenu = 0;
-        }
-        if (mouseOverMenu == 5
-        		&& (super.mouseX < friendsX
-        				|| super.mouseY < friendsY))
-        { // mouse left  spells
-            mouseOverMenu = 0;
-        }
-        if (mouseOverMenu == 6
-        		&& (super.mouseX < settingsX
-        				|| super.mouseY < settingsY))
-        { // mouse left settings
-            mouseOverMenu = 0;
-        }*/
     }
 
     private final void menuClick(int index)
@@ -3498,7 +3643,9 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics._mudclient = this;
         gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
         abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
-        bankWin = new BankWindow(windowHalfWidth, windowHalfHeight);
+        bankPan = new BankPanel(windowHalfWidth, windowHalfHeight);
+        invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight);
+        plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(spellsX, spellsY + spellsTabHeight+1,
@@ -3507,8 +3654,9 @@ public class mudclient extends GameWindowMiddleMan
         friendsMenuHandle = friendsMenu.method162(friendsX, friendsY + friendsTabHeight + friendsTitleHeight,
         		friendsWidth, friendsScrollBoxHeight, 1, 500, true);
         questMenu = new Menu(gameGraphics, 5);
-        questMenuHandle = questMenu.method162(statsX, statsY + statsTabHeight + statsTitleHeight,
-        		statsWidth, statsScrollBoxHeight, 1, 500, true);
+        questMenuHandle = questMenu.method162(plrPan.getContentX(),
+        		plrPan.getContentY() + plrPan.getTabHeight() + plrPan.getScrollBoxTitleHeight(),
+        		plrPan.getContentWidth(), plrPan.getScrollBoxHeight(), 1, 500, true);
         loadMedia(); // 30%
         if (lastLoadedNull)
             return;
@@ -7776,7 +7924,7 @@ public class mudclient extends GameWindowMiddleMan
             }
             if (mouseOverMenu == 1)
                 drawInventoryMenu(noMenusShown);
-            /* We always whow the minimap now
+            /* We always show the minimap now
             if (mouseOverMenu == 2)
                 drawMapMenu(noMenusShown);
              */
@@ -8292,24 +8440,10 @@ public class mudclient extends GameWindowMiddleMan
         gameWindowMenuBarY = windowHeight - gameWindowMenuBarHeight-3;
         gameWindowMenuBarItemWidth = 33;
         gameWindowMenuBarItemHeight = 32;
-        nInventoryCols = 5;
-        nInventoryRows = 6;
-        nInventorySlots = nInventoryCols*nInventoryRows;
-        inventoryWidth = nInventoryCols*itemSlotWidth+1;
-        inventoryHeight = nInventoryRows*itemSlotHeight+1;
-        inventoryX = gameWindowMenuBarX + gameWindowMenuBarWidth - inventoryWidth;
-        inventoryY = gameWindowMenuBarY - inventoryHeight;
         miniMapWidth = 156+40;
         miniMapHeight = 152+40;
         miniMapX = windowWidth-miniMapWidth-3;
         miniMapY = 3;
-        statsWidth = 197;
-        statsHeight = 275;
-        statsX = gameWindowMenuBarX + gameWindowMenuBarWidth - statsWidth;
-        statsY = gameWindowMenuBarY - statsHeight;
-        statsTabHeight = 24;
-        statsTitleHeight = 16;
-    	statsScrollBoxHeight = statsHeight - statsTabHeight - statsTitleHeight;
         spellsWidth = 197;
         spellsHeight = 275;
         spellsX = gameWindowMenuBarX + gameWindowMenuBarWidth - spellsWidth;
@@ -8500,7 +8634,9 @@ public class mudclient extends GameWindowMiddleMan
     private boolean aBooleanArray827[];
     private int playerStatBase[];
     private AbuseWindow abWin;
-    private BankWindow bankWin;
+    private BankPanel bankPan;
+    private InventoryPanel invPan;
+    private PlayerInfoPanel plrPan;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;
@@ -8556,7 +8692,6 @@ public class mudclient extends GameWindowMiddleMan
     int sectionX;
     int sectionY;
     int serverIndex;
-    private int nInventorySlots;
     protected int mouseDownTime;
     protected int itemIncrement;
     private int groundItemCount;
@@ -8662,11 +8797,7 @@ public class mudclient extends GameWindowMiddleMan
     public static int SCROLL_BAR_HEIGHT = 12;
     public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
     gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
-    public int nInventoryCols, nInventoryRows;
-    public int inventoryX, inventoryY, inventoryWidth, inventoryHeight;
     public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
-    public int statsX, statsY, statsWidth, statsHeight, statsTabHeight,
-    statsScrollBoxHeight, statsTitleHeight;
     public int spellsX, spellsY, spellsWidth, spellsHeight, spellsTabHeight,
     spellsScrollBoxHeight, spellsInfoBoxHeight;
     public int friendsX, friendsY, friendsWidth, friendsHeight, friendsTabHeight,

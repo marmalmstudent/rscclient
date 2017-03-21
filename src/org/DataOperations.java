@@ -164,10 +164,12 @@ public class DataOperations {
             out = new byte[dbEntryLength];
             for (int j = 0; j < dbEntryLength; ++j)
             	out[j] = (byte)(database[offset + j] >> 1);
+            /*
             try {
             	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
-            	misc.writeToFile(out, "src/org/conf/utils/cache/data/objects3d/object"+i+".ob3");
+            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/objects3d/object"+i+".ob3");
             } catch (IOException ioe) {ioe.printStackTrace();}
+            */
             offset += dbEntryLength;
         }
 
