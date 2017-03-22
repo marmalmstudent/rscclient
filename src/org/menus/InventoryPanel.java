@@ -1,36 +1,39 @@
 package org.menus;
 
+import java.awt.Rectangle;
+
 import org.mudclient;
 
-public class InventoryPanel extends GamePanel
+public class InventoryPanel extends InGameGridPanel
 {
     private int nCols, nRows, nSlots;
     
     public InventoryPanel(int xCenter, int yCenter)
     {
+		frame = new InGameFrame("Inventory");
         nCols = 5;
         nRows = 6;
         nSlots = nCols*nRows;
-	    height = getTitleBarHeight() + getTopMarginHeight()
-	    + getInvGridHeight()
-	    + getBottomMarginHeight();
-	    width = getLeftMarginWidth() + getInvGridWidth() + getRightMarginWidth();
+	    setHeight(getGridHeight());
+	    setWidth(getGridWidth());
 	    // TODO: revise these when the bottom menu is done.
-        x = xCenter*2 - width - 3;//xCenter - width/2;
-        y = yCenter*2 - height - 35;//yCenter - height/2;
-	    closeButton = new int[]{
-	    		getTitleBarX() + getTitleBarWidth() - 88,
-	    		getTitleBarY(),
-	    		getTitleBarX() + getTitleBarWidth(),
-	    		getTitleBarY() + getTitleBarHeight()};
+	    setX(xCenter - width / 2 - 3);
+	    setY(yCenter - height / 2 - 35);
+	    frame.setBounds(new Rectangle(x, y, width, height));
     }
     
     public int getCols() { return nCols; }
     public int getRows() { return nRows; }
     public int getSlots() { return nSlots; }
 	
-	public int getInvGridHeight() { return nRows*mudclient.itemSlotHeight; }
-	public int getInvGridWidth() { return nCols*mudclient.itemSlotWidth; }
-	public int getInvGridX() { return getLeftMarginX() + getLeftMarginWidth(); }
-	public int getInvGridY() { return getTopMarginY() + getTopMarginHeight(); }
+	public int getInvGridX() { return getX(); }
+	public int getInvGridY() { return getY(); }
+	
+	public boolean isMouseOverInvGrid(int mouseX, int mouseY)
+	{
+		return (mouseX >= getInvGridX()
+        		&& mouseY >= getInvGridY()
+        		&& mouseX < getInvGridX() + getGridWidth() 
+        		&& mouseY < getInvGridY() + getGridHeight());
+	}
 }
