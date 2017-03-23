@@ -9,6 +9,7 @@ import org.menus.InGameButton;
 import org.menus.InGameFrame;
 import org.menus.InGameGridPanel;
 import org.menus.InventoryPanel;
+import org.menus.MagicPanel;
 import org.menus.PlayerInfoPanel;
 import org.model.Sprite;
 import org.recorder.Recorder;
@@ -3574,10 +3575,12 @@ public class mudclient extends GameWindowMiddleMan
         bankPan = new BankPanel(windowHalfWidth, windowHalfHeight);
         invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight);
         plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
+        magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
-        spellMenuHandle = spellMenu.method162(spellsX, spellsY + spellsTabHeight+1,
-        		spellsWidth, spellsScrollBoxHeight, 1, 500, true);
+        spellMenuHandle = spellMenu.method162(magicPan.getX(),
+        		magicPan.getY() + magicPan.getTabHeight()+1,
+        		magicPan.getWidth(), magicPan.getScrollBoxHeight(), 1, 500, true);
         friendsMenu = new Menu(gameGraphics, 5);
         friendsMenuHandle = friendsMenu.method162(friendsX, friendsY + friendsTabHeight + friendsTitleHeight,
         		friendsWidth, friendsScrollBoxHeight, 1, 500, true);
@@ -4158,188 +4161,276 @@ public class mudclient extends GameWindowMiddleMan
         engineHandle.playerIsAlive = true;
         return true;
     }
+    
+    private void drawMagicWindowMisc()
+    {
+        gameGraphics.drawPicture(magicPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getXShift(),
+        		magicPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getHeight()
+        		- gameGraphics.sprites[SPRITE_MEDIA_START + 4].getYShift(),
+        		SPRITE_MEDIA_START + 4);
+    }
+
+    private void drawMagicPanel()
+    {
+    	
+        int magicTabColor = (menuMagicPrayersSelected == 1) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
+        int prayerTabColor = (menuMagicPrayersSelected == 0) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
+        gameGraphics.drawBoxAlpha(magicPan.getX(), magicPan.getY(),
+        		magicPan.getWidth() / 2, magicPan.getTabHeight(),
+        		prayerTabColor, magicPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(magicPan.getX() + magicPan.getWidth() / 2,
+        		magicPan.getY(), magicPan.getWidth() / 2,
+        		magicPan.getTabHeight(), magicTabColor, magicPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(magicPan.getX(),
+        		magicPan.getY() + magicPan.getTabHeight(), magicPan.getWidth(),
+        		magicPan.getScrollBoxHeight(), magicPan.getBGColor(),
+        		magicPan.getBGAlpha());
+    	gameGraphics.drawBoxAlpha(magicPan.getX(),
+    			magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(), magicPan.getWidth(),
+    			magicPan.getHeight() - magicPan.getScrollBoxHeight() - magicPan.getTabHeight(),
+    			magicPan.getBGColor(), magicPan.getBGAlpha());
+        
+        gameGraphics.drawLineX(magicPan.getX(), magicPan.getY(),
+        		magicPan.getWidth(), magicPan.getLineColor());
+        gameGraphics.drawLineY(magicPan.getX(),
+        		magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+        gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth(),
+        		magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+    	gameGraphics.drawLineX(magicPan.getX(),
+    			magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(),
+    			magicPan.getWidth(), magicPan.getLineColor());
+        
+        gameGraphics.drawLineX(magicPan.getX(),
+        		magicPan.getY() + magicPan.getTabHeight(),
+        		magicPan.getWidth(), magicPan.getLineColor());
+        gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth() / 2,
+        		magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+        InGameButton button = magicPan.getMagicButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
+        button = magicPan.getPrayerButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
+    }
+    
+    private void drawMagicInfoBox(int selectedSpellIndex)
+    {
+        if (selectedSpellIndex != -1)
+        {
+            gameGraphics.drawString("Level "
+            		+ EntityHandler.getSpellDef(selectedSpellIndex).getReqLevel()
+            		+ ": " + EntityHandler.getSpellDef(selectedSpellIndex).getName(),
+            		magicPan.getX() + 2,
+            		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 10,
+            		1, 0xffff00);
+            gameGraphics.drawString(EntityHandler.getSpellDef(selectedSpellIndex).getDescription(),
+            		magicPan.getX() + 2,
+            		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 22,
+            		0, 0xffffff);
+            int i4 = 0;
+            for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(selectedSpellIndex).getRunesRequired())
+            {
+                int runeID = e.getKey();
+                gameGraphics.drawPicture(magicPan.getX() + 2 + i4 * 44,
+                		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36,
+                		SPRITE_ITEM_START + EntityHandler.getItemDef(runeID).getSprite());
+                int runeInvCount = inventoryCount(runeID);
+                int runeCount = e.getValue();
+                String s2 = "@red@";
+                if (hasRequiredRunes(runeID, runeCount))
+                    s2 = "@gre@";
+                gameGraphics.drawString(s2 + runeInvCount + "/" + runeCount, magicPan.getX() + 2 + i4 * 44,
+                		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36, 1, 0xffffff);
+                i4++;
+            }
+        }
+        else
+            gameGraphics.drawString("Point at a spell for a description", magicPan.getX() + 2,
+            		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
+    }
+    
+    private void drawMagicTab()
+    {
+        spellMenu.resetListTextCount(spellMenuHandle);
+        int i1 = 0;
+        for (int spellIndex = 0; spellIndex < EntityHandler.spellCount(); spellIndex++)
+        {
+            String s = "@yel@";
+            for (Entry e : EntityHandler.getSpellDef(spellIndex).getRunesRequired())
+            {
+                if (hasRequiredRunes((Integer) e.getKey(), (Integer) e.getValue()))
+                    continue;
+                s = "@whi@";
+                break;
+            }
+            int spellLevel = playerStatCurrent[6];
+            if (EntityHandler.getSpellDef(spellIndex).getReqLevel() > spellLevel) {
+                s = "@bla@";
+            }
+            spellMenu.drawMenuListText(spellMenuHandle, i1++, s + "Level " + EntityHandler.getSpellDef(spellIndex).getReqLevel() + ": " + EntityHandler.getSpellDef(spellIndex).getName());
+        }
+
+        spellMenu.drawMenu(true);
+        drawMagicInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
+    }
+    
+    private void drawPrayerInfoBox(int selectedPrayerIdx)
+    {
+        if (selectedPrayerIdx != -1)
+        {
+            gameGraphics.drawText("Level " + EntityHandler.getPrayerDef(selectedPrayerIdx).getReqLevel() + ": "
+            		+ EntityHandler.getPrayerDef(selectedPrayerIdx).getName(), magicPan.getX() + magicPan.getWidth() / 2,
+            		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 16, 1, 0xffff00);
+            gameGraphics.drawText(EntityHandler.getPrayerDef(selectedPrayerIdx).getDescription(),
+            		magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
+            		+ magicPan.getScrollBoxHeight() + 31, 0, 0xffffff);
+            gameGraphics.drawText("Drain rate: " + EntityHandler.getPrayerDef(selectedPrayerIdx).getDrainRate(),
+            		magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
+            		+ magicPan.getScrollBoxHeight() + 46, 1, 0);
+        }
+        else
+            gameGraphics.drawString("Point at a prayer for a description", magicPan.getX() + 2,
+            		magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
+    }
+    
+    private void drawPrayerTab()
+    {
+        spellMenu.resetListTextCount(spellMenuHandle);
+        int j1 = 0;
+        for (int j2 = 0; j2 < EntityHandler.prayerCount(); j2++)
+        {
+            String s1 = "@whi@";
+            if (EntityHandler.getPrayerDef(j2).getReqLevel() > playerStatBase[5])
+                s1 = "@bla@";
+            if (prayerOn[j2])
+                s1 = "@gre@";
+            spellMenu.drawMenuListText(spellMenuHandle, j1++, s1 + "Level " + EntityHandler.getPrayerDef(j2).getReqLevel() + ": " + EntityHandler.getPrayerDef(j2).getName());
+        }
+        spellMenu.drawMenu(true);
+        drawPrayerInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
+    }
+    
+    private void handleMagicTabClicks()
+    {
+        if (super.mouseX < magicPan.getX() + magicPan.getWidth()/2
+        		&& menuMagicPrayersSelected == 1)
+        {  // switch to magic tab
+            menuMagicPrayersSelected = 0;
+            prayerMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
+            spellMenu.method165(spellMenuHandle, magicMenuIndex);
+        }
+        else if (super.mouseX > magicPan.getX() + magicPan.getWidth()/2
+        		&& menuMagicPrayersSelected == 0)
+        {  // switch to prayer tab
+            menuMagicPrayersSelected = 1;
+            magicMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
+            spellMenu.method165(spellMenuHandle, prayerMenuIndex);
+        }
+    }
+    
+    private void handleSpellsTabClicks()
+    {
+        int k1 = spellMenu.selectedListIndex(spellMenuHandle);
+        if (k1 != -1)
+        {
+            int k2 = playerStatCurrent[6];
+            if (EntityHandler.getSpellDef(k1).getReqLevel() > k2)
+                displayMessage("Your magic ability is not high enough for this spell", 3, 0);
+            else
+            {
+                int k3 = 0;
+                for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(k1).getRunesRequired())
+                {
+                    if (!hasRequiredRunes(e.getKey(), e.getValue()))
+                    {
+                        displayMessage("You don't have all the reagents you need for this spell",
+                        		3, 0);
+                        k3 = -1;
+                        break;
+                    }
+                    k3++;
+                }
+                if (k3 == EntityHandler.getSpellDef(k1).getRuneCount())
+                {
+                    selectedSpell = k1;
+                    selectedItem = -1;
+                }
+            }
+        }
+    }
+    
+    private void handlePrayerTabClicks()
+    {
+        int l1 = spellMenu.selectedListIndex(spellMenuHandle);
+        if (l1 != -1) {
+            int l2 = playerStatBase[5];
+            if (EntityHandler.getPrayerDef(l1).getReqLevel() > l2)
+                displayMessage("Your prayer ability is not high enough for this prayer", 3, 0);
+            else if (playerStatCurrent[5] == 0)
+                displayMessage("You have run out of prayer points. Return to a church to recharge", 3, 0);
+            else if (prayerOn[l1])
+            {
+                super.streamClass.createPacket(248);
+                super.streamClass.addByte(l1);
+                super.streamClass.formatPacket();
+                prayerOn[l1] = false;
+                playSound("prayeroff");
+            }
+            else
+            {
+                super.streamClass.createPacket(56);
+                super.streamClass.addByte(l1);
+                super.streamClass.formatPacket();
+                prayerOn[l1] = true;
+                playSound("prayeron");
+            }
+        }
+    }
 
     private final void drawMagicWindow(boolean flag)
     {
-        gameGraphics.drawPicture(spellsX - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getXShift(),
-        		spellsY - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getHeight()
-        		- gameGraphics.sprites[SPRITE_MEDIA_START + 4].getYShift(),
-        		SPRITE_MEDIA_START + 4);
-        int l;
-        int k = l = GameImage.convertRGBToLong(160, 160, 160);
+    	drawInGameFrame(magicPan.getFrame());
+    	drawMagicPanel();
         if (menuMagicPrayersSelected == 0)
-            k = GameImage.convertRGBToLong(220, 220, 220);
-        else
-            l = GameImage.convertRGBToLong(220, 220, 220);
-        gameGraphics.drawBoxAlpha(spellsX, spellsY, spellsWidth / 2, spellsTabHeight, k, 128);
-        gameGraphics.drawBoxAlpha(spellsX + spellsWidth / 2, spellsY, spellsWidth / 2,
-        		spellsTabHeight, l, 128);
-        gameGraphics.drawBoxAlpha(spellsX, spellsY + spellsTabHeight, spellsWidth, spellsScrollBoxHeight,
-        		GameImage.convertRGBToLong(220, 220, 220), 128);
-        gameGraphics.drawBoxAlpha(spellsX, spellsY + spellsTabHeight + spellsScrollBoxHeight, spellsWidth,
-        		spellsHeight - spellsScrollBoxHeight - spellsTabHeight,
-        		GameImage.convertRGBToLong(160, 160, 160), 128);
-        gameGraphics.drawLineX(spellsX, spellsY + spellsTabHeight, spellsWidth, 0x000000);
-        gameGraphics.drawLineY(spellsX + spellsWidth / 2, spellsY, spellsTabHeight, 0x000000);
-        gameGraphics.drawLineX(spellsX, spellsY + spellsTabHeight + spellsScrollBoxHeight,
-        		spellsWidth, 0x000000);
-        gameGraphics.drawText("Magic", spellsX + spellsWidth / 4,
-        		spellsY + spellsTabHeight/2+4, 4, 0);
-        gameGraphics.drawText("Prayers", spellsX + 3 * spellsWidth / 4,
-        		spellsY + spellsTabHeight/2+4, 4, 0);
-        if (menuMagicPrayersSelected == 0)
-        {
-            spellMenu.resetListTextCount(spellMenuHandle);
-            int i1 = 0;
-            for (int spellIndex = 0; spellIndex < EntityHandler.spellCount(); spellIndex++) {
-                String s = "@yel@";
-                for (Entry e : EntityHandler.getSpellDef(spellIndex).getRunesRequired()) {
-                    if (hasRequiredRunes((Integer) e.getKey(), (Integer) e.getValue())) {
-                        continue;
-                    }
-                    s = "@whi@";
-                    break;
-                }
-                int spellLevel = playerStatCurrent[6];
-                if (EntityHandler.getSpellDef(spellIndex).getReqLevel() > spellLevel) {
-                    s = "@bla@";
-                }
-                spellMenu.drawMenuListText(spellMenuHandle, i1++, s + "Level " + EntityHandler.getSpellDef(spellIndex).getReqLevel() + ": " + EntityHandler.getSpellDef(spellIndex).getName());
-            }
-
-            spellMenu.drawMenu(true);
-            int selectedSpellIndex = spellMenu.selectedListIndex(spellMenuHandle);
-            if (selectedSpellIndex != -1) {
-                gameGraphics.drawString("Level " + EntityHandler.getSpellDef(selectedSpellIndex).getReqLevel()
-                		+ ": " + EntityHandler.getSpellDef(selectedSpellIndex).getName(),
-                		spellsX + 2, spellsY + spellsTabHeight + spellsScrollBoxHeight + 10, 1, 0xffff00);
-                gameGraphics.drawString(EntityHandler.getSpellDef(selectedSpellIndex).getDescription(),
-                		spellsX + 2, spellsY + spellsTabHeight + spellsScrollBoxHeight + 22, 0, 0xffffff);
-                int i4 = 0;
-                for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(selectedSpellIndex).getRunesRequired())
-                {
-                    int runeID = e.getKey();
-                    gameGraphics.drawPicture(spellsX + 2 + i4 * 44,
-                    		spellsY + spellsTabHeight + spellsScrollBoxHeight + 36,
-                    		SPRITE_ITEM_START + EntityHandler.getItemDef(runeID).getSprite());
-                    int runeInvCount = inventoryCount(runeID);
-                    int runeCount = e.getValue();
-                    String s2 = "@red@";
-                    if (hasRequiredRunes(runeID, runeCount)) {
-                        s2 = "@gre@";
-                    }
-                    gameGraphics.drawString(s2 + runeInvCount + "/" + runeCount, spellsX + 2 + i4 * 44,
-                    		spellsY + spellsTabHeight + spellsScrollBoxHeight + 36, 1, 0xffffff);
-                    i4++;
-                }
-            } else {
-                gameGraphics.drawString("Point at a spell for a description", spellsX + 2,
-                		spellsY + spellsTabHeight + spellsScrollBoxHeight + 10, 1, 0);
-            }
-        }
+        	drawMagicTab();
         if (menuMagicPrayersSelected == 1)
-        {
-            spellMenu.resetListTextCount(spellMenuHandle);
-            int j1 = 0;
-            for (int j2 = 0; j2 < EntityHandler.prayerCount(); j2++) {
-                String s1 = "@whi@";
-                if (EntityHandler.getPrayerDef(j2).getReqLevel() > playerStatBase[5])
-                    s1 = "@bla@";
-                if (prayerOn[j2])
-                    s1 = "@gre@";
-                spellMenu.drawMenuListText(spellMenuHandle, j1++, s1 + "Level " + EntityHandler.getPrayerDef(j2).getReqLevel() + ": " + EntityHandler.getPrayerDef(j2).getName());
-            }
-            spellMenu.drawMenu(true);
-            int j3 = spellMenu.selectedListIndex(spellMenuHandle);
-            if (j3 != -1) {
-                gameGraphics.drawText("Level " + EntityHandler.getPrayerDef(j3).getReqLevel() + ": "
-                		+ EntityHandler.getPrayerDef(j3).getName(), spellsX + spellsWidth / 2,
-                		spellsY + spellsTabHeight + spellsScrollBoxHeight + 16, 1, 0xffff00);
-                gameGraphics.drawText(EntityHandler.getPrayerDef(j3).getDescription(),
-                		spellsX + spellsWidth / 2, spellsY + spellsTabHeight
-                		+ spellsScrollBoxHeight + 31, 0, 0xffffff);
-                gameGraphics.drawText("Drain rate: " + EntityHandler.getPrayerDef(j3).getDrainRate(),
-                		spellsX + spellsWidth / 2, spellsY + spellsTabHeight
-                		+ spellsScrollBoxHeight + 46, 1, 0);
-            } else {
-                gameGraphics.drawString("Point at a prayer for a description", spellsX + 2,
-                		spellsY + spellsTabHeight + spellsScrollBoxHeight + 10, 1, 0);
-            }
-        }
+        	drawPrayerTab();
         if (!flag)
             return;
         
-        if (super.mouseX >= spellsX
-        		&& super.mouseY >= spellsY
-        		&& super.mouseX < spellsX + spellsWidth
-        		&& super.mouseY < spellsY + spellsHeight)
+        if (magicPan.isMouseOver(super.mouseX, super.mouseY))
         {
             spellMenu.updateActions(super.mouseX, super.mouseY,
             		super.lastMouseDownButton, super.mouseDownButton);
-            if (super.mouseY <= spellsY + spellsTabHeight && mouseButtonClick == 1)
-                if (super.mouseX < spellsX + spellsWidth/2
-                		&& menuMagicPrayersSelected == 1)
-                {
-                    menuMagicPrayersSelected = 0;
-                    prayerMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
-                    spellMenu.method165(spellMenuHandle, magicMenuIndex);
-                }
-                else if (super.mouseX > spellsX + spellsWidth/2
-                		&& menuMagicPrayersSelected == 0)
-                {
-                    menuMagicPrayersSelected = 1;
-                    magicMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
-                    spellMenu.method165(spellMenuHandle, prayerMenuIndex);
-                }
+            if ((super.mouseY <= magicPan.getY() + magicPan.getTabHeight())
+            		&& mouseButtonClick == 1)
+            	handleMagicTabClicks();
             if (mouseButtonClick == 1 && menuMagicPrayersSelected == 0)
+            	handleSpellsTabClicks();
+            if (mouseButtonClick == 1 && menuMagicPrayersSelected == 1)
             {
-                int k1 = spellMenu.selectedListIndex(spellMenuHandle);
-                if (k1 != -1) {
-                    int k2 = playerStatCurrent[6];
-                    if (EntityHandler.getSpellDef(k1).getReqLevel() > k2) {
-                        displayMessage("Your magic ability is not high enough for this spell", 3, 0);
-                    } else {
-                        int k3 = 0;
-                        for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(k1).getRunesRequired()) {
-                            if (!hasRequiredRunes(e.getKey(), e.getValue())) {
-                                displayMessage("You don't have all the reagents you need for this spell",
-                                		3, 0);
-                                k3 = -1;
-                                break;
-                            }
-                            k3++;
-                        }
-                        if (k3 == EntityHandler.getSpellDef(k1).getRuneCount()) {
-                            selectedSpell = k1;
-                            selectedItem = -1;
-                        }
-                    }
-                }
-            }
-            if (mouseButtonClick == 1 && menuMagicPrayersSelected == 1) {
-                int l1 = spellMenu.selectedListIndex(spellMenuHandle);
-                if (l1 != -1) {
-                    int l2 = playerStatBase[5];
-                    if (EntityHandler.getPrayerDef(l1).getReqLevel() > l2)
-                        displayMessage("Your prayer ability is not high enough for this prayer", 3, 0);
-                    else if (playerStatCurrent[5] == 0)
-                        displayMessage("You have run out of prayer points. Return to a church to recharge", 3, 0);
-                    else if (prayerOn[l1]) {
-                        super.streamClass.createPacket(248);
-                        super.streamClass.addByte(l1);
-                        super.streamClass.formatPacket();
-                        prayerOn[l1] = false;
-                        playSound("prayeroff");
-                    } else {
-                        super.streamClass.createPacket(56);
-                        super.streamClass.addByte(l1);
-                        super.streamClass.formatPacket();
-                        prayerOn[l1] = true;
-                        playSound("prayeron");
-                    }
-                }
+            	handlePrayerTabClicks();
             }
             mouseButtonClick = 0;
+        }
+        else if (magicPan.getFrame().getCloseButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        { // close button
+        	
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		mouseOverMenu = (mouseOverMenu != 4) ? 4 : 0;
+        		mouseButtonClick = 0;
+        	}
+        }
+        else if (magicPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
+        { // click inside info panel but not on the content or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 
@@ -8378,13 +8469,6 @@ public class mudclient extends GameWindowMiddleMan
         miniMapHeight = 152+40;
         miniMapX = windowWidth-miniMapWidth-3;
         miniMapY = 3;
-        spellsWidth = 197;
-        spellsHeight = 275;
-        spellsX = gameWindowMenuBarX + gameWindowMenuBarWidth - spellsWidth;
-        spellsY = gameWindowMenuBarY - spellsHeight;
-        spellsTabHeight = 24;
-        spellsInfoBoxHeight = 70;
-    	spellsScrollBoxHeight = spellsHeight - spellsTabHeight - spellsInfoBoxHeight;
         friendsWidth = 197;
         friendsHeight = 275;
         friendsX = gameWindowMenuBarX + gameWindowMenuBarWidth - friendsWidth;
@@ -8571,6 +8655,7 @@ public class mudclient extends GameWindowMiddleMan
     private BankPanel bankPan;
     private InventoryPanel invPan;
     private PlayerInfoPanel plrPan;
+    private MagicPanel magicPan;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;
@@ -8730,8 +8815,6 @@ public class mudclient extends GameWindowMiddleMan
     public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
     gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
     public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
-    public int spellsX, spellsY, spellsWidth, spellsHeight, spellsTabHeight,
-    spellsScrollBoxHeight, spellsInfoBoxHeight;
     public int friendsX, friendsY, friendsWidth, friendsHeight, friendsTabHeight,
     friendsScrollBoxHeight, friendsTitleHeight;
     public int settingsX, settingsY, settingsWidth, settingsHeight;

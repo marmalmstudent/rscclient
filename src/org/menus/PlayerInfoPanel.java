@@ -2,11 +2,8 @@ package org.menus;
 
 import java.awt.Rectangle;
 
-public class PlayerInfoPanel extends InGamePanel
+public class PlayerInfoPanel extends InGameTabPanel
 {
-    private int tabHeight, scrollBoxHeight, scrollBoxTitleHeight;
-    private final int activeTabColor = 0xdcdcdc;
-    private final int inactiveTabColor = 0x909090;
     private InGameButton statTab, questTab;
     private InGameButtonPanel statsBtnPanel, equipmentBtnPanel;
     private final String skillText[] = {
@@ -18,7 +15,7 @@ public class PlayerInfoPanel extends InGamePanel
     		"Prayer", "Mining",
     		"Magic", "Herblaw",
     		"Cooking", "Agility",
-    		"Woodcut"/*, "Thieving"*/
+    		"Woodcut", "Thieving"
     };
     private final String equipmentStatusText[] = {
     		"Armour", "Magic",
@@ -71,12 +68,7 @@ public class PlayerInfoPanel extends InGamePanel
 		return cols*colFactor + rows;
 	}
     
-    public int getTabHeight() { return tabHeight; }
     public int getHeaderHeight() { return headerHeight; }
-    public int getScrollBoxHeight() { return scrollBoxHeight; }
-    public int getScrollBoxTitleHeight() { return scrollBoxTitleHeight; }
-    public int getActiveTabColor() { return activeTabColor; }
-    public int getInactiveTabColor() { return inactiveTabColor; }
     public InGameButton getStatButton() { return statTab; }
     public InGameButton getQuestButton() { return questTab; }
 
