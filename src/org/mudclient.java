@@ -5,6 +5,7 @@ import org.entityhandling.defs.ItemDef;
 import org.entityhandling.defs.NPCDef;
 import org.menus.AbuseWindow;
 import org.menus.BankPanel;
+import org.menus.FriendsPanel;
 import org.menus.InGameButton;
 import org.menus.InGameFrame;
 import org.menus.InGameGridPanel;
@@ -123,7 +124,7 @@ public class mudclient extends GameWindowMiddleMan
      * Formats a packet and cleans up necessary variables.
      * @param packetID The id of the packet.
      */
-    private void formatPacket(int packetID, int itemID, int itemAmt)
+    private void formatPacket(int packetID, int id, int amount)
     {
     	switch(packetID)
     	{
@@ -131,6 +132,13 @@ public class mudclient extends GameWindowMiddleMan
             super.streamClass.createPacket(48);
             super.streamClass.formatPacket();
             showBank = false;
+    		break;
+    	case 56:
+            super.streamClass.createPacket(56);
+            super.streamClass.addByte(id);
+            super.streamClass.formatPacket();
+            prayerOn[id] = true;
+            playSound("prayeron");
     		break;
     	case 70:
             super.streamClass.createPacket(70);
@@ -158,17 +166,17 @@ public class mudclient extends GameWindowMiddleMan
             break;
     	case 183: // bank withdraw
             super.streamClass.createPacket(183);
-            super.streamClass.add2ByteInt(itemID);
-            super.streamClass.add4ByteInt(itemAmt);
+            super.streamClass.add2ByteInt(id);
+            super.streamClass.add4ByteInt(amount);
             super.streamClass.formatPacket();
     		break;
     	case 198: // bank deposit
             super.streamClass.createPacket(198);
-            super.streamClass.add2ByteInt(itemID);
-            super.streamClass.add4ByteInt(itemAmt);
+            super.streamClass.add2ByteInt(id);
+            super.streamClass.add4ByteInt(amount);
             super.streamClass.formatPacket();
             break;
-    	case 218:
+    	case 218: // accept character remake?
             super.streamClass.createPacket(218);
             super.streamClass.addByte(chrHeadGender);
             super.streamClass.addByte(chrHeadType);
@@ -182,6 +190,13 @@ public class mudclient extends GameWindowMiddleMan
             gameGraphics.resetImagePixels();
             showCharacterLookScreen = false;
             break;
+    	case 248:  // switch prayer off
+            super.streamClass.createPacket(248);
+            super.streamClass.addByte(id);
+            super.streamClass.formatPacket();
+            prayerOn[id] = false;
+            playSound("prayeroff");
+    		break;
     	}
     	
     }
@@ -3576,14 +3591,16 @@ public class mudclient extends GameWindowMiddleMan
         invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight);
         plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
         magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
+        friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(magicPan.getX(),
         		magicPan.getY() + magicPan.getTabHeight()+1,
         		magicPan.getWidth(), magicPan.getScrollBoxHeight(), 1, 500, true);
         friendsMenu = new Menu(gameGraphics, 5);
-        friendsMenuHandle = friendsMenu.method162(friendsX, friendsY + friendsTabHeight + friendsTitleHeight,
-        		friendsWidth, friendsScrollBoxHeight, 1, 500, true);
+        friendsMenuHandle = friendsMenu.method162(friendPan.getX(),
+        		friendPan.getY() + friendPan.getTabHeight() + friendPan.getScrollBoxTitleHeight(),
+        		friendPan.getWidth(), friendPan.getScrollBoxHeight(), 1, 500, true);
         questMenu = new Menu(gameGraphics, 5);
         questMenuHandle = questMenu.method162(plrPan.getX(),
         		plrPan.getY() + plrPan.getTabHeight() + plrPan.getScrollBoxTitleHeight(),
@@ -3842,205 +3859,240 @@ public class mudclient extends GameWindowMiddleMan
         logoutTimeout = 0;
         displayMessage("@cya@Sorry, you can't logout at the moment", 3, 0);
     }
+    
+    private void drawFriendsPanelMisc()
+    {
+        gameGraphics.drawPicture(friendPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getXShift(),
+        		friendPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getHeight()
+        		- gameGraphics.sprites[SPRITE_MEDIA_START + 5].getYShift(),
+        		SPRITE_MEDIA_START + 5);
+    }
+    
+    private void drawFriendPanel()
+    {
+        int friendTabColor = (friendTabOn == 0) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
+        int ignoreTabColor = (friendTabOn == 1) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
+        gameGraphics.drawBoxAlpha(friendPan.getX(), friendPan.getY(),
+        		friendPan.getWidth() / 2, friendPan.getTabHeight(),
+        		friendTabColor, friendPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(friendPan.getX() + friendPan.getWidth() / 2,
+        		friendPan.getY(), friendPan.getWidth() / 2,
+        		friendPan.getTabHeight(), ignoreTabColor, friendPan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(friendPan.getX(),
+        		friendPan.getY() + friendPan.getTabHeight(), friendPan.getWidth(),
+        		friendPan.getHeight() - friendPan.getTabHeight(),
+        		friendPan.getBGColor(), friendPan.getBGAlpha());
+        
+        gameGraphics.drawLineX(friendPan.getX(), friendPan.getY(),
+        		friendPan.getWidth(), friendPan.getLineColor());
+        gameGraphics.drawLineY(friendPan.getX(),
+        		friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+        gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth(),
+        		friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+        
+        gameGraphics.drawLineX(friendPan.getX(),
+        		friendPan.getY() + friendPan.getTabHeight(),
+        		friendPan.getWidth(), friendPan.getLineColor());
+        gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth() / 2,
+        		friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+        InGameButton button = friendPan.getFriendsButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
+        button = friendPan.getIgnoreButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
+    }
+    
+    private void drawFriendsList()
+    {
+        for (int i1 = 0; i1 < super.friendsCount; i1++)
+        {
+            String s;
+            if (super.friendsListOnlineStatus[i1] == 99)
+                s = "@gre@";
+            else if (super.friendsListOnlineStatus[i1] > 0)
+                s = "@yel@";
+            else
+                s = "@red@";
+            friendsMenu.drawMenuListText(friendsMenuHandle, i1, s
+            		+ DataOperations.longToString(super.friendsListLongs[i1])
+            		+ "~"+(windowWidth-73)+"~@whi@|   Remove");
+        }
+    }
+    
+    private void drawIgnoreList()
+    {
+        for (int j1 = 0; j1 < super.ignoreListCount; j1++)
+            friendsMenu.drawMenuListText(friendsMenuHandle, j1, "@yel@"
+            		+ DataOperations.longToString(super.ignoreListLongs[j1])
+            		+ "~"+(windowWidth-73)+"~@whi@|   Remove");
+    }
+    
+    private void handleMouseOverFriend()
+    {
+        int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+    	String displayMsg;
+    	if (friendNameIdx >= 0
+    			&& super.mouseX < friendPan.getX() + friendPan.getWidth() - 10)
+    		if (super.mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+    			displayMsg = "Click to remove "
+    					+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
+    		else if (super.friendsListOnlineStatus[friendNameIdx] == 99)
+    			displayMsg = "Click to message "
+    					+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
+    		else if (super.friendsListOnlineStatus[friendNameIdx] > 0)
+    			displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
+    					+ " is on world " + super.friendsListOnlineStatus[friendNameIdx]);
+    		else
+    			displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
+    					+ " is offline");
+    	else
+    		displayMsg = "Click a name to send a message";
+        gameGraphics.drawText(displayMsg,
+        		friendPan.getX() + friendPan.getWidth() / 2,
+        		friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
+        InGameButton button = friendPan.getFriendsAddButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth() / 2,
+        		(button.getY() + button.getHeight()) - 3, 1,
+        		button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+    }
+    
+    private void handleMouseOverIgnore()
+    {
+        int ignoreNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+    	String displayMsg;
+        if (ignoreNameIdx >= 0
+        		&& super.mouseX < friendPan.getX() + friendPan.getWidth() - 10
+        		&& super.mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+        	displayMsg = "Click to remove "
+        			+ DataOperations.longToString(super.ignoreListLongs[ignoreNameIdx]);
+        else
+        	displayMsg = "Blocking messages from:";
+        gameGraphics.drawText(displayMsg,
+        		friendPan.getX() + friendPan.getWidth() / 2,
+        		friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
+
+        InGameButton button = friendPan.getIgnoreAddButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth() / 2,
+        		(button.getY() + button.getHeight()) - 3, 1,
+        		button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+    }
+    
+    private void handleFriendsTabClicks()
+    {
+        if (super.mouseX < friendPan.getX() + friendPan.getWidth()/2
+        		&& friendTabOn == 1)
+        {
+            friendTabOn = 0;
+            friendsMenu.method165(friendsMenuHandle, 0);
+        } else if (super.mouseX > friendPan.getX() + friendPan.getWidth()/2
+        		&& friendTabOn == 0)
+        {
+            friendTabOn = 1;
+            friendsMenu.method165(friendsMenuHandle, 0);
+        }
+    }
+    
+    private void handleClickOnFriends()
+    {
+        int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+        if (friendNameIdx >= 0 && super.mouseX < friendPan.getX() + friendPan.getWidth() - 10)
+        {
+            if (super.mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+            {
+                removeFromFriends(super.friendsListLongs[friendNameIdx]);
+            }
+            else if (super.friendsListOnlineStatus[friendNameIdx] != 0)
+            {
+                inputBoxType = 2;
+                privateMessageTarget = super.friendsListLongs[friendNameIdx];
+                super.inputMessage = "";
+                super.enteredMessage = "";
+            }
+        }
+    }
+    
+    private void handleClickOnIgnore()
+    {
+        int j2 = friendsMenu.selectedListIndex(friendsMenuHandle);
+        if (j2 >= 0 && super.mouseX < friendPan.getX() + friendPan.getWidth() - 10
+        		&& super.mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+        {
+            removeFromIgnoreList(super.ignoreListLongs[j2]);
+        }
+    }
+    
+    private void handleClickAddFriend()
+    {
+        inputBoxType = 1;
+        super.inputText = "";
+        super.enteredText = "";
+    }
+    
+    private void handleClickAddIgnore()
+    {
+        inputBoxType = 3;
+        super.inputText = "";
+        super.enteredText = "";
+    }
+    
+    private void handleFriendsPanelClicks()
+    {
+        friendsMenu.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if (super.mouseY <= friendPan.getY() + friendPan.getTabHeight()
+        		&& mouseButtonClick == 1)
+        	handleFriendsTabClicks();
+        if (mouseButtonClick == 1 && friendTabOn == 0)
+        	handleClickOnFriends();
+        if (mouseButtonClick == 1 && friendTabOn == 1)
+        	handleClickOnIgnore();
+        if (friendPan.getFriendsAddButton().isMouseOverButton(super.mouseX, super.mouseY)
+        		&& mouseButtonClick == 1 && friendTabOn == 0)
+        	handleClickAddFriend();
+        if (friendPan.getIgnoreAddButton().isMouseOverButton(super.mouseX, super.mouseY)
+        		&& mouseButtonClick == 1 && friendTabOn == 1)
+        	handleClickAddIgnore();
+        mouseButtonClick = 0;
+    }
 
     private final void drawFriendsWindow(boolean flag)
     {
-        gameGraphics.drawPicture(friendsX - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getXShift(),
-        		friendsY - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getHeight()
-        		- gameGraphics.sprites[SPRITE_MEDIA_START + 5].getYShift(),
-        		SPRITE_MEDIA_START + 5);
-        int l;
-        int k = l = GameImage.convertRGBToLong(160, 160, 160);
-        if (anInt981 == 0)
-            k = GameImage.convertRGBToLong(220, 220, 220);
-        else
-            l = GameImage.convertRGBToLong(220, 220, 220);
-        gameGraphics.drawBoxAlpha(friendsX, friendsY, friendsWidth / 2,
-        		friendsTabHeight, k, 128);
-        gameGraphics.drawBoxAlpha(friendsX + friendsWidth / 2, friendsY,
-        		friendsWidth / 2, friendsTabHeight, l, 128);
-        gameGraphics.drawBoxAlpha(friendsX, friendsY + friendsTabHeight,
-        		friendsWidth, friendsHeight - friendsTabHeight,
-        		GameImage.convertRGBToLong(220, 220, 220), 128);
-        gameGraphics.drawLineX(friendsX, friendsY + friendsTabHeight, friendsWidth, 0);
-        gameGraphics.drawLineY(friendsX + friendsWidth / 2, friendsY, friendsTabHeight, 0);
-        gameGraphics.drawLineX(friendsX, (friendsY + friendsHeight) - friendsTitleHeight,
-        		friendsWidth, 0);
-        gameGraphics.drawText("Friends", friendsX + friendsWidth / 4,
-        		friendsY + friendsTitleHeight, 4, 0);
-        gameGraphics.drawText("Ignore", friendsX + friendsWidth / 4 + friendsWidth / 2,
-        		friendsY + friendsTitleHeight, 4, 0);
+    	drawInGameFrame(friendPan.getFrame());
+    	drawFriendPanel();
         friendsMenu.resetListTextCount(friendsMenuHandle);
-        if (anInt981 == 0)
-        {
-            for (int i1 = 0; i1 < super.friendsCount; i1++)
-            {
-                String s;
-                if (super.friendsListOnlineStatus[i1] == 99)
-                    s = "@gre@";
-                else if (super.friendsListOnlineStatus[i1] > 0)
-                    s = "@yel@";
-                else
-                    s = "@red@";
-                friendsMenu.drawMenuListText(friendsMenuHandle, i1, s
-                		+ DataOperations.longToString(super.friendsListLongs[i1])
-                		+ "~"+(windowWidth-73)+"~@whi@|   Remove");
-            }
-        }
-        if (anInt981 == 1)
-        {
-            for (int j1 = 0; j1 < super.ignoreListCount; j1++)
-                friendsMenu.drawMenuListText(friendsMenuHandle, j1, "@yel@"
-                		+ DataOperations.longToString(super.ignoreListLongs[j1])
-                		+ "~"+(windowWidth-73)+"~@whi@|   Remove");
-        }
+        if (friendTabOn == 0)
+        	drawFriendsList();
+        if (friendTabOn == 1)
+        	drawIgnoreList();
         friendsMenu.drawMenu(true);
-        if (anInt981 == 0)
-        {
-            int k1 = friendsMenu.selectedListIndex(friendsMenuHandle);
-            if (k1 >= 0 && super.mouseX < friendsX + friendsWidth - 10)
-            {
-                if (super.mouseX > friendsX + friendsWidth - 70)
-                {
-                    gameGraphics.drawText("Click to remove "
-                    		+ DataOperations.longToString(super.friendsListLongs[k1]),
-                    		friendsX + friendsWidth / 2, friendsY + friendsTabHeight + 11, 1, 0xffffff);
-                }
-                else if (super.friendsListOnlineStatus[k1] == 99)
-                {
-                    gameGraphics.drawText("Click to message "
-                    		+ DataOperations.longToString(super.friendsListLongs[k1]),
-                    		friendsX + friendsWidth / 2, friendsY + friendsTabHeight + 11, 1, 0xffffff);
-                }
-                else if (super.friendsListOnlineStatus[k1] > 0)
-                {
-                    gameGraphics.drawText(DataOperations.longToString(super.friendsListLongs[k1])
-                    		+ " is on world " + super.friendsListOnlineStatus[k1],
-                    		friendsX + friendsWidth / 2, friendsY + friendsTabHeight + 11, 1, 0xffffff);
-                }
-                else
-                {
-                    gameGraphics.drawText(DataOperations.longToString(super.friendsListLongs[k1])
-                    		+ " is offline", friendsX + friendsWidth / 2,
-                    		friendsY + friendsTabHeight + 11, 1, 0xffffff);
-                }
-            } else
-            {
-                gameGraphics.drawText("Click a name to send a message",
-                		friendsX + friendsWidth / 2, friendsY + friendsTabHeight + 11, 1, 0xffffff);
-            }
-            int k2;
-            if (super.mouseX > friendsX
-            		&& super.mouseX < friendsX + friendsWidth
-            		&& super.mouseY > (friendsY + friendsHeight) - friendsTitleHeight
-            		&& super.mouseY < friendsY + friendsHeight)
-                k2 = 0xffff00;
-            else
-                k2 = 0xffffff;
-            gameGraphics.drawText("Click here to add a friend", friendsX + friendsWidth / 2,
-            		(friendsY + friendsHeight) - 3, 1, k2);
-        }
-        if (anInt981 == 1)
-        {
-            int l1 = friendsMenu.selectedListIndex(friendsMenuHandle);
-            if (l1 >= 0
-            		&& super.mouseX < friendsX + friendsWidth - 10
-            		&& super.mouseX > friendsX + friendsWidth - 70)
-            
-            {
-                if (super.mouseX > friendsX + friendsWidth - 70)
-                {
-                    gameGraphics.drawText("Click to remove "
-                    		+ DataOperations.longToString(super.ignoreListLongs[l1]),
-                    		friendsX + friendsWidth / 2, friendsY + friendsTabHeight + 11, 1, 0xffffff);
-                }
-            }
-            else
-            {
-                gameGraphics.drawText("Blocking messages from:", friendsX + friendsWidth / 2,
-                		friendsY + 35, 1, 0xffffff);
-            }
-            int l2;
-            if (super.mouseX > friendsX
-            		&& super.mouseX < friendsX + friendsWidth
-            		&& super.mouseY > (friendsY + friendsHeight) - friendsTitleHeight
-            		&& super.mouseY < friendsY + friendsHeight)
-            {
-                l2 = 0xffff00;
-            }
-            else
-            {
-                l2 = 0xffffff;
-            }
-            gameGraphics.drawText("Click here to add a name", friendsX + friendsWidth / 2,
-            		(friendsY + friendsHeight) - 3, 1, l2);
-        }
+        if (friendTabOn == 0)
+        	handleMouseOverFriend();
+        if (friendTabOn == 1)
+        	handleMouseOverIgnore();
         if (!flag)
             return;
-        if (super.mouseX >= friendsX
-        		&& super.mouseY >= friendsY
-        		&& super.mouseX < friendsX + friendsWidth
-        		&& super.mouseY < friendsY + friendsHeight)
-        {
-            friendsMenu.updateActions(super.mouseX, super.mouseY,
-            		super.lastMouseDownButton, super.mouseDownButton);
-            if (super.mouseY <= friendsY + friendsTabHeight
-            		&& mouseButtonClick == 1)
-            {
-                if (super.mouseX < friendsX + friendsWidth/2
-                		&& anInt981 == 1)
-                {
-                    anInt981 = 0;
-                    friendsMenu.method165(friendsMenuHandle, 0);
-                } else if (super.mouseX > friendsX + friendsWidth/2
-                		&& anInt981 == 0)
-                {
-                    anInt981 = 1;
-                    friendsMenu.method165(friendsMenuHandle, 0);
-                }
-            }
-            if (mouseButtonClick == 1 && anInt981 == 0)
-            {
-                int i2 = friendsMenu.selectedListIndex(friendsMenuHandle);
-                if (i2 >= 0 && super.mouseX < friendsX + friendsWidth - 10)
-                {
-                    if (super.mouseX > friendsX + friendsWidth - 70)
-                    {
-                        removeFromFriends(super.friendsListLongs[i2]);
-                    }
-                    else if (super.friendsListOnlineStatus[i2] != 0)
-                    {
-                        inputBoxType = 2;
-                        privateMessageTarget = super.friendsListLongs[i2];
-                        super.inputMessage = "";
-                        super.enteredMessage = "";
-                    }
-                }
-            }
-            if (mouseButtonClick == 1 && anInt981 == 1)
-            {
-                int j2 = friendsMenu.selectedListIndex(friendsMenuHandle);
-                if (j2 >= 0 && super.mouseX < friendsX + friendsWidth - 10
-                		&& super.mouseX > friendsX + friendsWidth - 70)
-                {
-                    removeFromIgnoreList(super.ignoreListLongs[j2]);
-                }
-            }
-            if (super.mouseY > friendsY + friendsTabHeight + friendsScrollBoxHeight + friendsTitleHeight
-            		&& mouseButtonClick == 1 && anInt981 == 0)
-            {
-                inputBoxType = 1;
-                super.inputText = "";
-                super.enteredText = "";
-            }
-            if (super.mouseY > friendsY + friendsTabHeight + friendsScrollBoxHeight + friendsTitleHeight
-            		&& mouseButtonClick == 1 && anInt981 == 1)
-            {
-                inputBoxType = 3;
-                super.inputText = "";
-                super.enteredText = "";
-            }
-            mouseButtonClick = 0;
+        if (friendPan.isMouseOver(super.mouseX, super.mouseY))
+        	handleFriendsPanelClicks();
+        else if (friendPan.getFrame().getCloseButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		mouseOverMenu = (mouseOverMenu != 5) ? 5 : 0;
+        		mouseButtonClick = 0;
+        	}
+        }
+        else if (magicPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
+        { // click inside friends panel but not on the content or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 
@@ -4332,16 +4384,16 @@ public class mudclient extends GameWindowMiddleMan
     
     private void handleSpellsTabClicks()
     {
-        int k1 = spellMenu.selectedListIndex(spellMenuHandle);
-        if (k1 != -1)
+        int spellIdx = spellMenu.selectedListIndex(spellMenuHandle);
+        if (spellIdx != -1)
         {
             int k2 = playerStatCurrent[6];
-            if (EntityHandler.getSpellDef(k1).getReqLevel() > k2)
+            if (EntityHandler.getSpellDef(spellIdx).getReqLevel() > k2)
                 displayMessage("Your magic ability is not high enough for this spell", 3, 0);
             else
             {
                 int k3 = 0;
-                for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(k1).getRunesRequired())
+                for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIdx).getRunesRequired())
                 {
                     if (!hasRequiredRunes(e.getKey(), e.getValue()))
                     {
@@ -4352,9 +4404,9 @@ public class mudclient extends GameWindowMiddleMan
                     }
                     k3++;
                 }
-                if (k3 == EntityHandler.getSpellDef(k1).getRuneCount())
+                if (k3 == EntityHandler.getSpellDef(spellIdx).getRuneCount())
                 {
-                    selectedSpell = k1;
+                    selectedSpell = spellIdx;
                     selectedItem = -1;
                 }
             }
@@ -4363,30 +4415,34 @@ public class mudclient extends GameWindowMiddleMan
     
     private void handlePrayerTabClicks()
     {
-        int l1 = spellMenu.selectedListIndex(spellMenuHandle);
-        if (l1 != -1) {
+        int prayerIdx = spellMenu.selectedListIndex(spellMenuHandle);
+        if (prayerIdx != -1) {
             int l2 = playerStatBase[5];
-            if (EntityHandler.getPrayerDef(l1).getReqLevel() > l2)
+            if (EntityHandler.getPrayerDef(prayerIdx).getReqLevel() > l2)
                 displayMessage("Your prayer ability is not high enough for this prayer", 3, 0);
             else if (playerStatCurrent[5] == 0)
                 displayMessage("You have run out of prayer points. Return to a church to recharge", 3, 0);
-            else if (prayerOn[l1])
-            {
-                super.streamClass.createPacket(248);
-                super.streamClass.addByte(l1);
-                super.streamClass.formatPacket();
-                prayerOn[l1] = false;
-                playSound("prayeroff");
-            }
+            else if (prayerOn[prayerIdx])
+            	formatPacket(248, prayerIdx, -1);  // switch prayer off
             else
-            {
-                super.streamClass.createPacket(56);
-                super.streamClass.addByte(l1);
-                super.streamClass.formatPacket();
-                prayerOn[l1] = true;
-                playSound("prayeron");
-            }
+            	formatPacket(56, prayerIdx, -1);  // switch prayer on
         }
+    }
+    
+    private void handleMagicPanelClicks()
+    {
+        spellMenu.updateActions(super.mouseX, super.mouseY,
+        		super.lastMouseDownButton, super.mouseDownButton);
+        if ((super.mouseY <= magicPan.getY() + magicPan.getTabHeight())
+        		&& mouseButtonClick == 1)
+        	handleMagicTabClicks();
+        if (mouseButtonClick == 1 && menuMagicPrayersSelected == 0)
+        	handleSpellsTabClicks();
+        if (mouseButtonClick == 1 && menuMagicPrayersSelected == 1)
+        {
+        	handlePrayerTabClicks();
+        }
+        mouseButtonClick = 0;
     }
 
     private final void drawMagicWindow(boolean flag)
@@ -4401,20 +4457,7 @@ public class mudclient extends GameWindowMiddleMan
             return;
         
         if (magicPan.isMouseOver(super.mouseX, super.mouseY))
-        {
-            spellMenu.updateActions(super.mouseX, super.mouseY,
-            		super.lastMouseDownButton, super.mouseDownButton);
-            if ((super.mouseY <= magicPan.getY() + magicPan.getTabHeight())
-            		&& mouseButtonClick == 1)
-            	handleMagicTabClicks();
-            if (mouseButtonClick == 1 && menuMagicPrayersSelected == 0)
-            	handleSpellsTabClicks();
-            if (mouseButtonClick == 1 && menuMagicPrayersSelected == 1)
-            {
-            	handlePrayerTabClicks();
-            }
-            mouseButtonClick = 0;
-        }
+        	handleMagicPanelClicks();
         else if (magicPan.getFrame().getCloseButton().isMouseOverButton(
         		super.mouseX, super.mouseY))
         { // close button
@@ -4728,17 +4771,22 @@ public class mudclient extends GameWindowMiddleMan
     protected final byte[] load(String filename) {
         return super.load(Config.CONF_DIR + File.separator + "data" + File.separator + filename);
     }
-
-    private final void drawOptionsMenu(boolean flag) {
-        /*
-        gameGraphics.drawPicture(statsX - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
-        		statsY - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
-        		- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
-        		SPRITE_MEDIA_START + 3);*/
+    
+    private void drawOptionsPanelMisc()
+    {
         gameGraphics.drawPicture(settingsX - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
         		settingsY -gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
         		- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
         		SPRITE_MEDIA_START + 6);
+    }
+    
+    private void drawOptionsPanel()
+    {
+    	
+    }
+
+    private final void drawOptionsMenu(boolean flag)
+    {
         int box1H = 65;
         int box2H = 65;
         int box3H = 95;
@@ -8469,13 +8517,6 @@ public class mudclient extends GameWindowMiddleMan
         miniMapHeight = 152+40;
         miniMapX = windowWidth-miniMapWidth-3;
         miniMapY = 3;
-        friendsWidth = 197;
-        friendsHeight = 275;
-        friendsX = gameWindowMenuBarX + gameWindowMenuBarWidth - friendsWidth;
-        friendsY = gameWindowMenuBarY - friendsHeight;
-        friendsTabHeight = 24;
-    	friendsTitleHeight = 16;
-    	friendsScrollBoxHeight = friendsHeight - friendsTabHeight - 2*friendsTitleHeight;
         settingsWidth = 197;
         settingsHeight = 265;
         settingsX = gameWindowMenuBarX + gameWindowMenuBarWidth - settingsWidth;
@@ -8656,6 +8697,7 @@ public class mudclient extends GameWindowMiddleMan
     private InventoryPanel invPan;
     private PlayerInfoPanel plrPan;
     private MagicPanel magicPan;
+    private FriendsPanel friendPan;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;
@@ -8802,7 +8844,7 @@ public class mudclient extends GameWindowMiddleMan
     private int cameraSizeInt;
     private Menu friendsMenu;
     int friendsMenuHandle;
-    int anInt981;
+    int friendTabOn;
     long privateMessageTarget;
     private long duelOpponentNameLong;
     protected String tradeOtherPlayerName;
@@ -8815,8 +8857,6 @@ public class mudclient extends GameWindowMiddleMan
     public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
     gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
     public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
-    public int friendsX, friendsY, friendsWidth, friendsHeight, friendsTabHeight,
-    friendsScrollBoxHeight, friendsTitleHeight;
     public int settingsX, settingsY, settingsWidth, settingsHeight;
     public static String quests[] = new String[]{
     		"Black Knights' Fortress", "Cook's Assistant", "Demon slayer",

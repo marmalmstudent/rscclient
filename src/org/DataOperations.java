@@ -151,7 +151,8 @@ public class DataOperations {
         for (int k = 0; k < entry.length(); k++)
             entryIdentifier = (entryIdentifier * 61 + entry.charAt(k)) - 32;
         int offset = 2 + nDBEntries * 10;
-        int dbEntryIdentifier, dbEntryLength;
+        long dbEntryIdentifier;
+        int dbEntryLength;
         byte[] out;
         for (int i = 0; i < nDBEntries; i++) {
             dbEntryIdentifier = ((database[i * 10 + 2] & 0xff) << 24)
@@ -166,7 +167,7 @@ public class DataOperations {
             	out[j] = (byte)(database[offset + j] >> 1);
             /*
             try {
-            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
+            	misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
             	//misc.writeToFile(out, "src/org/conf/utils/cache/data/objects3d/object"+i+".ob3");
             } catch (IOException ioe) {ioe.printStackTrace();}
             */
@@ -213,6 +214,11 @@ public class DataOperations {
         /*
         if (entry.startsWith("spellcharge3")
         		&& (entry.endsWith(".ob3") || entry.endsWith(".OB3")))
+        {
+        	storeDB(entry, database);
+        	System.out.printf("Printing to database\n");
+        }*//*
+        if (entry.endsWith(".pcm") || entry.endsWith(".PCM"))
         {
         	storeDB(entry, database);
         	System.out.printf("Printing to database\n");

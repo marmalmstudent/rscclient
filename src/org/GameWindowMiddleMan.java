@@ -4,6 +4,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.menus.FriendsPanel;
 import org.util.Config;
 import org.util.DataConversions;
 
@@ -415,9 +416,9 @@ public abstract class GameWindowMiddleMan extends GameWindow {
         username = "";
         password = "";
         packetData = new byte[5000];
-        friendsListLongs = new long[400];
-        friendsListOnlineStatus = new int[400];
-        ignoreListLongs = new long[200];
+        friendsListLongs = new long[FriendsPanel.MAX_FRIENDS];
+        friendsListOnlineStatus = new int[FriendsPanel.MAX_FRIENDS];
+        ignoreListLongs = new long[FriendsPanel.MAX_IGNORE];
     }
 
     public static int clientVersion = 1;
