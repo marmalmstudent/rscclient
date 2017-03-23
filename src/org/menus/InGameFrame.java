@@ -29,6 +29,11 @@ public class InGameFrame extends InGameComponent
     	this.title = title;
     }
     
+    public void setTitle(String newTitle)
+    {
+    	title = newTitle;
+    }
+    
     public void setBounds(Rectangle childBounds)
     {
     	x = childBounds.x - leftMarginWidth;

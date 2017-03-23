@@ -28,7 +28,7 @@ public class OptionsPanel extends InGamePanel
 	{
 		frame = new InGameFrame("Options");
         setWidth(197);
-        setHeight(265);
+        setHeight(245);
         setX(xCenter*2 - width - 3);
         setY(yCenter*2 - height - 35);
 	    frame.setBounds(new Rectangle(x, y, width, height));

@@ -15,6 +15,7 @@ public abstract class InGameGridPanel extends InGamePanel
         
     public int getRows() { return nRows; }
     public int getCols() { return nCols; }
+    public int getSlots() { return nRows*nCols; }
     public void setRows(int rows) { nRows = rows; }
     public void setCols(int cols) { nCols = cols; }
     public int getGridBGNotSelectColor() { return gridBGNotSelectColor; }

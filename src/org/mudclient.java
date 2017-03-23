@@ -13,6 +13,8 @@ import org.menus.InventoryPanel;
 import org.menus.MagicPanel;
 import org.menus.OptionsPanel;
 import org.menus.PlayerInfoPanel;
+import org.menus.TradeConfirmPanel;
+import org.menus.TradePanel;
 import org.model.Sprite;
 import org.recorder.Recorder;
 import org.util.Config;
@@ -129,10 +131,20 @@ public class mudclient extends GameWindowMiddleMan
     {
     	switch(packetID)
     	{
+    	case 42:
+            super.streamClass.createPacket(42);
+            super.streamClass.addByte(id);
+            super.streamClass.formatPacket();
+    		break;
     	case 48: // close bank
             super.streamClass.createPacket(48);
             super.streamClass.formatPacket();
             showBank = false;
+    		break;
+    	case 53: // confirm trade
+            tradeConfirmAccepted = true;
+            super.streamClass.createPacket(53);
+            super.streamClass.formatPacket();
     		break;
     	case 56:
             super.streamClass.createPacket(56);
@@ -183,6 +195,16 @@ public class mudclient extends GameWindowMiddleMan
             super.streamClass.add4ByteInt(amount);
             super.streamClass.formatPacket();
             break;
+    	case 211: // trade accept button
+			tradeWeAccepted = true;
+			super.streamClass.createPacket(211);
+			super.streamClass.formatPacket();
+    		break;
+    	case 216: // trade decline
+			showTradeWindow = false;
+			super.streamClass.createPacket(216);
+			super.streamClass.formatPacket();
+			break;
     	case 218: // accept character remake?
             super.streamClass.createPacket(218);
             super.streamClass.addByte(chrHeadGender);
@@ -1585,19 +1607,10 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics.drawText("Logging out...", windowHalfWidth,
         		windowHalfHeight + 6, 5, 0xffffff);
     }
+    //TODO: as
     
     private void drawInventoryGrid()
     {
-        int k7 = mouseOverBankPageText * invPan.getRows()*invPan.getCols();
-        for (int row = 0; row < bankPan.getRows(); row++)
-        {
-            for (int col = 0; col < bankPan.getCols(); col++)
-            {
-                int slotX = invPan.getGridX() + col*InGameGridPanel.ITEM_SLOT_WIDTH;
-                int slotY = invPan.getGridY() + row*InGameGridPanel.ITEM_SLOT_HEIGHT;
-                k7++;
-            }
-        }
         for (int j = 0; j < invPan.getSlots(); j++)
         {
             int col = invPan.getInvGridX() + (j % invPan.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
@@ -3600,6 +3613,8 @@ public class mudclient extends GameWindowMiddleMan
         magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
         friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight);
         optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight);
+        tradePan = new TradePanel(windowHalfWidth, windowHalfHeight);
+        tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(magicPan.getX(),
@@ -3614,6 +3629,10 @@ public class mudclient extends GameWindowMiddleMan
         		plrPan.getY() + plrPan.getTabHeight() + plrPan.getScrollBoxTitleHeight(),
         		plrPan.getWidth(), plrPan.getScrollBoxHeight(), 1, 500, true);
         loadMedia(); // 30%
+        tradePan.addAcceptButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
+        tradePan.addDeclineButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
+        tradeCfrmPan.addAcceptButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
+        tradeCfrmPan.addDeclineButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
         if (lastLoadedNull)
             return;
         loadEntity(); // 45%
@@ -5046,29 +5065,15 @@ public class mudclient extends GameWindowMiddleMan
         		mouseButtonClick = 0;
         }
     }
-
-    private final void processGame() {
-        if (systemUpdate > 1) {
-            systemUpdate--;
-        }
-        sendPingPacketReadPacketData();
-        if (logoutTimeout > 0) {
-            logoutTimeout--;
-        }
-        if (ourPlayer.currentSprite == 8 || ourPlayer.currentSprite == 9) {
-            lastWalkTimeout = 500;
-        }
-        if (lastWalkTimeout > 0) {
-            lastWalkTimeout--;
-        }
-        if (showCharacterLookScreen) {
-            drawCharacterLookScreen();
-            return;
-        }
-        for (int i = 0; i < playerCount; i++) {
+    
+    private void updatePlayers()
+    {
+        for (int i = 0; i < playerCount; i++)
+        {
             Mob mob = playerArray[i];
             int k = (mob.waypointCurrent + 1) % 10;
-            if (mob.waypointEndSprite != k) {
+            if (mob.waypointEndSprite != k)
+            {
                 int i1 = -1;
                 int l2 = mob.waypointEndSprite;
                 int j4;
@@ -5083,22 +5088,30 @@ public class mudclient extends GameWindowMiddleMan
                 		|| mob.waypointsY[l2] - mob.currentY > magicLoc * 3
                 		|| mob.waypointsX[l2] - mob.currentX < -magicLoc * 3
                 		|| mob.waypointsY[l2] - mob.currentY < -magicLoc * 3
-                		|| j4 > 8) {
+                		|| j4 > 8)
+                {
                     mob.currentX = mob.waypointsX[l2];
                     mob.currentY = mob.waypointsY[l2];
-                } else {
-                    if (mob.currentX < mob.waypointsX[l2]) {
+                }
+                else
+                {
+                    if (mob.currentX < mob.waypointsX[l2])
+                    {
                         mob.currentX += j5;
                         mob.stepCount++;
                         i1 = 2;
-                    } else if (mob.currentX > mob.waypointsX[l2]) {
+                    }
+                    else if (mob.currentX > mob.waypointsX[l2])
+                    {
                         mob.currentX -= j5;
                         mob.stepCount++;
                         i1 = 6;
                     }
-                    if (mob.currentX - mob.waypointsX[l2] < j5 && mob.currentX - mob.waypointsX[l2] > -j5)
+                    if (mob.currentX - mob.waypointsX[l2] < j5
+                    		&& mob.currentX - mob.waypointsX[l2] > -j5)
                         mob.currentX = mob.waypointsX[l2];
-                    if (mob.currentY < mob.waypointsY[l2]) {
+                    if (mob.currentY < mob.waypointsY[l2])
+                    {
                         mob.currentY += j5;
                         mob.stepCount++;
                         if (i1 == -1)
@@ -5107,7 +5120,9 @@ public class mudclient extends GameWindowMiddleMan
                             i1 = 3;
                         else
                             i1 = 5;
-                    } else if (mob.currentY > mob.waypointsY[l2]) {
+                    }
+                    else if (mob.currentY > mob.waypointsY[l2])
+                    {
                         mob.currentY -= j5;
                         mob.stepCount++;
                         if (i1 == -1)
@@ -5117,23 +5132,26 @@ public class mudclient extends GameWindowMiddleMan
                         else
                             i1 = 7;
                     }
-                    if (mob.currentY - mob.waypointsY[l2] < j5 && mob.currentY - mob.waypointsY[l2] > -j5)
+                    if (mob.currentY - mob.waypointsY[l2] < j5
+                    		&& mob.currentY - mob.waypointsY[l2] > -j5)
                         mob.currentY = mob.waypointsY[l2];
                 }
                 if (i1 != -1)
                     mob.currentSprite = i1;
-                if (mob.currentX == mob.waypointsX[l2] && mob.currentY == mob.waypointsY[l2])
+                if (mob.currentX == mob.waypointsX[l2]
+                		&& mob.currentY == mob.waypointsY[l2])
                     mob.waypointEndSprite = (l2 + 1) % 10;
-            } else {
-                mob.currentSprite = mob.nextSprite;
             }
+            else
+                mob.currentSprite = mob.nextSprite;
             if (mob.lastMessageTimeout > 0)
                 mob.lastMessageTimeout--;
             if (mob.anInt163 > 0)
                 mob.anInt163--;
             if (mob.combatTimer > 0)
                 mob.combatTimer--;
-            if (playerAliveTimeout > 0) {
+            if (playerAliveTimeout > 0)
+            {
                 playerAliveTimeout--;
                 if (playerAliveTimeout == 0)
                     displayMessage("You have been granted another life. Be more careful this time!", 3, 0);
@@ -5141,11 +5159,16 @@ public class mudclient extends GameWindowMiddleMan
                     displayMessage("You retain your skills. Your objects land where you died", 3, 0);
             }
         }
-
-        for (int j = 0; j < npcCount; j++) {
+    }
+    
+    private void updateNPCs()
+    {
+        for (int j = 0; j < npcCount; j++)
+        {
             Mob mob_1 = npcArray[j];
             int j1 = (mob_1.waypointCurrent + 1) % 10;
-            if (mob_1.waypointEndSprite != j1) {
+            if (mob_1.waypointEndSprite != j1)
+            {
                 int i3 = -1;
                 int k4 = mob_1.waypointEndSprite;
                 int k5;
@@ -5156,22 +5179,34 @@ public class mudclient extends GameWindowMiddleMan
                 int l5 = 4;
                 if (k5 > 2)
                     l5 = (k5 - 1) * 4;
-                if (mob_1.waypointsX[k4] - mob_1.currentX > magicLoc * 3 || mob_1.waypointsY[k4] - mob_1.currentY > magicLoc * 3 || mob_1.waypointsX[k4] - mob_1.currentX < -magicLoc * 3 || mob_1.waypointsY[k4] - mob_1.currentY < -magicLoc * 3 || k5 > 8) {
+                if (mob_1.waypointsX[k4] - mob_1.currentX > magicLoc * 3
+                		|| mob_1.waypointsY[k4] - mob_1.currentY > magicLoc * 3
+                		|| mob_1.waypointsX[k4] - mob_1.currentX < -magicLoc * 3
+                		|| mob_1.waypointsY[k4] - mob_1.currentY < -magicLoc * 3
+                		|| k5 > 8)
+                {
                     mob_1.currentX = mob_1.waypointsX[k4];
                     mob_1.currentY = mob_1.waypointsY[k4];
-                } else {
-                    if (mob_1.currentX < mob_1.waypointsX[k4]) {
+                }
+                else
+                {
+                    if (mob_1.currentX < mob_1.waypointsX[k4])
+                    {
                         mob_1.currentX += l5;
                         mob_1.stepCount++;
                         i3 = 2;
-                    } else if (mob_1.currentX > mob_1.waypointsX[k4]) {
+                    }
+                    else if (mob_1.currentX > mob_1.waypointsX[k4])
+                    {
                         mob_1.currentX -= l5;
                         mob_1.stepCount++;
                         i3 = 6;
                     }
-                    if (mob_1.currentX - mob_1.waypointsX[k4] < l5 && mob_1.currentX - mob_1.waypointsX[k4] > -l5)
+                    if (mob_1.currentX - mob_1.waypointsX[k4] < l5
+                    		&& mob_1.currentX - mob_1.waypointsX[k4] > -l5)
                         mob_1.currentX = mob_1.waypointsX[k4];
-                    if (mob_1.currentY < mob_1.waypointsY[k4]) {
+                    if (mob_1.currentY < mob_1.waypointsY[k4])
+                    {
                         mob_1.currentY += l5;
                         mob_1.stepCount++;
                         if (i3 == -1)
@@ -5180,7 +5215,9 @@ public class mudclient extends GameWindowMiddleMan
                             i3 = 3;
                         else
                             i3 = 5;
-                    } else if (mob_1.currentY > mob_1.waypointsY[k4]) {
+                    }
+                    else if (mob_1.currentY > mob_1.waypointsY[k4])
+                    {
                         mob_1.currentY -= l5;
                         mob_1.stepCount++;
                         if (i3 == -1)
@@ -5190,14 +5227,17 @@ public class mudclient extends GameWindowMiddleMan
                         else
                             i3 = 7;
                     }
-                    if (mob_1.currentY - mob_1.waypointsY[k4] < l5 && mob_1.currentY - mob_1.waypointsY[k4] > -l5)
+                    if (mob_1.currentY - mob_1.waypointsY[k4] < l5
+                    		&& mob_1.currentY - mob_1.waypointsY[k4] > -l5)
                         mob_1.currentY = mob_1.waypointsY[k4];
                 }
                 if (i3 != -1)
                     mob_1.currentSprite = i3;
                 if (mob_1.currentX == mob_1.waypointsX[k4] && mob_1.currentY == mob_1.waypointsY[k4])
                     mob_1.waypointEndSprite = (k4 + 1) % 10;
-            } else {
+            }
+            else
+            {
                 mob_1.currentSprite = mob_1.nextSprite;
                 if (mob_1.type == 43)
                     mob_1.stepCount++;
@@ -5209,28 +5249,28 @@ public class mudclient extends GameWindowMiddleMan
             if (mob_1.combatTimer > 0)
                 mob_1.combatTimer--;
         }
-
-        if (mouseOverMenu != 2) {
-            if (GameImage.anInt346 > 0)
-                anInt658++;
-            if (GameImage.anInt347 > 0)
-                anInt658 = 0;
-            GameImage.anInt346 = 0;
-            GameImage.anInt347 = 0;
-        }
-        for (int l = 0; l < playerCount; l++) {
-            Mob mob_2 = playerArray[l];
-            if (mob_2.anInt176 > 0)
-                mob_2.anInt176--;
-        }
-
-        if (cameraAutoAngleDebug) {
-            if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500 || lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500 || lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500 || lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500) {
+    }
+    
+    private void updateCamera()
+    {
+        if (cameraAutoAngleDebug)
+        {
+            if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500
+            		|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500
+            		|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500
+            		|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500)
+            {
                 lastAutoCameraRotatePlayerX = ourPlayer.currentX;
                 lastAutoCameraRotatePlayerY = ourPlayer.currentY;
             }
-        } else {
-            if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500 || lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500 || lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500 || lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500) {
+        }
+        else
+        {
+            if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500
+            		|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500
+            		|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500
+            		|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500)
+            {
                 lastAutoCameraRotatePlayerX = ourPlayer.currentX;
                 lastAutoCameraRotatePlayerY = ourPlayer.currentY;
             }
@@ -5238,61 +5278,73 @@ public class mudclient extends GameWindowMiddleMan
                 lastAutoCameraRotatePlayerX += (ourPlayer.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 500) / 15);
             if (lastAutoCameraRotatePlayerY != ourPlayer.currentY)
                 lastAutoCameraRotatePlayerY += (ourPlayer.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 500) / 15);
-            if (configAutoCameraAngle) {
+            if (configAutoCameraAngle)
+            {
                 int k1 = cameraAutoAngle * 32;
                 int j3 = k1 - cameraRotationLeftRight;
                 byte byte0 = 1;
-                if (j3 != 0) {
+                if (j3 != 0)
+                {
                     cameraRotationBaseAddition++;
-                    if (j3 > 128) {
+                    if (j3 > 128)
+                    {
                         byte0 = -1;
                         j3 = 256 - j3;
-                    } else if (j3 > 0)
+                    }
+                    else if (j3 > 0)
                         byte0 = 1;
-                    else if (j3 < -128) {
+                    else if (j3 < -128)
+                    {
                         byte0 = 1;
                         j3 = 256 + j3;
-                    } else if (j3 < 0) {
+                    }
+                    else if (j3 < 0)
+                    {
                         byte0 = -1;
                         j3 = -j3;
                     }
                     cameraRotationLeftRight += ((cameraRotationBaseAddition * j3 + 255) / 256) * byte0;
                     cameraRotationLeftRight &= 0xff;
-                } else {
-                    cameraRotationBaseAddition = 0;
                 }
+                else
+                    cameraRotationBaseAddition = 0;
             }
         }
-        if (anInt658 > 20) {
-            anInt658 = 0;
-        }
+    }
+    
+    private void checkChatTab()
+    {
         if (super.mouseY > windowHeight - 4)
         { // botom bar; chat tabs & report abuse
         	int buttonWidth = 82;
         	int xOffset = 14;
             if (super.mouseX > xOffset
             		&& super.mouseX < xOffset + buttonWidth
-            		&& super.lastMouseDownButton == 1) {
+            		&& super.lastMouseDownButton == 1)
+            {
                 messagesTab = 0;
             }
         	xOffset += 99;
             if (super.mouseX > xOffset
             		&& super.mouseX < xOffset + buttonWidth
-            		&& super.lastMouseDownButton == 1) {
+            		&& super.lastMouseDownButton == 1)
+            {
                 messagesTab = 1;
                 gameMenu.anIntArray187[messagesHandleChatHist] = 0xf423f;
             }
         	xOffset += 101;
             if (super.mouseX > xOffset
             		&& super.mouseX < xOffset + buttonWidth
-            		&& super.lastMouseDownButton == 1) {
+            		&& super.lastMouseDownButton == 1)
+            {
                 messagesTab = 2;
                 gameMenu.anIntArray187[messagesHandleQuestHist] = 0xf423f;
             }
         	xOffset += 101;
             if (super.mouseX > xOffset
             		&& super.mouseX < xOffset + buttonWidth
-            		&& super.lastMouseDownButton == 1) {
+            		&& super.lastMouseDownButton == 1)
+            {
                 messagesTab = 3;
                 gameMenu.anIntArray187[messagesHandlePrivHist] = 0xf423f;
             }
@@ -5309,6 +5361,10 @@ public class mudclient extends GameWindowMiddleMan
             super.lastMouseDownButton = 0;
             super.mouseDownButton = 0;
         }
+    }
+    
+    private void updateChatTabs()
+    {
         gameMenu.updateActions(super.mouseX, super.mouseY,
         		super.lastMouseDownButton, super.mouseDownButton);
         if (messagesTab > 0
@@ -5316,18 +5372,19 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX <= chatBoxX + this.chatBoxWidth
         		&& super.mouseY >= chatBoxY
         		&& super.mouseY <= chatBoxY + chatBoxHeight)
-        {
             super.lastMouseDownButton = 0;
-        }
-        if (gameMenu.hasActivated(chatHandlePlayerEntry)) {
+        if (gameMenu.hasActivated(chatHandlePlayerEntry))
+        {
             String s = lastMessage = gameMenu.getText(chatHandlePlayerEntry);
             gameMenu.updateText(chatHandlePlayerEntry, "");
-            if (s.startsWith("::")) {
+            if (s.startsWith("::"))
+            {
                 s = s.substring(2);
-                if (!handleCommand(s)) {
+                if (!handleCommand(s))
                     sendChatString(s);
-                }
-            } else {
+            }
+            else
+            {
                 byte[] chatMessage = DataConversions.stringToByteArray(s);
                 sendChatMessage(chatMessage, chatMessage.length);
                 s = DataConversions.byteToString(chatMessage, 0, chatMessage.length);
@@ -5343,9 +5400,12 @@ public class mudclient extends GameWindowMiddleMan
                     messagesTimeout[l1]--;
 
         }
-        if (playerAliveTimeout != 0)
-            super.lastMouseDownButton = 0;
-        if (showTradeWindow || showDuelWindow) {
+    }
+    
+    private void handleOfferAmounts()
+    {
+        if (showTradeWindow || showDuelWindow)
+        {
             if (super.mouseDownButton != 0)
                 mouseDownTime++;
             else
@@ -5364,25 +5424,31 @@ public class mudclient extends GameWindowMiddleMan
                 itemIncrement++;
             else if (mouseDownTime > 20 && (mouseDownTime & 5) == 0)
                 itemIncrement++;
-        } else {
+        }
+        else
+        {
             mouseDownTime = 0;
             itemIncrement = 0;
         }
-        if (super.lastMouseDownButton == 1)
-            mouseButtonClick = 1;
-        else if (super.lastMouseDownButton == 2)
-            mouseButtonClick = 2;
-        gameCamera.updateMouseCoords(super.mouseX, super.mouseY);
-        super.lastMouseDownButton = 0;
-        if (configAutoCameraAngle) {
-            if (cameraRotationBaseAddition == 0 || cameraAutoAngleDebug) {
-                if (super.keyLeftDown) {
+    }
+    
+    private void updateCameraPosition()
+    {
+
+        if (configAutoCameraAngle)
+        {
+            if (cameraRotationBaseAddition == 0 || cameraAutoAngleDebug)
+            {
+                if (super.keyLeftDown)
+                {
                     cameraAutoAngle = cameraAutoAngle + 1 & 7;
                     super.keyLeftDown = false;
-                    if (!zoomCamera) {
+                    if (!zoomCamera)
+                    {
                         if ((cameraAutoAngle & 1) == 0)
                             cameraAutoAngle = cameraAutoAngle + 1 & 7;
-                        for (int i2 = 0; i2 < 8; i2++) {
+                        for (int i2 = 0; i2 < 8; i2++)
+                        {
                             if (enginePlayerVisible(cameraAutoAngle))
                                 break;
                             cameraAutoAngle = cameraAutoAngle + 1 & 7;
@@ -5390,7 +5456,8 @@ public class mudclient extends GameWindowMiddleMan
 
                     }
                 }
-                if (super.keyRightDown) {
+                if (super.keyRightDown)
+                {
                     cameraAutoAngle = cameraAutoAngle + 7 & 7;
                     super.keyRightDown = false;
                     if (!zoomCamera) {
@@ -5405,54 +5472,102 @@ public class mudclient extends GameWindowMiddleMan
                     }
                 }
             }
-        } else if (super.keyLeftDown)
-        {
+        }
+        else if (super.keyLeftDown)
             cameraRotationLeftRight = cameraRotationLeftRight + 2 & 0xff;
-        }
         else if (super.keyRightDown)
-        {
             cameraRotationLeftRight = cameraRotationLeftRight - 2 & 0xff;
-        }
-        else if (super.keyUpDown)
-        {
-        	if (cameraRotationUpDown > 0x390)
-        	{
-        		cameraRotationUpDown = cameraRotationUpDown - 8 & 0x3ff;
-        	}
-        }
-        else if (super.keyDownDown)
-        {
-        	if (cameraRotationUpDown < 0x3f8)
-        	{
+        else if (super.keyUpDown && cameraRotationUpDown > 0x390)
+        	cameraRotationUpDown = cameraRotationUpDown - 8 & 0x3ff;
+        else if (super.keyDownDown && cameraRotationUpDown < 0x3f8)
         		cameraRotationUpDown = cameraRotationUpDown + 8 & 0x3ff;
-        	}
-        }
         if (zoomCamera && cameraHeight > 550)
             cameraHeight -= 4;
         else if (!zoomCamera && cameraHeight < 750)
             cameraHeight += 4;
+    }
+
+    private final void processGame()
+    {
+        if (systemUpdate > 1)
+            systemUpdate--;
+        sendPingPacketReadPacketData();
+        if (logoutTimeout > 0)
+            logoutTimeout--;
+        if (ourPlayer.currentSprite == 8
+        		|| ourPlayer.currentSprite == 9)
+            lastWalkTimeout = 500;
+        if (lastWalkTimeout > 0)
+            lastWalkTimeout--;
+        if (showCharacterLookScreen)
+        {
+            drawCharacterLookScreen();
+            return;
+        }
+        updatePlayers();
+        updateNPCs();
+
+        if (mouseOverMenu != 2)
+        {
+            if (GameImage.anInt346 > 0)
+                anInt658++;
+            if (GameImage.anInt347 > 0)
+                anInt658 = 0;
+            GameImage.anInt346 = 0;
+            GameImage.anInt347 = 0;
+        }
+        for (int l = 0; l < playerCount; l++)
+        {
+            Mob mob_2 = playerArray[l];
+            if (mob_2.anInt176 > 0)
+                mob_2.anInt176--;
+        }
+        updateCamera();
+        
+        if (anInt658 > 20)
+            anInt658 = 0;
+        
+        checkChatTab();
+        updateChatTabs();
+        
+        if (playerAliveTimeout != 0)
+            super.lastMouseDownButton = 0;
+        handleOfferAmounts();
+        if (super.lastMouseDownButton == 1)
+            mouseButtonClick = 1;
+        else if (super.lastMouseDownButton == 2)
+            mouseButtonClick = 2;
+        gameCamera.updateMouseCoords(super.mouseX, super.mouseY);
+        super.lastMouseDownButton = 0;
+        updateCameraPosition();
+        
         if (actionPictureType > 0)
             actionPictureType--;
         else if (actionPictureType < 0)
             actionPictureType++;
         gameCamera.method301(17);
         modelUpdatingTimer++;
-        if (modelUpdatingTimer > 5) {
+        if (modelUpdatingTimer > 5)
+        {
             modelUpdatingTimer = 0;
             modelFireLightningSpellNumber = (modelFireLightningSpellNumber + 1) % 3;
             modelTorchNumber = (modelTorchNumber + 1) % 4;
             modelClawSpellNumber = (modelClawSpellNumber + 1) % 5;
         }
-        for (int k2 = 0; k2 < objectCount; k2++) {
+        /* updating models blow it seems */
+        for (int k2 = 0; k2 < objectCount; k2++)
+        {
             int l3 = objectX[k2];
             int l4 = objectY[k2];
             if (l3 >= 0 && l4 >= 0 && l3 < 96 && l4 < 96 && objectType[k2] == 74)
                 objectModelArray[k2].method188(1, 0, 0);
         }
 
-        for (int i4 = 0; i4 < anInt892; i4++) {
+        for (int i4 = 0; i4 < anInt892; i4++)
+        {
             anIntArray923[i4]++;
-            if (anIntArray923[i4] > 50) {
+            if (anIntArray923[i4] > 50)
+            {
                 anInt892--;
                 for (int i5 = i4; i5 < anInt892; i5++) {
                     anIntArray944[i5] = anIntArray944[i5 + 1];
@@ -5466,36 +5581,45 @@ public class mudclient extends GameWindowMiddleMan
 
     }
 
-    private final void loadSounds() {
-        try {
+    private final void loadSounds()
+    {
+        try
+        {
             drawLoadingBarText(90, "Unpacking Sound effects");
             sounds = load("sounds1.mem");   
             audioReader = new AudioReader();
             return;
         }
-        catch (Throwable throwable) {
+        catch (Throwable throwable)
+        {
             System.out.println("Unable to init sounds:" + throwable);
         }
     }
 
-    private final void drawCombatStyleWindow() {
+    private final void drawCombatStyleWindow()
+    {
         byte byte0 = 7;
         byte byte1 = 15;
         char c = '\257';
-        if (mouseButtonClick != 0) {
-            for (int i = 0; i < 5; i++) {
-                if (i <= 0 || super.mouseX <= byte0 || super.mouseX >= byte0 + c || super.mouseY <= byte1 + i * 20 || super.mouseY >= byte1 + i * 20 + 20)
+        if (mouseButtonClick != 0)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (i <= 0
+                		|| super.mouseX <= byte0
+                		|| super.mouseX >= byte0 + c
+                		|| super.mouseY <= byte1 + i * 20
+                		|| super.mouseY >= byte1 + i * 20 + 20)
                     continue;
                 combatStyle = i - 1;
                 mouseButtonClick = 0;
-                super.streamClass.createPacket(42);
-                super.streamClass.addByte(combatStyle);
-                super.streamClass.formatPacket();
+                formatPacket(42, combatStyle, -1);
                 break;
             }
 
         }
-        for (int j = 0; j < 5; j++) {
+        for (int j = 0; j < 5; j++)
+        {
             if (j == combatStyle + 1)
                 gameGraphics.drawBoxAlpha(byte0, byte1 + j * 20, c, 20, GameImage.convertRGBToLong(255, 0, 0), 128);
             else
@@ -5858,271 +5982,288 @@ public class mudclient extends GameWindowMiddleMan
         showBank = false;
         super.friendsCount = 0;
     }
+    
+    private void drawTradePanel()
+    {
+    	tradeCfrmPan.getFrame().setTitle("Trading with: @yel@"
+    			+ DataOperations.longToString(tradeConfirmOtherNameLong));
+        gameGraphics.drawBoxAlpha(tradePan.getPlrTextBoxX(),
+        		tradePan.getPlrTextBoxY(), tradePan.getPlrTextBoxWidth(),
+        		tradePan.getPlrTextBoxHeight(), tradePan.getBGColor(),
+        		tradePan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(tradePan.getMdlMarginBarX(),
+        		tradePan.getMdlMarginBarY(), tradePan.getMdlMarginBarWidth(),
+        		tradePan.getMdlMarginBarHeight(), tradePan.getBGColor(),
+        		tradePan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(tradePan.getOpntTextBoxX(),
+        		tradePan.getOpntTextBoxY(), tradePan.getOpntTextBoxWidth(),
+        		tradePan.getOpntTextBoxHeight(), tradePan.getBGColor(),
+        		tradePan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(tradePan.getAccptDclnBoxX(),
+        		tradePan.getAccptDclnBoxY(), tradePan.getAccptDclnBoxWidth(),
+        		tradePan.getAccptDclnBoxHeight(), tradePan.getBGColor(),
+        		tradePan.getBGAlpha());
+        gameGraphics.drawBoxAlpha(tradePan.getItemInfoBarX(),
+        		tradePan.getItemInfoBarY(), tradePan.getItemInfoBarWidth(),
+        		tradePan.getItemInfoBarHeight(), tradePan.getBGColor(),
+        		tradePan.getBGAlpha());
+        tradePan.getFrame().setTitle("Trading with: " + tradeOtherPlayerName);
+        gameGraphics.drawString("Your Offer", tradePan.getPlrTextBoxX()+1,
+        		tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
+        		4, 0xffffff);
+        gameGraphics.drawString("Opponent's Offer", tradePan.getOpntTextBoxX()+1,
+        		tradePan.getOpntTextBoxY()+tradePan.getOpntTextBoxHeight()-3,
+        		4, 0xffffff);
+        gameGraphics.drawString("Your Inventory", tradePan.getGridX(),
+        		tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
+        		4, 0xffffff);
+    }
+    
+    private void handleTradePanelClicks()
+    {
+    	if (mouseButtonClick == 1)
+    	{
+    		if (tradePan.getAcceptButton().isMouseOverButton(super.mouseX, super.mouseY))
+    			this.formatPacket(211, -1, -1);
+    		if (tradePan.getDeclineButton().isMouseOverButton(super.mouseX, super.mouseY))
+    			this.formatPacket(216, -1, -1);
+    	}
+    }
+    
+    private void drawTradeInventoryGrid()
+    {
+        for (int j = 0; j < tradePan.getSlots(); j++)
+        {
+            int col = tradePan.getInvGridX() + (j % tradePan.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
+            int row = tradePan.getInvGridY() + (j / tradePan.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+
+            drawItemBox(tradePan, inventoryItems[j], col, row,
+            		false, j < inventoryCount && inventoryItems[j] != -1);
+            if (j < inventoryCount && inventoryItems[j] != -1
+            		&& EntityHandler.getItemDef(inventoryItems[j]).isStackable())
+            	drawTradeInvText(col, row, inventoryItemsCount[j]);
+            if (super.mouseX > col &&
+            		super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+            		&& super.mouseY > row
+            		&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+            		&& j < inventoryCount && inventoryItems[j] != -1)
+            	gameGraphics.drawString(EntityHandler.getItemDef(
+            			inventoryItems[j]).getName()
+            			+ ": @whi@" + EntityHandler.getItemDef(
+            					inventoryItems[j]).getDescription(),
+            			tradePan.getX() + 2,
+            			tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+            			1, 0xffff00);
+        }
+    }
+    
+    private void drawTradePlrOfferGrid()
+    {
+        for (int j = 0; j < tradePan.getOfferGridSlots(); j++)
+        {
+            int col = tradePan.getPlrOfferGridX() + (j % tradePan.getOfferGridCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
+            int row = tradePan.getPlrOfferGridY() + (j / tradePan.getOfferGridCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+
+            drawItemBox(tradePan, tradeMyItems[j], col, row,
+            		false, j < tradeMyItemCount && tradeMyItems[j] != -1);
+            if (j < tradeMyItemCount && tradeMyItems[j] != -1
+            		&& EntityHandler.getItemDef(tradeMyItems[j]).isStackable())
+            	drawTradeInvText(col, row, tradeMyItemsCount[j]);
+            if (super.mouseX > col &&
+            		super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+            		&& super.mouseY > row
+            		&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+            		&& j < tradeMyItemCount && tradeMyItems[j] != -1)
+            	gameGraphics.drawString(EntityHandler.getItemDef(
+            			tradeMyItems[j]).getName()
+            			+ ": @whi@" + EntityHandler.getItemDef(
+            					tradeMyItems[j]).getDescription(),
+            			tradePan.getX() + 2,
+            			tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+            			1, 0xffff00);
+        }
+    }
+    
+    private void drawTradeOpntOfferGrid()
+    {
+        for (int j = 0; j < tradePan.getOfferGridSlots(); j++)
+        {
+            int col = tradePan.getOpntOfferGridX() + (j % tradePan.getOfferGridCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
+            int row = tradePan.getOpntOfferGridY() + (j / tradePan.getOfferGridCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+
+            drawItemBox(tradePan, tradeOtherItems[j], col, row,
+            		false, j < tradeOtherItemCount && tradeOtherItems[j] != -1);
+            if (j < tradeOtherItemCount && tradeOtherItems[j] != -1
+            		&& EntityHandler.getItemDef(tradeOtherItems[j]).isStackable())
+            	drawTradeInvText(col, row, tradeOtherItemsCount[j]);
+            if (super.mouseX > col &&
+            		super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+            		&& super.mouseY > row
+            		&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+            		&& j < tradeOtherItemCount && tradeOtherItems[j] != -1)
+            	gameGraphics.drawString(EntityHandler.getItemDef(
+            			tradeOtherItems[j]).getName()
+            			+ ": @whi@" + EntityHandler.getItemDef(
+            					tradeOtherItems[j]).getDescription(),
+            			tradePan.getX() + 2,
+            			tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+            			1, 0xffff00);
+        }
+    }
+    
+    private void drawTradeInvText(int col, int row, int amount)
+    {
+        gameGraphics.drawString(getAbbreviatedValue(amount),
+        		col + 1, row + 10, 1, tradePan.getInvCountTextColor());
+    }
+    
+    private void updateTradeStatus()
+    {
+        if (!tradeWeAccepted)
+            gameGraphics.drawPicture(tradePan.getAcceptButton().getX(),
+            		tradePan.getAcceptButton().getY(),
+            		tradePan.getAcceptButton().getSpriteIdx());
+        gameGraphics.drawPicture(tradePan.getDeclineButton().getX(),
+        		tradePan.getDeclineButton().getY(),
+        		tradePan.getDeclineButton().getSpriteIdx());
+        if (tradeOtherAccepted)
+        {
+            gameGraphics.drawText("Other player",
+            		tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
+            		tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
+            gameGraphics.drawText("has accepted",
+            		tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
+            		tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
+        }
+        if (tradeWeAccepted) {
+            gameGraphics.drawText("Waiting for",
+            		tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
+            		tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
+            gameGraphics.drawText("other player",
+            		tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
+            		tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
+        }
+    }
+    
+    private void handleMouseOverTradeInv()
+    {
+    	int slotIdx = (super.mouseX - (tradePan.getInvGridX()+1)) / InGameGridPanel.ITEM_SLOT_WIDTH
+        		+ ((super.mouseY - (tradePan.getInvGridY()+1)) / InGameGridPanel.ITEM_SLOT_HEIGHT) * tradePan.getCols();
+        if (slotIdx >= 0 && slotIdx < inventoryCount)
+        {
+            boolean flag = false;
+            int l1 = 0;
+            int slotItemId = inventoryItems[slotIdx];
+            for (int k3 = 0; k3 < tradeMyItemCount; k3++)
+            {
+                if (tradeMyItems[k3] == slotItemId)
+                {
+                    if (EntityHandler.getItemDef(slotItemId).isStackable())
+                    {
+                        for (int i4 = 0; i4 < itemIncrement; i4++)
+                        {
+                            if (tradeMyItemsCount[k3] < inventoryItemsCount[slotIdx])
+                            {
+                                tradeMyItemsCount[k3]++;
+                            }
+                            flag = true;
+                        }
+
+                    }
+                    else
+                        l1++;
+                }
+            }
+            if (inventoryCount(slotItemId) <= l1)
+                flag = true;
+            if (!flag && tradeMyItemCount < 12)
+            {
+                tradeMyItems[tradeMyItemCount] = slotItemId;
+                tradeMyItemsCount[tradeMyItemCount] = 1;
+                tradeMyItemCount++;
+                flag = true;
+            }
+            if (flag)
+            	formatPacket(70, -1, -1);
+        }
+    }
+    
+    private void handleMouseOverPlrTradeOffer()
+    {
+        int l = (super.mouseX - (tradePan.getPlrOfferBoxX()+1)) / InGameGridPanel.ITEM_SLOT_WIDTH
+        		+ ((super.mouseY - (tradePan.getPlrOfferBoxY()+1)) / InGameGridPanel.ITEM_SLOT_HEIGHT) * tradePan.getOfferGridCols();
+        if (l >= 0 && l < tradeMyItemCount)
+        {
+            int j1 = tradeMyItems[l];
+            for (int i2 = 0; i2 < itemIncrement; i2++)
+            {
+                if (EntityHandler.getItemDef(j1).isStackable()
+                		&& tradeMyItemsCount[l] > 1)
+                {
+                    tradeMyItemsCount[l]--;
+                    continue;
+                }
+                tradeMyItemCount--;
+                mouseDownTime = 0;
+                for (int l2 = l; l2 < tradeMyItemCount; l2++)
+                {
+                    tradeMyItems[l2] = tradeMyItems[l2 + 1];
+                    tradeMyItemsCount[l2] = tradeMyItemsCount[l2 + 1];
+                }
+
+                break;
+            }
+        	formatPacket(70, -1, -1);
+        }
+    }
 
     private final void drawTradeWindow()
     {
-    	int nInventoryCols = 5;
-    	int nInventoryRows = 6;
-    	int nTradeCols = 4;
-    	int nTradeRows = 3;
-        int leftMarginWidth = 8;
-        int middleMarginWidth = 11;
-        int rightMarginWidth = 6;
-        int titleBarHeight = 12;
-        int plrTextBoxHeight = 18;
-        int opntTextBoxHeight = 22;
-        int btmLeftMargiBoxHeight = 20;
-        int tradeWindowWidth = leftMarginWidth + (nTradeCols*itemSlotWidth+1)
-        		+ middleMarginWidth + (nInventoryCols*itemSlotWidth+1) + rightMarginWidth;
-        int tradeWindowHeight = titleBarHeight + plrTextBoxHeight
-        		+ 2*(nTradeRows*itemSlotHeight+1) + opntTextBoxHeight + btmLeftMargiBoxHeight;
-    	int tradeWindowHalfWidth = tradeWindowWidth/2;
-    	int tradeWidnowHalfHeight = tradeWindowHeight/2;
-        int tradeWindowX = (windowHalfWidth - tradeWindowHalfWidth);
-        int tradeWindowY = (windowHalfHeight - tradeWidnowHalfHeight);
-        int tradeBgClr = 0x989898;
-        int invBgClr = 0xd0d0d0;
-        int tradeWindowAlpha = 0xa0;
-        int[] titleBar = {tradeWindowX, tradeWindowY, tradeWindowWidth,
-        		titleBarHeight, 0x0000c0, 0x00};
-        int[] plrTextBox = {tradeWindowX, titleBar[1]+titleBar[3], tradeWindowWidth,
-        		plrTextBoxHeight, tradeBgClr, tradeWindowAlpha};
-        int[] plrOfferBox = {tradeWindowX+leftMarginWidth, plrTextBox[1]+plrTextBox[3],
-        		nTradeCols*itemSlotWidth+1, nTradeRows*itemSlotHeight+1, invBgClr, tradeWindowAlpha};
-        int[] opntTextBox = {tradeWindowX+leftMarginWidth, plrOfferBox[1]+plrOfferBox[3],
-        		nTradeCols*itemSlotWidth+1, opntTextBoxHeight, tradeBgClr, tradeWindowAlpha};
-        int[] opntOfferBox = {tradeWindowX+leftMarginWidth, opntTextBox[1]+opntTextBox[3],
-        		nTradeCols*itemSlotWidth+1, nTradeRows*itemSlotHeight+1, invBgClr, tradeWindowAlpha};
-        int[] plrInvBox = {plrOfferBox[0]+plrOfferBox[2]+middleMarginWidth,
-        		plrTextBox[1]+plrTextBox[3], nInventoryCols*itemSlotWidth+1,
-        		nInventoryRows*itemSlotHeight+1, invBgClr, tradeWindowAlpha};
-        int[] btmLeftMarginBar = {tradeWindowX+leftMarginWidth, opntOfferBox[1]+opntOfferBox[3],
-        		nTradeCols*itemSlotWidth+1, btmLeftMargiBoxHeight, tradeBgClr, tradeWindowAlpha};
-        int[] leftMarginBar = {tradeWindowX, plrTextBox[1]+plrTextBox[3], leftMarginWidth,
-        		plrOfferBox[3]+opntTextBox[3]+opntOfferBox[3]+btmLeftMarginBar[3],
-        		tradeBgClr, tradeWindowAlpha};
-        int[] mdlMarginBar = {plrOfferBox[0]+plrOfferBox[2], plrTextBox[1]+plrTextBox[3],
-        		middleMarginWidth, plrOfferBox[3]+opntTextBox[3]+opntOfferBox[3]+btmLeftMarginBar[3],
-        		tradeBgClr, tradeWindowAlpha};
-        int[] rgtMarginBar = {plrInvBox[0]+plrInvBox[2], plrTextBox[1]+plrTextBox[3],
-        		rightMarginWidth, plrOfferBox[3]+opntTextBox[3]+opntOfferBox[3]+btmLeftMarginBar[3],
-        		tradeBgClr, tradeWindowAlpha};
-        int[] accptDclnBox = {mdlMarginBar[0]+mdlMarginBar[2], plrInvBox[1]+plrInvBox[3], plrInvBox[2],
-        		btmLeftMarginBar[1]+btmLeftMarginBar[3]-(plrInvBox[1]+plrInvBox[3]),
-        		tradeBgClr, tradeWindowAlpha};
-        Sprite dclnBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26];
-        Sprite accptBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25];
-        int[] accptBtn = {accptDclnBox[0], accptDclnBox[1]+3, accptBtnSprite.getWidth(),
-        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 25};
-        int[] dclnBtn = {accptDclnBox[0]+accptDclnBox[2]-dclnBtnSprite.getWidth(),
-        		accptDclnBox[1]+3, dclnBtnSprite.getWidth(),
-        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 26};
-
-        if (!tradeWeAccepted)
-            gameGraphics.drawPicture(accptDclnBox[0],
-            		accptDclnBox[1]+3, SPRITE_MEDIA_START + 25);
-        gameGraphics.drawPicture(accptDclnBox[0]+accptDclnBox[2]-dclnBtnSprite.getWidth()-dclnBtnSprite.getXShift(),
-        		accptDclnBox[1]+3, SPRITE_MEDIA_START + 26);
         if (mouseButtonClick != 0 && itemIncrement == 0)
             itemIncrement = 1;
         if (itemIncrement > 0)
         {
-            if (super.mouseX >= tradeWindowX && super.mouseY >= tradeWindowY
-            		&& super.mouseX < tradeWindowX+tradeWindowWidth
-            		&& super.mouseY < tradeWindowY+tradeWindowHeight)
+            if (tradePan.isMouseOver(super.mouseX, super.mouseY))
             { // inside trade window
-                if (super.mouseX > plrInvBox[0] && super.mouseY > plrInvBox[1]
-                		&& super.mouseX < plrInvBox[0]+plrInvBox[2]
-                		&& super.mouseY < plrInvBox[1]+plrInvBox[3])
-                { // your inventory
-                    int slotIdx = (super.mouseX - (plrInvBox[0]+1)) / itemSlotWidth
-                    		+ ((super.mouseY - (plrInvBox[1]+1)) / itemSlotHeight) * nInventoryCols;
-                    if (slotIdx >= 0 && slotIdx < inventoryCount)
-                    {
-                        boolean flag = false;
-                        int l1 = 0;
-                        int slotItemId = inventoryItems[slotIdx];
-                        for (int k3 = 0; k3 < tradeMyItemCount; k3++)
-                        {
-                            if (tradeMyItems[k3] == slotItemId)
-                            {
-                                if (EntityHandler.getItemDef(slotItemId).isStackable())
-                                {
-                                    for (int i4 = 0; i4 < itemIncrement; i4++)
-                                    {
-                                        if (tradeMyItemsCount[k3] < inventoryItemsCount[slotIdx])
-                                        {
-                                            tradeMyItemsCount[k3]++;
-                                        }
-                                        flag = true;
-                                    }
-
-                                } else {
-                                    l1++;
-                                }
-                            }
-                        }
-                        if (inventoryCount(slotItemId) <= l1)
-                            flag = true;
-                        if (!flag && tradeMyItemCount < 12) {
-                            tradeMyItems[tradeMyItemCount] = slotItemId;
-                            tradeMyItemsCount[tradeMyItemCount] = 1;
-                            tradeMyItemCount++;
-                            flag = true;
-                        }
-                        if (flag)
-                        	formatPacket(70, -1, -1);
-                    }
-                }
-                if (super.mouseX > plrOfferBox[0] && super.mouseY > plrOfferBox[1]
-                		&& super.mouseX < plrOfferBox[0]+plrOfferBox[2]
-                		&& super.mouseY < plrOfferBox[1]+plrOfferBox[3])
-                { // your offer
-                    int l = (super.mouseX - (plrOfferBox[0]+1)) / itemSlotWidth
-                    		+ ((super.mouseY - (plrOfferBox[1]+1)) / itemSlotHeight) * nTradeCols;
-                    if (l >= 0 && l < tradeMyItemCount)
-                    {
-                        int j1 = tradeMyItems[l];
-                        for (int i2 = 0; i2 < itemIncrement; i2++)
-                        {
-                            if (EntityHandler.getItemDef(j1).isStackable()
-                            		&& tradeMyItemsCount[l] > 1)
-                            {
-                                tradeMyItemsCount[l]--;
-                                continue;
-                            }
-                            tradeMyItemCount--;
-                            mouseDownTime = 0;
-                            for (int l2 = l; l2 < tradeMyItemCount; l2++)
-                            {
-                                tradeMyItems[l2] = tradeMyItems[l2 + 1];
-                                tradeMyItemsCount[l2] = tradeMyItemsCount[l2 + 1];
-                            }
-
-                            break;
-                        }
-                    	formatPacket(70, -1, -1);
-                    }
-                }
-                if (super.mouseX >= accptBtn[0]
-                		&& super.mouseY >= accptBtn[1]
-                		&& super.mouseX <= accptBtn[0]+accptBtn[2]
-                		&& super.mouseY <= accptBtn[1]+accptBtn[3])
-                {
-                    tradeWeAccepted = true;
-                    super.streamClass.createPacket(211);
-                    super.streamClass.formatPacket();
-                }
-                if (super.mouseX >= dclnBtn[0]
-                		&& super.mouseY >= dclnBtn[1]
-                		&& super.mouseX <= dclnBtn[0]+dclnBtn[2]
-                		&& super.mouseY <= dclnBtn[1]+dclnBtn[3])
-                {
-                    showTradeWindow = false;
-                    super.streamClass.createPacket(216);
-                    super.streamClass.formatPacket();
-                }
-            } else if (mouseButtonClick != 0) {
-                showTradeWindow = false;
-                super.streamClass.createPacket(216);
-                super.streamClass.formatPacket();
+                if (tradePan.isMouseOverGrid(super.mouseX, super.mouseY))
+                	handleMouseOverTradeInv();
+                else if (tradePan.isMouseOverOfferGrid(super.mouseX, super.mouseY))
+                	handleMouseOverPlrTradeOffer();
+                else
+                	handleTradePanelClicks();
             }
             mouseButtonClick = 0;
             itemIncrement = 0;
         }
         if (!showTradeWindow)
             return;
-        
-        gameGraphics.drawBox(titleBar[0], titleBar[1], titleBar[2], titleBar[3], titleBar[4]);
-        gameGraphics.drawBoxAlpha(plrTextBox[0], plrTextBox[1], plrTextBox[2],
-        		plrTextBox[3], plrTextBox[4], plrTextBox[5]);
-        gameGraphics.drawBoxAlpha(leftMarginBar[0], leftMarginBar[1], leftMarginBar[2],
-        		leftMarginBar[3], leftMarginBar[4], leftMarginBar[5]);
-        gameGraphics.drawBoxAlpha(mdlMarginBar[0], mdlMarginBar[1], mdlMarginBar[2],
-        		mdlMarginBar[3], mdlMarginBar[4], mdlMarginBar[5]);
-        gameGraphics.drawBoxAlpha(rgtMarginBar[0], rgtMarginBar[1], rgtMarginBar[2],
-        		rgtMarginBar[3], rgtMarginBar[4], rgtMarginBar[5]);
-        gameGraphics.drawBoxAlpha(opntTextBox[0], opntTextBox[1], opntTextBox[2],
-        		opntTextBox[3], opntTextBox[4], opntTextBox[5]);
-        gameGraphics.drawBoxAlpha(btmLeftMarginBar[0], btmLeftMarginBar[1],
-        		btmLeftMarginBar[2], btmLeftMarginBar[3], btmLeftMarginBar[4],
-        		btmLeftMarginBar[5]);
-        gameGraphics.drawBoxAlpha(accptDclnBox[0], accptDclnBox[1], accptDclnBox[2],
-        		accptDclnBox[3], accptDclnBox[4], accptDclnBox[5]);
-        gameGraphics.drawBoxAlpha(plrOfferBox[0], plrOfferBox[1], plrOfferBox[2],
-        		plrOfferBox[3], plrOfferBox[4], plrOfferBox[5]);
-        gameGraphics.drawBoxAlpha(opntOfferBox[0], opntOfferBox[1], opntOfferBox[2],
-        		opntOfferBox[3], opntOfferBox[4], opntOfferBox[5]);
-        gameGraphics.drawBoxAlpha(plrInvBox[0], plrInvBox[1], plrInvBox[2],
-        		plrInvBox[3], plrInvBox[4], plrInvBox[5]);
-        for (int linNbr = 0; linNbr <= nTradeRows; linNbr++)
-            gameGraphics.drawLineX(plrOfferBox[0], plrOfferBox[1] + linNbr * itemSlotHeight,
-            		plrOfferBox[2], 0x000000);
-        for (int linNbr = 0; linNbr <= nTradeRows; linNbr++)
-            gameGraphics.drawLineX(opntOfferBox[0], opntOfferBox[1] + linNbr * itemSlotHeight,
-            		opntOfferBox[2], 0x000000);
-        for (int linNbr = 0; linNbr <= nInventoryRows; linNbr++)
-            gameGraphics.drawLineX(plrInvBox[0], plrInvBox[1] + linNbr * itemSlotHeight,
-            		plrInvBox[2], 0x000000);
-        for (int linNbr = 0; linNbr < nInventoryCols; linNbr++)
-        {
-            if (linNbr <= nTradeCols)
-                gameGraphics.drawLineY(plrOfferBox[0] + linNbr * itemSlotWidth,
-                		plrOfferBox[1],plrOfferBox[3], 0x000000);
-            if (linNbr <= nTradeCols)
-                gameGraphics.drawLineY(opntOfferBox[0] + linNbr * itemSlotWidth,
-                		opntOfferBox[1], opntOfferBox[3], 0x000000);
-            gameGraphics.drawLineY(plrInvBox[0] + linNbr * itemSlotWidth, plrInvBox[1],
-            		plrInvBox[3], 0x000000);
-        }
 
-        gameGraphics.drawString("Trading with: " + tradeOtherPlayerName, tradeWindowX + 1, tradeWindowY + 10, 1, 0xffffff);
-        gameGraphics.drawString("Your Offer", plrTextBox[0]+1, plrTextBox[1]+plrTextBox[3]-3, 4, 0xffffff);
-        gameGraphics.drawString("Opponent's Offer", opntTextBox[0]+1, opntTextBox[1]+opntTextBox[3]-3, 4, 0xffffff);
-        gameGraphics.drawString("Your Inventory", plrInvBox[0], plrTextBox[1]+plrTextBox[3]-3, 4, 0xffffff);
-        if (!tradeWeAccepted)
-            gameGraphics.drawPicture(accptBtn[0], accptBtn[1], accptBtn[4]);
-        gameGraphics.drawPicture(dclnBtn[0], dclnBtn[1], dclnBtn[4]);
-        if (tradeOtherAccepted)
-        {
-            gameGraphics.drawText("Other player", accptDclnBox[0]+accptDclnBox[2]/2,
-            		accptDclnBox[1]+11, 1, 0xffffff);
-            gameGraphics.drawText("has accepted", accptDclnBox[0]+accptDclnBox[2]/2,
-            		accptDclnBox[1]+21, 1, 0xffffff);
+        // draw the interface
+    	drawInGameFrame(tradePan.getFrame());
+    	drawTradePanel();
+    	updateTradeStatus();
+    	drawTradeInventoryGrid();
+    	drawTradePlrOfferGrid();
+    	drawTradeOpntOfferGrid();
+    	
+        if (tradePan.isMouseOver(super.mouseX, super.mouseY))
+        	handleTradePanelClicks();
+        else if (tradePan.getFrame().getCloseButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		formatPacket(216, -1, -1);
+        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
+        		mouseButtonClick = 0;
+        	}
         }
-        if (tradeWeAccepted) {
-            gameGraphics.drawText("Waiting for", accptDclnBox[0]+accptBtnSprite.getWidth()/2, accptDclnBox[1]+11, 1, 0xffffff);
-            gameGraphics.drawText("other player", accptDclnBox[0]+accptBtnSprite.getWidth()/2, accptDclnBox[1]+21, 1, 0xffffff);
-        }
-        for (int invIdx = 0; invIdx < inventoryCount; invIdx++)
-        {
-            int slotCol = plrInvBox[0]+1 + (invIdx % nInventoryCols) * itemSlotWidth;
-            int slotRow = plrInvBox[1]+1 + (invIdx / nInventoryCols) * itemSlotHeight;
-            gameGraphics.spriteClip4(slotCol, slotRow, itemSlotWidth-1, itemSlotHeight-2, SPRITE_ITEM_START + EntityHandler.getItemDef(inventoryItems[invIdx]).getSprite(), EntityHandler.getItemDef(inventoryItems[invIdx]).getPictureMask(), 0, 0, false);
-            if (EntityHandler.getItemDef(inventoryItems[invIdx]).isStackable())
-                gameGraphics.drawString(String.valueOf(inventoryItemsCount[invIdx]), slotCol + 1, slotRow + 10, 1, 0xffff00);
-        }
-
-        for (int invIdx = 0; invIdx < tradeMyItemCount; invIdx++)
-        {
-            int slotCol = plrOfferBox[0]+1 + (invIdx % nInventoryRows) * itemSlotWidth;
-            int slotRow = plrOfferBox[1]+1 + (invIdx / nInventoryRows) * itemSlotHeight;
-            gameGraphics.spriteClip4(slotCol, slotRow, itemSlotWidth-1, itemSlotHeight-2, SPRITE_ITEM_START + EntityHandler.getItemDef(tradeMyItems[invIdx]).getSprite(), EntityHandler.getItemDef(tradeMyItems[invIdx]).getPictureMask(), 0, 0, false);
-            if (EntityHandler.getItemDef(tradeMyItems[invIdx]).isStackable())
-                gameGraphics.drawString(String.valueOf(tradeMyItemsCount[invIdx]), slotCol + 1, slotRow + 10, 1, 0xffff00);
-            if (super.mouseX > slotCol && super.mouseX < slotCol + itemSlotWidth-1 && super.mouseY > slotRow && super.mouseY < slotRow + itemSlotHeight-2)
-                gameGraphics.drawString(EntityHandler.getItemDef(tradeMyItems[invIdx]).getName() + ": @whi@" + EntityHandler.getItemDef(tradeMyItems[invIdx]).getDescription(), btmLeftMarginBar[0], btmLeftMarginBar[1]+btmLeftMarginBar[3]-5, 1, 0xffff00);
-        }
-
-        for (int invIdx = 0; invIdx < tradeOtherItemCount; invIdx++)
-        {
-            int slotCol = opntOfferBox[0]+1 + (invIdx % nInventoryRows) * itemSlotWidth;
-            int slotRow = opntOfferBox[1]+1 + (invIdx / nInventoryRows) * itemSlotHeight;
-            gameGraphics.spriteClip4(slotCol, slotRow, itemSlotWidth-1, itemSlotHeight-2, SPRITE_ITEM_START + EntityHandler.getItemDef(tradeOtherItems[invIdx]).getSprite(), EntityHandler.getItemDef(tradeOtherItems[invIdx]).getPictureMask(), 0, 0, false);
-            if (EntityHandler.getItemDef(tradeOtherItems[invIdx]).isStackable())
-                gameGraphics.drawString(String.valueOf(tradeOtherItemsCount[invIdx]), slotCol + 1, slotRow + 10, 1, 0xffff00);
-            if (super.mouseX > slotCol && super.mouseX < slotCol + itemSlotWidth-1 && super.mouseY > slotRow && super.mouseY < slotRow + itemSlotHeight-2)
-                gameGraphics.drawString(EntityHandler.getItemDef(tradeOtherItems[invIdx]).getName() + ": @whi@" + EntityHandler.getItemDef(tradeOtherItems[invIdx]).getDescription(), btmLeftMarginBar[0], btmLeftMarginBar[1]+btmLeftMarginBar[3]-5, 1, 0xffff00);
+        else if (tradePan.getFrame().isMouseOver(super.mouseX, super.mouseY))
+        { // click inside settings panel but not on the content or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 
@@ -7403,118 +7544,123 @@ public class mudclient extends GameWindowMiddleMan
         }
         return super.createImage(i, j);
     }
-
-    private final void drawTradeConfirmWindow()
+    
+    private void drawTradeCfrmPanel()
     {
-    	int nInventoryCols = 5;
-    	int nTradeCols = 4;
-    	int nTradeRows = 3;
-        int leftMarginWidth = 8;
-        int middleMarginWidth = 11;
-        int rightMarginWidth = 6;
-        int titleBarHeight = 12;
-        int plrTextBoxHeight = 18;
-        int opntTextBoxHeight = 22;
-        int btmLeftMargiBoxHeight = 20;
-        int tradeCfrmBgHeight = plrTextBoxHeight + 2*(nTradeRows*itemSlotHeight+1)
-        		+ opntTextBoxHeight + btmLeftMargiBoxHeight;
-        int tradeWindowWidth = leftMarginWidth + (nTradeCols*itemSlotWidth+1)
-        		+ middleMarginWidth + (nInventoryCols*itemSlotWidth+1) + rightMarginWidth;
-        int tradeWindowHeight = titleBarHeight + tradeCfrmBgHeight;
-    	int tradeWindowHalfWidth = tradeWindowWidth/2;
-    	int tradeWidnowHalfHeight = tradeWindowHeight/2;
-        int tradeWindowX = (windowHalfWidth - tradeWindowHalfWidth);
-        int tradeWindowY = (windowHalfHeight - tradeWidnowHalfHeight);
-        int tradeBgClr = 0x989898;
-        int tradeWindowAlpha = 0xa0;
-        int[] titleBar = {tradeWindowX, tradeWindowY, tradeWindowWidth,
-        		titleBarHeight, 0x0000c0, 0x00};
-        int[] tradeBgBox = {titleBar[0], titleBar[1]+titleBar[3], titleBar[2],
-        		tradeCfrmBgHeight, tradeBgClr, tradeWindowAlpha};
-        Sprite dclnBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26];
-        Sprite accptBtnSprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25];
-        int[] accptBtn = {tradeBgBox[0]+tradeBgBox[2]/4-accptBtnSprite.getWidth()/2,
-        		tradeBgBox[1]+tradeBgBox[3]-24, accptBtnSprite.getWidth(),
-        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 25};
-        int[] dclnBtn = {tradeBgBox[0]+3*tradeBgBox[2]/4-dclnBtnSprite.getWidth()/2,
-        		tradeBgBox[1]+tradeBgBox[3]-24, dclnBtnSprite.getWidth(),
-        		accptBtnSprite.getHeight(), SPRITE_MEDIA_START + 26};
-        gameGraphics.drawBox(titleBar[0], titleBar[1], titleBar[2], titleBar[3], titleBar[4]);
-        gameGraphics.drawBoxAlpha(tradeBgBox[0], tradeBgBox[1], tradeBgBox[2],
-        		tradeBgBox[3], tradeBgBox[4], tradeBgBox[5]);
-        gameGraphics.drawText("Please confirm your trade with @yel@" + DataOperations.longToString(tradeConfirmOtherNameLong),
-        		titleBar[0]+titleBar[2]/2, titleBar[1]+titleBar[3] - 3, 1, 0xffffff);
-        int itemsTitleHeight = tradeBgBox[1] + plrTextBoxHeight;
-        gameGraphics.drawText("You are about to give:", tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight, 1, 0xffff00);
-        for (int line = 0; line < tradeConfirmItemCount; line++) {
+    	tradeCfrmPan.getFrame().setTitle("Please confirm your trade with @yel@"
+    			+ DataOperations.longToString(tradeConfirmOtherNameLong));
+        gameGraphics.drawBoxAlpha(tradeCfrmPan.getX(), tradeCfrmPan.getY(),
+        		tradeCfrmPan.getWidth(), tradeCfrmPan.getHeight(),
+        		tradeCfrmPan.getBGColor(), tradeCfrmPan.getBGAlpha());
+        int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
+        gameGraphics.drawText("You are about to give:",
+        		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+        		itemsTitleHeight, 1, 0xffff00);
+        gameGraphics.drawText("In return you will receive:",
+        		tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
+        		itemsTitleHeight, 1, 0xffff00);
+        gameGraphics.drawText("Are you sure you want to do this?",
+        		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+        		tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-62, 4, 65535);
+        gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.",
+        		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+        		tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-47, 1, 0xffffff);
+        gameGraphics.drawText("Remember that not all players are trustworthy",
+        		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+        		tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-32, 1, 0xffffff);
+    }
+    
+    private void drawTradeItems()
+    {
+        int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
+        if (tradeConfirmItemCount == 0)
+            gameGraphics.drawText("Nothing!",
+            		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+            		itemsTitleHeight + 12, 1, 0xffffff);
+        for (int line = 0; line < tradeConfirmItemCount; line++)
+        {
             String s = EntityHandler.getItemDef(tradeConfirmItems[line]).getName();
             if (EntityHandler.getItemDef(tradeConfirmItems[line]).isStackable())
                 s = s + " x " + method74(tradeConfirmItemsCount[line]);
-            gameGraphics.drawText(s, tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
-        }
-
-        if (tradeConfirmItemCount == 0)
-            gameGraphics.drawText("Nothing!", tradeBgBox[0]+tradeBgBox[2]/4, itemsTitleHeight + 12, 1, 0xffffff);
-        gameGraphics.drawText("In return you will receive:", tradeBgBox[0]+3*tradeBgBox[2]/4, itemsTitleHeight, 1, 0xffff00);
-        for (int line = 0; line < tradeConfirmOtherItemCount; line++) {
-            String s1 = EntityHandler.getItemDef(tradeConfirmOtherItems[line]).getName();
-            if (EntityHandler.getItemDef(tradeConfirmOtherItems[line]).isStackable())
-                s1 = s1 + " x " + method74(tradeConfirmOtherItemsCount[line]);
-            gameGraphics.drawText(s1, tradeBgBox[0]+3*tradeBgBox[2]/4, itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
+            gameGraphics.drawText(s, tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+            		itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
         }
 
         if (tradeConfirmOtherItemCount == 0)
-            gameGraphics.drawText("Nothing!", tradeBgBox[0]+3*tradeBgBox[2]/4,
+            gameGraphics.drawText("Nothing!",
+            		tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
             		itemsTitleHeight + 12, 1, 0xffffff);
-        gameGraphics.drawText("Are you sure you want to do this?",
-        		tradeBgBox[0]+tradeBgBox[2]/2,
-        		tradeBgBox[1]+tradeBgBox[3]-62, 4, 65535);
-        gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.",
-        		tradeBgBox[0]+tradeBgBox[2]/2,
-        		tradeBgBox[1]+tradeBgBox[3]-47, 1, 0xffffff);
-        gameGraphics.drawText("Remember that not all players are trustworthy",
-        		tradeBgBox[0]+tradeBgBox[2]/2,
-        		tradeBgBox[1]+tradeBgBox[3]-32, 1, 0xffffff);
+        for (int line = 0; line < tradeConfirmOtherItemCount; line++)
+        {
+            String s1 = EntityHandler.getItemDef(tradeConfirmOtherItems[line]).getName();
+            if (EntityHandler.getItemDef(tradeConfirmOtherItems[line]).isStackable())
+                s1 = s1 + " x " + method74(tradeConfirmOtherItemsCount[line]);
+            gameGraphics.drawText(s1, tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
+            		itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
+        }
+    }
+    
+    private void updateTradeCfrmButtons()
+    {
         if (!tradeConfirmAccepted)
         {
-            gameGraphics.drawPicture(accptBtn[0], accptBtn[1], accptBtn[4]);
-            gameGraphics.drawPicture(dclnBtn[0], dclnBtn[1], dclnBtn[4]);
+            gameGraphics.drawPicture(tradeCfrmPan.getAcceptButton().getX(),
+            		tradeCfrmPan.getAcceptButton().getY(),
+            		tradeCfrmPan.getAcceptButton().getSpriteIdx());
+            gameGraphics.drawPicture(tradeCfrmPan.getDeclineButton().getX(),
+            		tradeCfrmPan.getDeclineButton().getY(),
+            		tradeCfrmPan.getDeclineButton().getSpriteIdx());
         }
         else
         {
-            gameGraphics.drawText("Waiting for other player...", tradeBgBox[0]+tradeBgBox[2]/2, tradeBgBox[1]+tradeBgBox[3]-12, 1, 0xffff00);
+            gameGraphics.drawText("Waiting for other player...",
+            		tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+            		tradeCfrmPan.getY()+tradeCfrmPan.getHeight()/4-12, 1, 0xffff00);
         }
-        if (mouseButtonClick == 1)
-        {
-            if (super.mouseX < tradeBgBox[0]
-            		|| super.mouseY < tradeBgBox[1]
-            		|| super.mouseX > tradeBgBox[0] + tradeBgBox[2]
-            		|| super.mouseY > tradeBgBox[2] + tradeBgBox[3])
-            {
-                showTradeConfirmWindow = false;
-                super.streamClass.createPacket(216);
-                super.streamClass.formatPacket();
-            }
-            if (super.mouseX >= accptBtn[0]
-            		&& super.mouseX <= accptBtn[0]+accptBtn[2]
-            		&& super.mouseY >= accptBtn[1]
-            		&& super.mouseY <= accptBtn[1]+accptBtn[3])
-            {
-                tradeConfirmAccepted = true;
-                super.streamClass.createPacket(53);
-                super.streamClass.formatPacket();
-            }
-            if (super.mouseX >= dclnBtn[0]
-            		&& super.mouseX <= dclnBtn[0]+dclnBtn[2]
-            		&& super.mouseY >= dclnBtn[1]
-            		&& super.mouseY <= dclnBtn[1]+dclnBtn[3])
-            {
-                showTradeConfirmWindow = false;
-                super.streamClass.createPacket(216);
-                super.streamClass.formatPacket();
-            }
-            mouseButtonClick = 0;
+    }
+    
+    private void handleTradeCfrmPanelClicks()
+    {
+        if (tradeCfrmPan.getAcceptButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        	formatPacket(53, -1, -1);
+        if (!tradeCfrmPan.getFrame().isMouseOver(super.mouseX, super.mouseY)
+        		|| tradeCfrmPan.getDeclineButton().isMouseOverButton(
+        		super.mouseX, super.mouseY)
+        		|| tradeCfrmPan.getFrame().getCloseButton().isMouseOverButton(
+        				super.mouseX, super.mouseY))
+        	formatPacket(216, -1, -1);
+        mouseButtonClick = 0;
+    }
+
+    private final void drawTradeConfirmWindow()
+    {
+    	if (tradePan.isMouseOver(super.mouseX, super.mouseY))
+    	{
+    		if (mouseButtonClick == 1)
+    			handleTradeCfrmPanelClicks();
+    	}
+        else if (tradePan.getFrame().getCloseButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		formatPacket(216, -1, -1);
+        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
+        		mouseButtonClick = 0;
+        	}
         }
+        else if (tradePan.getFrame().isMouseOver(super.mouseX, super.mouseY))
+        { // click inside settings panel but not on the content or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
+        }
+    	drawInGameFrame(tradeCfrmPan.getFrame());
+    	drawTradeCfrmPanel();
+    	drawTradeItems();
+    	updateTradeCfrmButtons();
     }
 
     private final void walkToGroundItem(int walkSectionX, int walkSectionY, int x, int y, boolean coordsEqual) {
@@ -8723,6 +8869,8 @@ public class mudclient extends GameWindowMiddleMan
     private MagicPanel magicPan;
     private FriendsPanel friendPan;
     private OptionsPanel optPan;
+    private TradePanel tradePan;
+    private TradeConfirmPanel tradeCfrmPan;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;

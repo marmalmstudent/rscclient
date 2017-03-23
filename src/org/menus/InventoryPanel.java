@@ -6,7 +6,6 @@ import org.mudclient;
 
 public class InventoryPanel extends InGameGridPanel
 {
-    private int nSlots;
     private final int invCountTextColor = 0xffff00;
     
     public InventoryPanel(int xCenter, int yCenter)
@@ -14,7 +13,6 @@ public class InventoryPanel extends InGameGridPanel
 		frame = new InGameFrame("Inventory");
         nCols = 5;
         nRows = 6;
-        nSlots = nCols*nRows;
 	    setHeight(getGridHeight());
 	    setWidth(getGridWidth());
 	    // TODO: revise these when the bottom menu is done.
@@ -24,7 +22,6 @@ public class InventoryPanel extends InGameGridPanel
 		gridY =  getY();
 		gridX = getX();
     }
-    public int getSlots() { return nSlots; }
 	public int getInvCountTextColor() { return invCountTextColor; }
 	public int getInvGridX() { return getX(); }
 	public int getInvGridY() { return getY(); }
