@@ -11,6 +11,7 @@ import org.menus.InGameFrame;
 import org.menus.InGameGridPanel;
 import org.menus.InventoryPanel;
 import org.menus.MagicPanel;
+import org.menus.OptionsPanel;
 import org.menus.PlayerInfoPanel;
 import org.model.Sprite;
 import org.recorder.Recorder;
@@ -164,6 +165,12 @@ public class mudclient extends GameWindowMiddleMan
             duelOpponentAccepted = false;
             duelMyAccepted = false;
             break;
+    	case 157: // change settings in settings menu
+            super.streamClass.createPacket(157);
+            super.streamClass.addByte(id);
+            super.streamClass.addByte(amount);
+            super.streamClass.formatPacket();
+    		break;
     	case 183: // bank withdraw
             super.streamClass.createPacket(183);
             super.streamClass.add2ByteInt(id);
@@ -3592,6 +3599,7 @@ public class mudclient extends GameWindowMiddleMan
         plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
         magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
         friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight);
+        optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(magicPan.getX(),
@@ -4774,248 +4782,268 @@ public class mudclient extends GameWindowMiddleMan
     
     private void drawOptionsPanelMisc()
     {
-        gameGraphics.drawPicture(settingsX - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
-        		settingsY -gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
+        gameGraphics.drawPicture(optPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
+        		optPan.getY() -gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
         		- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
         		SPRITE_MEDIA_START + 6);
     }
     
     private void drawOptionsPanel()
     {
-    	
-    }
-
-    private final void drawOptionsMenu(boolean flag)
-    {
         int box1H = 65;
         int box2H = 65;
         int box3H = 95;
         int box4H = 40;
-        gameGraphics.drawBoxAlpha(settingsX, settingsY, settingsWidth, box1H,
-        		GameImage.convertRGBToLong(181, 181, 181), 160);
-        gameGraphics.drawBoxAlpha(settingsX, settingsY+box1H, settingsWidth, box2H,
-        		GameImage.convertRGBToLong(201, 201, 201), 160);
-        gameGraphics.drawBoxAlpha(settingsX, settingsY+box1H+box2H , settingsWidth, box3H,
-        		GameImage.convertRGBToLong(181, 181, 181), 160);
-        gameGraphics.drawBoxAlpha(settingsX, settingsY+box1H+box2H+box3H , settingsWidth, box4H,
-        		GameImage.convertRGBToLong(201, 201, 201), 160);
-        int k = settingsX + 3;
-        int lineSpacing = 15;
-        int i1 = settingsY + lineSpacing;
-        gameGraphics.drawString("Game options - click to toggle", k, i1, 1, 0);
-        i1 += lineSpacing;
-        if (configAutoCameraAngle)
-            gameGraphics.drawString("Camera angle mode - @gre@Auto", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Camera angle mode - @red@Manual", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (configMouseButtons)
-            gameGraphics.drawString("Mouse buttons - @red@One", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Mouse buttons - @gre@Two", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (configSoundEffects)
-            gameGraphics.drawString("Sound effects - @red@off", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Sound effects - @gre@on", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        gameGraphics.drawString("Client assists - click to toggle", k, i1, 1, 0);
-        i1 += lineSpacing;
-        if (showRoof)
-            gameGraphics.drawString("Hide Roofs - @red@off", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Hide Roofs - @gre@on", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (autoScreenshot)
-            gameGraphics.drawString("Auto Screenshots - @gre@on", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Auto Screenshots - @red@off", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (combatWindow)
-            gameGraphics.drawString("Fightmode Selector - @gre@on", k, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Fightmode Selector - @red@off", k, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        i1 += 5;
-        gameGraphics.drawString("Privacy settings. Will be applied to", settingsX + 3, i1, 1, 0);
-        i1 += lineSpacing;
-        gameGraphics.drawString("all people not on your friends list", settingsX + 3, i1, 1, 0);
-        i1 += lineSpacing;
-        if (super.blockChatMessages == 0)
-            gameGraphics.drawString("Block chat messages: @red@<off>", settingsX + 3, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Block chat messages: @gre@<on>", settingsX + 3, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (super.blockPrivateMessages == 0)
-            gameGraphics.drawString("Block private messages: @red@<off>", settingsX + 3, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Block private messages: @gre@<on>", settingsX + 3, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (super.blockTradeRequests == 0)
-            gameGraphics.drawString("Block trade requests: @red@<off>", settingsX + 3, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Block trade requests: @gre@<on>", settingsX + 3, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        if (super.blockDuelRequests == 0)
-            gameGraphics.drawString("Block duel requests: @red@<off>", settingsX + 3, i1, 1, 0xffffff);
-        else
-            gameGraphics.drawString("Block duel requests: @gre@<on>", settingsX + 3, i1, 1, 0xffffff);
-        i1 += lineSpacing;
-        i1 += 5;
-        gameGraphics.drawString("Always logout when you finish", k, i1, 1, 0);
-        i1 += lineSpacing;
+        gameGraphics.drawBoxAlpha(optPan.getX(), optPan.getY(),
+        		optPan.getWidth(), optPan.getHeight(),
+        		optPan.getBGColor(), optPan.getBGAlpha());
+        
+        gameGraphics.drawLineX(optPan.getX(),
+        		optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight(),
+        		optPan.getWidth(), optPan.getLineColor());
+        gameGraphics.drawLineX(optPan.getX(),
+        		optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight(),
+        		optPan.getWidth(), optPan.getLineColor());
+        gameGraphics.drawLineX(optPan.getX(),
+        		optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight(),
+        		optPan.getWidth(), optPan.getLineColor());
+    }
+    
+    private void drawGameOptions()
+    {
+    	String info[] = {
+    			"Camera angle mode", "Mouse buttons", "Sound effects"
+    	};
+    	boolean condition[] = {
+    			configAutoCameraAngle, !configMouseButtons, !configSoundEffects
+    	};
+    	int xOffset = 2;
+        gameGraphics.drawString("Game options - click to toggle",
+        		optPan.getX() + xOffset, optPan.getY() + optPan.getHeaderHeight() - 3, 1, 0);
+        String color;
+        int i = 0;
+        int clr;
+        for (InGameButton button : optPan.getGameOptions().getButtons())
+        {
+            optPan.setGameOptionState(i, condition[i]);
+            color = (condition[i] ? "@gre@" : "@red@");
+            clr = (button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+            gameGraphics.drawString(info[i] + " - " + color
+            		+ button.getButtonText(), button.getX() + xOffset,
+            		button.getY() + 10, 1, clr);
+        	++i;
+        }
+    }
+    
+    private void drawClientAssist()
+    {
+    	String info[] = {
+    			"Hide Roofs", "Auto Screenshots", "Fightmode Selector"
+    	};
+    	boolean condition[] = {
+    			!showRoof, autoScreenshot, combatWindow
+    	};
+    	int xOffset = 2;
+        gameGraphics.drawString("Client assists - click to toggle",
+        		optPan.getX() + xOffset,
+        		optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight()
+        		+ optPan.getHeaderHeight() - 3, 1, 0);
+        String color;
+        int i = 0;
+        int clr;
+        for (InGameButton button : optPan.getClientAssists().getButtons())
+        {
+            optPan.setClientAssistState(i, condition[i]);
+            color = (condition[i] ? "@gre@" : "@red@");
+            clr = (button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+            gameGraphics.drawString(info[i] + " - " + color
+            		+ button.getButtonText(), button.getX() + xOffset,
+            		button.getY() + 10, 1, clr);
+        	++i;
+        }
+    }
+    
+    private void drawPrivacySettings()
+    {
+    	String info[] = {
+    			"Block chat messages", "Block private messages",
+    			"Block trade requests", "Block duel requests"
+    	};
+    	boolean condition[] = {
+    			!(super.blockChatMessages == 0),
+    			!(super.blockPrivateMessages == 0),
+    			!(super.blockTradeRequests == 0),
+    			!(super.blockDuelRequests == 0)
+    	};
+    	int xOffset = 2;
+        gameGraphics.drawString("Privacy settings. Will be applied to",
+        		optPan.getX() + xOffset,
+        		optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
+        		+ optPan.getHeaderHeight() - 3, 1, 0);
+        gameGraphics.drawString("all people not on your friends list",
+        		optPan.getX() + xOffset,
+        		optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
+        		+ 2*optPan.getHeaderHeight() - 3, 1, 0);
+        String color;
+        int i = 0;
+        int clr;
+        for (InGameButton button : optPan.getPrivacySettings().getButtons())
+        {
+            optPan.setPrivacySettingsState(i, condition[i]);
+            color = (condition[i] ? "@gre@" : "@red@");
+            clr = (button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+            gameGraphics.drawString(info[i] + ": " + color
+            		+ button.getButtonText(), button.getX() + xOffset,
+            		button.getY() + 10, 1, clr);
+        	++i;
+        }
+    }
+    
+    private void drawLogout()
+    {
+    	int xOffset = 2;
+        gameGraphics.drawString("Always logout when you finish",
+        		optPan.getX() + xOffset,
+        		optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight()
+        		+ optPan.getHeaderHeight() - 3, 1, 0);
         int k1 = 0xffffff;
-        if (super.mouseX > k
-        		&& super.mouseX < k + settingsWidth
-        		&& super.mouseY > i1 - 12
-        		&& super.mouseY < i1 + 4)
+        if (optPan.getLogoutButton().isMouseOverButton(super.mouseX, super.mouseY))
         {
             k1 = 0xffff00;
         }
-        gameGraphics.drawString("Click here to logout", settingsX + 3, i1, 1, k1);
-        if (!flag)
-            return;
-        if (super.mouseX >= settingsX
-        		&& super.mouseY >= settingsY
-        		&& super.mouseX < settingsX + settingsWidth
-        		&& super.mouseY < settingsY + settingsHeight)
-        {
-            int j1 = settingsY + 2*lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+        gameGraphics.drawString("Click here to logout",
+        		optPan.getLogoutButton().getX() + xOffset,
+        		optPan.getLogoutButton().getY() + optPan.getLogoutButton().getHeight() - 3,
+        		1, k1);
+    }
+    
+    private void handleGameOptionsClicks()
+    {
+    	if (mouseButtonClick == 1)
+    	{
+    		InGameButton buttons[] = optPan.getGameOptions().getButtons();
+    		if (buttons[0].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 configAutoCameraAngle = !configAutoCameraAngle;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(0);
-                super.streamClass.addByte(configAutoCameraAngle ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 0, configAutoCameraAngle ? 1 : 0);
+    		}
+    		else if (buttons[1].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 configMouseButtons = !configMouseButtons;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(2);
-                super.streamClass.addByte(configMouseButtons ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 2, configMouseButtons ? 1 : 0);
+    		}
+    		else if (buttons[2].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 configSoundEffects = !configSoundEffects;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(3);
-                super.streamClass.addByte(configSoundEffects ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 3, configSoundEffects ? 1 : 0);
+    		}
+    	}
+    }
+    
+    private void handleClientAssistClicks()
+    {
+    	if (mouseButtonClick == 1)
+    	{
+    		InGameButton buttons[] = optPan.getClientAssists().getButtons();
+    		if (buttons[0].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 showRoof = !showRoof;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(4);
-                super.streamClass.addByte(showRoof ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 4, showRoof ? 1 : 0);
+    		}
+    		else if (buttons[1].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 autoScreenshot = !autoScreenshot;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(5);
-                super.streamClass.addByte(autoScreenshot ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 5, autoScreenshot ? 1 : 0);
+    		}
+    		else if (buttons[2].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 combatWindow = !combatWindow;
-                super.streamClass.createPacket(157);
-                super.streamClass.addByte(6);
-                super.streamClass.addByte(combatWindow ? 1 : 0);
-                super.streamClass.formatPacket();
-            }
-            j1 += lineSpacing;
-
-            boolean flag1 = false;
-            j1 += 2*lineSpacing + 5;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+                formatPacket(157, 6, combatWindow ? 1 : 0);
+    		}
+    	}
+    }
+    
+    private void handlePrivacySettingsClicks()
+    {
+    	if (mouseButtonClick == 1)
+    	{
+    		boolean flag1 = false;
+    		InGameButton buttons[] = optPan.getPrivacySettings().getButtons();
+    		if (buttons[0].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 super.blockChatMessages = 1 - super.blockChatMessages;
                 flag1 = true;
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+    		}
+    		else if (buttons[1].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 super.blockPrivateMessages = 1 - super.blockPrivateMessages;
                 flag1 = true;
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+    		}
+    		else if (buttons[2].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 super.blockTradeRequests = 1 - super.blockTradeRequests;
                 flag1 = true;
-            }
-            j1 += lineSpacing;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
-            {
+    		}
+    		else if (buttons[3].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
                 super.blockDuelRequests = 1 - super.blockDuelRequests;
                 flag1 = true;
-            }
-            j1 += lineSpacing;
+    		}
             if (flag1)
-                sendUpdatedPrivacyInfo(super.blockChatMessages, super.blockPrivateMessages,
-                		super.blockTradeRequests, super.blockDuelRequests);
-            j1 += lineSpacing + 5;
-            if (super.mouseX > settingsX
-            		&& super.mouseX < settingsX + settingsWidth
-            		&& super.mouseY > j1 - 12
-            		&& super.mouseY < j1 + 4
-            		&& mouseButtonClick == 1)
             {
-                logout();
+                sendUpdatedPrivacyInfo(
+                		super.blockChatMessages, super.blockPrivateMessages,
+                		super.blockTradeRequests, super.blockDuelRequests);
             }
-            mouseButtonClick = 0;
+    	}
+    }
+    
+    private void handleLogoutClick()
+    {
+        if (mouseButtonClick == 1)
+            logout();
+    }
+    
+    private void handleOptionsPanelClicks()
+    {
+    	if (optPan.getGameOptions().isMouseOver(super.mouseX, super.mouseY))
+    		handleGameOptionsClicks();
+    	else if (optPan.getClientAssists().isMouseOver(super.mouseX, super.mouseY))
+    		handleClientAssistClicks();
+    	else if (optPan.getPrivacySettings().isMouseOver(super.mouseX, super.mouseY))
+    		handlePrivacySettingsClicks();
+    	else if (optPan.getLogoutButton().isMouseOverButton(super.mouseX, super.mouseY))
+    		handleLogoutClick();
+        mouseButtonClick = 0;
+    }
+
+    private final void drawOptionsMenu(boolean flag)
+    {
+    	drawInGameFrame(optPan.getFrame());
+    	drawOptionsPanel();
+        drawGameOptions();
+        drawClientAssist();
+        drawPrivacySettings();
+        drawLogout();
+        if (!flag)
+            return;
+        if (optPan.isMouseOver(super.mouseX, super.mouseY))
+        	handleOptionsPanelClicks();
+        else if (optPan.getFrame().getCloseButton().isMouseOverButton(
+        		super.mouseX, super.mouseY))
+        { // close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        	{
+        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
+        		mouseButtonClick = 0;
+        	}
+        }
+        else if (optPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
+        { // click inside settings panel but not on the content or close button
+            menuLength++;
+        	if (mouseButtonClick == 1)
+        		mouseButtonClick = 0;
         }
     }
 
@@ -8517,10 +8545,6 @@ public class mudclient extends GameWindowMiddleMan
         miniMapHeight = 152+40;
         miniMapX = windowWidth-miniMapWidth-3;
         miniMapY = 3;
-        settingsWidth = 197;
-        settingsHeight = 265;
-        settingsX = gameWindowMenuBarX + gameWindowMenuBarWidth - settingsWidth;
-        settingsY = gameWindowMenuBarY - settingsHeight;
         
     }
 
@@ -8698,6 +8722,7 @@ public class mudclient extends GameWindowMiddleMan
     private PlayerInfoPanel plrPan;
     private MagicPanel magicPan;
     private FriendsPanel friendPan;
+    private OptionsPanel optPan;
     private int abuseSelectedType;
     private int actionPictureType;
     int actionPictureX;
@@ -8857,7 +8882,6 @@ public class mudclient extends GameWindowMiddleMan
     public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
     gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
     public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
-    public int settingsX, settingsY, settingsWidth, settingsHeight;
     public static String quests[] = new String[]{
     		"Black Knights' Fortress", "Cook's Assistant", "Demon slayer",
     		"Doric's quest", "The restless ghost", "Goblin diplomacy",

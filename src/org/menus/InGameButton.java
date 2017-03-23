@@ -29,4 +29,6 @@ public class InGameButton {
 				&& mouseX < bounds.x + bounds.width
 				&& mouseY < bounds.y + bounds.height);
 	}
+	
+	public void setButtonText(String text) { buttonText = text; }
 }
