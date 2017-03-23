@@ -5,6 +5,8 @@ import java.awt.Rectangle;
 public class BankPanel extends InGameGridPanel
 {
     private int topInfoBoxHeight, bottomInfoBoxHeight;
+    private final int bankCountTextColor = 0x00ff00;
+    private final int invCountTextColor = 0x00ffff;
     private final String[] tabButtonText = {
     		"<page 1>", "<page 2>", "<page 3>", "<page 4>"
     }; 
@@ -25,13 +27,15 @@ public class BankPanel extends InGameGridPanel
 	    setX(xCenter - width / 2);
 	    setY(yCenter - height / 2);
 	    frame.setBounds(new Rectangle(x, y, width, height));
+		gridY =  getTopInfoBoxY() + getTopInfoBoxHeight();
+		gridX = getX();
 	    int buttonWidth = 65;
 	    int buttonHeight = frame.getTitleBarHeight();
 	    int nButtons = tabButtonText.length;
 	    tabBtnPanel = new InGameButtonPanel(
 	    		frame.getX() + 50,
 	    		frame.getY(), buttonWidth, buttonHeight,
-	    		tabButtonText.length);
+	    		tabButtonText.length, tabButtonText.length);
 	    for (int i = 0; i < nButtons; ++i)
 	    	tabBtnPanel.addButton(tabButtonText[i]);
 	    
@@ -42,7 +46,7 @@ public class BankPanel extends InGameGridPanel
 	    withBtnPanel = new InGameButtonPanel(
 	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - nButtons*buttonWidth,
 	    		getBottomInfoBoxY() + yOffset, buttonWidth, buttonHeight,
-	    		withDepButtonText.length);
+	    		withDepButtonText.length, withDepButtonText.length);
 	    for (int i = 0; i < nButtons; ++i)
 	    	withBtnPanel.addButton(withDepButtonText[i]);
 	    
@@ -50,7 +54,7 @@ public class BankPanel extends InGameGridPanel
 	    depBtnPanel = new InGameButtonPanel(
 	    		getBottomInfoBoxX() + getBottomInfoBoxWidth() - nButtons*buttonWidth,
 	    		getBottomInfoBoxY() + yOffset, buttonWidth, buttonHeight,
-	    		withDepButtonText.length);
+	    		withDepButtonText.length, withDepButtonText.length);
 	    for (int i = 0; i < nButtons; ++i)
 	    	depBtnPanel.addButton(withDepButtonText[i]);
 	}
@@ -85,7 +89,7 @@ public class BankPanel extends InGameGridPanel
 	
 	public int getTabMouseover(int mouseX, int mouseY, int nTabs)
 	{
-		if (tabBtnPanel.isMouseOver(mouseX, mouseY))
+		if (!tabBtnPanel.isMouseOver(mouseX, mouseY))
 			return 0;
 		if (nTabs > 1)
 			for (int i = 0; i < nTabs; ++i)
@@ -94,19 +98,20 @@ public class BankPanel extends InGameGridPanel
 		return 0;
 	}
 	
+	
 	public int getTopInfoBoxHeight() { return topInfoBoxHeight; }
 	public int getTopInfoBoxWidth() { return getWidth(); }
 	public int getTopInfoBoxX() { return getX(); }
 	public int getTopInfoBoxY() { return getY(); }
 	
-	public int getBankGridY() { return getTopInfoBoxY() + getTopInfoBoxHeight(); }
-	public int getBankGridX() { return getX(); }
-	
 	public int getBottomInfoBoxHeight() { return bottomInfoBoxHeight; }
 	public int getBottomInfoBoxWidth() { return getGridWidth(); }
 	public int getBottomInfoBoxX() { return getX(); }
-	public int getBottomInfoBoxY() { return getBankGridY() + getGridHeight(); }
+	public int getBottomInfoBoxY() { return getGridY() + getGridHeight(); }
 	public InGameButtonPanel getTabButtonPanel() { return tabBtnPanel; }
 	public InGameButtonPanel getDepButtonPanel() { return depBtnPanel; }
 	public InGameButtonPanel getWithButtonPanel() { return withBtnPanel; }
+	
+    public int getBankCountTextColor() { return bankCountTextColor; }
+    public int getInvCountTextColor() { return invCountTextColor; }
 }

@@ -7,6 +7,7 @@ import org.menus.AbuseWindow;
 import org.menus.BankPanel;
 import org.menus.InGameButton;
 import org.menus.InGameFrame;
+import org.menus.InGameGridPanel;
 import org.menus.InventoryPanel;
 import org.menus.PlayerInfoPanel;
 import org.model.Sprite;
@@ -1149,31 +1150,60 @@ public class mudclient extends GameWindowMiddleMan
      */
     private void drawBankGrid()
     {
-        int i7 = 0xd0d0d0;
         int k7 = mouseOverBankPageText * bankPan.getRows()*bankPan.getCols();
         for (int row = 0; row < bankPan.getRows(); row++)
         {
             for (int col = 0; col < bankPan.getCols(); col++)
             {
-                int slotX = bankPan.getBankGridX() - 1 + col * itemSlotWidth;
-                int slotY = bankPan.getBankGridY() - 1 + row * itemSlotHeight;
-                if (selectedBankItem == k7)
-                    gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, 0xff0000, 160);
-                else
-                    gameGraphics.drawBoxAlpha(slotX, slotY, itemSlotWidth, itemSlotHeight, i7, 160);
-                gameGraphics.drawBoxEdge(slotX, slotY, itemSlotWidth+1, itemSlotHeight+1, 0);
-                if (k7 < bankItemCount && bankItems[k7] != -1) {
-                    gameGraphics.spriteClip4(slotX+1, slotY+1, itemSlotWidth-1, itemSlotHeight-2,
-                    		SPRITE_ITEM_START + EntityHandler.getItemDef(bankItems[k7]).getSprite(),
-                    		EntityHandler.getItemDef(bankItems[k7]).getPictureMask(), 0, 0, false);
-                    gameGraphics.drawString(getAbbreviatedValue(bankItemsCount[k7]),
-                    		slotX + 1, slotY + 10, 1, 0x00ff00);
-                    gameGraphics.drawBoxTextRight(getAbbreviatedValue(inventoryCount(bankItems[k7])),
-                    		slotX + itemSlotWidth - 1, slotY + itemSlotHeight - 5, 1, 0x00ffff);
-                }
+                int slotX = bankPan.getGridX() + col*(InGameGridPanel.ITEM_SLOT_WIDTH);
+                int slotY = bankPan.getGridY() + row*(InGameGridPanel.ITEM_SLOT_HEIGHT);
+                drawItemBox(bankPan, bankItems[k7], slotX, slotY,
+                		selectedBankItem == k7,
+                		k7 < bankItemCount && bankItems[k7] != -1);
+                if (k7 < bankItemCount && bankItems[k7] != -1)
+                	drawBankText(slotX, slotY, bankItemsCount[k7],
+                			inventoryCount(bankItems[k7]));
                 k7++;
             }
         }
+    }
+    
+    private void drawItemBox(InGameGridPanel panel, int itemID,
+    		int slotX, int slotY, boolean selected, boolean drawSprite)
+    {
+        if (selected)
+            gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
+            		InGameGridPanel.ITEM_SLOT_WIDTH-1,
+            		InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+            		panel.getGridBGSelectColor(),
+            		panel.getGridBGAlpha());
+        else
+            gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
+            		InGameGridPanel.ITEM_SLOT_WIDTH-1,
+            		InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+            		panel.getGridBGNotSelectColor(),
+            		panel.getGridBGAlpha());
+        gameGraphics.drawBoxEdge(slotX, slotY,
+        		InGameGridPanel.ITEM_SLOT_WIDTH+1,
+        		InGameGridPanel.ITEM_SLOT_HEIGHT+1, panel.getGridLineColor());
+        if (drawSprite)
+            gameGraphics.spriteClip4(slotX+1, slotY+1,
+            		InGameGridPanel.ITEM_SLOT_WIDTH-1,
+            		InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+            		SPRITE_ITEM_START + EntityHandler.getItemDef(
+            				itemID).getSprite(),
+            		EntityHandler.getItemDef(itemID).getPictureMask(),
+            		0, 0, false);
+    }
+    
+    private void drawBankText(int slotX, int slotY,
+    		int bankAmount, int invAmount)
+    {
+    	gameGraphics.drawString(getAbbreviatedValue(bankAmount),
+    			slotX + 1, slotY + 10, 1, bankPan.getBankCountTextColor());
+    	gameGraphics.drawBoxTextRight(getAbbreviatedValue(invAmount),
+    			slotX + InGameGridPanel.ITEM_SLOT_WIDTH - 1,
+    			slotY + InGameGridPanel.ITEM_SLOT_HEIGHT - 5, 1, 0x00ffff);
     }
     
     /**
@@ -1371,8 +1401,8 @@ public class mudclient extends GameWindowMiddleMan
     private void clickBankItem()
     {
         int itemIdx = mouseOverBankPageText * bankPan.getRows()*bankPan.getCols();
-        int mouseXGrid = super.mouseX - bankPan.getBankGridX();
-        int mouseYGrid = super.mouseY - bankPan.getBankGridY();
+        int mouseXGrid = super.mouseX - bankPan.getGridX();
+        int mouseYGrid = super.mouseY - bankPan.getGridY();
         for (int row = 0; row < bankPan.getRows(); row++)
         {
             for (int col = 0; col < bankPan.getCols(); col++)
@@ -1468,12 +1498,7 @@ public class mudclient extends GameWindowMiddleMan
         if (mouseButtonClick != 0)
         {
             mouseButtonClick = 0;
-            if (super.mouseX > bankPan.getBankGridX()
-            		&& super.mouseY > bankPan.getBankGridY()
-            		&& super.mouseX < (bankPan.getBankGridX()
-            				+ bankPan.getGridWidth())
-            		&& super.mouseY < (bankPan.getBankGridY()
-            				+ bankPan.getGridHeight()))
+            if (bankPan.isMouseOverGrid(super.mouseX, super.mouseY))
             	clickBankItem();
             else if (super.mouseX > bankPan.getBottomInfoBoxX()
                 		&& super.mouseY > bankPan.getBottomInfoBoxY()
@@ -1482,14 +1507,10 @@ public class mudclient extends GameWindowMiddleMan
                 		&& super.mouseY < (bankPan.getBottomInfoBoxY()
                 				+ bankPan.getBottomInfoBoxHeight()))
             	clickBankItemMove();
-            
             else if (bankPan.getTabButtonPanel().isMouseOver(
             		super.mouseX, super.mouseY))
             	switchBankTab();
-            else if (super.mouseX < bankPan.getX()
-            		|| super.mouseY < bankPan.getY()
-            		|| super.mouseX > bankPan.getX() + bankPan.getWidth()
-            		|| super.mouseY > bankPan.getY() + bankPan.getHeight()
+            else if (!bankPan.getFrame().isMouseOver(super.mouseX, super.mouseY)
             		|| (bankPan.getFrame().getCloseButton().isMouseOverButton(
             				super.mouseX, super.mouseY)))
             {
@@ -1544,31 +1565,34 @@ public class mudclient extends GameWindowMiddleMan
     
     private void drawInventoryGrid()
     {
-        for (int j = 0; j < invPan.getSlots(); j++)
+        int k7 = mouseOverBankPageText * invPan.getRows()*invPan.getCols();
+        for (int row = 0; row < bankPan.getRows(); row++)
         {
-            int row = invPan.getInvGridX()-1 + (j % invPan.getCols()) * itemSlotWidth;
-            int col = invPan.getInvGridY()-1 + (j / invPan.getCols()) * itemSlotHeight;
-            if (j < inventoryCount && wearing[j] == 1)
-                gameGraphics.drawBoxAlpha(row, col, itemSlotWidth, itemSlotHeight,
-                		0xff0000, 128);
-            else
-                gameGraphics.drawBoxAlpha(row, col, itemSlotWidth, itemSlotHeight,
-                		GameImage.convertRGBToLong(181, 181, 181), 128);
-            gameGraphics.drawBoxEdge(row, col, itemSlotWidth+1, itemSlotHeight+1, 0);
-            if (j < inventoryCount)
+            for (int col = 0; col < bankPan.getCols(); col++)
             {
-                gameGraphics.spriteClip4(row+1, col+1, itemSlotWidth-1, itemSlotHeight-2,
-                		SPRITE_ITEM_START
-                		+ EntityHandler.getItemDef(inventoryItems[j]).getSprite(),
-                		EntityHandler.getItemDef(inventoryItems[j]).getPictureMask(),
-                		0, 0, false);
-                if (EntityHandler.getItemDef(inventoryItems[j]).isStackable())
-                {
-                    gameGraphics.drawString(getAbbreviatedValue(inventoryItemsCount[j]),
-                    		row + 1, col + 10, 1, 0xffff00);
-                }
+                int slotX = invPan.getGridX() + col*InGameGridPanel.ITEM_SLOT_WIDTH;
+                int slotY = invPan.getGridY() + row*InGameGridPanel.ITEM_SLOT_HEIGHT;
+                k7++;
             }
         }
+        for (int j = 0; j < invPan.getSlots(); j++)
+        {
+            int col = invPan.getInvGridX() + (j % invPan.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
+            int row = invPan.getInvGridY() + (j / invPan.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+
+            drawItemBox(invPan, inventoryItems[j], col, row,
+            		j < inventoryCount && wearing[j] == 1,
+            		j < inventoryCount && inventoryItems[j] != -1);
+            if (j < inventoryCount && inventoryItems[j] != -1
+            		&& EntityHandler.getItemDef(inventoryItems[j]).isStackable())
+            	drawInvText(col, row, inventoryItemsCount[j]);
+        }
+    }
+    
+    private void drawInvText(int col, int row, int amount)
+    {
+        gameGraphics.drawString(getAbbreviatedValue(amount),
+        		col + 1, row + 10, 1, invPan.getInvCountTextColor());
     }
     
     private void drawInventoryMisc()
@@ -1702,33 +1726,39 @@ public class mudclient extends GameWindowMiddleMan
         			sprite.getHeight(), SPRITE_MEDIA_START + 22);
         }
         sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 23];
-        gameGraphics.drawPicture((windowWidth - sprite.getWidth())/2, windowHeight - 4, SPRITE_MEDIA_START + 23);
+        gameGraphics.drawPicture(0, windowHeight - 4, SPRITE_MEDIA_START + 23);
     	
         int i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 0)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt952 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("All messages", windowHalfWidth - 202, windowHeight + 6, 0, i);
+    	int buttonWidth = 82;
+    	int j = 14 + buttonWidth/2;
+        gameGraphics.drawText("All messages", j, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 1)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt953 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Chat history", windowHalfWidth - 101, windowHeight + 6, 0, i);
+        j += 99;
+        gameGraphics.drawText("Chat history", j, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 2)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt954 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Quest history", windowHalfWidth - 1, windowHeight + 6, 0, i);
+        j += 101;
+        gameGraphics.drawText("Quest history", j, windowHeight + 6, 0, i);
         i = GameImage.convertRGBToLong(200, 200, 255);
         if (messagesTab == 3)
             i = GameImage.convertRGBToLong(255, 200, 50);
         if (anInt955 % 30 > 15)
             i = GameImage.convertRGBToLong(255, 50, 50);
-        gameGraphics.drawText("Private history", windowHalfWidth + 99, windowHeight + 6, 0, i);
-        gameGraphics.drawText("Report abuse", windowHalfWidth + 201, windowHeight + 6, 0, 0xffffff);
+        j += 101;
+        gameGraphics.drawText("Private history", j, windowHeight + 6, 0, i);
+        j += 101;
+        gameGraphics.drawText("Report abuse", j, windowHeight + 6, 0, 0xffffff);
     }
 
     /**
@@ -1916,56 +1946,44 @@ public class mudclient extends GameWindowMiddleMan
     
     private void drawStatsTab()
     {
-        int i1 = plrPan.getY() + plrPan.getTabHeight() + 12;
+        int i1 = plrPan.getY() + plrPan.getTabHeight() + plrPan.getHeaderHeight()/*13*/;
         int k1 = -1;
-        gameGraphics.drawString("Skills", plrPan.getX() + 5, i1, 3, 0xffff00);
-        i1 += 13;
+        int yOffset = -5;
+        gameGraphics.drawString("Skills", plrPan.getX() + 5, i1 + yOffset,
+        		3, 0xffff00);
         gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%",
-        		(plrPan.getX() + plrPan.getWidth() / 2) - 5, i1 - 13, 1, 0xffffff);
-        for (int l1 = 0; l1 < 9; l1++) {
-            int i2 = 0xffffff;
-            if (super.mouseX > plrPan.getX() + 3
-            		&& super.mouseY >= i1 - 11
-            		&& super.mouseY < i1 + 2
-            		&& super.mouseX < plrPan.getX() + 90)
-            {
-                i2 = 0xff0000;
-                k1 = l1;
-            }
-            gameGraphics.drawString(skillArray[l1] + ":@yel@"
-            		+ playerStatCurrent[l1] + "/" + playerStatBase[l1],
-            		plrPan.getX() + 5, i1, 1, i2);
-            i2 = 0xffffff;
-            if (super.mouseX >= plrPan.getX() + 90
-            		&& super.mouseY >= i1 - 11
-            		&& super.mouseY < i1 + 2
-            		&& super.mouseX < plrPan.getX() + 196)
-            {
-                i2 = 0xff0000;
-                k1 = l1 + 9;
-            }
-            gameGraphics.drawString(skillArray[l1 + 9] + ":@yel@" + playerStatCurrent[l1 + 9]
-            		+ "/" + playerStatBase[l1 + 9], 
-            		(plrPan.getX() + plrPan.getWidth() / 2) - 5, i1, 1, i2);
-            i1 += 13;
-        }
-
-        i1 += 8;
-        gameGraphics.drawString("Equipment Status", plrPan.getX() + 5, i1, 3, 0xffff00);
-        i1 += 12;
-        for (int j2 = 0; j2 < 3; j2++)
+        		(plrPan.getX() + plrPan.getWidth() / 2) + 5, i1 + yOffset,
+        		1, 0xffffff);
+        i1 += plrPan.getStatButtonPanel().getHeight() + plrPan.getHeaderHeight();
+        int i = 0;
+        for (InGameButton button : plrPan.getStatButtonPanel().getButtons())
         {
-            gameGraphics.drawString(equipmentStatusName[j2]
-            		+ ":@yel@" + equipmentStatus[j2],
-            		plrPan.getX() + 5, i1, 1, 0xffffff);
-            gameGraphics.drawString(equipmentStatusName[j2 + 3]
-            		+ ":@yel@" + equipmentStatus[j2 + 3],
-            		plrPan.getX() + plrPan.getWidth() / 2 + 25, i1, 1, 0xffffff);
-            i1 += 13;
+            gameGraphics.drawString(button.getButtonText() + ":@yel@"
+            		+ playerStatCurrent[i] + "/" + playerStatBase[i],
+            		button.getX() + 5, button.getY() + 10, 1,
+            		button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+            if (button.isMouseOverButton(super.mouseX, super.mouseY))
+            	k1 = plrPan.getCorrectedSkillIndex(i);
+        	++i;
         }
+        
+        gameGraphics.drawString("Equipment Status", plrPan.getX() + 5,
+        		i1 + yOffset, 3, 0xffff00);
 
-        i1 += 6;
-        gameGraphics.drawLineX(plrPan.getX(), i1 - 15, plrPan.getWidth(), 0);
+        i = 0;
+        for (InGameButton button : plrPan.getEquipmentButtonPanel().getButtons())
+        {
+            gameGraphics.drawString(button.getButtonText()
+            		+ ":@yel@" + equipmentStatus[i],
+            		button.getX() + 5, button.getY() + 10, 1,
+            		button.isMouseOverButton(super.mouseX, super.mouseY) ? button.getMouseOverColor() : button.getMouseNotOverColor());
+        	++i;
+        }
+        i1 += plrPan.getEquipmentButtonPanel().getHeight() + 1;
+        
+        gameGraphics.drawLineX(plrPan.getX(), i1 /*- 15*/, plrPan.getWidth(),
+        		plrPan.getLineColor());
+        i1 += 11;
         if (k1 != -1) {
             gameGraphics.drawString(skillArrayLong[k1] + " skill",
             		plrPan.getX() + 5, i1, 1, 0xffff00);
@@ -2032,43 +2050,39 @@ public class mudclient extends GameWindowMiddleMan
     
     private void drawInfoPanel()
     {
-        int l;
-        int k = l = GameImage.convertRGBToLong(160, 160, 160);
-        if (anInt826 == 0)
-            k = GameImage.convertRGBToLong(220, 220, 220);
-        else
-            l = GameImage.convertRGBToLong(220, 220, 220);
+        int questTabColor = (anInt826 == 1) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
+        int statsTabColor = (anInt826 == 0) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
         gameGraphics.drawBoxAlpha(plrPan.getX(), plrPan.getY(),
-        		plrPan.getWidth() / 2, plrPan.getTabHeight(), k, 128);
+        		plrPan.getWidth() / 2, plrPan.getTabHeight(),
+        		statsTabColor, plrPan.getBGAlpha());
         gameGraphics.drawBoxAlpha(plrPan.getX() + plrPan.getWidth() / 2,
         		plrPan.getY(), plrPan.getWidth() / 2,
-        		plrPan.getTabHeight(), l, 128);
+        		plrPan.getTabHeight(), questTabColor, plrPan.getBGAlpha());
         gameGraphics.drawBoxAlpha(plrPan.getX(),
-        		plrPan.getY() + plrPan.getTabHeight(),
-        		plrPan.getWidth(),
+        		plrPan.getY() + plrPan.getTabHeight(), plrPan.getWidth(),
         		plrPan.getHeight() - plrPan.getTabHeight(),
-        		GameImage.convertRGBToLong(220, 220, 220), 128);
+        		plrPan.getBGColor(), plrPan.getBGAlpha());
         
-        gameGraphics.drawLineX(plrPan.getX(),
-        		plrPan.getY(),
-        		plrPan.getWidth(), 0);
+        gameGraphics.drawLineX(plrPan.getX(), plrPan.getY(),
+        		plrPan.getWidth(), plrPan.getLineColor());
         gameGraphics.drawLineY(plrPan.getX(),
-        		plrPan.getY(), plrPan.getTabHeight(), 0);
-        // dunno why i need the extra -1 here.
-        gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth()-1,
-        		plrPan.getY(), plrPan.getTabHeight(), 0);
+        		plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
+        gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth(),
+        		plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
         
         gameGraphics.drawLineX(plrPan.getX(),
         		plrPan.getY() + plrPan.getTabHeight(),
-        		plrPan.getWidth(), 0);
+        		plrPan.getWidth(), plrPan.getLineColor());
         gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth() / 2,
-        		plrPan.getY(), plrPan.getTabHeight(), 0);
-        gameGraphics.drawText("Stats",
-        		plrPan.getX() + plrPan.getWidth() / 4,
-        		plrPan.getY() + plrPan.getTabHeight()/2+4, 4, 0);
-        gameGraphics.drawText("Quests",
-        		plrPan.getX() + 3 * plrPan.getWidth() / 4,
-        		plrPan.getY() + plrPan.getTabHeight()/2+4, 4, 0);
+        		plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
+        InGameButton button = plrPan.getStatButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
+        button = plrPan.getQuestButton();
+        gameGraphics.drawText(button.getButtonText(),
+        		button.getX() + button.getWidth()/2,
+        		button.getY() + button.getHeight()/2 + 4, 4, 0);
     }
 
     private final void drawPlayerInfoMenu(boolean flag)
@@ -2083,10 +2097,7 @@ public class mudclient extends GameWindowMiddleMan
         {
             return;
         }
-        if (super.mouseX >= plrPan.getX()
-        		&& super.mouseY >= plrPan.getY()
-        		&& super.mouseX < plrPan.getX() + plrPan.getWidth()
-        		&& super.mouseY < plrPan.getY() + plrPan.getHeight())
+        if (plrPan.isMouseOver(super.mouseX, super.mouseY))
         {
             if (super.mouseY <= plrPan.getY() + plrPan.getTabHeight()
             		&& mouseButtonClick == 1)
@@ -2102,15 +2113,22 @@ public class mudclient extends GameWindowMiddleMan
                     anInt826 = 1;
                 }
             }
-            else if (plrPan.isMouseOver(super.mouseX, super.mouseY)
-            		&& anInt826 == 1)
+            else if (super.mouseY > plrPan.getY() + plrPan.getTabHeight())
             {
-            	/* TODO: Find out why the scroll bar does not work for quest menu
-            	 * but it does for magic menu. I fixed it now by increasing the
-            	 * visible scroll area to twice the width of the scroll bar.
-            	 */ 
-                questMenu.updateActions(super.mouseX, super.mouseY,
-                		super.lastMouseDownButton, super.mouseDownButton);
+            	if (anInt826 == 0)
+            	{
+            		//handle clicking on skills and combat stats
+            	}
+            	else if (anInt826 == 1)
+            	{
+            		/* TODO: Find out why the scroll bar does not work for quest menu
+            		 * but it does for magic menu. I fixed it now by increasing the
+            		 * visible scroll area to twice the width of the scroll bar.
+            		 */ 
+            		questMenu.updateActions(super.mouseX, super.mouseY,
+            				super.lastMouseDownButton, super.mouseDownButton);
+            		mouseButtonClick = 0;
+            	}
         		mouseButtonClick = 0;
             }
         }
@@ -2126,7 +2144,7 @@ public class mudclient extends GameWindowMiddleMan
         	}
         }
         else if (plrPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
-        { // click inside inventory but not on the grid or close button
+        { // click inside info panel but not on the content or close button
             menuLength++;
         	if (mouseButtonClick == 1)
         		mouseButtonClick = 0;
@@ -5083,31 +5101,37 @@ public class mudclient extends GameWindowMiddleMan
         }
         if (super.mouseY > windowHeight - 4)
         { // botom bar; chat tabs & report abuse
-            if (super.mouseX > windowHalfWidth - 241
-            		&& super.mouseX < windowHalfWidth - 160
+        	int buttonWidth = 82;
+        	int xOffset = 14;
+            if (super.mouseX > xOffset
+            		&& super.mouseX < xOffset + buttonWidth
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 0;
             }
-            if (super.mouseX > windowHalfWidth - 146
-            		&& super.mouseX < windowHalfWidth - 62
+        	xOffset += 99;
+            if (super.mouseX > xOffset
+            		&& super.mouseX < xOffset + buttonWidth
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 1;
                 gameMenu.anIntArray187[messagesHandleChatHist] = 0xf423f;
             }
-            if (super.mouseX > windowHalfWidth - 41
-            		&& super.mouseX < windowHalfWidth + 39
+        	xOffset += 101;
+            if (super.mouseX > xOffset
+            		&& super.mouseX < xOffset + buttonWidth
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 2;
                 gameMenu.anIntArray187[messagesHandleQuestHist] = 0xf423f;
             }
-            if (super.mouseX > windowHalfWidth + 59
-            		&& super.mouseX < windowHalfWidth + 139
+        	xOffset += 101;
+            if (super.mouseX > xOffset
+            		&& super.mouseX < xOffset + buttonWidth
             		&& super.lastMouseDownButton == 1) {
                 messagesTab = 3;
                 gameMenu.anIntArray187[messagesHandlePrivHist] = 0xf423f;
             }
-            if (super.mouseX > windowHalfWidth + 161
-            		&& super.mouseX < windowHalfWidth + 241
+        	xOffset += 101;
+            if (super.mouseX > xOffset
+            		&& super.mouseX < xOffset + buttonWidth
             		&& super.lastMouseDownButton == 1)
             {
                 showAbuseWindow = 1;
@@ -8614,7 +8638,6 @@ public class mudclient extends GameWindowMiddleMan
     private EngineHandle engineHandle;
     private Mob playerArray[];
     private boolean serverMessageBoxTop;
-    private final String equipmentStatusName[] = {"Armour", "WeaponAim", "WeaponPower", "Magic", "Prayer", "Range"};
     private int referId;
     private int anInt900;
     private int newUserOkButton;
@@ -8635,7 +8658,6 @@ public class mudclient extends GameWindowMiddleMan
     private int playerStatExperience[];
     private boolean cameraAutoAngleDebug;
     private Mob npcRecordArray[];
-    private final String skillArray[] = {"Attack", "Defense", "Strength", "Hits", "Ranged", "Prayer", "Magic", "Cooking", "Woodcut", "Fletching", "Fishing", "Firemaking", "Crafting", "Smithing", "Mining", "Herblaw", "Agility", "Thieving"};
     private boolean showDuelWindow;
     private int anIntArray923[];
     protected GameImageMiddleMan gameGraphics;

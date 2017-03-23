@@ -7,14 +7,14 @@ public class InGameFrame extends InGameComponent
 	protected final int titleBarColor = 0x0000c0;
 	protected final int titleBarAlpha = 0xff;
 	protected final int titleTextColor = 0xffffff;
-	protected final int marginBGColor = 0x000000;//0x989898;
+	protected final int marginBGColor = 0x0000c0;//0x989898;
 	protected final int marginBGAlpha = 0xff;//0xa0;
 	
     protected final int titlebarHeight = 12;
-    protected final int topMarginHeight = 8;
-    protected final int bottomMarginHeight = 8;
-    protected final int leftMarginWidth = 8;
-    protected final int rightMarginWidth = 8;
+    protected final int topMarginHeight = 1;
+    protected final int bottomMarginHeight = 1;
+    protected final int leftMarginWidth = 1;
+    protected final int rightMarginWidth = 1;
     
     protected final int closeButtonWidth = 88;
     protected final String closeBtnText = "Close window";
@@ -38,7 +38,7 @@ public class InGameFrame extends InGameComponent
     			+ topMarginHeight + bottomMarginHeight;
     	closeButton = new InGameButton(
     			x + getTitleBarWidth() - closeButtonWidth,
-    			y, getTitleBarHeight(), closeButtonWidth,
+    			y, closeButtonWidth, getTitleBarHeight(),
     			closeBtnText);
     }
     

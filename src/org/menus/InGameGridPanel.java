@@ -6,7 +6,7 @@ public abstract class InGameGridPanel extends InGamePanel
 {
     public static final int ITEM_SLOT_WIDTH = 49;
     public static final int ITEM_SLOT_HEIGHT = 34;
-    protected int nRows, nCols;
+    protected int nRows, nCols, gridX, gridY;
     protected final int gridBGSelectColor = 0xff0000;
     protected final int gridBGNotSelectColor = 0xd0d0d0;
     protected final int gridBGAlpha = 0xa0;
@@ -23,6 +23,16 @@ public abstract class InGameGridPanel extends InGamePanel
     public int getGridLineColor() { return gridLineColor; }
     public int getGridLineAlpha() { return gridLineAlpha; }
     
-	public int getGridHeight() { return nRows*ITEM_SLOT_HEIGHT; }
-	public int getGridWidth() { return nCols*ITEM_SLOT_WIDTH; }
+	public int getGridHeight() { return nRows*ITEM_SLOT_HEIGHT+1; }
+	public int getGridWidth() { return nCols*ITEM_SLOT_WIDTH+1; }
+	public int getGridX() { return gridX; }
+	public int getGridY() { return gridY; }
+	
+	public boolean isMouseOverGrid(int mouseX, int mouseY)
+	{
+    	return (!(mouseX < getGridX()
+        		|| mouseY < getGridY()
+        		|| mouseX > getGridX() + getGridWidth()
+        		|| mouseY > getGridY() + getGridHeight()));
+	}
 }
