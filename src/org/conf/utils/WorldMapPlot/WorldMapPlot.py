@@ -352,9 +352,11 @@ sector_height = 48
 
 def readElev0():
     const_x = []
+    txtr_x = []
     for i in range(0, np.size(landscape0_file, axis=0)):
         # x-axis
-        const_y = [];
+        const_y = []
+        txtr_y = []
         for j in range(0, np.size(landscape0_file, axis=1)):
             # y-axis
             fh = open(landscape_path+landscape0_file[i][j], "rb")
@@ -362,10 +364,15 @@ def readElev0():
             fh.close()
             groundElevation = np.transpose(
                 np.reshape(data_read, (sector_width*sector_height, 10)))[0]
+            groundTexture = np.transpose(
+                np.reshape(data_read, (sector_width*sector_height, 10)))[2]
             const_y.append(np.reshape(groundElevation,
                                       (sector_width, sector_height)))
+            txtr_y.append(np.reshape(groundTexture,
+                                     (sector_width, sector_height)))
         const_x.append(np.hstack(const_y))
-    return np.vstack(const_x)
+        txtr_x.append(np.hstack(txtr_y))
+    return np.vstack(const_x), np.vstack(txtr_x)
 
 
 def readElev1():
@@ -429,16 +436,18 @@ y = np.arange(0, np.size(plot_mat0, axis=1))
 [X, Y] = np.meshgrid(x, y)
 surf_plot(X, Y, plot_mat0/25.5)
 """
-plot_mat0 = readElev0()
+plot_mat0, txtr = readElev0()
 x = np.arange(0, np.size(plot_mat0, axis=0))
 y = np.arange(0, np.size(plot_mat0, axis=1))
 [Y, X] = np.meshgrid(y, x)  # because the C++ program uses x in the outer loop
 X = np.reshape(X, (-1, np.size(X)))
 Y = np.reshape(Y, (-1, np.size(Y)))
 Z = np.reshape(plot_mat0, (-1, np.size(plot_mat0)))
+T = np.reshape(txtr, (-1, np.size(txtr)))
 X = np.array(X, dtype=np.float64)
 Y = np.array(Y, dtype=np.float64)
 Z = -np.array(Z/32, dtype=np.float64)
+T = np.array(T, dtype=np.float64)
 fh = open("X.dat", "wb")
 fh.write(X.tobytes())
 fh.close()
@@ -448,7 +457,10 @@ fh.close()
 fh = open("Z.dat", "wb")
 fh.write(Z.tobytes())
 fh.close()
+fh = open("T.dat", "wb")
+fh.write(T.tobytes())
+fh.close()
 curr_path = "$HOME/git/rscclient/src/org/conf/utils/WorldMapPlot/"
 os.system("build/Point " + curr_path + "X.dat "
-          + curr_path + "Y.dat " + curr_path + "Z.dat "
+          + curr_path + "Y.dat " + curr_path + "Z.dat " + curr_path + "T.dat "
           + str(len(x)) + " " + str(len(y)))

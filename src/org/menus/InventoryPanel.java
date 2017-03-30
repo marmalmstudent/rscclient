@@ -2,14 +2,16 @@ package org.menus;
 
 import java.awt.Rectangle;
 
-import org.mudclient;
+import org.GameImageMiddleMan;
 
 public class InventoryPanel extends InGameGridPanel
 {
     private final int invCountTextColor = 0xffff00;
+    private GameImageMiddleMan gameGFX;
     
-    public InventoryPanel(int xCenter, int yCenter)
+    public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan gameGraphics)
     {
+    	this.gameGFX = gameGraphics;
 		frame = new InGameFrame("Inventory");
         nCols = 5;
         nRows = 6;
@@ -28,6 +30,8 @@ public class InventoryPanel extends InGameGridPanel
 	
 	public boolean isMouseOverInvGrid(int mouseX, int mouseY)
 	{
+		//gameGFX.drawBoxAlpha(10, 10, 200, 200, 0xffff00, 0x7f);
+		//gameGraphics.drawBoxAlpha(210, 210, 200, 200, 0xff00ff, 0x7f);
 		return (mouseX >= getInvGridX()
         		&& mouseY >= getInvGridY()
         		&& mouseX < getInvGridX() + getGridWidth() 

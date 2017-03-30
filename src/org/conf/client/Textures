@@ -219,4 +219,28 @@
     <dataName>lava</dataName>
     <animationName>flames</animationName>
   </TextureDef>
+  <TextureDef>
+    <dataName>grass</dataName>
+    <animationName></animationName>
+  </TextureDef>
+  <TextureDef>
+    <dataName>road</dataName>
+    <animationName></animationName>
+  </TextureDef>
+  <TextureDef>
+    <dataName>dirt</dataName>
+    <animationName></animationName>
+  </TextureDef>
+  <TextureDef>
+    <dataName>stone</dataName>
+    <animationName></animationName>
+  </TextureDef>
+  <TextureDef>
+    <dataName>snow</dataName>
+    <animationName></animationName>
+  </TextureDef>
+  <TextureDef>
+    <dataName>sand</dataName>
+    <animationName></animationName>
+  </TextureDef>
 </TextureDef-array>

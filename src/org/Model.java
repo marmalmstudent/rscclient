@@ -284,7 +284,7 @@ public class Model {
             int j1 = method206(abyte0);
             int k1 = method206(abyte0);
             int l1 = method206(abyte0);
-            insertCoordPointNoDublicate(j1, k1, l1);
+            insertCoordPointNoDuplicate(j1, k1, l1);
         }
 
         for (int k3 = 0; k3 < i1; k3++) {
@@ -388,7 +388,7 @@ public class Model {
                 int ai[] = new int[model.anIntArray235[j1]];
                 int ai1[] = model.anIntArrayArray236[j1];
                 for (int k1 = 0; k1 < model.anIntArray235[j1]; k1++)
-                    ai[k1] = insertCoordPointNoDublicate(model.xCoords[ai1[k1]], model.zCoords[ai1[k1]], model.yCoords[ai1[k1]]);
+                    ai[k1] = insertCoordPointNoDuplicate(model.xCoords[ai1[k1]], model.zCoords[ai1[k1]], model.yCoords[ai1[k1]]);
 
                 int l1 = method181(model.anIntArray235[j1], ai, model.surfaceTexture1[j1], model.surfaceTexture2[j1]);
                 anIntArray241[l1] = model.anIntArray241[j1];
@@ -422,7 +422,7 @@ public class Model {
      * @param y
      * @return
      */
-    public int insertCoordPointNoDublicate(int x, int z, int y) {
+    public int insertCoordPointNoDuplicate(int x, int z, int y) {
         for (int i = 0; i < nbrCoordPoints; i++)
             if (xCoords[i] == x && zCoords[i] == z && yCoords[i] == y)
                 return i;
@@ -518,7 +518,7 @@ public class Model {
     public void method183(Model model, int ai[], int i, int j) {
         int ai1[] = new int[i];
         for (int k = 0; k < i; k++) {
-            int l = ai1[k] = model.insertCoordPointNoDublicate(xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
+            int l = ai1[k] = model.insertCoordPointNoDuplicate(xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
             model.anIntArray232[l] = anIntArray232[ai[k]];
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }

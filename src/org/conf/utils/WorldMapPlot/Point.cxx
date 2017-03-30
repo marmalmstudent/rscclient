@@ -123,6 +123,7 @@ void createTopology(vtkSmartPointer<vtkPoints> points,
                     std::vector<double> *x,
                     std::vector<double> *y,
                     std::vector<double> *z,
+                    std::vector<double> *t,
                     int xSize, int ySize)
 {
   /*
@@ -156,11 +157,18 @@ void createTopology(vtkSmartPointer<vtkPoints> points,
 					 z->at((j+1)*xSize+i+1));
 	// Insert the next cell
 	vertices->InsertNextCell(4, pid);
+	// Insert texture to colormap
+	colormap->InsertNextValue(t->at(j*xSize +i));
+	colormap->InsertNextValue(t->at(j*xSize +i+1));
+	colormap->InsertNextValue(t->at((j+1)*xSize +i));
+	colormap->InsertNextValue(t->at((j+1)*xSize +i+1));
 	// Insert height to colormap
+	/*
 	colormap->InsertNextValue(z->at(j*xSize +i));
 	colormap->InsertNextValue(z->at(j*xSize +i+1));
 	colormap->InsertNextValue(z->at((j+1)*xSize +i));
 	colormap->InsertNextValue(z->at((j+1)*xSize +i+1));
+	*/
       }
   }
   delete[] pid;
@@ -169,7 +177,8 @@ void createTopology(vtkSmartPointer<vtkPoints> points,
 
 void plotSurface(vtkRenderWindowInteractor *iren,
                  std::string fileX, std::string fileY,
-                 std::string fileZ, int xSize, int ySize)
+                 std::string fileZ, std::string fileT,
+		 int xSize, int ySize)
 {
   /* Create the geometry of a point (the coordinate) */
   VTK_SP(vtkPoints, points);
@@ -189,9 +198,11 @@ void plotSurface(vtkRenderWindowInteractor *iren,
   std::vector<double> x;
   std::vector<double> y;
   std::vector<double> z;
+  std::vector<double> t;
   loadData(fileX, &x);
   loadData(fileY, &y);
   loadData(fileZ, &z);
+  loadData(fileT, &t);
   /* Find max and min for the colormap */
   std::vector<double> zBounds;
   zBounds.push_back(z.at(0));
@@ -200,7 +211,7 @@ void plotSurface(vtkRenderWindowInteractor *iren,
 
   /* Create the topology of the point (a vertex) */
   createTopology(points, vertices, colormap,
-                &x, &y, &z, xSize, ySize);
+		 &x, &y, &z, &t, xSize, ySize);
   /*
     ----------------------------------------------------------------------------
     Set the points and vertices created as the geometry and topology of the
@@ -223,7 +234,8 @@ void plotSurface(vtkRenderWindowInteractor *iren,
 
   /* Visualize polygons as primitive grapnics */
   mapper->SetInputData(point);
-  mapper->SetScalarRange(zBounds.at(0), zBounds.at(1)); // colormap boundaries
+  mapper->SetScalarRange(0, 19); // colormap boundaries
+  // mapper->SetScalarRange(zBounds.at(0), zBounds.at(1)); // colormap boundaries
   //delete[] zBounds;
   //zBounds = NULL;
   /* set the rendering scene */
@@ -253,21 +265,22 @@ void plotSurface(vtkRenderWindowInteractor *iren,
 int main(int argc, char *argv[], char *envp[])
 {
   int nxpts, nypts;
-  std::string fileX, fileY, fileZ;
-  if (argc > 5)
+  std::string fileX, fileY, fileZ, fileT;
+  if (argc > 6)
     {
       fileX = argv[1];
       fileY = argv[2];
       fileZ = argv[3];
-      nxpts = std::stoi(argv[4]);
-      nypts = std::stoi(argv[5]);
+      fileT = argv[4];
+      nxpts = std::stoi(argv[5]);
+      nypts = std::stoi(argv[6]);
     }
   std::cout << "Reading from file: \n\t" << fileX << "\n\t" << fileY << "\n\t" << fileZ << std::endl;
   std::cout << "Grid size: " << nxpts << " x " << nypts << std::endl;
   // Interactor to interact with the render window
   VTK_SP(vtkRenderWindowInteractor, iren);
   //std::vector<double> surfData = loadData(filename, nxpts, nypts);
-  plotSurface(iren, fileX, fileY, fileZ, nxpts, nypts);
+  plotSurface(iren, fileX, fileY, fileZ, fileT, nxpts, nypts);
   //renWin->Render();
   //ren->GetActiveCamera()->Zoom(1.5);
   iren->Render();

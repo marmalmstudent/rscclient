@@ -2777,8 +2777,9 @@ public class Camera {
 
     }
 
-    public static int method305(int i, int j, int k) {
-        return -1 - (i / 8) * 1024 - (j / 8) * 32 - k / 8;
+    public static int getGroundColorVal(int red, int green, int blue)
+    {
+        return -1 - (red / 8) * 1024 - (green / 8) * 32 - blue / 8;
     }
 
     public int method306(int i, int j, int k, int l, int i1) {

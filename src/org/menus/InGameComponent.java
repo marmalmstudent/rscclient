@@ -1,6 +1,8 @@
 package org.menus;
 
-public abstract class InGameComponent
+import org.mudclient;
+
+public abstract class InGameComponent extends mudclient
 {
     protected int x, y, width, height;
     

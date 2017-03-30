@@ -71,8 +71,8 @@ public class Tile {
         Tile tile = new Tile();
 
         tile.groundElevation = in.get();
-        tile.groundTexture = in.get();
-        tile.groundOverlay = in.get();
+        tile.groundTexture = in.get(); // color of the tile
+        tile.groundOverlay = in.get(); // (sprite) overlay
         tile.roofTexture = in.get();
         tile.horizontalWall = in.get();
         tile.verticalWall = in.get();

@@ -431,37 +431,65 @@ public class EngineHandle {
         }
         if (flag) {
             gameImage.resetImagePixels();
-            for (int xTile = 0; xTile < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; xTile++) {
-                for (int yTile = 0; yTile < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++) {
+            /*
+             * Reset all tiles to non-walkable
+             */
+            for (int xTile = 0; xTile < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; xTile++)
+            {
+                for (int yTile = 0; yTile < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++)
+                {
                     walkableValue[xTile][yTile] = 0;
                 }
             }
 
             Model model = aModel;
             model.method176();
-            for (int j2 = 0; j2 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; j2++) {
-                for (int i3 = 0; i3 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; i3++) {
+            /*
+             * Sets elevation.
+             */
+            for (int j2 = 0; j2 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; j2++)
+            {
+                for (int i3 = 0; i3 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; i3++)
+                {
                     int i4 = -getGroundElevation(j2, i3);
-                    if (getGroundTexturesOverlay(j2, i3) > 0 && EntityHandler.getTileDef(getGroundTexturesOverlay(j2, i3) - 1).getUnknown() == 4)
+                    if (getGroundTexturesOverlay(j2, i3) > 0
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(j2, i3) - 1).getUnknown() == 4)
                         i4 = 0;
-                    if (getGroundTexturesOverlay(j2 - 1, i3) > 0 && EntityHandler.getTileDef(getGroundTexturesOverlay(j2 - 1, i3) - 1).getUnknown() == 4)
+                    if (getGroundTexturesOverlay(j2 - 1, i3) > 0
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(j2 - 1, i3) - 1).getUnknown() == 4)
                         i4 = 0;
-                    if (getGroundTexturesOverlay(j2, i3 - 1) > 0 && EntityHandler.getTileDef(getGroundTexturesOverlay(j2, i3 - 1) - 1).getUnknown() == 4)
+                    if (getGroundTexturesOverlay(j2, i3 - 1) > 0
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(j2, i3 - 1) - 1).getUnknown() == 4)
                         i4 = 0;
-                    if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0 && EntityHandler.getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4)
+                    if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4)
                         i4 = 0;
-                    int j5 = model.insertCoordPointNoDublicate(j2 * 128, i4, i3 * 128);
+                    int j5 = model.insertCoordPointNoDuplicate(j2 * 128, i4, i3 * 128);
                     int j7 = (int) (Math.random() * 10D) - 5;
                     model.method187(j5, j7);
                 }
             }
 
-            for (int j3 = 0; j3 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH-1; j3++)
+            /*
+             * Draws ground tiles that does not have overlays (i.e. not roads, house floors,
+             * water etc.)
+             */
+            for (int tile_x = 0; tile_x < NBR_VISIBLE_SECTORS*SECTOR_WIDTH-1; tile_x++)
             {
-                for (int j4 = 0; j4 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT-1; j4++)
+                for (int tile_y = 0; tile_y < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT-1; tile_y++)
                 {
-                    int k5 = getGroundTexture(j3, j4);
-                    int k7 = groundTextureArray[k5];
+                    int k5 = getGroundTexture(tile_x, tile_y);
+                    int k7;
+                    if (k5 >= 0 && k5 < 64)
+                    	k7 = 59; // white-ish (sprite 3279)
+                    else if (k5 >= 64 && k5 < 128)
+                    	k7 = 55; // green-ish (sprite 3275)
+                    else if (k5 >= 128 && k5 < 192)
+                    	k7 = 57; // brown-ish (sprite 3277)
+                    else if (k5 >= 192 && k5 < 256)
+                    	k7 = 60;  // sand-ish (sprite 3280)
+                    else
+                    	k7 = groundTextureArray[k5];
                     int i10 = k7;
                     int k12 = k7;
                     int l14 = 0;
@@ -471,86 +499,95 @@ public class EngineHandle {
                         i10 = 0xbc614e;
                         k12 = 0xbc614e;
                     }
-                    if (getGroundTexturesOverlay(j3, j4) > 0)
-                    {
-                        int l16 = getGroundTexturesOverlay(j3, j4);
+                    if (getGroundTexturesOverlay(tile_x, tile_y) > 0)
+                    {  // Draws roads, water etc.
+                        int l16 = getGroundTexturesOverlay(tile_x, tile_y);
                         int l5 = EntityHandler.getTileDef(l16 - 1).getUnknown();
-                        int i19 = method427(j3, j4);
+                        int i19 = method427(tile_x, tile_y);
+                        // 1 water, 3 wood, -16913 gray, 12345678 invisible,
+                        // -1 black, -26426 light gray, -27685 red carpet
                         k7 = i10 = EntityHandler.getTileDef(l16 - 1).getColour();
+                        if (l16 == 1)
+                        	k7 = i10 = 56; // roads
+                        else if (l16 == 5)
+                        	k7 = i10 = 58; // rock (cavern)
                         if (l5 == 4)
                         {
+                        	// water
                             k7 = 1;
                             i10 = 1;
                             if (l16 == 12)
-                            {
+                            { // lava
                                 k7 = 31;
                                 i10 = 31;
                             }
                         }
                         if (l5 == 5)
-                        {
-                            if (getDiagonalWalls(j3, j4) > 0
-                            		&& getDiagonalWalls(j3, j4) < 24000)
-                                if (getOverlayIfRequired(j3 - 1, j4, k12) != 0xbc614e
-                                		&& getOverlayIfRequired(j3, j4 - 1, k12) != 0xbc614e)
+                        {  // this part draws the road and water stuff.
+                            if (getDiagonalWalls(tile_x, tile_y) > 0
+                            		&& getDiagonalWalls(tile_x, tile_y) < 24000)
+                                if (getOverlayIfRequired(tile_x - 1, tile_y, k12) != 0xbc614e
+                                		&& getOverlayIfRequired(tile_x, tile_y - 1, k12) != 0xbc614e)
                                 {
-                                    k7 = getOverlayIfRequired(j3 - 1, j4, k12);
+                                    k7 = getOverlayIfRequired(tile_x - 1, tile_y, k12);
                                     l14 = 0;
                                 }
-                                else if (getOverlayIfRequired(j3 + 1, j4, k12) != 0xbc614e
-                                		&& getOverlayIfRequired(j3, j4 + 1, k12) != 0xbc614e)
+                                else if (getOverlayIfRequired(tile_x + 1, tile_y, k12) != 0xbc614e
+                                		&& getOverlayIfRequired(tile_x, tile_y + 1, k12) != 0xbc614e)
                                 {
-                                    i10 = getOverlayIfRequired(j3 + 1, j4, k12);
+                                    i10 = getOverlayIfRequired(tile_x + 1, tile_y, k12);
                                     l14 = 0;
                                 }
-                                else if (getOverlayIfRequired(j3 + 1, j4, k12) != 0xbc614e
-                                		&& getOverlayIfRequired(j3, j4 - 1, k12) != 0xbc614e)
+                                else if (getOverlayIfRequired(tile_x + 1, tile_y, k12) != 0xbc614e
+                                		&& getOverlayIfRequired(tile_x, tile_y - 1, k12) != 0xbc614e)
                                 {
-                                    i10 = getOverlayIfRequired(j3 + 1, j4, k12);
+                                    i10 = getOverlayIfRequired(tile_x + 1, tile_y, k12);
                                     l14 = 1;
                                 }
-                                else if (getOverlayIfRequired(j3 - 1, j4, k12) != 0xbc614e
-                                		&& getOverlayIfRequired(j3, j4 + 1, k12) != 0xbc614e)
+                                else if (getOverlayIfRequired(tile_x - 1, tile_y, k12) != 0xbc614e
+                                		&& getOverlayIfRequired(tile_x, tile_y + 1, k12) != 0xbc614e)
                                 {
-                                    k7 = getOverlayIfRequired(j3 - 1, j4, k12);
+                                    k7 = getOverlayIfRequired(tile_x - 1, tile_y, k12);
                                     l14 = 1;
                                 }
                         }
-                        else if (l5 != 2 || getDiagonalWalls(j3, j4) > 0
-                        		&& getDiagonalWalls(j3, j4) < 24000)
-                            if (method427(j3 - 1, j4) != i19 && method427(j3, j4 - 1) != i19)
+                        else if (l5 != 2 || getDiagonalWalls(tile_x, tile_y) > 0
+                        		&& getDiagonalWalls(tile_x, tile_y) < 24000)
+                        {  // when a road/water tile and a non-road/water tile shares the same tile
+                            if (method427(tile_x - 1, tile_y) != i19 && method427(tile_x, tile_y - 1) != i19)
                             {
                                 k7 = k12;
                                 l14 = 0;
                             }
-                            else if (method427(j3 + 1, j4) != i19
-                            		&& method427(j3, j4 + 1) != i19)
+                            else if (method427(tile_x + 1, tile_y) != i19
+                            		&& method427(tile_x, tile_y + 1) != i19)
                             {
                                 i10 = k12;
                                 l14 = 0;
                             }
-                            else if (method427(j3 + 1, j4) != i19
-                            		&& method427(j3, j4 - 1) != i19)
+                            else if (method427(tile_x + 1, tile_y) != i19
+                            		&& method427(tile_x, tile_y - 1) != i19)
                             {
                                 i10 = k12;
                                 l14 = 1;
                             }
-                            else if (method427(j3 - 1, j4) != i19
-                            		&& method427(j3, j4 + 1) != i19)
+                            else if (method427(tile_x - 1, tile_y) != i19
+                            		&& method427(tile_x, tile_y + 1) != i19)
                             {
                                 k7 = k12;
                                 l14 = 1;
                             }
+                        }
                         if (EntityHandler.getTileDef(l16 - 1).getObjectType() != 0)
-                            walkableValue[j3][j4] |= 0x40;
+                            walkableValue[tile_x][tile_y] |= 0x40;
                         if (EntityHandler.getTileDef(l16 - 1).getUnknown() == 2)
-                            walkableValue[j3][j4] |= 0x80;
+                            walkableValue[tile_x][tile_y] |= 0x80;
                     }
-                    method413(j3, j4, l14, k7, i10);
-                    int i17 = ((getGroundElevation(j3 + 1, j4 + 1)
-                    		- getGroundElevation(j3 + 1, j4))
-                    		+ getGroundElevation(j3, j4 + 1))
-                    		- getGroundElevation(j3, j4);
+                    method413(tile_x, tile_y, l14, k7, i10);
+                    int i17 = ((getGroundElevation(tile_x + 1, tile_y + 1)
+                    		- getGroundElevation(tile_x + 1, tile_y))
+                    		+ getGroundElevation(tile_x, tile_y + 1))
+                    		- getGroundElevation(tile_x, tile_y);
                     // TODO: figure out if the 96 has to do with width or height
                     if (k7 != i10 || i17 != 0)
                     {
@@ -560,58 +597,58 @@ public class EngineHandle {
                         {
                             if (k7 != 0xbc614e)
                             {
-                                ai[0] = j4 + j3 * 96 + 96;
-                                ai[1] = j4 + j3 * 96;
-                                ai[2] = j4 + j3 * 96 + 1;
+                                ai[0] = tile_y + tile_x * 96 + 96;
+                                ai[1] = tile_y + tile_x * 96;
+                                ai[2] = tile_y + tile_x * 96 + 1;
                                 int l21 = model.method181(3, ai, 0xbc614e, k7);
-                                selectedX[l21] = j3;
-                                selectedY[l21] = j4;
+                                selectedX[l21] = tile_x;
+                                selectedY[l21] = tile_y;
                                 model.anIntArray258[l21] = 0x30d40 + l21;
                             }
                             if (i10 != 0xbc614e) {
-                                ai7[0] = j4 + j3 * 96 + 1;
-                                ai7[1] = j4 + j3 * 96 + 96 + 1;
-                                ai7[2] = j4 + j3 * 96 + 96;
+                                ai7[0] = tile_y + tile_x * 96 + 1;
+                                ai7[1] = tile_y + tile_x * 96 + 96 + 1;
+                                ai7[2] = tile_y + tile_x * 96 + 96;
                                 int i22 = model.method181(3, ai7, 0xbc614e, i10);
-                                selectedX[i22] = j3;
-                                selectedY[i22] = j4;
+                                selectedX[i22] = tile_x;
+                                selectedY[i22] = tile_y;
                                 model.anIntArray258[i22] = 0x30d40 + i22;
                             }
                         } else {
                             if (k7 != 0xbc614e) {
-                                ai[0] = j4 + j3 * 96 + 1;
-                                ai[1] = j4 + j3 * 96 + 96 + 1;
-                                ai[2] = j4 + j3 * 96;
+                                ai[0] = tile_y + tile_x * 96 + 1;
+                                ai[1] = tile_y + tile_x * 96 + 96 + 1;
+                                ai[2] = tile_y + tile_x * 96;
                                 int j22 = model.method181(3, ai, 0xbc614e, k7);
-                                selectedX[j22] = j3;
-                                selectedY[j22] = j4;
+                                selectedX[j22] = tile_x;
+                                selectedY[j22] = tile_y;
                                 model.anIntArray258[j22] = 0x30d40 + j22;
                             }
                             if (i10 != 0xbc614e) {
-                                ai7[0] = j4 + j3 * 96 + 96;
-                                ai7[1] = j4 + j3 * 96;
-                                ai7[2] = j4 + j3 * 96 + 96 + 1;
+                                ai7[0] = tile_y + tile_x * 96 + 96;
+                                ai7[1] = tile_y + tile_x * 96;
+                                ai7[2] = tile_y + tile_x * 96 + 96 + 1;
                                 int k22 = model.method181(3, ai7, 0xbc614e, i10);
-                                selectedX[k22] = j3;
-                                selectedY[k22] = j4;
+                                selectedX[k22] = tile_x;
+                                selectedY[k22] = tile_y;
                                 model.anIntArray258[k22] = 0x30d40 + k22;
                             }
                         }
                     } else if (k7 != 0xbc614e) {
                         int ai1[] = new int[4];
-                        ai1[0] = j4 + j3 * 96 + 96;
-                        ai1[1] = j4 + j3 * 96;
-                        ai1[2] = j4 + j3 * 96 + 1;
-                        ai1[3] = j4 + j3 * 96 + 96 + 1;
+                        ai1[0] = tile_y + tile_x * 96 + 96;
+                        ai1[1] = tile_y + tile_x * 96;
+                        ai1[2] = tile_y + tile_x * 96 + 1;
+                        ai1[3] = tile_y + tile_x * 96 + 96 + 1;
                         int l19 = model.method181(4, ai1, 0xbc614e, k7);
-                        selectedX[l19] = j3;
-                        selectedY[l19] = j4;
+                        selectedX[l19] = tile_x;
+                        selectedY[l19] = tile_y;
                         model.anIntArray258[l19] = 0x30d40 + l19;
                     }
                 }
 
             }
-
+            /* bridges it seems */
             for (int k4 = 1; k4 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH-1; k4++)
             {
                 for (int i6 = 1; i6 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT-1; i6++)
@@ -620,10 +657,10 @@ public class EngineHandle {
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() == 4)
                     {
                         int l7 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getColour();
-                        int j10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int l12 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int i15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                        int j17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        int j10 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                        int l12 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                        int i15 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                        int j17 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                         int ai2[] = {
                                 j10, l12, i15, j17
                         };
@@ -640,10 +677,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getUnknown() == 4)
                         {
                             int i8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getColour();
-                            int k10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int i13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int j15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int k17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int k10 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int i13 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int j15 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int k17 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai3[] = {
                                     k10, i13, j15, k17
                             };
@@ -657,10 +694,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getUnknown() == 4)
                         {
                             int j8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getColour();
-                            int l10 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int j13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int k15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int l17 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int l10 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int j13 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int k15 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int l17 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai4[] = {
                                     l10, j13, k15, l17
                             };
@@ -674,10 +711,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getUnknown() == 4)
                         {
                             int k8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getColour();
-                            int i11 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int k13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int l15 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int i18 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int i11 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int k13 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int l15 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int i18 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai5[] = {
                                     i11, k13, l15, i18
                             };
@@ -691,10 +728,10 @@ public class EngineHandle {
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getUnknown() == 4)
                         {
                             int l8 = EntityHandler.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getColour();
-                            int j11 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int l13 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int i16 = model.insertCoordPointNoDublicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
-                            int j18 = model.insertCoordPointNoDublicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                            int j11 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
+                            int l13 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
+                            int i16 = model.insertCoordPointNoDuplicate((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1), (i6 + 1) * 128);
+                            int j18 = model.insertCoordPointNoDuplicate(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
                             int ai6[] = {
                                     j11, l13, i16, j18
                             };
@@ -713,8 +750,10 @@ public class EngineHandle {
             for (int j6 = 0; j6 < 64; j6++) {
                 camera.addModel(aModelArray596[j6]); // floor tiles
             }
-            for (int i9 = 0; i9 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; i9++) {
-                for (int k11 = 0; k11 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; k11++) {
+            for (int i9 = 0; i9 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH; i9++)
+            {
+                for (int k11 = 0; k11 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT; k11++)
+                {
                 	// objects; roofs, fences, walls etc but not trees and and stuff.
                     anIntArrayArray581[i9][k11] = getGroundElevation(i9, k11);
                 }
@@ -722,6 +761,7 @@ public class EngineHandle {
         }
         aModel.method176();
         int k1 = 0x606060;
+        // walls, fences
         for (int i2 = 0; i2 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH-1; i2++) {
             for (int k2 = 0; k2 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT-1; k2++) {
                 int k3 = getVerticalWall(i2, k2);
@@ -775,10 +815,10 @@ public class EngineHandle {
                 }
             }
         }
-
         if (flag) {
             gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1, 0, 0, 285, 285);
         }
+        // walls, fences etc.
         aModel.method184(false, 60, 24, -50, -10, -50);
         aModelArrayArray580[k] = aModel.method182(0, 0, 1536, 1536, 8, 64, 338, true);
         for (int l2 = 0; l2 < 64; l2++) {
@@ -799,7 +839,6 @@ public class EngineHandle {
                     method403(k6 - 12001, l3 + 1, l4, l3, l4 + 1);
             }
         }
-
         for (int i5 = 1; i5 < NBR_VISIBLE_SECTORS*SECTOR_WIDTH-1; i5++) {
             for (int l6 = 1; l6 < NBR_VISIBLE_SECTORS*SECTOR_HEIGHT-1; l6++) {
                 int j9 = getRoofTexture(i5, l6);
@@ -947,50 +986,50 @@ public class EngineHandle {
                     		&& getRoofTexture(i7 - 1, k9 - 1) == 0)
                     {
                         int ai8[] = new int[3];
-                        ai8[0] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
-                        ai8[1] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
-                        ai8[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                        ai8[0] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
+                        ai8[1] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
+                        ai8[2] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
                         aModel.method181(3, ai8, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 12000 && getDiagonalWalls(i7, k9) < 24000
                     		&& getRoofTexture(i7 + 1, k9 + 1) == 0)
                     {
                         int ai9[] = new int[3];
-                        ai9[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                        ai9[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                        ai9[2] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                        ai9[0] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                        ai9[1] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                        ai9[2] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
                         aModel.method181(3, ai9, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
                     		&& getRoofTexture(i7 + 1, k9 - 1) == 0)
                     {
                         int ai10[] = new int[3];
-                        ai10[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
-                        ai10[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                        ai10[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                        ai10[0] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
+                        ai10[1] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                        ai10[2] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
                         aModel.method181(3, ai10, i12, 0xbc614e);
                     } else
                     if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
                     		&& getRoofTexture(i7 - 1, k9 + 1) == 0)
                     {
                         int ai11[] = new int[3];
-                        ai11[0] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                        ai11[1] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
-                        ai11[2] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                        ai11[0] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                        ai11[1] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
+                        ai11[2] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
                         aModel.method181(3, ai11, i12, 0xbc614e);
                     } else if (j27 == k27 && l27 == i28) {
                         int ai12[] = new int[4];
-                        ai12[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                        ai12[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                        ai12[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
-                        ai12[3] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                        ai12[0] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                        ai12[1] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                        ai12[2] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
+                        ai12[3] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
                         aModel.method181(4, ai12, i12, 0xbc614e);
                     } else if (j27 == i28 && k27 == l27) {
                         int ai13[] = new int[4];
-                        ai13[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
-                        ai13[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                        ai13[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                        ai13[3] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                        ai13[0] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
+                        ai13[1] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                        ai13[2] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                        ai13[3] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
                         aModel.method181(4, ai13, i12, 0xbc614e);
                     } else {
                         boolean flag1 = true;
@@ -1002,25 +1041,25 @@ public class EngineHandle {
                         }
                         if (!flag1) {
                             int ai14[] = new int[3];
-                            ai14[0] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                            ai14[1] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
-                            ai14[2] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
+                            ai14[0] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                            ai14[1] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
+                            ai14[2] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
                             aModel.method181(3, ai14, i12, 0xbc614e);
                             int ai16[] = new int[3];
-                            ai16[0] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
-                            ai16[1] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                            ai16[2] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
+                            ai16[0] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
+                            ai16[1] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                            ai16[2] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
                             aModel.method181(3, ai16, i12, 0xbc614e);
                         } else {
                             int ai15[] = new int[3];
-                            ai15[0] = aModel.insertCoordPointNoDublicate(k24, j27, i25);
-                            ai15[1] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
-                            ai15[2] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
+                            ai15[0] = aModel.insertCoordPointNoDuplicate(k24, j27, i25);
+                            ai15[1] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
+                            ai15[2] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
                             aModel.method181(3, ai15, i12, 0xbc614e);
                             int ai17[] = new int[3];
-                            ai17[0] = aModel.insertCoordPointNoDublicate(l26, l27, i26);
-                            ai17[1] = aModel.insertCoordPointNoDublicate(j26, i28, i27);
-                            ai17[2] = aModel.insertCoordPointNoDublicate(k25, k27, k26);
+                            ai17[0] = aModel.insertCoordPointNoDuplicate(l26, l27, i26);
+                            ai17[1] = aModel.insertCoordPointNoDuplicate(j26, i28, i27);
+                            ai17[2] = aModel.insertCoordPointNoDuplicate(k25, k27, k26);
                             aModel.method181(3, ai17, i12, 0xbc614e);
                         }
                     }
@@ -1261,10 +1300,10 @@ public class EngineHandle {
         int j2 = k * 128;
         int k2 = l * 128;
         int l2 = i1 * 128;
-        int i3 = model.insertCoordPointNoDublicate(i2, -anIntArrayArray581[j][k], j2);
-        int j3 = model.insertCoordPointNoDublicate(i2, -anIntArrayArray581[j][k] - j1, j2);
-        int k3 = model.insertCoordPointNoDublicate(k2, -anIntArrayArray581[l][i1] - j1, l2);
-        int l3 = model.insertCoordPointNoDublicate(k2, -anIntArrayArray581[l][i1], l2);
+        int i3 = model.insertCoordPointNoDuplicate(i2, -anIntArrayArray581[j][k], j2);
+        int j3 = model.insertCoordPointNoDuplicate(i2, -anIntArrayArray581[j][k] - j1, j2);
+        int k3 = model.insertCoordPointNoDuplicate(k2, -anIntArrayArray581[l][i1] - j1, l2);
+        int l3 = model.insertCoordPointNoDuplicate(k2, -anIntArrayArray581[l][i1], l2);
         int i4 = model.method181(4, new int[]{i3, j3, k3, l3}, k1, l1);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
             model.anIntArray258[i4] = 30000 + i;
@@ -1439,18 +1478,17 @@ public class EngineHandle {
             e.printStackTrace();
             System.exit(1);
         }
-
         for (int i = 0; i < 64; i++) {
-            groundTextureArray[i] = Camera.method305(255 - i * 4, 255 - (int) ((double) i * 1.75D), 255 - i * 4);
+            groundTextureArray[i] = Camera.getGroundColorVal(255 - i * 4, 255 - (int) ((double) i * 1.75D), 255 - i * 4);
         }
-        for (int j = 0; j < 64; j++) {
-            groundTextureArray[j + 64] = Camera.method305(j * 3, 144, 0);
+        for (int i = 0; i < 64; i++) {
+            groundTextureArray[i + 64] = Camera.getGroundColorVal(i * 3, 144, 0);
         }
-        for (int k = 0; k < 64; k++) {
-            groundTextureArray[k + 128] = Camera.method305(192 - (int) ((double) k * 1.5D), 144 - (int) ((double) k * 1.5D), 0);
+        for (int i = 0; i < 64; i++) {
+            groundTextureArray[i + 128] = Camera.getGroundColorVal(192 - (int) ((double) i * 1.5D), 144 - (int) ((double) i * 1.5D), 0);
         }
-        for (int l = 0; l < 64; l++) {
-            groundTextureArray[l + 192] = Camera.method305(96 - (int) ((double) l * 1.5D), 48 + (int) ((double) l * 1.5D), 0);
+        for (int i = 0; i < 64; i++) {
+            groundTextureArray[i + 192] = Camera.getGroundColorVal(96 - (int) ((double) i * 1.5D), 48 + (int) ((double) i * 1.5D), 0);
         }
     }
 

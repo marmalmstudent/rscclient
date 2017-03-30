@@ -97,10 +97,6 @@ public class mudclient extends GameWindowMiddleMan
         GameWindowMiddleMan.clientVersion = 25;
         mc = new mudclient();
         mc.appletMode = false;
-        /*
-        mc.setLogo(Toolkit.getDefaultToolkit().getImage(
-        		Config.CONF_DIR + File.separator + "Loading.rscd"));
-        */
         mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32,
         		"TestServer v" + GameWindowMiddleMan.clientVersion, false);
     }
@@ -705,8 +701,7 @@ public class mudclient extends GameWindowMiddleMan
         	gameGraphics.imageToPixArray(gameGraphics.loginScreen, 0, 0,
     				windowWidth, windowHeight, true);
         	// bottom right sprite
-        	gameGraphics.drawPicture(windowWidth - sprite.getWidth() - sprite.getXShift(),
-        			windowHeight - sprite.getHeight() - sprite.getYShift(), 2010);
+        	gameGraphics.drawPicture(0, 20, 2010);
         }
         // blue bar at the bottom
         sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
@@ -1731,7 +1726,7 @@ public class mudclient extends GameWindowMiddleMan
             menuLength++;
         	if (mouseButtonClick == 1)
         	{
-        		mouseOverMenu = (mouseOverMenu != 1) ? 1 : 0;
+        		mouseOverMenu = 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -2175,7 +2170,7 @@ public class mudclient extends GameWindowMiddleMan
             menuLength++;
         	if (mouseButtonClick == 1)
         	{
-        		mouseOverMenu = (mouseOverMenu != 3) ? 3 : 0;
+        		mouseOverMenu = 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -2380,7 +2375,7 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX < gameWindowMenuBarX + gameWindowMenuBarWidth
         		&& super.mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
         { // iventory
-        	mouseOverMenu = (mouseOverMenu != 1) ? 1 : 0;
+        	mouseOverMenu = mouseOverMenu != 1 ? 1 : 0;
             mouseButtonClick = 0;
         }
         if (super.mouseX >= gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
@@ -2402,7 +2397,7 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX < gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
         		&& super.mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
         { // stats
-        	mouseOverMenu = (mouseOverMenu != 3) ? 3 : 0;
+        	mouseOverMenu = mouseOverMenu != 3 ? 3 : 0;
             mouseButtonClick = 0;
         }
         if (mouseButtonClick == 1
@@ -2411,7 +2406,7 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX < gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
         		&& super.mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
         { // spells
-        	mouseOverMenu = (mouseOverMenu != 4) ? 4 : 0;
+        	mouseOverMenu = mouseOverMenu != 4 ? 4 : 0;
             mouseButtonClick = 0;
         }
         if (mouseButtonClick == 1
@@ -2420,7 +2415,7 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX < gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
         		&& super.mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
         { // friends
-        	mouseOverMenu = (mouseOverMenu != 5) ? 5 : 0;
+        	mouseOverMenu = mouseOverMenu != 5 ? 5 : 0;
             mouseButtonClick = 0;
         }
         if (mouseButtonClick == 1
@@ -2429,7 +2424,7 @@ public class mudclient extends GameWindowMiddleMan
         		&& super.mouseX < gameWindowMenuBarX + gameWindowMenuBarItemWidth
         		&& super.mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
         { // settings when some menu is open
-        	mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
+        	mouseOverMenu = mouseOverMenu != 6 ? 6 : 0;
             mouseButtonClick = 0;
         }
     }
@@ -2793,10 +2788,10 @@ public class mudclient extends GameWindowMiddleMan
         modelY *= magicLoc;
         modelX1 *= magicLoc;
         modelX2 *= magicLoc;
-        int i3 = model.insertCoordPointNoDublicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
-        int j3 = model.insertCoordPointNoDublicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - l2, modelY);
-        int k3 = model.insertCoordPointNoDublicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - l2, modelX2);
-        int l3 = model.insertCoordPointNoDublicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
+        int i3 = model.insertCoordPointNoDuplicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
+        int j3 = model.insertCoordPointNoDuplicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - l2, modelY);
+        int k3 = model.insertCoordPointNoDuplicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - l2, modelX2);
+        int l3 = model.insertCoordPointNoDuplicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
         int ai[] = {
                 i3, j3, k3, l3
         };
@@ -3608,13 +3603,13 @@ public class mudclient extends GameWindowMiddleMan
         gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
         abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
         bankPan = new BankPanel(windowHalfWidth, windowHalfHeight);
-        invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight);
+        tradePan = new TradePanel(windowHalfWidth, windowHalfHeight);
+        tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight);
+        invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
         plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
         magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
         friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight);
         optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight);
-        tradePan = new TradePanel(windowHalfWidth, windowHalfHeight);
-        tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight);
         Menu.aBoolean220 = false;
         spellMenu = new Menu(gameGraphics, 5);
         spellMenuHandle = spellMenu.method162(magicPan.getX(),
@@ -4111,7 +4106,7 @@ public class mudclient extends GameWindowMiddleMan
             menuLength++;
         	if (mouseButtonClick == 1)
         	{
-        		mouseOverMenu = (mouseOverMenu != 5) ? 5 : 0;
+        		mouseOverMenu = 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -4492,7 +4487,7 @@ public class mudclient extends GameWindowMiddleMan
             menuLength++;
         	if (mouseButtonClick == 1)
         	{
-        		mouseOverMenu = (mouseOverMenu != 4) ? 4 : 0;
+        		mouseOverMenu = 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -4530,7 +4525,7 @@ public class mudclient extends GameWindowMiddleMan
     	{ // F12
         	takeScreenshot(true);
     	}
-        if (!loggedIn)
+        if (!loggedIn && menuWelcome != null)
         {
             if (loginScreenNumber == 0)
                 menuWelcome.keyDown(keyCode, keyChar);
@@ -5054,7 +5049,7 @@ public class mudclient extends GameWindowMiddleMan
             menuLength++;
         	if (mouseButtonClick == 1)
         	{
-        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
+        		mouseOverMenu = 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -6255,7 +6250,6 @@ public class mudclient extends GameWindowMiddleMan
         	if (mouseButtonClick == 1)
         	{
         		formatPacket(216, -1, -1);
-        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -7647,7 +7641,6 @@ public class mudclient extends GameWindowMiddleMan
         	if (mouseButtonClick == 1)
         	{
         		formatPacket(216, -1, -1);
-        		mouseOverMenu = (mouseOverMenu != 6) ? 6 : 0;
         		mouseButtonClick = 0;
         	}
         }
@@ -8664,7 +8657,7 @@ public class mudclient extends GameWindowMiddleMan
         windowWidth = 512;
         windowHeight = 334;
         */
-        windowWidth = 1300;
+        windowWidth = 1200;
         windowHeight = 650;
         windowHalfWidth = windowWidth/2;
         windowHalfHeight = windowHeight/2;
@@ -8691,7 +8684,7 @@ public class mudclient extends GameWindowMiddleMan
         miniMapHeight = 152+40;
         miniMapX = windowWidth-miniMapWidth-3;
         miniMapY = 3;
-        
+
     }
 
     private boolean combatWindow;
