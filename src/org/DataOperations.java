@@ -167,8 +167,8 @@ public class DataOperations {
             	out[j] = (byte)(database[offset + j] >> 1);
             /*
             try {
-            	misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
-            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/objects3d/object"+i+".ob3");
+            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
+            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/models36/object"+i+".ob3");
             } catch (IOException ioe) {ioe.printStackTrace();}
             */
             offset += dbEntryLength;
@@ -212,11 +212,11 @@ public class DataOperations {
         int offset = 2 + nDBEntries * 10;
         int dbEntryIdentifier, dbEntryLength;
         /*
-        if (entry.startsWith("spellcharge3")
+        if (entry.startsWith("Legends")
         		&& (entry.endsWith(".ob3") || entry.endsWith(".OB3")))
         {
         	storeDB(entry, database);
-        	System.out.printf("Printing to database\n");
+        	System.out.printf("Printing "+nDBEntries+" entries to database\n");
         }*//*
         if (entry.endsWith(".pcm") || entry.endsWith(".PCM"))
         {

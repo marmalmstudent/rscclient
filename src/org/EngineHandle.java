@@ -480,16 +480,11 @@ public class EngineHandle {
                 {
                     int k5 = getGroundTexture(tile_x, tile_y);
                     int k7;
-                    if (k5 >= 0 && k5 < 64)
-                    	k7 = 59; // white-ish (sprite 3279)
-                    else if (k5 >= 64 && k5 < 128)
-                    	k7 = 55; // green-ish (sprite 3275)
-                    else if (k5 >= 128 && k5 < 192)
-                    	k7 = 57; // brown-ish (sprite 3277)
-                    else if (k5 >= 192 && k5 < 256)
-                    	k7 = 60;  // sand-ish (sprite 3280)
+                    if (textures)
+                    	k7 = 60 + k5; // use textures
                     else
-                    	k7 = groundTextureArray[k5];
+                    	k7 = groundTextureArray[k5]; // do not use textures
+                     
                     int i10 = k7;
                     int k12 = k7;
                     int l14 = 0;
@@ -506,11 +501,15 @@ public class EngineHandle {
                         int i19 = method427(tile_x, tile_y);
                         // 1 water, 3 wood, -16913 gray, 12345678 invisible,
                         // -1 black, -26426 light gray, -27685 red carpet
-                        k7 = i10 = EntityHandler.getTileDef(l16 - 1).getColour();
-                        if (l16 == 1)
-                        	k7 = i10 = 56; // roads
-                        else if (l16 == 5)
-                        	k7 = i10 = 58; // rock (cavern)
+                        if (textures)
+                        {
+                        	if (l16 == 1)
+                        		k7 = i10 = 56; // roads
+                        	else
+                        		k7 = i10 = EntityHandler.getTileDef(l16 - 1).getColour();
+                        }
+                        else
+                    		k7 = i10 = EntityHandler.getTileDef(l16 - 1).getColour();
                         if (l5 == 4)
                         {
                         	// water
@@ -541,13 +540,13 @@ public class EngineHandle {
                                 else if (getOverlayIfRequired(tile_x + 1, tile_y, k12) != 0xbc614e
                                 		&& getOverlayIfRequired(tile_x, tile_y - 1, k12) != 0xbc614e)
                                 {
-                                    i10 = getOverlayIfRequired(tile_x + 1, tile_y, k12);
+                                	i10 = getOverlayIfRequired(tile_x + 1, tile_y, k12);
                                     l14 = 1;
                                 }
                                 else if (getOverlayIfRequired(tile_x - 1, tile_y, k12) != 0xbc614e
                                 		&& getOverlayIfRequired(tile_x, tile_y + 1, k12) != 0xbc614e)
                                 {
-                                    k7 = getOverlayIfRequired(tile_x - 1, tile_y, k12);
+                                	k7 = getOverlayIfRequired(tile_x - 1, tile_y, k12);
                                     l14 = 1;
                                 }
                         }
@@ -1453,10 +1452,10 @@ public class EngineHandle {
         objectDirs[x][y] = dir;
     }
 
-    public EngineHandle(Camera camera, GameImage gameImage) {
+    public EngineHandle(Camera camera, GameImage gameImage)
+    {
         this.camera = camera;
         this.gameImage = gameImage;
-
         objectDirs = new int[NBR_VISIBLE_SECTORS*SECTOR_WIDTH][NBR_VISIBLE_SECTORS*SECTOR_HEIGHT];
         selectedX = new int[18432];
         selectedY = new int[18432];
@@ -1478,16 +1477,11 @@ public class EngineHandle {
             e.printStackTrace();
             System.exit(1);
         }
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < 64; i++)
+        {
             groundTextureArray[i] = Camera.getGroundColorVal(255 - i * 4, 255 - (int) ((double) i * 1.75D), 255 - i * 4);
-        }
-        for (int i = 0; i < 64; i++) {
             groundTextureArray[i + 64] = Camera.getGroundColorVal(i * 3, 144, 0);
-        }
-        for (int i = 0; i < 64; i++) {
             groundTextureArray[i + 128] = Camera.getGroundColorVal(192 - (int) ((double) i * 1.5D), 144 - (int) ((double) i * 1.5D), 0);
-        }
-        for (int i = 0; i < 64; i++) {
             groundTextureArray[i + 192] = Camera.getGroundColorVal(96 - (int) ((double) i * 1.5D), 48 + (int) ((double) i * 1.5D), 0);
         }
     }
@@ -1515,6 +1509,16 @@ public class EngineHandle {
         }
         sectors[sector] = s;
     }
+    
+    public boolean getTextureUse()
+    {
+    	return textures;
+    }
+    
+    public void setTextureUse(boolean useTxtr)
+    {
+    	textures = useTxtr;
+    }
 
     private ZipFile tileArchive;
 
@@ -1530,6 +1534,7 @@ public class EngineHandle {
     public static final int SECTOR_HEIGHT = 48;
     public static final int SECTOR_WIDTH = 48;
     public static final int NBR_VISIBLE_SECTORS = 2;
+    private boolean textures = false;
 
     private Sector[] sectors;
 

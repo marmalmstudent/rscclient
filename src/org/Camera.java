@@ -37,8 +37,8 @@ public class Camera {
         anIntArray446 = new int[40];
         f1Toggle = false;
         this.gameImage = gameImage;
-        halfWidth = gameImage.menuDefaultWidth / 2;
-        halfHeight = gameImage.menuDefaultHeight / 2;
+        halfWidth = gameImage.gameWindowWidth / 2;
+        halfHeight = gameImage.gameWindowHeight / 2;
         anIntArray437 = gameImage.imagePixelArray;
         modelCount = 0;
         maxModelCount = maxModels;
@@ -63,17 +63,17 @@ public class Camera {
         cameraYPos = 0;
         cameraZPos = 0;
         cameraXPos = 0;
-        cameraUpDownRot = 0;
-        cameraLeftRigtRot = 0;
+        cameraElevation = 0;
+        cameraAzimuth = 0;
         anInt408 = 0;
         for (int i1 = 0; i1 < 256; i1++) {
-            anIntArray385[i1] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D);
-            anIntArray385[i1 + 256] = (int) (Math.cos((double) i1 * 0.02454369D) * 32768D);
+            sinCos256Res32768Magn[i1] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D);
+            sinCos256Res32768Magn[i1 + 256] = (int) (Math.cos((double) i1 * 0.02454369D) * 32768D);
         }
 
         for (int j1 = 0; j1 < 1024; j1++) {
-            anIntArray384[j1] = (int) (Math.sin((double) j1 * 0.00613592315D) * 32768D);
-            anIntArray384[j1 + 1024] = (int) (Math.cos((double) j1 * 0.00613592315D) * 32768D);
+            sinCos1024Res32768Magn[j1] = (int) (Math.sin((double) j1 * 0.00613592315D) * 32768D);
+            sinCos1024Res32768Magn[j1 + 1024] = (int) (Math.cos((double) j1 * 0.00613592315D) * 32768D);
         }
 
     }
@@ -282,26 +282,26 @@ public class Camera {
     }
 
     public void method279(int i, int j, int k) {
-        int l = -cameraUpDownRot + 1024 & 0x3ff;
-        int i1 = -cameraLeftRigtRot + 1024 & 0x3ff;
+        int l = -cameraElevation + 1024 & 0x3ff;
+        int i1 = -cameraAzimuth + 1024 & 0x3ff;
         int j1 = -anInt408 + 1024 & 0x3ff;
         if (j1 != 0) {
-            int k1 = anIntArray384[j1];
-            int j2 = anIntArray384[j1 + 1024];
+            int k1 = sinCos1024Res32768Magn[j1];
+            int j2 = sinCos1024Res32768Magn[j1 + 1024];
             int i3 = j * k1 + i * j2 >> 15;
             j = j * j2 - i * k1 >> 15;
             i = i3;
         }
         if (l != 0) {
-            int l1 = anIntArray384[l];
-            int k2 = anIntArray384[l + 1024];
+            int l1 = sinCos1024Res32768Magn[l];
+            int k2 = sinCos1024Res32768Magn[l + 1024];
             int j3 = j * k2 - k * l1 >> 15;
             k = j * l1 + k * k2 >> 15;
             j = j3;
         }
         if (i1 != 0) {
-            int i2 = anIntArray384[i1];
-            int l2 = anIntArray384[i1 + 1024];
+            int i2 = sinCos1024Res32768Magn[i1];
+            int l2 = sinCos1024Res32768Magn[i1 + 1024];
             int k3 = k * i2 + i * l2 >> 15;
             k = k * l2 - i * i2 >> 15;
             i = k3;
@@ -347,9 +347,9 @@ public class Camera {
         modelArray[modelCount] = aModel_423;
         aModel_423.anInt246 = 2;
         for (int i = 0; i < modelCount; i++)
-            modelArray[i].method201(cameraYPos, cameraZPos, cameraXPos, cameraUpDownRot, cameraLeftRigtRot, anInt408, cameraSizeInt, anInt379);
+            modelArray[i].method201(cameraYPos, cameraZPos, cameraXPos, cameraElevation, cameraAzimuth, anInt408, cameraSizeInt, anInt379);
 
-        modelArray[modelCount].method201(cameraYPos, cameraZPos, cameraXPos, cameraUpDownRot, cameraLeftRigtRot, anInt408, cameraSizeInt, anInt379);
+        modelArray[modelCount].method201(cameraYPos, cameraZPos, cameraXPos, cameraElevation, cameraAzimuth, anInt408, cameraSizeInt, anInt379);
         cameraModelCount = 0;
         for (int k3 = 0; k3 < modelCount; k3++) {
             Model model = modelArray[k3];
@@ -2301,41 +2301,47 @@ public class Camera {
     }
 
     public void setCamera(int playerX, int averageElevation, int playerY,
-    		int l, int i1, int j1, int k1, double cameraZoom) {
-        l &= 0x3ff;
-        i1 &= 0x3ff;
+    		int mcCameraUpDownRot, int mcCameraLeftRightRot, int j1, int k1, double cameraZoom) {
+        mcCameraUpDownRot &= 0x3ff;
+        mcCameraLeftRightRot &= 0x3ff;
         j1 &= 0x3ff;
-        cameraUpDownRot = 1024 - l & 0x3ff; // y-axis rotation
-        cameraLeftRigtRot = 1024 - i1 & 0x3ff; // z-axis rotation
-        // very strange variable, maybe has something to do with how sprites are aligned.
-        anInt408 = 1024 - j1 & 0x3ff; 
+        if (!mc.getFreeCamera())
+        {
+        	cameraElevation = 1024 - mcCameraUpDownRot & 0x3ff; // y-axis rotation
+        	cameraAzimuth = 1024 - mcCameraLeftRightRot & 0x3ff; // z-axis rotation
+        	// very strange variable, maybe has something to do with how sprites are aligned.
+        	anInt408 = 1024 - j1 & 0x3ff;
+        }
         int cameraXOffset = 0;
         int cameraHeightOffset = 0;
         int cameraYOffset = k1;
-        if (l != 0) {
-            int k2 = anIntArray384[l];
-            int j3 = anIntArray384[l + 1024];
-            int i4 = cameraHeightOffset * j3 - cameraYOffset * k2 >> 15;
-            cameraYOffset = cameraHeightOffset * k2 + cameraYOffset * j3 >> 15;
-            cameraHeightOffset = i4;
+        if (mcCameraUpDownRot != 0) {
+            int sine = sinCos1024Res32768Magn[mcCameraUpDownRot];
+            int cosine = sinCos1024Res32768Magn[mcCameraUpDownRot + 1024];
+            int camZOffsTmp = cameraHeightOffset * cosine - cameraYOffset * sine >> 15;
+            cameraYOffset = cameraHeightOffset * sine + cameraYOffset * cosine >> 15;
+            cameraHeightOffset = camZOffsTmp;
         }
-        if (i1 != 0) {
-            int l2 = anIntArray384[i1];
-            int k3 = anIntArray384[i1 + 1024];
-            int j4 = cameraYOffset * l2 + cameraXOffset * k3 >> 15;
-            cameraYOffset = cameraYOffset * k3 - cameraXOffset * l2 >> 15;
-            cameraXOffset = j4;
+        if (mcCameraLeftRightRot != 0) {
+            int sine = sinCos1024Res32768Magn[mcCameraLeftRightRot];
+            int cosine = sinCos1024Res32768Magn[mcCameraLeftRightRot + 1024];
+            int camXOffsTmp = cameraYOffset * sine + cameraXOffset * cosine >> 15;
+            cameraYOffset = cameraYOffset * cosine - cameraXOffset * sine >> 15;
+            cameraXOffset = camXOffsTmp;
         }
         if (j1 != 0) {
-            int i3 = anIntArray384[j1];
-            int l3 = anIntArray384[j1 + 1024];
-            int k4 = cameraHeightOffset * i3 + cameraXOffset * l3 >> 15;
-            cameraHeightOffset = cameraHeightOffset * l3 - cameraXOffset * i3 >> 15;
-            cameraXOffset = k4;
+            int sine = sinCos1024Res32768Magn[j1];
+            int cosine = sinCos1024Res32768Magn[j1 + 1024];
+            int camXOffsTmp = cameraHeightOffset * sine + cameraXOffset * cosine >> 15;
+            cameraHeightOffset = cameraHeightOffset * cosine - cameraXOffset * sine >> 15;
+            cameraXOffset = camXOffsTmp;
         }
-        cameraYPos = playerX - (int)(cameraXOffset*cameraZoom); // camera position
-        cameraZPos = averageElevation - (int)(cameraHeightOffset*cameraZoom)-200; // -200 makes it so we don't zoom in on out feet
-        cameraXPos = playerY - (int)(cameraYOffset*cameraZoom); // how the camera rotates when the camera position changes
+        if (!mc.getFreeCamera())
+        {
+        	cameraYPos = playerX - (int)(cameraXOffset*cameraZoom); // camera position
+        	cameraZPos = averageElevation - (int)(cameraHeightOffset*cameraZoom)-200; // -200 makes it so we don't zoom in on out feet
+        	cameraXPos = playerY - (int)(cameraYOffset*cameraZoom); // how the camera rotates when the camera position changes
+        }
     }
 
     private void method293(int i) {
@@ -3055,6 +3061,86 @@ public class Camera {
         int k15 = ai2[i1];
         return method308(j6, k10, k15, flag);
     }
+    
+    public void moveCamera(int factor, int keyMask)
+    {
+        if (!mc.getFreeCamera())
+        	return;
+    	if ((keyMask & 1) == 1) // left key
+    	{
+    		cameraAzimuth = cameraAzimuth - 8 & 0x3ff;
+    	}
+        else if ((keyMask & 2) == 2)
+        {
+        	cameraAzimuth = cameraAzimuth + 8 & 0x3ff;
+        }
+    	/*      cameraLeftRigtRot
+    	 *             N
+         *    		   0
+  		 *	  NW 896       128 NE
+         * 			  \|/
+		 *	W  768   -----   256  E
+         * 			  /|\
+  	  	 *	  SW 640       384 SE
+         *			  512
+         * 			   S
+    	 */
+    	double theta = 2*Math.PI*(cameraAzimuth % 1024)/1024.0;
+    	/*       theta*180/PI
+    	 *            --y
+         *             0
+  		 *    NW 315        45 NE
+         *            \|/
+		 * --x  270  -----   90  ++x
+         *            /|\
+  	  	 *    SW 225        135 SE
+         *            180
+         *            ++y
+    	 */
+    	double dx = 0;
+    	double dy = 0;
+        if ((keyMask & 4) == 4)
+        { // key up (move forward)
+        	dx = -Math.sin(theta);
+        	dy = Math.cos(theta);
+        }
+        else if ((keyMask & 8) == 8)
+        {  // key down (move backward)
+        	dx = Math.sin(theta);
+        	dy = -Math.cos(theta);
+        }
+    	double xMove = factor*dx;
+    	double yMove = factor*dy;
+    	cameraYPos += xMove;
+    	cameraXPos += yMove;
+    }
+    
+    public int getCameraX()
+    {
+    	//return (cameraXPos - 6208)/64;
+    	return cameraXPos/128;
+    }
+    
+    public int getCameraY()
+    {
+    	//return (cameraYPos - 6208)/64;
+    	return cameraYPos/128;
+    }
+    
+    public int getCameraZ()
+    {
+    	return cameraZPos;
+    }
+    
+    public int getCameraAzimuth()
+    {
+    	return cameraAzimuth;
+    }
+    
+    public int getCameraElevation()
+    {
+    	return cameraElevation;
+    }
 
     int anInt374;
     int anIntArray375[];
@@ -3066,8 +3152,8 @@ public class Camera {
     public int drawSpriteMaxDist;
     public int zoom3;
     public int fadeDist;
-    public static int anIntArray384[] = new int[2048];
-    private static int anIntArray385[] = new int[512];
+    public static int sinCos1024Res32768Magn[] = new int[2048];
+    private static int sinCos256Res32768Magn[] = new int[512];
     public boolean aBoolean386;
     public double aDouble387;
     public int anInt388;
@@ -3088,8 +3174,8 @@ public class Camera {
     private int cameraYPos;
     private int cameraZPos;
     private int cameraXPos;
-    private int cameraUpDownRot;
-    private int cameraLeftRigtRot;
+    private int cameraElevation;
+    private int cameraAzimuth;
     private int anInt408;
     public int modelCount;
     public int maxModelCount;

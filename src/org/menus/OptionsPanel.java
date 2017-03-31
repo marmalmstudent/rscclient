@@ -16,6 +16,8 @@ public class OptionsPanel extends InGamePanel
 	private String[][] clientAssistsText = {
 			{"off", "on"},
 			{"off", "on"},
+			{"off", "on"},
+			{"off", "on"},
 			{"off", "on"}
 	};
 	private String[][] privacySettingsText = {
@@ -28,10 +30,9 @@ public class OptionsPanel extends InGamePanel
 	{
 		frame = new InGameFrame("Options");
         setWidth(197);
-        setHeight(245);
+        setHeight(276);
         setX(xCenter*2 - width - 3);
         setY(yCenter*2 - height - 35);
-	    frame.setBounds(new Rectangle(x, y, width, height));
 	    headerHeight = 15;
 
 	    int buttonWidth = width;
@@ -58,7 +59,8 @@ public class OptionsPanel extends InGamePanel
 	    	privacySettings.addButton(privacySettingsText[i][0]);
 	    logoutButton = new InGameButton(x,
 	    		privacySettings.getY() + privacySettings.getHeight() + headerHeight,
-	    		width, 15, "Click here to logout");
+	    		width, buttonHeight, "Click here to logout");
+	    frame.setBounds(new Rectangle(x, y, width, height));
 	}
 	
 	public void setGameOptionState(int index, boolean isSet)

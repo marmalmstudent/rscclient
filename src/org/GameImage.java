@@ -22,13 +22,14 @@ public class GameImage implements ImageProducer, ImageObserver {
     private ZipFile spriteArchive;
     public BufferedImage loginScreen;
 
-    public GameImage(int width, int height, int k, Component component) {
+    public GameImage(int width, int height, int k, Component component)
+    {
         f1Toggle = false;
         drawStringShadows = false;
         imageHeight = height;
         imageWidth = width;
-        imageWidthUnused = menuDefaultWidth = width;
-        imageHeightUnused = menuDefaultHeight = height;
+        gameWindowWidthUnused = gameWindowWidth = width;
+        gameWindowHeightUnused = gameWindowHeight = height;
         imagePixelArray = new int[width * height];
         for (int i1 = 0; i1 < imagePixelArray.length; i1++) {
             imagePixelArray[i1] = 0;
@@ -80,7 +81,7 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     public synchronized void addConsumer(ImageConsumer imageconsumer) {
         imageConsumer = imageconsumer;
-        imageconsumer.setDimensions(menuDefaultWidth, menuDefaultHeight);
+        imageconsumer.setDimensions(gameWindowWidth, gameWindowHeight);
         imageconsumer.setProperties(null);
         imageconsumer.setColorModel(colourModel);
         imageconsumer.setHints(14);
@@ -108,7 +109,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (imageConsumer == null) {
             return;
         }
-        imageConsumer.setPixels(0, 0, menuDefaultWidth, menuDefaultHeight, colourModel, imagePixelArray, 0, menuDefaultWidth);
+        imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight, colourModel, imagePixelArray, 0, gameWindowWidth);
         imageConsumer.imageComplete(2);
     }
 
@@ -117,10 +118,10 @@ public class GameImage implements ImageProducer, ImageObserver {
             x = 0;
         if (y < 0)
             y = 0;
-        if (width > menuDefaultWidth)
-            width = menuDefaultWidth;
-        if (height > menuDefaultHeight)
-            height = menuDefaultHeight;
+        if (width > gameWindowWidth)
+            width = gameWindowWidth;
+        if (height > gameWindowHeight)
+            height = gameWindowHeight;
         imageX = x;
         imageY = y;
         imageWidth = width;
@@ -130,8 +131,8 @@ public class GameImage implements ImageProducer, ImageObserver {
     public void resetDimensions() {
         imageX = 0;
         imageY = 0;
-        imageWidth = menuDefaultWidth;
-        imageHeight = menuDefaultHeight;
+        imageWidth = gameWindowWidth;
+        imageHeight = gameWindowHeight;
     }
 
     public void drawImage(Graphics g, int x, int y) {
@@ -140,18 +141,18 @@ public class GameImage implements ImageProducer, ImageObserver {
     }
 
     public void resetImagePixels() {
-        int i = menuDefaultWidth * menuDefaultHeight;
+        int i = gameWindowWidth * gameWindowHeight;
         if (!f1Toggle) {
             for (int j = 0; j < i; ++j)
                 imagePixelArray[j] = 0;
             return;
         }
         int k = 0;
-        for (int l = -menuDefaultHeight; l < 0; l += 2)
+        for (int l = -gameWindowHeight; l < 0; l += 2)
         {
-            for (int i1 = -menuDefaultWidth; i1 < 0; i1++)
+            for (int i1 = -gameWindowWidth; i1 < 0; i1++)
                 imagePixelArray[k++] = 0;
-            k += menuDefaultWidth;
+            k += gameWindowWidth;
         }
 
     }
@@ -165,8 +166,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (i3 < 0)
             i3 = 0;
         int j3 = j + k;
-        if (j3 >= menuDefaultHeight)
-            j3 = menuDefaultHeight - 1;
+        if (j3 >= gameWindowHeight)
+            j3 = gameWindowHeight - 1;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
@@ -180,9 +181,9 @@ public class GameImage implements ImageProducer, ImageObserver {
             if (j4 < 0)
                 j4 = 0;
             int k4 = i + i4;
-            if (k4 >= menuDefaultWidth)
-                k4 = menuDefaultWidth - 1;
-            int l4 = j4 + k3 * menuDefaultWidth;
+            if (k4 >= gameWindowWidth)
+                k4 = gameWindowWidth - 1;
+            int l4 = j4 + k3 * gameWindowWidth;
             for (int i5 = j4; i5 <= k4; i5++) {
                 int j2 = (imagePixelArray[l4] >> 16 & 0xff) * j1;
                 int k2 = (imagePixelArray[l4] >> 8 & 0xff) * j1;
@@ -212,17 +213,17 @@ public class GameImage implements ImageProducer, ImageObserver {
         int l1 = (colour >> 16 & 0xff) * alpha;
         int i2 = (colour >> 8 & 0xff) * alpha;
         int j2 = (colour & 0xff) * alpha;
-        int j3 = menuDefaultWidth - width;
+        int j3 = gameWindowWidth - width;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
-            j3 += menuDefaultWidth;
+            j3 += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int k3 = x + y * menuDefaultWidth;
+        int k3 = x + y * gameWindowWidth;
         for (int l3 = 0; l3 < height; l3 += byte0) {
             for (int i4 = -width; i4 < 0; i4++) {
                 int k2 = (imagePixelArray[k3] >> 16 & 0xff) * k1;
@@ -250,18 +251,18 @@ public class GameImage implements ImageProducer, ImageObserver {
         int clrTopRed = colorTop >> 16 & 0xff;
         int clrTopGre = colorTop >> 8 & 0xff;
         int clrTopBlu = colorTop & 0xff;
-        int skipNLastPixels = menuDefaultWidth - width;
+        int skipNLastPixels = gameWindowWidth - width;
         byte byte0 = 1;
         if (f1Toggle)
         {
             byte0 = 2;
-            skipNLastPixels += menuDefaultWidth;
+            skipNLastPixels += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int xyCoord = x + y * menuDefaultWidth;
+        int xyCoord = x + y * gameWindowWidth;
         for (int y_idx = 0; y_idx < height; y_idx += byte0)
             if (y_idx + y >= imageY && y_idx + y < imageHeight) 
             {
@@ -270,7 +271,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                     imagePixelArray[xyCoord++] = pixelClr;
                 xyCoord += skipNLastPixels;
             } else {
-                xyCoord += menuDefaultWidth;
+                xyCoord += gameWindowWidth;
             }
     }
 
@@ -287,17 +288,17 @@ public class GameImage implements ImageProducer, ImageObserver {
             width = imageWidth - x;
         if (y + height > imageHeight)
             height = imageHeight - y;
-        int j1 = menuDefaultWidth - width;
+        int j1 = gameWindowWidth - width;
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
-            j1 += menuDefaultWidth;
+            j1 += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int k1 = x + y * menuDefaultWidth;
+        int k1 = x + y * gameWindowWidth;
         for (int l1 = -height; l1 < 0; l1 += byte0) {
             for (int i2 = -width; i2 < 0; i2++)
                 imagePixelArray[k1++] = colour;
@@ -323,7 +324,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         if (x1 + x2 > imageWidth)
             x2 = imageWidth - x1;
-        int xPixel = x1 + y1 * menuDefaultWidth;
+        int xPixel = x1 + y1 * gameWindowWidth;
         for (int yPixel = 0; yPixel < x2; yPixel++)
             imagePixelArray[xPixel + yPixel] = colour;
 
@@ -338,9 +339,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         if (y1 + y2 > imageWidth)
             y2 = imageHeight - y1;
-        int xPixel = x1 + y1 * menuDefaultWidth;
+        int xPixel = x1 + y1 * gameWindowWidth;
         for (int yPixel = 0; yPixel < y2; yPixel++)
-            imagePixelArray[xPixel + yPixel * menuDefaultWidth] = colour;
+            imagePixelArray[xPixel + yPixel * gameWindowWidth] = colour;
 
     }
 
@@ -348,11 +349,11 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (x < imageX || y < imageY || x >= imageWidth || y >= imageHeight) {
             return;
         }
-        imagePixelArray[x + y * menuDefaultWidth] = colour;
+        imagePixelArray[x + y * gameWindowWidth] = colour;
     }
 
     public void fadePixels() {
-        int k = menuDefaultWidth * menuDefaultHeight;
+        int k = gameWindowWidth * gameWindowHeight;
         for (int j = 0; j < k; j++) {
             int i = imagePixelArray[j] & 0xffffff;
             imagePixelArray[j] = (i >>> 1 & 0x7f7f7f) + (i >>> 2 & 0x3f3f3f) + (i >>> 3 & 0x1f1f1f) + (i >>> 4 & 0xf0f0f);
@@ -367,10 +368,10 @@ public class GameImage implements ImageProducer, ImageObserver {
                 int k2 = 0;
                 int l2 = 0;
                 for (int i3 = k1 - i; i3 <= k1 + i; i3++)
-                    if (i3 >= 0 && i3 < menuDefaultWidth) {
+                    if (i3 >= 0 && i3 < gameWindowWidth) {
                         for (int j3 = l1 - j; j3 <= l1 + j; j3++)
-                            if (j3 >= 0 && j3 < menuDefaultHeight) {
-                                int k3 = imagePixelArray[i3 + menuDefaultWidth * j3];
+                            if (j3 >= 0 && j3 < gameWindowHeight) {
+                                int k3 = imagePixelArray[i3 + gameWindowWidth * j3];
                                 i2 += k3 >> 16 & 0xff;
                                 j2 += k3 >> 8 & 0xff;
                                 k2 += k3 & 0xff;
@@ -379,7 +380,7 @@ public class GameImage implements ImageProducer, ImageObserver {
 
                     }
 
-                imagePixelArray[k1 + menuDefaultWidth * l1] = (i2 / l2 << 16) + (j2 / l2 << 8) + k2 / l2;
+                imagePixelArray[k1 + gameWindowWidth * l1] = (i2 / l2 << 16) + (j2 / l2 << 8) + k2 / l2;
             }
 
         }
@@ -401,7 +402,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         int pixel = 0;
         for (int x = startX; x < startX + width; x++) {
             for (int y = startY; y < startY + height; y++) {
-                pixels[pixel++] = imagePixelArray[x + y * menuDefaultWidth];
+                pixels[pixel++] = imagePixelArray[x + y * gameWindowWidth];
             }
         }
 
@@ -418,7 +419,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         int pixel = 0;
         for (int y = startY; y < startY + height; y++) {
             for (int x = startX; x < startX + width; x++) {
-                pixels[pixel++] = imagePixelArray[x + y * menuDefaultWidth];
+                pixels[pixel++] = imagePixelArray[x + y * gameWindowWidth];
             }
         }
 
@@ -436,18 +437,18 @@ public class GameImage implements ImageProducer, ImageObserver {
                 x += sprites[picture].getXShift();
                 y += sprites[picture].getYShift();
             }
-            int l = x + y * menuDefaultWidth;
+            int l = x + y * gameWindowWidth;
             int i1 = 0;
             int j1 = sprites[picture].getHeight();
             int k1 = sprites[picture].getWidth();
-            int l1 = menuDefaultWidth - k1;
+            int l1 = gameWindowWidth - k1;
             int i2 = 0;
             if (y < imageY) {
                 int j2 = imageY - y;
                 j1 -= j2;
                 y = imageY;
                 i1 += j2 * k1;
-                l += j2 * menuDefaultWidth;
+                l += j2 * gameWindowWidth;
             }
             if (y + j1 >= imageHeight)
                 j1 -= ((y + j1) - imageHeight) + 1;
@@ -471,10 +472,10 @@ public class GameImage implements ImageProducer, ImageObserver {
             byte byte0 = 1;
             if (f1Toggle) {
                 byte0 = 2;
-                l1 += menuDefaultWidth;
+                l1 += gameWindowWidth;
                 i2 += sprites[picture].getWidth();
                 if ((y & 1) != 0) {
-                    l += menuDefaultWidth;
+                    l += gameWindowWidth;
                     j1--;
                 }
             }
@@ -510,13 +511,13 @@ public class GameImage implements ImageProducer, ImageObserver {
                 newWidth = (newWidth * (sprites[spriteId].getWidth() - (l1 >> 16))) / l2;
                 newHeight = (newHeight * (sprites[spriteId].getHeight() - (i2 >> 16))) / j3;
             }
-            int i3 = startX + startY * menuDefaultWidth;
-            int k3 = menuDefaultWidth - newWidth;
+            int i3 = startX + startY * gameWindowWidth;
+            int k3 = gameWindowWidth - newWidth;
             if (startY < imageY) {
                 int l3 = imageY - startY;
                 newHeight -= l3;
                 startY = 0;
-                i3 += l3 * menuDefaultWidth;
+                i3 += l3 * gameWindowWidth;
                 i2 += k2 * l3;
             }
             if (startY + newHeight >= imageHeight)
@@ -537,10 +538,10 @@ public class GameImage implements ImageProducer, ImageObserver {
             byte byte0 = 1;
             if (f1Toggle) {
                 byte0 = 2;
-                k3 += menuDefaultWidth;
+                k3 += gameWindowWidth;
                 k2 += k2;
                 if ((startY & 1) != 0) {
-                    i3 += menuDefaultWidth;
+                    i3 += gameWindowWidth;
                     newHeight--;
                 }
             }
@@ -557,18 +558,18 @@ public class GameImage implements ImageProducer, ImageObserver {
             i += sprites[spriteId].getXShift();
             j += sprites[spriteId].getYShift();
         }
-        int i1 = i + j * menuDefaultWidth;
+        int i1 = i + j * gameWindowWidth;
         int j1 = 0;
         int spriteHeight = sprites[spriteId].getHeight();
         int spriteWidth = sprites[spriteId].getWidth();
-        int i2 = menuDefaultWidth - spriteWidth;
+        int i2 = gameWindowWidth - spriteWidth;
         int j2 = 0;
         if (j < imageY) {
             int k2 = imageY - j;
             spriteHeight -= k2;
             j = imageY;
             j1 += k2 * spriteWidth;
-            i1 += k2 * menuDefaultWidth;
+            i1 += k2 * gameWindowWidth;
         }
         if (j + spriteHeight >= imageHeight)
             spriteHeight -= ((j + spriteHeight) - imageHeight) + 1;
@@ -592,10 +593,10 @@ public class GameImage implements ImageProducer, ImageObserver {
         byte byte0 = 1;
         if (f1Toggle) {
             byte0 = 2;
-            i2 += menuDefaultWidth;
+            i2 += gameWindowWidth;
             j2 += sprites[spriteId].getWidth();
             if ((j & 1) != 0) {
-                i1 += menuDefaultWidth;
+                i1 += gameWindowWidth;
                 spriteHeight--;
             }
         }
@@ -635,13 +636,13 @@ public class GameImage implements ImageProducer, ImageObserver {
                 newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
                 newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
             }
-            int j3 = startX + startY * menuDefaultWidth;
-            int l3 = menuDefaultWidth - newWidth;
+            int j3 = startX + startY * gameWindowWidth;
+            int l3 = gameWindowWidth - newWidth;
             if (startY < imageY) {
                 int i4 = imageY - startY;
                 newHeight -= i4;
                 startY = 0;
-                j3 += i4 * menuDefaultWidth;
+                j3 += i4 * gameWindowWidth;
                 j2 += l2 * i4;
             }
             if (startY + newHeight >= imageHeight)
@@ -662,10 +663,10 @@ public class GameImage implements ImageProducer, ImageObserver {
             byte byte0 = 1;
             if (f1Toggle) {
                 byte0 = 2;
-                l3 += menuDefaultWidth;
+                l3 += gameWindowWidth;
                 l2 += l2;
                 if ((startY & 1) != 0) {
-                    j3 += menuDefaultWidth;
+                    j3 += gameWindowWidth;
                     newHeight--;
                 }
             }
@@ -709,13 +710,13 @@ public class GameImage implements ImageProducer, ImageObserver {
                 newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
                 newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
             }
-            int j3 = startX + startY * menuDefaultWidth;
-            int l3 = menuDefaultWidth - newWidth;
+            int j3 = startX + startY * gameWindowWidth;
+            int l3 = gameWindowWidth - newWidth;
             if (startY < imageY) {
                 int i4 = imageY - startY;
                 newHeight -= i4;
                 startY = 0;
-                j3 += i4 * menuDefaultWidth;
+                j3 += i4 * gameWindowWidth;
                 j2 += l2 * i4;
             }
             if (startY + newHeight >= imageHeight)
@@ -736,10 +737,10 @@ public class GameImage implements ImageProducer, ImageObserver {
             byte byte0 = 1;
             if (f1Toggle) {
                 byte0 = 2;
-                l3 += menuDefaultWidth;
+                l3 += gameWindowWidth;
                 l2 += l2;
                 if ((startY & 1) != 0) {
-                    j3 += menuDefaultWidth;
+                    j3 += gameWindowWidth;
                     newHeight--;
                 }
             }
@@ -984,8 +985,8 @@ public class GameImage implements ImageProducer, ImageObserver {
     }
 
     public void method242(int i, int j, int k, int l, int i1) {
-        int j1 = menuDefaultWidth;
-        int k1 = menuDefaultHeight;
+        int j1 = gameWindowWidth;
+        int k1 = gameWindowHeight;
         if (anIntArray339 == null) {
             anIntArray339 = new int[512];
             for (int l1 = 0; l1 < 256; l1++) {
@@ -1300,103 +1301,149 @@ public class GameImage implements ImageProducer, ImageObserver {
             { // large helmet, platebody and platelegs
                 hairColor = 0xff0044; // dragon items color
             }*/
-            int spriteWidthInit = sprites[spriteId].getWidth();
-            int spriteHeightInit = sprites[spriteId].getHeight();
+            int spriteWidth = sprites[spriteId].getWidth();
+            int spriteHeight = sprites[spriteId].getHeight();
             int k2 = 0;
             int l2 = 0;
             int i3 = l1 << 16;
-            int j3 = (spriteWidthInit << 16) / newWidth;
-            int k3 = (spriteHeightInit << 16) / newHeight;
+            int j3 = (spriteWidth << 16) / newWidth;
+            int k3 = (spriteHeight << 16) / newHeight;
             int l3 = -(l1 << 16) / newHeight;
-            if (sprites[spriteId].requiresShift()) {
-                int i4 = sprites[spriteId].getSomething1();
-                int k4 = sprites[spriteId].getSomething2();
-                j3 = (i4 << 16) / newWidth;
-                k3 = (k4 << 16) / newHeight;
-                int j5 = sprites[spriteId].getXShift();
-                int k5 = sprites[spriteId].getYShift();
+            if (sprites[spriteId].requiresShift())
+            {
+                int something1 = sprites[spriteId].getSomething1();
+                int something2 = sprites[spriteId].getSomething2();
+                j3 = (something1 << 16) / newWidth;
+                k3 = (something2 << 16) / newHeight;
+                int xShift = sprites[spriteId].getXShift();
+                int yShift = sprites[spriteId].getYShift();
                 if (flip)
-                    j5 = i4 - sprites[spriteId].getWidth() - j5;
-                startX += ((j5 * newWidth + i4) - 1) / i4;
-                int l5 = ((k5 * newHeight + k4) - 1) / k4;
+                    xShift = something1 - sprites[spriteId].getWidth() - xShift;
+                startX += ((xShift * newWidth + something1) - 1) / something1;
+                int l5 = ((yShift * newHeight + something2) - 1) / something2;
                 startY += l5;
                 i3 += l5 * l3;
-                if ((j5 * newWidth) % i4 != 0)
-                    k2 = (i4 - (j5 * newWidth) % i4 << 16) / newWidth;
-                if ((k5 * newHeight) % k4 != 0)
-                    l2 = (k4 - (k5 * newHeight) % k4 << 16) / newHeight;
+                if ((xShift * newWidth) % something1 != 0)
+                    k2 = (something1 - (xShift * newWidth) % something1 << 16) / newWidth;
+                if ((yShift * newHeight) % something2 != 0)
+                    l2 = (something2 - (yShift * newHeight) % something2 << 16) / newHeight;
                 newWidth = ((((sprites[spriteId].getWidth() << 16) - k2) + j3) - 1) / j3;
                 newHeight = ((((sprites[spriteId].getHeight() << 16) - l2) + k3) - 1) / k3;
             }
-            int j4 = startY * menuDefaultWidth;
+            int windowYIdx = startY * gameWindowWidth;
             i3 += startX << 16;
             if (startY < imageY) {
                 int l4 = imageY - startY;
                 newHeight -= l4;
                 startY = imageY;
-                j4 += l4 * menuDefaultWidth;
+                windowYIdx += l4 * gameWindowWidth;
                 l2 += k3 * l4;
                 i3 += l3 * l4;
             }
             if (startY + newHeight >= imageHeight)
                 newHeight -= ((startY + newHeight) - imageHeight) + 1;
-            int i5 = j4 / menuDefaultWidth & 1;
+            int i5 = windowYIdx / gameWindowWidth & 1;
             if (!f1Toggle)
                 i5 = 2;
-            if (skinColor == 0xffffff) {
-                if (!flip) {
-                    spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, k2, l2, j4, newWidth, newHeight, j3, k3, spriteWidthInit, hairColor, i3, l3, i5);
+            if (skinColor == 0xffffff)
+            {
+                if (!flip)
+                {              	
+                    spritePlotTransparent(
+                    		imagePixelArray, sprites[spriteId].getPixels(),
+                    		0, k2, l2, windowYIdx, newWidth, newHeight, j3, k3,
+                    		spriteWidth, hairColor, i3, l3, i5);
                     return;
-                } else {
-                    spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, (sprites[spriteId].getWidth() << 16) - k2 - 1, l2, j4, newWidth, newHeight, -j3, k3, spriteWidthInit, hairColor, i3, l3, i5);
+                }
+                else
+                {
+                    spritePlotTransparent(
+                    		imagePixelArray, sprites[spriteId].getPixels(), 0,
+                    		(sprites[spriteId].getWidth() << 16) - k2 - 1, l2,
+                    		windowYIdx, newWidth, newHeight, -j3, k3, spriteWidth,
+                    		hairColor, i3, l3, i5);
                     return;
                 }
             }
-            if (!flip) {
-                spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, k2, l2, j4, newWidth, newHeight, j3, k3, spriteWidthInit, hairColor, skinColor, i3, l3, i5);
+            if (!flip)
+            {
+                spritePlotTransparent(
+                		imagePixelArray, sprites[spriteId].getPixels(), 0,
+                		k2, l2, windowYIdx, newWidth, newHeight, j3, k3,
+                		spriteWidth, hairColor, skinColor, i3, l3, i5);
                 return;
-            } else {
-                spritePlotTransparent(imagePixelArray, sprites[spriteId].getPixels(), 0, (sprites[spriteId].getWidth() << 16) - k2 - 1, l2, j4, newWidth, newHeight, -j3, k3, spriteWidthInit, hairColor, skinColor, i3, l3, i5);
+            }
+            else
+            {
+                spritePlotTransparent(
+                		imagePixelArray, sprites[spriteId].getPixels(), 0,
+                		(sprites[spriteId].getWidth() << 16) - k2 - 1, l2,
+                		windowYIdx, newWidth, newHeight, -j3, k3, spriteWidth,
+                		hairColor, skinColor, i3, l3, i5);
                 return;
             }
         }
-        catch (Exception _ex) {
+        catch (Exception _ex)
+        {
             System.out.println("error in sprite clipping routine");
         }
     }
-
-    private void spritePlotTransparent(int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2, int i3) {
-        int i4 = overlay >> 16 & 0xff;
-        int j4 = overlay >> 8 & 0xff;
-        int k4 = overlay & 0xff;
-        try {
+/*
+--------------------------------------------------------------------------------
+ */
+    private void spritePlotTransparent(
+    		int imagePixels[], int spritePixels[], int pixelColor, int j, int k, int gameWindowStartIdx,
+    		int spriteBoxWidth, int spriteBoxHeight, int k1, int l1, int spriteWidth,
+    		int overlay, int k2, int l2, int i3)
+    {
+    	//j += (int)(0x1000000*Math.random());
+    	//k += (int)(0x1000000*Math.random());
+    	//l += (int)(100*Math.random());
+        int redOverlay = overlay >> 16 & 0xff;
+        int greenOverlay = overlay >> 8 & 0xff;
+        int blueOverlay = overlay & 0xff;
+        try
+        {
             int l4 = j;
-            for (int i5 = -j1; i5 < 0; i5++) {
-                int j5 = (k >> 16) * i2;
+            for (int spritePixelRow = -spriteBoxHeight; spritePixelRow < 0; spritePixelRow++)
+            {
+                int j5 = (k >> 16) * spriteWidth;
                 int k5 = k2 >> 16;
-                int l5 = i1;
-                if (k5 < imageX) {
+                int l5 = spriteBoxWidth;
+                if (k5 < imageX)
+                {
                     int i6 = imageX - k5;
                     l5 -= i6;
                     k5 = imageX;
                     j += k1 * i6;
                 }
-                if (k5 + l5 >= imageWidth) {
+                if (k5 + l5 >= imageWidth)
+                {
                     int j6 = (k5 + l5) - imageWidth;
                     l5 -= j6;
                 }
                 i3 = 1 - i3;
-                if (i3 != 0) {
-                    for (int k6 = k5; k6 < k5 + l5; k6++) {
-                        i = ai1[(j >> 16) + j5];
-                        if (i != 0) {
-                            int j3 = i >> 16 & 0xff;
-                            int k3 = i >> 8 & 0xff;
-                            int l3 = i & 0xff;
-                            if (j3 == k3 && k3 == l3)
-                                ai[k6 + l] = ((j3 * i4 >> 8) << 16) + ((k3 * j4 >> 8) << 8) + (l3 * k4 >> 8);
+                if (i3 != 0)
+                {
+                    for (int spritePixelIdx = k5; spritePixelIdx < k5 + l5; spritePixelIdx++)
+                    {
+                        pixelColor = spritePixels[(j >> 16) + j5];
+                        if (pixelColor != 0)
+                        {
+                            int spriteRed = pixelColor >> 16 & 0xff;
+                            int spriteGreen = pixelColor >> 8 & 0xff;
+                            int spriteBlue = pixelColor & 0xff;
+                            if (spriteRed == spriteGreen
+                            		&& spriteGreen == spriteBlue)
+                            {  // apply color mask
+                                imagePixels[spritePixelIdx+ + gameWindowStartIdx] = (((spriteRed * redOverlay >> 8) << 16)
+                                		+ ((spriteGreen * greenOverlay >> 8) << 8)
+                                		+ (spriteBlue * blueOverlay >> 8));
+                            }
                             else
-                                ai[k6 + l] = i;
+                            {  // use the sprite color
+                                imagePixels[spritePixelIdx + gameWindowStartIdx] = pixelColor;
+                            }
                         }
                         j += k1;
                     }
@@ -1404,18 +1451,21 @@ public class GameImage implements ImageProducer, ImageObserver {
                 }
                 k += l1;
                 j = l4;
-                l += menuDefaultWidth;
+                gameWindowStartIdx += gameWindowWidth;
                 k2 += l2;
             }
-
             return;
         }
-        catch (Exception _ex) {
+        catch (Exception _ex)
+        {
             System.out.println("error in transparent sprite plot routine");
         }
     }
 
-    private void spritePlotTransparent(int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2, int i3, int j3) {
+    private void spritePlotTransparent(
+    		int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1,
+    		int k1, int l1, int i2, int overlay, int k2, int l2, int i3, int j3)
+    {
         int j4 = overlay >> 16 & 0xff;
         int k4 = overlay >> 8 & 0xff;
         int l4 = overlay & 0xff;
@@ -1459,7 +1509,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 }
                 k += l1;
                 j = l5;
-                l += menuDefaultWidth;
+                l += gameWindowWidth;
                 l2 += i3;
             }
 
@@ -1470,7 +1520,11 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    private void spritePlotTransparent(int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2, int i3) {
+    private void spritePlotTransparent(
+    		int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l,
+    		int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2,
+    		int i3)
+    {
         int i4 = overlay >> 16 & 0xff;
         int j4 = overlay >> 8 & 0xff;
         int k4 = overlay & 0xff;
@@ -1510,7 +1564,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 }
                 k += l1;
                 j = l4;
-                l += menuDefaultWidth;
+                l += gameWindowWidth;
                 k2 += l2;
             }
 
@@ -1521,7 +1575,11 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    private void spritePlotTransparent(int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2, int i3, int j3) {
+    private void spritePlotTransparent(
+    		int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l,
+    		int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2,
+    		int i3, int j3)
+{
         int j4 = overlay >> 16 & 0xff;
         int k4 = overlay >> 8 & 0xff;
         int l4 = overlay & 0xff;
@@ -1566,7 +1624,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 }
                 k += l1;
                 j = l5;
-                l += menuDefaultWidth;
+                l += gameWindowWidth;
                 l2 += i3;
             }
 
@@ -1839,15 +1897,15 @@ public class GameImage implements ImageProducer, ImageObserver {
         int k1 = abyte0[i + 3];
         int l1 = abyte0[i + 4];
         int i2 = abyte0[i] * 16384 + abyte0[i + 1] * 128 + abyte0[i + 2];
-        int j2 = i1 + j1 * menuDefaultWidth;
-        int k2 = menuDefaultWidth - k1;
+        int j2 = i1 + j1 * gameWindowWidth;
+        int k2 = gameWindowWidth - k1;
         int l2 = 0;
         if (j1 < imageY) {
             int i3 = imageY - j1;
             l1 -= i3;
             j1 = imageY;
             i2 += i3 * k1;
-            j2 += i3 * menuDefaultWidth;
+            j2 += i3 * gameWindowWidth;
         }
         if (j1 + l1 >= imageHeight)
             l1 -= ((j1 + l1) - imageHeight) + 1;
@@ -1986,10 +2044,10 @@ public class GameImage implements ImageProducer, ImageObserver {
         return true;
     }
 
-    public int menuDefaultWidth;
-    public int menuDefaultHeight;
-    public int imageWidthUnused;
-    public int imageHeightUnused;
+    public int gameWindowWidth;
+    public int gameWindowHeight;
+    public int gameWindowWidthUnused;
+    public int gameWindowHeightUnused;
     ColorModel colourModel;
     public int imagePixelArray[];
     ImageConsumer imageConsumer;

@@ -573,8 +573,8 @@ image_path = "sprites_img/"
 """
 if __name__ == "__main__":
     # Load data file and save to png file.
-    max_files = 3500
-    for i in range(0, max_files):
+    max_files = 75  # 3500
+    for i in range(13720, 13720+max_files):
         if (os.path.isfile(sprite_path+str(i))):
             print("Processing file %d of %d (%.1f%%)"
                   % (i, max_files, 100*i/max_files))
@@ -606,8 +606,8 @@ if __name__ == "__main__":
 """
 
 if __name__ == "__main__":
-    max_files = 100
-    start_idx = 3520
+    max_files = 500
+    start_idx = 3220
     for i in range(start_idx, start_idx+max_files):
         if (os.path.isfile("rs2textures/"+str(i)+".png")):
             print("Processing file %d of %d (%.1f%%)" % (i, max_files,
@@ -642,3 +642,4 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(i)+".png", image_mat)
+

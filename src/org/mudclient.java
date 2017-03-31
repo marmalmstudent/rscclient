@@ -63,6 +63,7 @@ public class mudclient extends GameWindowMiddleMan
     private int magicMenuIndex = 0;
     private boolean showRoof = true;
     private boolean autoScreenshot = true;
+    private boolean freeCamera = false;
     private long expGained = 0;
     private boolean hasWorldInfo = false;
     private boolean recording = false;
@@ -117,6 +118,11 @@ public class mudclient extends GameWindowMiddleMan
     public static int getWindowWidth()
     {
     	return mc.windowWidth;
+    }
+    
+    public boolean getFreeCamera()
+    {
+    	return freeCamera;
     }
     
     /**
@@ -2994,6 +3000,10 @@ public class mudclient extends GameWindowMiddleMan
         anInt699 = 0;
         mobMessageCount = 0;
         anInt718 = 0;
+        if (freeCamera)
+        {
+        	handleCharacterControlBinds();
+        }
         if (cameraAutoAngleDebug) {
             if (configAutoCameraAngle && !zoomCamera) {
                 int lastCameraAutoAngle = cameraAutoAngle;
@@ -4560,7 +4570,7 @@ public class mudclient extends GameWindowMiddleMan
         case 10: // enter
         	isTyping = !isTyping;
         	break;
-        case 69: // E
+        	/*case 69: // E
         	if (super.keyDownCode[87])
         	{ // W
         		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
@@ -4639,7 +4649,7 @@ public class mudclient extends GameWindowMiddleMan
             			sectionX, sectionY - 1, false, true);
             	cameraRotationLeftRight = 128;
         	}
-        	break;
+        	break;*/
         }
     }
     
@@ -4661,6 +4671,21 @@ public class mudclient extends GameWindowMiddleMan
     	{ // return key
         	isTyping = !isTyping;
     	}
+    }
+    
+    private void handleCharacterControlBinds()
+    {
+    	int arrowKeyMask = 0;
+    	if (super.keyDownCode[69]) // E
+    		arrowKeyMask |= 1;
+    	else if (super.keyDownCode[81]) // Q
+    		arrowKeyMask |= 2;
+    	if (super.keyDownCode[87]) // W
+    		arrowKeyMask |= 4;
+    	else if (super.keyDownCode[83]) // S
+    		arrowKeyMask |= 8;
+    	if (arrowKeyMask != 0)
+    		gameCamera.moveCamera(100, arrowKeyMask);
     }
 
     private final void drawShopBox() {
@@ -4852,10 +4877,10 @@ public class mudclient extends GameWindowMiddleMan
     private void drawClientAssist()
     {
     	String info[] = {
-    			"Hide Roofs", "Auto Screenshots", "Fightmode Selector"
+    			"Hide Roofs", "Auto Screenshots", "Fightmode Selector", "Textures", "Free Camera"
     	};
     	boolean condition[] = {
-    			!showRoof, autoScreenshot, combatWindow
+    			!showRoof, autoScreenshot, combatWindow, engineHandle.getTextureUse(), freeCamera
     	};
     	int xOffset = 2;
         gameGraphics.drawString("Client assists - click to toggle",
@@ -4973,6 +4998,16 @@ public class mudclient extends GameWindowMiddleMan
     		{
                 combatWindow = !combatWindow;
                 formatPacket(157, 6, combatWindow ? 1 : 0);
+    		}
+    		else if (buttons[3].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
+    			engineHandle.setTextureUse(!engineHandle.getTextureUse());
+    			//TODO: send this toggle to server, also should reload the map
+    		}
+    		else if (buttons[4].isMouseOverButton(super.mouseX, super.mouseY))
+    		{
+    			freeCamera = !freeCamera;
+    			//TODO: send this toggle to server, also should reload the map
     		}
     	}
     }
@@ -7095,6 +7130,7 @@ public class mudclient extends GameWindowMiddleMan
                 showRoof = DataOperations.getUnsignedByte(data[4]) == 1;
                 autoScreenshot = DataOperations.getUnsignedByte(data[5]) == 1;
                 combatWindow = DataOperations.getUnsignedByte(data[6]) == 1;
+                //TODO: send and receive texture on/off info.
                 return;
             }
             if (command == 209) {
@@ -8372,8 +8408,8 @@ public class mudclient extends GameWindowMiddleMan
         int i1 = cameraRotationLeftRight + anInt985 & 0xff;
         int k1 = ((ourPlayer.currentX - 6040) * 3 * k) / 2048;
         int i3 = ((ourPlayer.currentY - 6040) * 3 * k) / 2048;
-        int k4 = Camera.anIntArray384[0x400 - i1 * 4 & 0x3ff];
-        int i5 = Camera.anIntArray384[(0x400 - i1 * 4 & 0x3ff) + 1024];
+        int k4 = Camera.sinCos1024Res32768Magn[0x400 - i1 * 4 & 0x3ff];
+        int i5 = Camera.sinCos1024Res32768Magn[(0x400 - i1 * 4 & 0x3ff) + 1024];
         int k5 = i3 * k4 + k1 * i5 >> 18;
         i3 = i3 * i5 - k1 * k4 >> 18;
         k1 = k5;
@@ -8446,8 +8482,8 @@ public class mudclient extends GameWindowMiddleMan
             int j1 = cameraRotationLeftRight + anInt985 & 0xff;
             int l2 = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 0x4000) / (3 * l);
             int j4 = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 0x4000) / (3 * l);
-            int l4 = Camera.anIntArray384[0x400 - j1 * 4 & 0x3ff];
-            int j5 = Camera.anIntArray384[(0x400 - j1 * 4 & 0x3ff) + 0x400];
+            int l4 = Camera.sinCos1024Res32768Magn[0x400 - j1 * 4 & 0x3ff];
+            int j5 = Camera.sinCos1024Res32768Magn[(0x400 - j1 * 4 & 0x3ff) + 0x400];
             int l6 = j4 * l4 + l2 * j5 >> 15;
             j4 = j4 * j5 - l2 * l4 >> 15;
             l2 = l6;
