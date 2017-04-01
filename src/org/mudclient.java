@@ -1041,6 +1041,8 @@ public class mudclient extends GameWindowMiddleMan
                 gameDataModels[j] = new Model(1, 1);
             else
                 gameDataModels[j] = new Model(models, modelOffset, true);
+            System.out.printf("%s\n", EntityHandler.getModelName(j));
+            //System.out.printf("\"%s\", ", EntityHandler.getModelName(j));
             gameDataModels[j].isGiantCrystal = EntityHandler.getModelName(j).equals("giantcrystal");
         }
     }

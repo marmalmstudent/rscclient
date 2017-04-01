@@ -164,13 +164,13 @@ public class DataOperations {
             		+ (database[i * 10 + 11] & 0xff);
             out = new byte[dbEntryLength];
             for (int j = 0; j < dbEntryLength; ++j)
-            	out[j] = (byte)(database[offset + j] >> 1);
-            /*
+            	out[j] = (byte)(database[offset + j]);
+            
             try {
-            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
+            	misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
             	//misc.writeToFile(out, "src/org/conf/utils/cache/data/models36/object"+i+".ob3");
             } catch (IOException ioe) {ioe.printStackTrace();}
-            */
+            
             offset += dbEntryLength;
         }
 
@@ -212,7 +212,7 @@ public class DataOperations {
         int offset = 2 + nDBEntries * 10;
         int dbEntryIdentifier, dbEntryLength;
         /*
-        if (entry.startsWith("Legends")
+        if (entry.startsWith("tree2")
         		&& (entry.endsWith(".ob3") || entry.endsWith(".OB3")))
         {
         	storeDB(entry, database);
