@@ -1,3 +1,4 @@
+
 import numpy as np
 import scipy as sp
 import os
@@ -189,8 +190,10 @@ model_key = {
     458190 : "clawspell3", 459372 : "clawspell4", 462318 : "clawspell5",
     751554 : "spellcharge2", 755476 : "spellcharge3"
 }
-max_files = 13
-for i in range(12, max_files):
+# Reads .ob3 files (readable by the client), plots the object and prints to .png files.
+"""
+max_files = 500
+for i in range(0, max_files):
     if (os.path.isfile("object"+str(i)+".ob3")):
         print("Processing file %d of %d (%.1f%%)" % (i, max_files-1,
                                                      100*(i)/(max_files-1)))
@@ -248,14 +251,12 @@ for i in range(12, max_files):
                 tmpArray2.dtype = sp.int16
                 tmpArray = tmpArray2.byteswap()
             cellArray.append(tmpArray)
-
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
         x = dataPoints[0]
         y = dataPoints[2]
         z = -dataPoints[1]
-        print(np.transpose([x, y, x]))
 
         vertices = cellArray
 
@@ -273,7 +274,6 @@ for i in range(12, max_files):
                 tri.set_color(rgba_to_hex(surfaceColor2[j]))
             tri.set_edgecolor("#3f3f3f")
             ax.add_collection3d(tri)
-        # print("%d, %d, %d, %d, %d, %d" % (min(x), max(x), min(y), max(y), min(z), max(z)))
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")
@@ -287,3 +287,108 @@ for i in range(12, max_files):
         plt.savefig("object"+str(i)+".png")
         plt.close()
         # plt.show()
+"""
+# Convert .ob3 files (readable by the client) to .csg files (readable by OpenSCAD)
+"""
+max_files = 500
+for i in range(0, max_files):
+    if (os.path.isfile("object"+str(i)+".ob3")):
+        print("Processing file %d of %d (%.1f%%)" % (i, max_files-1,
+                                                     100*(i)/(max_files-1)))
+        with open("object"+str(i)+".ob3", "rb") as f:
+            data_read = sp.array(bytearray(f.read()), dtype=sp.uint8)
+        offset = 0
+        nPoints = data_read[offset:offset+2]
+        offset += 2
+        nPoints.dtype = np.uint16
+        nPoints = nPoints.byteswap()
+        nPoints = nPoints[0]
+
+        nSides = data_read[offset:offset+2]
+        offset += 2
+        nSides.dtype = np.uint16
+        nSides = nSides.byteswap()
+        nSides = nSides[0]
+
+        # 2 because 16-bit integer, 3 because 3 dimensions
+        dataPoints = data_read[offset:offset+2*3*nPoints]
+        offset += 2*3*nPoints
+        dataPoints.dtype = sp.int16
+        dataPoints = dataPoints.byteswap()
+        dataPoints = sp.reshape(dataPoints, (3, nPoints))
+
+        pointsPerCell = data_read[offset:offset+nSides]
+        offset += nSides
+
+        surfaceColor1 = data_read[offset:offset+2*nSides]
+        offset += 2*nSides
+        surfaceColor1.dtype = sp.int16
+        surfaceColor1 = surfaceColor1.byteswap()
+
+        surfaceColor2 = data_read[offset:offset+2*nSides]
+        offset += 2*nSides
+        surfaceColor2.dtype = sp.int16
+        surfaceColor2 = surfaceColor2.byteswap()
+
+        someArray = data_read[offset:offset+nSides]
+        offset += nSides
+
+        cellArray = []
+        for j in range(0, nSides, 1):
+            tmpArray = np.empty(pointsPerCell[j], dtype=np.int32)
+            if (nPoints < 256):
+                tmpArray = data_read[offset:offset+pointsPerCell[j]]
+                offset += pointsPerCell[j]
+            else:
+                tmpArray2 = np.empty(2*pointsPerCell[j], dtype=np.uint8)
+                tmpArray2 = data_read[offset:offset+2*pointsPerCell[j]]
+                offset += 2*pointsPerCell[j]
+                tmpArray2.dtype = sp.int16
+                tmpArray = tmpArray2.byteswap()
+            cellArray.append(tmpArray.tolist())
+
+        points = np.transpose([dataPoints[0], dataPoints[2], dataPoints[1]])
+        with open("object"+str(i)+".csg", "w") as f:
+            f.write("group() {\n        polyhedron(points = ")
+            f.write(str(points.tolist()))
+            f.write(", faces = ")
+            f.write(str(cellArray))
+            f.write(", convexity = 1);\n}")
+"""
+# Convert .csg files (readable by OpenSCAD) to .ob3 files (readable by the client)
+if __name__ == "__main__":
+max_files = 500
+for i in range(0, max_files):
+    if (os.path.isfile("object"+str(i)+".csg")):
+        print("Processing file %d of %d (%.1f%%)" % (i, max_files-1,
+                                                     100*(i)/(max_files-1)))
+        with open("object"+str(i)+".csg", "r") as f:
+            data_read=f.read()
+        # Data points (x,y,z)
+        points = data_read[data_read.find("points = ")+9:data_read.find(", faces = ")]
+        outer_points = points[2:-2].split("], [")
+        inner_points = []
+        data_points = []
+        for l in outer_points:
+            inner_points.append(l.split(", "))
+        for lo in inner_points:
+            tmp_arr = []
+            for li in lo:
+                tmp_arr.append(int(li))
+            data_points.append(tmp_arr)
+        dataPoints = np.transpose(np.array(data_points, dtype=np.int16))
+
+        faces = data_read[data_read.find(", faces = ")+10:data_read.find(", convexity = ")]
+        outer_faces = faces[2:-2].split("], [")
+        inner_faces = []
+        faces_data = []
+        for l in outer_faces:
+            inner_faces.append(l.split(", "))
+        for lo in inner_faces:
+            tmp_arr = []
+            for li in lo:
+                tmp_arr.append(int(li))
+            faces_data.append(tmp_arr)
+
+print(data_points)
+print(faces_data)

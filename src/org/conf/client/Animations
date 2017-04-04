@@ -1289,7 +1289,7 @@
   </AnimationDef>
   <AnimationDef>
     <name>battleaxe</name>
-    <charColour>16711748</charColour>
+    <charColour>13500416</charColour>
     <genderModel>0</genderModel>
     <hasA>true</hasA>
     <hasF>false</hasF>
@@ -1297,7 +1297,7 @@
   </AnimationDef>
   <AnimationDef>
     <name>sword</name>
-    <charColour>16711748</charColour>
+    <charColour>13500416</charColour>
     <genderModel>0</genderModel>
     <hasA>true</hasA>
     <hasF>false</hasF>
@@ -1425,7 +1425,7 @@
   </AnimationDef>
   <AnimationDef>
     <name>mediumhelm</name>
-    <charColour>16711748</charColour>
+    <charColour>13500416</charColour>
     <genderModel>0</genderModel>
     <hasA>true</hasA>
     <hasF>false</hasF>

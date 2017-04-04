@@ -5937,7 +5937,7 @@
     <basePrice>100000</basePrice>
     <stackable>false</stackable>
     <wieldable>true</wieldable>
-    <pictureMask>16711748</pictureMask>
+    <pictureMask>13500416</pictureMask>
   </ItemDef>
   <ItemDef>
     <name>Dragon axe</name>
@@ -5947,7 +5947,7 @@
     <basePrice>200000</basePrice>
     <stackable>false</stackable>
     <wieldable>true</wieldable>
-    <pictureMask>16711748</pictureMask>
+    <pictureMask>13500416</pictureMask>
   </ItemDef>
   <ItemDef>
     <name>Jail keys</name>
@@ -7957,7 +7957,7 @@
     <basePrice>100000</basePrice>
     <stackable>false</stackable>
     <wieldable>true</wieldable>
-    <pictureMask>16711748</pictureMask>
+    <pictureMask>13500416</pictureMask>
   </ItemDef>
   <ItemDef>
     <name>Mithril seed</name>

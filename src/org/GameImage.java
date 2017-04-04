@@ -1299,7 +1299,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             /*
             if ((spriteId >= 297 && spriteId <= 314) || (spriteId >= 351 && spriteId <= 395))
             { // large helmet, platebody and platelegs
-                hairColor = 0xff0044; // dragon items color
+                hairColor = 0xce0000; // dragon items color
             }*/
             int spriteWidth = sprites[spriteId].getWidth();
             int spriteHeight = sprites[spriteId].getHeight();

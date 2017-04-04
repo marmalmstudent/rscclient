@@ -458,7 +458,7 @@ def get_data_from_matrix(image_matrix):
     return data
 
 
-def get_image_matrix(image_data):
+def get_image_matrix(image_data, use_native_alpha=False):
     """
     Extracts a 2-dimensional unsigned 32-bit data array into a 3-dimensional
     8-bit matrix where elemend [i,j] is on the form [r,g,b].
@@ -477,9 +477,10 @@ def get_image_matrix(image_data):
     image_b = np.array((image_data >> 24) & 0xff, dtype=np.uint8)
     image_g = np.array((image_data >> 16) & 0xff, dtype=np.uint8)
     image_r = np.array((image_data >> 8) & 0xff, dtype=np.uint8)
-    # image_a = np.array(image_data & 0xff, dtype=np.uint8)
-    image_a = 255*np.ones(np.shape(image_data), dtype=np.uint8)
-    # image_a = np.array(255*(1 - (image_r == 255)*(image_b == 255)*(image_g == 0)),dtype=np.uint8)
+    if (use_native_alpha):
+        image_a = 255*np.ones(np.shape(image_data), dtype=np.uint8)*(image_data != 0)
+    else:
+        image_a = 255*np.ones(np.shape(image_data), dtype=np.uint8)
     image_disp = np.transpose(
         np.array([image_r, image_g, image_b, image_a]), (1, 2, 0))
     return image_disp
@@ -573,18 +574,18 @@ image_path = "sprites_img/"
 """
 if __name__ == "__main__":
     # Load data file and save to png file.
-    max_files = 75  # 3500
-    for i in range(13720, 13720+max_files):
+    max_files = 4000
+    for i in range(0, max_files):
         if (os.path.isfile(sprite_path+str(i))):
             print("Processing file %d of %d (%.1f%%)"
-                  % (i, max_files, 100*i/max_files))
+                  % (i, max_files, 100*i/(max_files)))
             data_read = read_sprite(sprite_path+str(i))
             header_data = get_header(data_read)
             height = get_height(header_data)
             width = get_width(header_data)
             image_data = get_matrix_from_data(get_image_data(data_read),
                                               width, height)
-            image_mat = get_image_matrix(image_data)
+            image_mat = get_image_matrix(image_data, use_native_alpha=True)
             save_image(image_path+str(i)+".png", image_mat)
 """
 """
@@ -604,7 +605,7 @@ if __name__ == "__main__":
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(3500+i)+".png", image_mat)
 """
-
+"""
 if __name__ == "__main__":
     max_files = 500
     start_idx = 3220
@@ -642,4 +643,59 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(i)+".png", image_mat)
+"""
 
+if __name__ == "__main__":
+    # 763, 465, 543
+    """
+    sprites = {0: "dragon_baxe", 1: "dragon_long", 2: "dragon_med"}
+    xshift = {0: 28, 1: 27, 2: 22}
+    yshift = {0: 34, 1: 18, 2: 7}
+    something1 = {0: 64, 1: 64, 2: 64}
+    something2 = {0: 102, 1: 102, 2: 102}
+    """
+    header_info = {756: [15, 18, 64, 102], 757: [14, 24, 64, 102],
+                   758: [14, 40, 64, 102], 759: [14, 42, 64, 102],
+                   760: [19, 24, 64, 102], 761: [23, 19, 64, 102],
+                   762: [22, 40, 64, 102], 763: [28, 28, 64, 102],
+                   764: [32, 18, 64, 102], 765: [41, 36, 64, 102],
+                   766: [45, 24, 64, 102], 767: [47, 16, 64, 102],
+                   768: [43, 44, 64, 102], 769: [44, 26, 64, 102],
+                   770: [45, 19, 64, 102], 771: [-10, -10, 84, 102],
+                   772: [30, -7, 84, 102], 773: [38, 10, 84, 102]}
+    max_files = len(header_info)
+    start_idx = 756
+    for i in range(start_idx, start_idx+max_files):
+        if (os.path.isfile("rs2textures/dragon_battleaxe_"+str(i)+".png")):
+            print("Processing file %d of %d (%.1f%%)" % (i, max_files,
+                                                         100*(i-start_idx)/max_files))
+            # Load png image and write the image to a dat file.
+            # get 3-dim matrix [r,g,b,a] each element is a matrix.
+            data_read, width, height = read_image(
+                "rs2textures/dragon_battleaxe_"+str(i)+".png")
+            # data_read[1] = np.array(255*(data_read[0] == 0) + data_read[1], dtype=np.uint8)  # r
+            # data_read[3] = np.array(255*(data_read[0] == 0) + data_read[3], dtype=np.uint8)  # b
+            # convert to matrix with each elements representing pixel values.
+            # typecast to 8-bit.
+            image_arr = img_32_to_8(image_matrix_to_array(data_read))
+            requires_shift = True
+            x_shift = header_info[i][0]
+            y_shift = header_info[i][1]
+            something_1 = header_info[i][2]
+            something_2 = header_info[i][3]
+            # create header
+            image_header = get_header_array(width, height, requires_shift,
+                                            x_shift, y_shift, something_1,
+                                            something_2)
+            image_data = get_data_write(image_header, image_arr)
+            write_sprite(sprite_path+str(i), image_data)
+
+            # Load data file and save to png file.
+            data_read = read_sprite(sprite_path+str(i))
+            header_data = get_header(data_read)
+            height = get_height(header_data)
+            width = get_width(header_data)
+            image_data = get_matrix_from_data(get_image_data(data_read),
+                                              width, height)
+            image_mat = get_image_matrix(image_data, use_native_alpha=True)
+            save_image(image_path+"dragon_battleaxe_"+str(i)+".png", image_mat)
