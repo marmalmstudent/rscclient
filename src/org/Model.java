@@ -162,14 +162,15 @@ public class Model {
         anInt306 = 256;
         anInt307 = 512;
         anInt308 = 32;
-        // 0   8
         int nbrCoordPoints = DataOperations.getUnsigned2Bytes(database, offset);
         offset += 2;
-        // 0  20
         int nbrSurfaces = DataOperations.getUnsigned2Bytes(database, offset);
         offset += 2;
         method174(nbrCoordPoints, nbrSurfaces);
         anIntArrayArray279 = new int[nbrSurfaces][1];
+
+        
+        // The spatial coordinate points.
         for (int i = 0; i < nbrCoordPoints; i++)
         {
             xCoords[i] = DataOperations.getSigned2Bytes(database, offset);
@@ -185,35 +186,55 @@ public class Model {
             yCoords[i] = DataOperations.getSigned2Bytes(database, offset);
             offset += 2;
         }
-        // how many data points should be used to create a surface
-        // (which can be colored or have texture on it).
+        
+        /* how many data points should be used to create a surface
+         * (which can be colored or have texture on it).
+         */
         this.nbrCoordPoints = nbrCoordPoints;
-        for (int i = 0; i < nbrSurfaces; i++) {
+        for (int i = 0; i < nbrSurfaces; i++)
+        {
             pointsPerCell[i] = database[offset++] & 0xff;
         }
-        for (int i = 0; i < nbrSurfaces; i++) {
+        
+        /* 16-bit colors without alpha mask.
+         * Positive numbers (>= 0x0, <= 0xffff) seems to mean the texture index
+         * (e.g. 0 is sprite 3220)
+         * - red bit mask is   0b0111110000000000 (0x7c00)
+         * - green bit mask is 0b0000001111100000 (0x3e0)
+         * - blue bit mask is  0b0000000000011111 (0x1f)
+         * 32767 (0x7fff) denotes invisible (i think)
+         */
+        for (int i = 0; i < nbrSurfaces; i++)
+        { // bottom/inside/lower i think
             surfaceTexture1[i] = DataOperations.getSigned2Bytes(database, offset);
             offset += 2;
             if (surfaceTexture1[i] == 32767)
                 surfaceTexture1[i] = anInt270;
         }
-        for (int i = 0; i < nbrSurfaces; i++) {
+        for (int i = 0; i < nbrSurfaces; i++)
+        { // top/outside/upper i think
             surfaceTexture2[i] = DataOperations.getSigned2Bytes(database, offset);
             offset += 2;
             if (surfaceTexture2[i] == 32767)
                 surfaceTexture2[i] = anInt270;
         }
-        // probably something to do with if the object should be colored
-        // or use a texture
-        for (int i = 0; i < nbrSurfaces; i++) {
+        
+        /* Does not seem to affect anything. Most surfaces
+         * will have k2 != 0. and i can not find any pattern
+         * for those that does not.
+         */
+        for (int i = 0; i < nbrSurfaces; i++)
+        {
             int k2 = database[offset++] & 0xff;
             if (k2 == 0)
                 anIntArray241[i] = 0;
             else
                 anIntArray241[i] = anInt270;
         }
-        // store which data points are used to create a surface
-        // for each surface.
+        
+        /* store which data points are used to create a surface
+         * for each surface.
+         */
         for (int i = 0; i < nbrSurfaces; i++) {
             surfaces[i] = new int[pointsPerCell[i]];
             for (int j = 0; j < pointsPerCell[i]; j++)
