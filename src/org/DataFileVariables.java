@@ -30,14 +30,14 @@ class DataFileVariables {
     final int anInt462 = 50;
     final int anInt463 = 4;
     final int anInt464 = 18002;
-    byte aByteArray465[];
+    byte source[];
     int anInt466;
-    int anInt467;
+    int sourceSize;
     int anInt468;
     int anInt469;
-    byte aByteArray470[];
+    byte destination[];
     int anInt471;
-    int anInt472;
+    int destinationSize;
     int anInt473;
     int anInt474;
     byte aByte475;

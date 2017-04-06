@@ -617,28 +617,6 @@ def write_to_csg(obj_id, data_points, surface_color1,
         f.write("}")
 
 
-def ob3tocsg(start_file, max_files):
-    """
-    Convert .ob3 files (readable by the client) to .csg files (readable by
-    OpenSCAD)
-
-    Parameters
-    ----------
-    start_file : int
-        index of first csg file, e.g. object500.ob3 would be 500.
-    max_files : int
-        The number of files (offset from start_file) to be converted
-    """
-    for i in range(start_file, start_file + max_files):
-        if (os.path.isfile("object"+str(i)+".ob3")):
-            print("Processing file %d of %d (%.1f%%)"
-                  % (i, max_files, 100*(i-start_file)/max_files))
-            with open("object"+str(i)+".ob3", "rb") as f:
-                data_read = sp.array(bytearray(f.read()), dtype=sp.uint8)
-            data = get_data(data_read)
-            write_to_csg(i, data[2], data[4], data[5], data[7])
-
-
 def load_csg(data):
     """
     Extracts the arrays from the data contained in a a csg file.
@@ -878,6 +856,28 @@ def format_ob3(
     cell_array.dtype = np.uint8
     out_array = np.hstack((out_array, cell_array))
     return out_array
+
+
+def ob3tocsg(start_file, max_files):
+    """
+    Convert .ob3 files (readable by the client) to .csg files (readable by
+    OpenSCAD)
+
+    Parameters
+    ----------
+    start_file : int
+        index of first csg file, e.g. object500.ob3 would be 500.
+    max_files : int
+        The number of files (offset from start_file) to be converted
+    """
+    for i in range(start_file, start_file + max_files):
+        if (os.path.isfile("object"+str(i)+".ob3")):
+            print("Processing file %d of %d (%.1f%%)"
+                  % (i, max_files, 100*(i-start_file)/max_files))
+            with open("object"+str(i)+".ob3", "rb") as f:
+                data_read = sp.array(bytearray(f.read()), dtype=sp.uint8)
+            data = get_data(data_read)
+            write_to_csg(i, data[2], data[4], data[5], data[7])
 
 
 def csgtoob3(start_file, max_files):

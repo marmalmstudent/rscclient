@@ -6,14 +6,21 @@ import java.awt.event.*;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
 import javax.swing.*;
+
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.model.Sprite;
 import org.util.Config;
+import org.util.DataConversions;
 
 public class GameWindow extends JApplet 
 	implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, WindowListener, ComponentListener
@@ -288,32 +295,32 @@ public class GameWindow extends JApplet
 
     protected byte[] load(String filename)
     {
-        int j = 0;
-        int data_size = 0;
-        byte abyte0[] = null;
+        int uncompressedSize = 0;
+        int compressedSize = 0;
+        byte compressedData[] = null;
         try
         {
             java.io.InputStream inputstream = DataOperations.streamFromPath(filename);
             DataInputStream datainputstream = new DataInputStream(inputstream);
-            byte abyte2[] = new byte[6];
-            datainputstream.readFully(abyte2, 0, 6);
-            j = ((abyte2[0] & 0xff) << 16)
-            		+ ((abyte2[1] & 0xff) << 8)
-            		+ (abyte2[2] & 0xff);
-            data_size = ((abyte2[3] & 0xff) << 16)
-            		+ ((abyte2[4] & 0xff) << 8)
-            		+ (abyte2[5] & 0xff);
-            int l = 0;
-            abyte0 = new byte[data_size];
-            while (l < data_size)
+            byte header[] = new byte[6];
+            datainputstream.readFully(header, 0, 6);
+            uncompressedSize = ((header[0] & 0xff) << 16)
+            		+ ((header[1] & 0xff) << 8)
+            		+ (header[2] & 0xff);
+            compressedSize = ((header[3] & 0xff) << 16)
+            		+ ((header[4] & 0xff) << 8)
+            		+ (header[5] & 0xff);
+            int offset = 0;
+            compressedData = new byte[compressedSize];
+            while (offset < compressedSize)
             {
-                int i1 = data_size - l;
-                if (i1 > 1000)
+                int bufferSize = compressedSize - offset;
+                if (bufferSize > 1000)
                 {
-                    i1 = 1000;
+                    bufferSize = 1000;
                 }
-                datainputstream.readFully(abyte0, l, i1);
-                l += i1;
+                datainputstream.readFully(compressedData, offset, bufferSize);
+                offset += bufferSize;
             }
             datainputstream.close();
         }
@@ -321,15 +328,15 @@ public class GameWindow extends JApplet
         {
         	_ex.printStackTrace();
         }
-        if (data_size != j)
+        if (compressedSize != uncompressedSize)
         {
-            byte abyte1[] = new byte[j];
-            DataFileDecrypter.unpackData(abyte1, j, abyte0, data_size, 0);
-            return abyte1;
+            byte uncompressedData[] = new byte[uncompressedSize];
+            DataFileDecrypter.unpackData(uncompressedData, uncompressedSize, compressedData, compressedSize, 0);
+            return uncompressedData;
         }
         else
         {
-            return abyte0;
+            return compressedData;
         }
     }
 

@@ -1,15 +1,17 @@
 package org;
 
 public class DataFileDecrypter {
-
-    public static int unpackData(byte abyte0[], int i, byte abyte1[], int j, int k) {
+// -----------------------------------------------------------------------------
+    public static int unpackData(
+    		byte dst[], int dstSize, byte src[], int srcSize, int k)
+    {
         DataFileVariables dataFileVariables = new DataFileVariables();
-        dataFileVariables.aByteArray465 = abyte1;
+        dataFileVariables.source = src;
         dataFileVariables.anInt466 = k;
-        dataFileVariables.aByteArray470 = abyte0;
+        dataFileVariables.destination = dst;
         dataFileVariables.anInt471 = 0;
-        dataFileVariables.anInt467 = j;
-        dataFileVariables.anInt472 = i;
+        dataFileVariables.sourceSize = srcSize;
+        dataFileVariables.destinationSize = dstSize;
         dataFileVariables.anInt479 = 0;
         dataFileVariables.anInt478 = 0;
         dataFileVariables.anInt468 = 0;
@@ -18,8 +20,8 @@ public class DataFileDecrypter {
         dataFileVariables.anInt474 = 0;
         dataFileVariables.anInt481 = 0;
         method131(dataFileVariables);
-        i -= dataFileVariables.anInt472;
-        return i;
+        dstSize -= dataFileVariables.destinationSize;
+        return dstSize;
     }
 
     private static void method130(DataFileVariables dataFileVariables) {
@@ -29,36 +31,42 @@ public class DataFileDecrypter {
         int k = dataFileVariables.anInt484;
         int ai[] = DataFileVariables.anIntArray489;
         int l = dataFileVariables.anInt483;
-        byte abyte0[] = dataFileVariables.aByteArray470;
+        byte dst[] = dataFileVariables.destination;
         int i1 = dataFileVariables.anInt471;
-        int j1 = dataFileVariables.anInt472;
-        int k1 = j1;
+        int dstSize = dataFileVariables.destinationSize;
+        int k1 = dstSize;
         int l1 = dataFileVariables.anInt503 + 1;
         label0:
-        do {
-            if (i > 0) {
-                do {
-                    if (j1 == 0)
+        do
+        {
+            if (i > 0)
+            {
+                do
+                {
+                    if (dstSize == 0)
                         break label0;
                     if (i == 1)
                         break;
-                    abyte0[i1] = byte4;
+                    dst[i1] = byte4;
                     i--;
                     i1++;
-                    j1--;
+                    dstSize--;
                 } while (true);
-                if (j1 == 0) {
+                if (dstSize == 0)
+                {
                     i = 1;
                     break;
                 }
-                abyte0[i1] = byte4;
+                dst[i1] = byte4;
                 i1++;
-                j1--;
+                dstSize--;
             }
             boolean flag = true;
-            while (flag) {
+            while (flag)
+            {
                 flag = false;
-                if (j == l1) {
+                if (j == l1)
+                {
                     i = 0;
                     break label0;
                 }
@@ -69,12 +77,12 @@ public class DataFileDecrypter {
                 j++;
                 if (byte0 != k) {
                     k = byte0;
-                    if (j1 == 0) {
+                    if (dstSize == 0) {
                         i = 1;
                     } else {
-                        abyte0[i1] = byte4;
+                        dst[i1] = byte4;
                         i1++;
-                        j1--;
+                        dstSize--;
                         flag = true;
                         continue;
                     }
@@ -82,13 +90,13 @@ public class DataFileDecrypter {
                 }
                 if (j != l1)
                     continue;
-                if (j1 == 0) {
+                if (dstSize == 0) {
                     i = 1;
                     break label0;
                 }
-                abyte0[i1] = byte4;
+                dst[i1] = byte4;
                 i1++;
-                j1--;
+                dstSize--;
                 flag = true;
             }
             i = 2;
@@ -120,7 +128,7 @@ public class DataFileDecrypter {
                 }
         } while (true);
         int i2 = dataFileVariables.anInt473;
-        dataFileVariables.anInt473 += k1 - j1;
+        dataFileVariables.anInt473 += k1 - dstSize;
         if (dataFileVariables.anInt473 < i2)
             dataFileVariables.anInt474++;
         dataFileVariables.aByte475 = byte4;
@@ -129,9 +137,9 @@ public class DataFileDecrypter {
         dataFileVariables.anInt484 = k;
         DataFileVariables.anIntArray489 = ai;
         dataFileVariables.anInt483 = l;
-        dataFileVariables.aByteArray470 = abyte0;
+        dataFileVariables.destination = dst;
         dataFileVariables.anInt471 = i1;
-        dataFileVariables.anInt472 = j1;
+        dataFileVariables.destinationSize = dstSize;
     }
 
     private static void method131(DataFileVariables dataFileVariables) {
@@ -444,10 +452,10 @@ public class DataFileDecrypter {
                 j = k;
                 break;
             }
-            dataFileVariables.anInt478 = dataFileVariables.anInt478 << 8 | dataFileVariables.aByteArray465[dataFileVariables.anInt466] & 0xff;
+            dataFileVariables.anInt478 = dataFileVariables.anInt478 << 8 | dataFileVariables.source[dataFileVariables.anInt466] & 0xff;
             dataFileVariables.anInt479 += 8;
             dataFileVariables.anInt466++;
-            dataFileVariables.anInt467--;
+            dataFileVariables.sourceSize--;
             dataFileVariables.anInt468++;
             if (dataFileVariables.anInt468 == 0)
                 dataFileVariables.anInt469++;

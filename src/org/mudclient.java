@@ -26,15 +26,21 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /* 80 columns
 --------------------------------------------------------------------------------
@@ -1006,6 +1012,56 @@ public class mudclient extends GameWindowMiddleMan
         drawLoadingBarText(15, "Unpacking Configuration");
         EntityHandler.load();
     }
+    /* Need to fix reading the files.
+    private final void loadModel() throws IOException
+    {
+    	ZipFile objectArchive = new ZipFile(new File(Config.CONF_DIR + "/data/models36.zip"));
+        try {
+        	for (int j = 0; j < EntityHandler.getModelCount(); j++)
+        	{
+        		ZipEntry e = objectArchive.getEntry(String.valueOf(j));
+        		if (e == null)
+        		{
+        			System.err.printf("Sprite %d missing!", j);
+        			continue;
+        		}
+
+                DataInputStream datainputstream = new DataInputStream(objectArchive.getInputStream(e));
+                byte entrySize[] = new byte[4];
+                datainputstream.readFully(entrySize, 0, 4);
+                int dataSize = ((entrySize[0] & 0xff) << 24)
+                		+ ((entrySize[1] & 0xff) << 16)
+                		+ ((entrySize[2] & 0xff) << 8)
+                		+ (entrySize[3] & 0xff);
+                int offset = 0;
+                byte model[] = new byte[dataSize];
+                while (offset < dataSize)
+                {
+                    int bufferSize = dataSize - offset;
+                    if (bufferSize > 1000)
+                    {
+                        bufferSize = 1000;
+                    }
+                    datainputstream.readFully(model, offset, bufferSize);
+                    offset += bufferSize;
+                }
+                datainputstream.close();
+
+                if (j == 0)
+                    gameDataModels[j] = new Model(1, 1);
+                else
+                    gameDataModels[j] = new Model(model, 0, true);
+                gameDataModels[j].isGiantCrystal = EntityHandler.getModelName(j).equals("giantcrystal");
+        	}
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally
+        {
+        	objectArchive.close();
+        }
+    }*/
 
     /**
      * Loads 3D models
@@ -1026,6 +1082,9 @@ public class mudclient extends GameWindowMiddleMan
         };
         for (String name : modelNames)
             EntityHandler.storeModel(name);
+        /* Need to fix reading the files.
+        try { loadModel(); } catch (IOException ioe) { ioe.printStackTrace(); }
+        */
         byte[] models = load("models36.jag");
         if (models == null)
         {
