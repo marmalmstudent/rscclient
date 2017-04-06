@@ -1,0 +1,10 @@
+import numpy as np
+
+
+if __name__ == "__main__":
+    max_files = 500
+    for i in range(0, max_files):
+        if (os.path.isfile("object"+str(i)+".ob3")):
+            print("Processing file %d of %d (%.1f%%)" % (i, max_files,
+                                                         100*(i)/max_files))
+            with open("object"+str(i)+".ob3", "rb") as f:
