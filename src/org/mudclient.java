@@ -1012,7 +1012,7 @@ public class mudclient extends GameWindowMiddleMan
         drawLoadingBarText(15, "Unpacking Configuration");
         EntityHandler.load();
     }
-    /* Need to fix reading the files.
+    
     private final void loadModel() throws IOException
     {
     	ZipFile objectArchive = new ZipFile(new File(Config.CONF_DIR + "/data/models36.zip"));
@@ -1022,7 +1022,7 @@ public class mudclient extends GameWindowMiddleMan
         		ZipEntry e = objectArchive.getEntry(String.valueOf(j));
         		if (e == null)
         		{
-        			System.err.printf("Sprite %d missing!", j);
+        			System.err.printf("Model %d missing!", j);
         			continue;
         		}
 
@@ -1061,7 +1061,7 @@ public class mudclient extends GameWindowMiddleMan
         {
         	objectArchive.close();
         }
-    }*/
+    }
 
     /**
      * Loads 3D models
@@ -1082,28 +1082,10 @@ public class mudclient extends GameWindowMiddleMan
         };
         for (String name : modelNames)
             EntityHandler.storeModel(name);
-        /* Need to fix reading the files.
-        try { loadModel(); } catch (IOException ioe) { ioe.printStackTrace(); }
-        */
-        byte[] models = load("models36.jag");
-        if (models == null)
+        try
         {
-            lastLoadedNull = true;
-            return;
-        }
-        int modelOffset;
-        for (int j = 0; j < EntityHandler.getModelCount(); j++)
-        {
-            modelOffset = DataOperations.getEntryOffset(EntityHandler.getModelName(j)
-            		+ ".ob3", models);
-            if (modelOffset == 0)
-                gameDataModels[j] = new Model(1, 1);
-            else
-                gameDataModels[j] = new Model(models, modelOffset, true);
-            System.out.printf("%s\n", EntityHandler.getModelName(j));
-            //System.out.printf("\"%s\", ", EntityHandler.getModelName(j));
-            gameDataModels[j].isGiantCrystal = EntityHandler.getModelName(j).equals("giantcrystal");
-        }
+        	loadModel();
+        } catch (IOException ioe) { ioe.printStackTrace(); }
     }
 
     protected final void handleMouseDown(int button, int x, int y)

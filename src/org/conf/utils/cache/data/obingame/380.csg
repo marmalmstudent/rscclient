@@ -1,0 +1,7 @@
+group() {
+	group() {
+		color([1.0, 0.0, 1.0, 1.0]) {
+			polyhedron(points = [[-64, 64, 0], [64, 0, 0], [192, 64, -64]], faces = [[0, 1, 2]], convexity = 1);
+		}
+	}
+}

@@ -2,6 +2,7 @@ package org;
 
 import java.io.*;
 
+import org.entityhandling.EntityHandler;
 import org.util.misc;
 
 public class DataOperations {
@@ -144,15 +145,10 @@ public class DataOperations {
         return s;
     }
     
-    public static int storeDB(String entry, byte database[]) {
+    public static int storeDB(byte database[]) {
         int nDBEntries = getUnsigned2Bytes(database, 0);
-        int entryIdentifier = 0;
-        entry = entry.toUpperCase();
-        for (int k = 0; k < entry.length(); k++)
-            entryIdentifier = (entryIdentifier * 61 + entry.charAt(k)) - 32;
         int offset = 2 + nDBEntries * 10;
-        long dbEntryIdentifier;
-        int dbEntryLength;
+        int dbEntryLength, dbEntryIdentifier;
         byte[] out;
         for (int i = 0; i < nDBEntries; i++) {
             dbEntryIdentifier = ((database[i * 10 + 2] & 0xff) << 24)
@@ -162,16 +158,25 @@ public class DataOperations {
             dbEntryLength = ((database[i * 10 + 9] & 0xff) << 16)
             		+ ((database[i * 10 + 10] & 0xff) << 8)
             		+ (database[i * 10 + 11] & 0xff);
+            System.out.printf("%d: %d, ", i, dbEntryIdentifier);
+            
+            /*
             out = new byte[dbEntryLength];
             for (int j = 0; j < dbEntryLength; ++j)
             	out[j] = (byte)(database[offset + j]);
             
             try {
-            	misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
-            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/models36/object"+i+".ob3");
+            	System.out.println();
+            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
+            	misc.writeToFile(out, "src/org/conf/utils/cache/data/models3d/"+i+".ob3");
             } catch (IOException ioe) {ioe.printStackTrace();}
-            
+            */
             offset += dbEntryLength;
+        }
+        System.out.printf("\n");
+        for (int i = 0; i < nDBEntries; ++i) {
+        	if (EntityHandler.getModelName(i) != null)
+        		System.out.printf("%d: %d, ", i, getIdentifier(EntityHandler.getModelName(i)+".ob3"));
         }
 
         return 0;
