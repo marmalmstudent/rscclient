@@ -1,6 +1,5 @@
 translate([2605, 2189, 0]) {
     rotate([0, 0, 180]) {
-        /*
     include<h0x48y37.csg>;
     include<h0x48y38.csg>;
     include<h0x48y39.csg>;
@@ -441,7 +440,7 @@ translate([2605, 2189, 0]) {
     include<h0x68y54.csg>;
     include<h0x68y55.csg>;
     include<h0x68y56.csg>;
-    include<h0x68y57.csg>;
+    include<h0x68y57.csg>;/*
     include<h1x48y37.csg>;
     include<h1x48y38.csg>;
     include<h1x48y39.csg>;
@@ -1323,7 +1322,7 @@ translate([2605, 2189, 0]) {
     include<h2x68y54.csg>;
     include<h2x68y55.csg>;
     include<h2x68y56.csg>;
-    include<h2x68y57.csg>;*/
+    include<h2x68y57.csg>;
     include<h3x48y37.csg>;
     include<h3x48y38.csg>;
     include<h3x48y39.csg>;
@@ -1764,5 +1763,5 @@ translate([2605, 2189, 0]) {
     include<h3x68y54.csg>;
     include<h3x68y55.csg>;
     include<h3x68y56.csg>;
-    include<h3x68y57.csg>;
+    include<h3x68y57.csg>;*/
 }}

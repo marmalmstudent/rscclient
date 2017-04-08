@@ -93,34 +93,15 @@ def diag_wall(dwall_data):
     dwall_data.dtype = np.int32
     return dwall_data.tolist()
 
-def write_to_csg(h, x, y, elevation, texture):
+def write_to_csg(h, x, y, elevation, texture, use_translate=True):
     """
     Writes the data to a csg file.
-
-    Parameters
-    ----------
-    obj_id : int
-        index of the csg file, e.g. object500.csg would be 500.
-    data_points : numpy.ndarray
-        A 16-bit signed integer array of dimension (3, n_points).
-        The array should contain then spatial coordinate points in then order
-        [x, y, z].
-    surface_color1 : numpy.ndarray
-        A 16-bit signed integer array of size n_sides.
-        The array should contain information about the color of the "upside"
-        of each side/face.
-    surface_color2 : numpy.ndarray
-        A 16-bit signed integer array of size n_sides.
-        The array should contain information about the color of the "downside"
-        of each side/face.
-    cell_array : list
-        The list should contain information about which points creates each
-        side/face.
-        The format should be [s0p0, s0p1, ..., s0pK0, s1p0, s1p1, ..., s1pK1,
-        sNp0, sNp1, ..., sNpKN]
     """
     with open(landsc_dst + "h" + str(h) + "x" + str(x) + "y" + str(y) + ".csg", "w") as f:
         f.write("group() {\n")
+        if (not use_translate):
+            x = 0
+            y = 0
         for i in range(map_size-1):
             for j in range(map_size-1):
                 color_write = texture[i*map_size + j]
@@ -239,15 +220,15 @@ def landscape_to_csg(h_start, h_len, x_start, x_len, y_start, y_len):
                 hwall = horiz_wall(data_mat[4])
                 vwall = vert_wall(data_mat[5])
                 dwall = diag_wall(data_mat[6:10])
-                write_to_csg(i, j, k, elevation.tolist(), texture)
+                write_to_csg(i, j, k, elevation.tolist(), texture, use_translate=True)
 
 
 landsc_src = "../Landscape/"
 landsc_dst = "landscape/"
 orig_map_size = 48
 # Available compression: 1, 2, 3, 4, 6, 8, 12, 16, 24, 48,
-compression = 2
+compression = 1
 map_size = int(orig_map_size / compression)
 if __name__ == "__main__":
-    landscape_to_csg(1, 3, 48, 21, 37, 21)
-    # landscape_to_csg(0, 1, 49, 1, 53, 1)
+    landscape_to_csg(0, 4, 48, 21, 37, 21)
+    # landscape_to_csg(0, 1, 56, 1, 40, 1)
