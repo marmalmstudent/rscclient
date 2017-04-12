@@ -6623,6 +6623,7 @@ public class mudclient extends GameWindowMiddleMan
                             int j40 = ((i15 + i15 + i34) * magicLoc) / 2;
                             int i42 = ((l19 + l19 + j37) * magicLoc) / 2;
                             int k43 = EntityHandler.getObjectDef(k8).modelID;
+                            System.out.printf("Loading requested model from server: %d, %d\n", k8, k43);
                             Model model_1 = gameDataModels[k43].method203();
                             // TODO: make the server send objects that are further away
                             gameCamera.addModel(model_1);

@@ -97,7 +97,6 @@ def write_mtl(scene, filepath, path_mode, copy_set, mtl_dict):
         # Write material/image combinations we have used.
         # Using mtl_dict.values() directly gives un-predictable order.
         for mtl_mat_name, mat, face_img in mtl_dict_values:
-            print(mtl_mat_name, mat, face_img)
             # Get the Blender data for the material and the image.
             # Having an image named None will make a bug, dont do it :)
 
@@ -170,7 +169,7 @@ def write_mtl(scene, filepath, path_mode, copy_set, mtl_dict):
                                                                   path_mode, "", copy_set, face_img.library)
                     fw('map_Kd %s\n' % filepath)  # Diffuse mapping image
                     # NOTE: THIS HAS NOT BEEN TESTED!!
-                    mtl_texture_dict.update({mtl_mat_name: filepath.split("/")[-1]})
+                    mtl_texture_dict.update({mtl_mat_name: filepath.split("/")[-1].split(".")[0]})
                     del filepath
                 else:
                     # so we write the materials image.
@@ -435,6 +434,11 @@ def write_file(filepath, objects, scene,
                             mesh_triangulate(me)
                         me_verts = me.vertices[:]
 
+                        # required for textures
+                        faceuv = len(me.uv_textures) > 0
+                        if faceuv:
+                            uv_texture = me.uv_textures.active.data[:]
+
                         # Make our own list so it can be sorted to reduce context switching
                         face_index_pairs = [(face, index) for index, face in enumerate(me.polygons)]
                         if not (len(face_index_pairs) + len(me.vertices)):  # Make sure there is something to write
@@ -479,6 +483,8 @@ def write_file(filepath, objects, scene,
 
                         subprogress2.step()
                         subprogress2.step()
+                        if not faceuv:
+                            f_image = None
                         subprogress2.step()
 
                         for f, f_index in face_index_pairs:
@@ -486,6 +492,9 @@ def write_file(filepath, objects, scene,
                             # MAKE KEY
                             key = material_names[f_mat], None  # No image, use None instead.
 
+                            if faceuv:
+                                tface = uv_texture[f_index]
+                                f_image = tface.image
                             # CHECK FOR CONTEXT SWITCH
                             if key == contextMat:
                                 pass  # Context already switched, dont do anything
@@ -517,8 +526,10 @@ def write_file(filepath, objects, scene,
                                                 i += 1
                                                 tmp_ext = "_%3d" % i
                                             mtl_name += tmp_ext
-                                        mat_data = mtl_dict[key] = mtl_name, materials[f_mat], None
+                                        mat_data = mtl_dict[key] = mtl_name, materials[f_mat], f_image
                                         mtl_rev_dict[mtl_name] = key
+                                    # need to update texture image
+                                    mat_data = mtl_dict[key] = mat_data[0], mat_data[1], f_image
                                     if EXPORT_MTL:
                                         fw("usemtl %s\n" % mat_data[0])  # can be mat_image or (null)
                             contextMat = key
@@ -531,7 +542,7 @@ def write_file(filepath, objects, scene,
                             for vi, v, li in f_v:
                                 fw(" %d" % (totverts + v.index))
                                 faces_points.append(local_to_global[v.index])
-                            material_list.append(contextMat)
+                            material_list.append(mtl_dict[key])
                             points_per_cell.append(len(faces_points))
                             cell_array.extend(faces_points)
                             fw('\n')
@@ -552,19 +563,22 @@ def write_file(filepath, objects, scene,
 
         subprogress1.step("Finished exporting geometry, now exporting materials")
 
-        materials, textures = zip(*material_list)  # zip(*...) is the "inverse" of zip(...)
+        materials, unused, textures = zip(*material_list)  # zip(*...) is the "inverse" of zip(...)
         # Now we have all our materials, save them
         if EXPORT_MTL:
             mtl_color_dict, mtl_texture_dict = write_mtl(scene, mtlfilepath, EXPORT_PATH_MODE, copy_set, mtl_dict)
-        for mtl_name in materials:
-            mtl_val = mtl_color_dict[mtl_name]
-            r = int(round(mtl_val[0]*31))
-            g = int(round(mtl_val[1]*31))
-            b = int(round(mtl_val[2]*31))
-            color_val = ((r & 0x1f) << 10) + ((g & 0x1f) << 5) + (b & 0x1f)
-            color_val = np.array(-color_val-1, dtype=np.int16).tolist()
-            surface_color1.append(color_val)
-            surface_color2.append(color_val)
+        for mtl_idx in range(len(materials)):
+            if textures[mtl_idx] is not None:
+                texture_val = int(mtl_texture_dict[materials[mtl_idx]])-3220
+                surface_color2.append(texture_val)
+            else:
+                mtl_val = mtl_color_dict[materials[mtl_idx]]
+                r = int(round(mtl_val[0]*31))
+                g = int(round(mtl_val[1]*31))
+                b = int(round(mtl_val[2]*31))
+                color_val = ((r & 0x1f) << 10) + ((g & 0x1f) << 5) + (b & 0x1f)
+                color_val = np.array(-color_val-1, dtype=np.int16).tolist()
+                surface_color2.append(color_val)
 
         data_points = np.transpose(data_points)
         n_points = np.array([np.size(data_points, axis=1)], dtype=np.uint16)
@@ -574,23 +588,14 @@ def write_file(filepath, objects, scene,
         z = data_points[2]
         data_points = np.reshape(np.array([x, z, y], dtype=np.int16), (-1, np.size(data_points)))[0]
         points_per_cell = np.array(points_per_cell, dtype=np.uint8)
-        surface_color1 = np.array(surface_color1, dtype=np.int16)
         surface_color2 = np.array(surface_color2, dtype=np.int16)
+        surface_color1 = 0x7fff*np.ones(len(surface_color2), dtype=np.int16)
         some_array = np.ones(n_faces, dtype=np.uint8)
         if (n_faces < 256):
             cell_array = np.array(cell_array, dtype=np.uint8)
         else:
             cell_array = np.array(cell_array, dtype=np.uint16)
-        """
-        print(n_points, n_points.dtype)
-        print(n_faces, n_faces.dtype)
-        print(data_points, data_points.dtype)
-        print(points_per_cell, points_per_cell.dtype)
-        print(surface_color1, surface_color1.dtype)
-        print(surface_color2, surface_color2.dtype)
-        print(some_array, some_array.dtype)
-        print(cell_array, cell_array.dtype)
-        """
+
         n_points = n_points.byteswap()
         n_points.dtype = np.uint8
         n_faces = n_faces.byteswap()

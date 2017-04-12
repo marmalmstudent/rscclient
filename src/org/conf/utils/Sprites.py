@@ -604,7 +604,7 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(3500+i)+".png", image_mat)
-"""
+
 """
 if __name__ == "__main__":
     max_files = 500
@@ -643,17 +643,17 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(i)+".png", image_mat)
-"""
 
+"""
 if __name__ == "__main__":
     # 763, 465, 543
-    """
+    """"""
     sprites = {0: "dragon_baxe", 1: "dragon_long", 2: "dragon_med"}
     xshift = {0: 28, 1: 27, 2: 22}
     yshift = {0: 34, 1: 18, 2: 7}
     something1 = {0: 64, 1: 64, 2: 64}
     something2 = {0: 102, 1: 102, 2: 102}
-    """
+    """"""
     header_info = {756: [15, 18, 64, 102], 757: [14, 24, 64, 102],
                    758: [14, 40, 64, 102], 759: [14, 42, 64, 102],
                    760: [19, 24, 64, 102], 761: [23, 19, 64, 102],
@@ -699,3 +699,4 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data, use_native_alpha=True)
             save_image(image_path+"dragon_battleaxe_"+str(i)+".png", image_mat)
+"""
