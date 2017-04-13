@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 import os
 
 
@@ -568,10 +567,9 @@ def read_image(file_name):
 
 
 sprite_path = "cache/Sprites/"
-sprite_path_rs2 = "rs2textures/"
 image_path = "sprites_img/"
 
-
+"""
 if __name__ == "__main__":
     # Load data file and save to png file.
     max_files = 400000
@@ -587,36 +585,19 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data, use_native_alpha=True)
             save_image(image_path+str(i)+".png", image_mat)
-
 """
 if __name__ == "__main__":
-    # Load data file and save to png file.
-    max_files = 100
-    for i in range(0, max_files):
-        if (os.path.isfile(sprite_path_rs2+str(i)+".dat")):
-            print("Processing file %d of %d (%.1f%%)"
-                  % (i, max_files, 100*i/max_files))
-            data_read = read_sprite(sprite_path_rs2+str(i)+".dat")
-            header_data = get_header(data_read)
-            height = get_height(header_data)
-            width = get_width(header_data)
-            image_data = get_matrix_from_data(get_image_data(data_read),
-                                              width, height)
-            image_mat = get_image_matrix(image_data)
-            save_image(image_path+str(3500+i)+".png", image_mat)
-"""
-"""
-if __name__ == "__main__":
+    # Load png file and save to data file
     max_files = 500
-    start_idx = 3220
+    start_idx = 3200
     for i in range(start_idx, start_idx+max_files):
-        if (os.path.isfile("rs2textures/"+str(i)+".png")):
-            print("Processing file %d of %d (%.1f%%)" % (i, max_files,
-                                                         100*(i-start_idx)/max_files))
+        if (os.path.isfile(image_path+str(i)+".png")):
+            print("Processing file %d of %d (%.1f%%)"
+                  % (i, max_files, 100*(i-start_idx)/max_files))
             # Load png image and write the image to a dat file.
             # get 3-dim matrix [r,g,b,a] each element is a matrix.
             data_read, width, height = read_image(
-                "rs2textures/"+str(i)+".png")
+                image_path+str(i)+".png")
             data_read[1] = np.array(255*(data_read[0] == 0) + data_read[1], dtype=np.uint8)  # r
             data_read[3] = np.array(255*(data_read[0] == 0) + data_read[3], dtype=np.uint8)  # b
             # convert to matrix with each elements representing pixel values.
@@ -643,7 +624,7 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(i)+".png", image_mat)
-"""
+
 """
 if __name__ == "__main__":
     # 763, 465, 543
