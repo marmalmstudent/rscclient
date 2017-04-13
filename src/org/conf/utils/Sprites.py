@@ -571,10 +571,10 @@ sprite_path = "cache/Sprites/"
 sprite_path_rs2 = "rs2textures/"
 image_path = "sprites_img/"
 
-"""
+
 if __name__ == "__main__":
     # Load data file and save to png file.
-    max_files = 4000
+    max_files = 400000
     for i in range(0, max_files):
         if (os.path.isfile(sprite_path+str(i))):
             print("Processing file %d of %d (%.1f%%)"
@@ -587,7 +587,7 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data, use_native_alpha=True)
             save_image(image_path+str(i)+".png", image_mat)
-"""
+
 """
 if __name__ == "__main__":
     # Load data file and save to png file.
@@ -604,7 +604,7 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(3500+i)+".png", image_mat)
-
+"""
 """
 if __name__ == "__main__":
     max_files = 500
@@ -643,7 +643,7 @@ if __name__ == "__main__":
                                               width, height)
             image_mat = get_image_matrix(image_data)
             save_image(image_path+str(i)+".png", image_mat)
-
+"""
 """
 if __name__ == "__main__":
     # 763, 465, 543
