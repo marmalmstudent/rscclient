@@ -2750,18 +2750,18 @@ public class Camera {
 
     }
 
-    public int method302(int i) {
-        if (i == 0xbc614e)
+    public int color16bitTo24bit(int color16bit) {
+        if (color16bit == 0xbc614e)
             return 0;
-        method299(i);
-        if (i >= 0)
-            return anIntArrayArray429[i][0];
-        if (i < 0) {
-            i = -(i + 1);
-            int j = i >> 10 & 0x1f;
-            int k = i >> 5 & 0x1f;
-            int l = i & 0x1f;
-            return (j << 19) + (k << 11) + (l << 3);
+        method299(color16bit);
+        if (color16bit >= 0)
+            return anIntArrayArray429[color16bit][0];
+        if (color16bit < 0) {
+            color16bit = -(color16bit + 1);
+            int red = color16bit >> 10 & 0x1f;
+            int green = color16bit >> 5 & 0x1f;
+            int blue = color16bit & 0x1f;
+            return (red << 19) + (green << 11) + (blue << 3);
         } else {
             return 0;
         }

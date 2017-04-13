@@ -1153,25 +1153,31 @@ public class EngineHandle {
         }
     }
 
-    public void method413(int i, int j, int k, int l, int i1) {
+    /* Something to do with drawing the ground and roads/floors on
+     * the minimap
+     */
+    public void method413(int i, int j, int k, int neColor16, int swColor16) {
         int j1 = i * 3;
         int k1 = j * 3;
-        int l1 = camera.method302(l);
-        int i2 = camera.method302(i1);
-        l1 = l1 >> 1 & 0x7f7f7f;
-        i2 = i2 >> 1 & 0x7f7f7f;
+        int neColor24 = camera.color16bitTo24bit(neColor16);
+        int swColor24 = camera.color16bitTo24bit(swColor16);
+        /* 0x7f7f7f = 0b011111110111111101111111 */
+        /* So this removes the most significant bit */
+        neColor24 = neColor24 >> 1 & 0x7f7f7f;
+        swColor24 = swColor24 >> 1 & 0x7f7f7f;
         if (k == 0) {
-            gameImage.drawLineX(j1, k1, 3, l1);
-            gameImage.drawLineX(j1, k1 + 1, 2, l1);
-            gameImage.drawLineX(j1, k1 + 2, 1, l1);
-            gameImage.drawLineX(j1 + 2, k1 + 1, 1, i2);
-            gameImage.drawLineX(j1 + 1, k1 + 2, 2, i2);
+        	// one tile is 3x3
+            gameImage.drawLineX(j1, k1, 3, neColor24);
+            gameImage.drawLineX(j1, k1 + 1, 2, neColor24);
+            gameImage.drawLineX(j1, k1 + 2, 1, neColor24);
+            gameImage.drawLineX(j1 + 2, k1 + 1, 1, swColor24);
+            gameImage.drawLineX(j1 + 1, k1 + 2, 2, swColor24);
         } else if (k == 1) {
-            gameImage.drawLineX(j1, k1, 3, i2);
-            gameImage.drawLineX(j1 + 1, k1 + 1, 2, i2);
-            gameImage.drawLineX(j1 + 2, k1 + 2, 1, i2);
-            gameImage.drawLineX(j1, k1 + 1, 1, l1);
-            gameImage.drawLineX(j1, k1 + 2, 2, l1);
+            gameImage.drawLineX(j1, k1, 3, swColor24);
+            gameImage.drawLineX(j1 + 1, k1 + 1, 2, swColor24);
+            gameImage.drawLineX(j1 + 2, k1 + 2, 1, swColor24);
+            gameImage.drawLineX(j1, k1 + 1, 1, neColor24);
+            gameImage.drawLineX(j1, k1 + 2, 2, neColor24);
         }
     }
 
