@@ -4,7 +4,7 @@ import java.io.File;
 
 public class Textures extends Sprite
 {
-	public final int TEXTURES_START = 3220;
+	public static final int TEXTURES_START = 3220;
 	public Textures()
 	{
 		super();

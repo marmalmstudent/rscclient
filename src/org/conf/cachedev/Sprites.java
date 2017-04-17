@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class Sprites extends Sprite {
 
-	public final int SPRITES_START = 0;
+	public static final int SPRITES_START = 0;
 	public Sprites()
 	{
 		super();

@@ -21,8 +21,7 @@ import javax.imageio.ImageIO;
 
 public class FileOperations {
 	
-	public static final int MAX_FILE_SIZE = 100000; // 100 kb
-	public static final int BUFFER_SIZE = 1000; // 1 kb
+	public static final int MAX_FILE_SIZE = 1000000; // 1 Mb
 	
 	public FileOperations() {}
 	
