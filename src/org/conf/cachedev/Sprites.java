@@ -1,11 +1,12 @@
 package org.conf.cachedev;
 
 import java.io.File;
+import java.io.IOException;
 
-public class Textures extends Sprite
-{
-	public final int TEXTURES_START = 3220;
-	public Textures()
+public class Sprites extends Sprite {
+
+	public final int SPRITES_START = 0;
+	public Sprites()
 	{
 		super();
 	}
@@ -19,7 +20,7 @@ public class Textures extends Sprite
 	{
 		for (int i = 0; i < pixelData.length; ++i)
 			if ((pixelData[i] & 0xff000000) == 0)
-				pixelData[i] = 0xffff00ff;
+				pixelData[i] = 0;
 	}
 
 	/**
@@ -30,9 +31,7 @@ public class Textures extends Sprite
 	private void datToPNGTransparent()
 	{
 		for (int i = 0; i < pixelData.length; ++i)
-			if (pixelData[i] == 0xff00ff)
-				pixelData[i] = 0;
-			else
+			if (pixelData[i] != 0)
 				pixelData[i] = 0xff000000 + (pixelData[i] & 0xffffff);
 	}
 	
@@ -45,6 +44,7 @@ public class Textures extends Sprite
 	{
 		loadPNG(src);
 		pngToDatTransparent();
+		/*write*/
         requiresShift = false;
         xShift = 0;
         yShift = 0;

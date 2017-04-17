@@ -1,5 +1,6 @@
 package org.conf.cachedev;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
@@ -27,22 +28,27 @@ public class FileOperations {
 	
 	public static void main(String args[])
 	{
-		int a = 0xfeebdaed;
-		byte c[] = new byte[4];
-		int offset = FileOperations.write4Bytes(c, 0, a);
-		for (byte b : c)
-			System.out.println(b);
-		int b[] = {((a >> 24) & 0xff), ((a >> 16) & 0xff),
-				((a >> 8) & 0xff), (a & 0xff)};
-		System.out.printf("%d, (%d, %d, %d, %d), [%d, %d, %d, %d]\n", a,0xfe, 0xeb, 0xda, 0xed, b[0], b[1], b[2], b[3]);
-		/*
-		try
-		{
-			byte fileData[] = FileOperations.read(new File("src/org/conf/cachedev/testfile.txt"));
-			System.out.println(new String(fileData, StandardCharsets.UTF_8));
-			FileOperations.write(fileData, new File("src/org/conf/cachedev/testfile2.txt"));
-		} catch (IOException ioe) {}
-		*/
+	}
+	
+	public static Dimension getImageDimension(File file) throws IOException
+	{
+		BufferedImage img = ImageIO.read(file);
+		return new Dimension(img.getWidth(), img.getHeight());
+	}
+	
+	public static int[] readImage(File file, int width, int height)
+	throws IOException
+	{
+		BufferedImage img = ImageIO.read(file);
+		int[] pixelDataRaw = new int[width*height*4];
+		Raster rast = img.getData();
+		rast.getPixels(0, 0, width, height, pixelDataRaw);
+		int[] pixelData = new int[width*height];
+		int pdOffs = 0;
+		// rgba format
+		for (int i = 0; i < pixelDataRaw.length; i += 4)
+			pixelData[pdOffs++] = FileOperations.rgbaToInt(pixelDataRaw, i);
+		return pixelData;
 	}
 	
 	public static int rgbaToInt(int array[], int offset)
