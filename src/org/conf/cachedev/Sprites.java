@@ -6,9 +6,9 @@ import java.io.IOException;
 public class Sprites extends Sprite {
 
 	public static final int SPRITES_START = 0;
-	public Sprites()
+	public Sprites(String name)
 	{
-		super();
+		super(name);
 	}
 
 	/**
@@ -39,8 +39,9 @@ public class Sprites extends Sprite {
 	 * Converts a png image into a dat file.
 	 * @param src the source (png) image.
 	 * @param dst the destination (dat) file.
+	 * @param zip TODO
 	 */
-	public void pngToDat(File src, File dst)
+	public void pngToDat(File src, File dst, boolean zip)
 	{
 		loadPNG(src);
 		pngToDatTransparent();
@@ -57,10 +58,11 @@ public class Sprites extends Sprite {
 	 * Converts a dat file into a png image
 	 * @param src the source (dat) file.
 	 * @param dst the destination (png) image.
+	 * @param unzip TODO
 	 */
-	public void datToPNG(File src, File dst)
+	public void datToPNG(File src, File dst, boolean unzip)
 	{
-		loadDat(src);
+		loadDat(src, unzip);
 		datToPNGTransparent();
 		writePNG(dst);
 	}

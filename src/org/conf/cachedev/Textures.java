@@ -5,9 +5,9 @@ import java.io.File;
 public class Textures extends Sprite
 {
 	public static final int TEXTURES_START = 3220;
-	public Textures()
+	public Textures(String name)
 	{
-		super();
+		super(name);
 	}
 
 	/**
@@ -40,8 +40,9 @@ public class Textures extends Sprite
 	 * Converts a png image into a dat file.
 	 * @param src the source (png) image.
 	 * @param dst the destination (dat) file.
+	 * @param zip TODO
 	 */
-	public void pngToDat(File src, File dst)
+	public void pngToDat(File src, File dst, boolean zip)
 	{
 		loadPNG(src);
 		pngToDatTransparent();
@@ -57,10 +58,14 @@ public class Textures extends Sprite
 	 * Converts a dat file into a png image
 	 * @param src the source (dat) file.
 	 * @param dst the destination (png) image.
+	 * @param unzip TODO
 	 */
-	public void datToPNG(File src, File dst)
+	public void datToPNG(File src, File dst, boolean unzip)
 	{
-		loadDat(src);
+		loadDat(src, unzip);
+		System.out.print(entryName + " ");
+		if (pixelData == null)
+			return;
 		datToPNGTransparent();
 		writePNG(dst);
 	}

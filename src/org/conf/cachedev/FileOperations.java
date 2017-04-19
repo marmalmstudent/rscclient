@@ -10,13 +10,26 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
+
+import org.Model;
+import org.entityhandling.EntityHandler;
+import org.util.Config;
 
 
 public class FileOperations {
@@ -27,6 +40,9 @@ public class FileOperations {
 	
 	public static void main(String args[])
 	{
+		try{
+			FileOperations.write("this is another test".getBytes(), new File("src/org/conf/cachedev/test.txt"));
+		}catch(Exception e){e.printStackTrace();}
 	}
 	
 	public static Dimension getImageDimension(File file) throws IOException
@@ -98,47 +114,63 @@ public class FileOperations {
 	 * @param f the file that will be read.
 	 * @return the data contained in the file, or null if an error occurs.
 	 * @throws IOException
-	 */
+	 */	
 	public static byte[] read(File f) throws IOException
 	{
-		FileInputStream stream = new FileInputStream(f);
+		FileInputStream fIn = null;
+		BufferedInputStream buffIn = null; // seems a bit faster without this
 		byte out[] = null;
-		int dataSize = 0;
 		try
 		{
-			int fileSize = stream.available();
-			/* Perhaps i should verify here that the file size is
-			 * the same as fileSize */
+			fIn = new FileInputStream(f);
+			buffIn = new BufferedInputStream(fIn);
+            
+			int fileSize = buffIn.available();
 			if (fileSize > MAX_FILE_SIZE)
 			{
-				System.err.printf("File too big (%d > %d)",
-						fileSize, MAX_FILE_SIZE);
+				System.err.printf("File too big (%d > %d)", fileSize, MAX_FILE_SIZE);
 			}
 			else
 			{
 				byte[] buffer = new byte[MAX_FILE_SIZE];
-				dataSize = stream.read(buffer);
-				out = new byte[dataSize];
-				for (int i = 0; i < dataSize; ++i)
-					out[i] = buffer[i];
+				int size, offset;
+				for(offset = 0, size = 0; (size = buffIn.read(buffer, offset, 4096)) != -1; offset += size);
+				out = new byte[offset];
+				for(int i = 0, j = 0; i != offset; out[i++] = buffer[j++]);
 			}
 		}
 		finally
 		{
-			stream.close();
+			if (buffIn != null)
+				buffIn.close();
+			if (fIn != null)
+				fIn.close();
 		}
 		return out;
 	}
 
 	public static void write(byte[] array, File filename) throws IOException
 	{
-		FileOutputStream stream = new FileOutputStream(filename);
+		FileOutputStream stream = null;
+		BufferedOutputStream buffOut = null;
 		try
 		{
-			stream.write(array);
+			stream = new FileOutputStream(filename);
+			buffOut = new BufferedOutputStream(stream);
+			int bufferSize = 4096;
+			int offset;
+			for(offset = 0; offset < array.length; offset += bufferSize)
+			{ // write bufferSize bytes at a time.
+				if (array.length - offset < bufferSize)
+					bufferSize = array.length - offset;
+				buffOut.write(array, offset, bufferSize);
+			}
 		} finally
 		{
-			stream.close();
+			if (buffOut != null)
+				buffOut.close();
+			if (stream != null)
+				stream.close();
 		}
 	}
 	
@@ -154,5 +186,155 @@ public class FileOperations {
 				true, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 		BufferedImage image = new BufferedImage(cm, raster, true, null);
 		ImageIO.write(image, "png", file);
+	}
+	
+	public static byte[] readZip(File src, String entryName) throws IOException
+	{
+    	ZipFile archive = new ZipFile(src);
+		byte out[] = null;
+		int dataSize = 0;
+        try
+        {
+        	
+        	ZipEntry e = archive.getEntry(entryName);
+        	if (e == null)
+        		return null; // entry not found
+        	System.out.printf("Entry Name: %s\n", e.getName());
+        	//DataInputStream inStream = new DataInputStream(archive.getInputStream(e));
+        	InputStream inStream = archive.getInputStream(e);
+        	int fileSize = inStream.available();
+        	if (fileSize > MAX_FILE_SIZE)
+        	{
+        		System.err.printf("File too big (%d > %d)",
+        				fileSize, MAX_FILE_SIZE);
+        	}
+        	else
+        	{
+        		byte[] buffer = new byte[MAX_FILE_SIZE];
+        		dataSize = inStream.read(buffer);
+        		out = new byte[dataSize];
+        		for (int i = 0; i < dataSize; ++i)
+        			out[i] = buffer[i];
+        	}
+        }
+        finally
+        {
+        	archive.close();
+        }
+        System.out.printf("unzip: %s, %d, %d\n", entryName, out.length, dataSize);
+        return out;
+	}
+	
+	/**
+	 * Unzips the specified archive and extracts the contents to the specified directory.
+	 * @param src The source zip file.
+	 * @param dstDir path/to/destination/dir/
+	 * @throws IOException
+	 */
+	public static void unzipArchive(File src, String dstDir) throws IOException
+	{
+		if (!src.exists())
+			return;
+		FileInputStream fIn = null;
+		BufferedInputStream buffIn = null; // to avoid calling the system to read file
+        ZipInputStream zipIs = null;
+        ZipEntry zEntry = null;
+        FileOutputStream fos = null;
+        try
+        {
+        	fIn = new FileInputStream(src);
+        	buffIn = new BufferedInputStream(fIn);
+            zipIs = new ZipInputStream(buffIn);
+            while((zEntry = zipIs.getNextEntry()) != null)
+            {
+                try
+                {
+                    byte[] tmp = new byte[4096];
+                    File dst = new File(dstDir+zEntry.getName());
+                    fos = new FileOutputStream(dst);
+                    int size = 0;
+                    while((size = zipIs.read(tmp)) != -1)
+                    {
+                        fos.write(tmp, 0 , size);
+                    }
+                    fos.flush();
+                }
+                catch(Exception ex)
+                {
+                     ex.printStackTrace();
+                }
+                finally
+                {
+                	if (fos != null)
+                		fos.close();
+                }
+            }
+        }
+        finally
+        {
+        	if (zipIs != null)
+        		zipIs.close();
+        	if (buffIn != null)
+        		buffIn.close();
+        	if (fIn != null)
+        		fIn.close();
+        }
+	}
+	
+	public static void zipArchive(String srcDir, File dst, int maxFiles) throws IOException
+	{
+		FileOutputStream fOut = null;
+		BufferedOutputStream buffOut = null; // to avoid calling the system to write file
+		ZipOutputStream out = null;
+        ZipEntry zEntry = null;
+        FileInputStream fIn = null;
+        BufferedInputStream buffIn = null;
+		try
+		{
+			fOut = new FileOutputStream(dst);
+			buffOut = new BufferedOutputStream(fOut);
+			out = new ZipOutputStream(buffOut);
+			for (int i = 0; i < maxFiles; ++i)
+			{
+				File f = new File(srcDir+Integer.toString(i));
+				if (!f.exists())
+					continue; // file not found
+				try
+				{
+					fIn = new FileInputStream(f);
+					buffIn = new BufferedInputStream(fIn);
+					zEntry = new ZipEntry(Integer.toString(i));
+    				out.putNextEntry(zEntry);
+    				/* Create buffer to control the data flow */
+                    byte[] tmp = new byte[4096];
+                    int size;
+					while((size = buffIn.read(tmp)) != -1)
+						out.write(tmp, 0, size);
+					out.closeEntry();
+				}
+                catch(Exception ex)
+                {
+                     ex.printStackTrace();
+                }
+                finally
+                {
+                	/* Close any open streams */
+                	if (buffIn != null)
+                		buffIn.close();
+                	if (fIn != null)
+                		fIn.close();
+                }
+			}
+		}
+		finally
+		{
+        	/* Close any open streams */
+        	if (out != null)
+        		out.close();
+        	if (buffOut != null)
+        		buffOut.close();
+        	if (fOut != null)
+        		fOut.close();
+		}
 	}
 }

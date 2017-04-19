@@ -14,10 +14,12 @@ public class Sprite {
 	protected boolean requiresShift;
 	protected byte[] header, image, data;
 	protected int[] pixelData;
+	protected String entryName;
 	private static final int HEADER_SIZE = 25;
 	
-	public Sprite()
+	public Sprite(String name)
 	{
+		entryName = name;
 	}
 	
 	public int getWidth() { return width; }
@@ -160,13 +162,17 @@ public class Sprite {
 	
 	/**
 	 * reads a dat file.
+	 * @param unzip TODO
 	 * @param dst
 	 */
-	protected void loadDat(File src)
+	protected void loadDat(File src, boolean unzip)
 	{
 		try
 		{
-			data = FileOperations.read(src);
+			if (unzip)
+				data = FileOperations.readZip(src, entryName);
+			else
+				data = FileOperations.read(src);
 		} catch (IOException ioe) { ioe.printStackTrace(); }
 		if (data == null)
 			return;
