@@ -13,10 +13,26 @@ public class Main {
 	public static final String devFolderLandscape = devFolder+"Landscape/";
 	public static final String devFolderSound = devFolder+"sounds1/";
 	public static final int MAX_SPRITES = 4000;
+	public static final int MAX_MODELS = 500;
 	
 	public static void main(String args[])
 	{
 		onInit();
+		/* Convert models to stl format. */
+		try {
+			workonModels();
+		} catch (Exception e) { e.printStackTrace(); }
+		Models model = new Models(new File("src/org/conf/cachedev/modelnames"));
+		for (int i = 0; i < 500; ++i)
+		{
+			File src = new File(devFolderModels+Integer.toString(i));
+			if (!src.exists())
+				continue;
+			model.newModel(src);
+			model.saveSTL(new File("src/org/conf/cachedev/obj_stl/"+Integer.toString(i)+".stl"));
+		}
+		/* EOF. */
+		/*
 		try {
 			workonSprites();
 			workoffSprites();
@@ -27,6 +43,7 @@ public class Main {
 			workonSounds();
 			workoffSounds();
 		} catch (Exception e) { e.printStackTrace(); }
+		*/
 	}
 	
 	/**
@@ -98,10 +115,9 @@ public class Main {
 	
 	public static void workoffModels()
 	{
-		int max_models = 500; // TODO: change to static variable in Models.java
 		try
 		{
-			FileOperations.zipArchive(devFolderModels, new File(cacheDataFolder+"models36.zip"), max_models);
+			FileOperations.zipArchive(devFolderModels, new File(cacheDataFolder+"models36.zip"), MAX_MODELS);
 		}
 		catch(IOException ioe)
 		{

@@ -41,13 +41,13 @@ public class Sprite {
 	protected void packDataDat()
 	{
 		data = new byte[25 + width*height*4];
-		FileOperations.write4Bytes(data, 0, width);
-		FileOperations.write4Bytes(data, 4, height);
+		FileOperations.write4Bytes(data, 0, width, true);
+		FileOperations.write4Bytes(data, 4, height, true);
 		FileOperations.writeBoolean(data, 8, requiresShift);
-		FileOperations.write4Bytes(data, 9, xShift);
-		FileOperations.write4Bytes(data, 13, yShift);
-		FileOperations.write4Bytes(data, 17, cameraAngle1);
-		FileOperations.write4Bytes(data, 21, cameraAngle2);
+		FileOperations.write4Bytes(data, 9, xShift, true);
+		FileOperations.write4Bytes(data, 13, yShift, true);
+		FileOperations.write4Bytes(data, 17, cameraAngle1, true);
+		FileOperations.write4Bytes(data, 21, cameraAngle2, true);
 		packImageDat();
 		FileOperations.writeArray(data, HEADER_SIZE, image);
 	}
@@ -60,13 +60,13 @@ public class Sprite {
 	 */
 	protected void unpackDataDat()
 	{
-		width = FileOperations.getInt(data, 0);
-		height = FileOperations.getInt(data, 4);
+		width = FileOperations.readInt(data, 0, true);
+		height = FileOperations.readInt(data, 4, true);
 		requiresShift = FileOperations.readBoolean(data, 8);
-		xShift = FileOperations.getInt(data, 9);
-		yShift = FileOperations.getInt(data, 13);
-		cameraAngle1 = FileOperations.getInt(data, 17);
-		cameraAngle2 = FileOperations.getInt(data, 21);
+		xShift = FileOperations.readInt(data, 9, true);
+		yShift = FileOperations.readInt(data, 13, true);
+		cameraAngle1 = FileOperations.readInt(data, 17, true);
+		cameraAngle2 = FileOperations.readInt(data, 21, true);
 		unpackImage();
 	}
 	
@@ -81,7 +81,7 @@ public class Sprite {
 		pixelData = new int[dataSizeBytes/4];
 		int imageOffset = 0;
 		for (int i = HEADER_SIZE; i < data.length; i += 4)
-			pixelData[imageOffset++] = FileOperations.getInt(data, i);
+			pixelData[imageOffset++] = FileOperations.readInt(data, i, true);
 	}
 
 	/**
