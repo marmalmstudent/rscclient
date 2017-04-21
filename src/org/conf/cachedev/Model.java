@@ -1,6 +1,5 @@
 package org.conf.cachedev;
 
-import java.io.File;
 
 public class Model
 {
@@ -31,11 +30,11 @@ public class Model
 	public Model(byte[] data)
 	{
 		int offset = 0;
-		fileSize = FileOperations.readInt(data, offset, true);
+		fileSize = DataOperations.readInt(data, offset, true);
 		offset += 4;
-        nPoints = FileOperations.read2Bytes(data, offset, false, true);
+        nPoints = DataOperations.read2Bytes(data, offset, false, true);
         offset += 2;
-        nSides = FileOperations.read2Bytes(data, offset, false, true);
+        nSides = DataOperations.read2Bytes(data, offset, false, true);
         offset += 2;
         xCoords = new int[nPoints];
         yCoords = new int[nPoints];
@@ -46,18 +45,18 @@ public class Model
         someArray = new int[nSides];
         cellArray = new int[nSides][];
         for (int i = 0; i < nPoints; offset += 2)
-        	xCoords[i++] = FileOperations.read2Bytes(data, offset, true, true);
+        	xCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
         for (int i = 0; i < nPoints; offset += 2)
-        	zCoords[i++] = FileOperations.read2Bytes(data, offset, true, true);
+        	zCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
         for (int i = 0; i < nPoints; offset += 2)
-        	yCoords[i++] = FileOperations.read2Bytes(data, offset, true, true);
+        	yCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
         for (int i = 0; i < nSides; i++)
             pointsPerCell[i] = data[offset++] & 0xff;
 
         for (int i = 0; i < nSides; offset += 2)
-        	color1[i++] = FileOperations.read2Bytes(data, offset, true, true);
+        	color1[i++] = DataOperations.read2Bytes(data, offset, true, true);
         for (int i = 0; i < nSides; offset += 2)
-        	color2[i++] = FileOperations.read2Bytes(data, offset, true, true);
+        	color2[i++] = DataOperations.read2Bytes(data, offset, true, true);
 
         for (int i = 0; i < nSides; i++)
         	someArray[i] = data[offset++] & 0xff;
@@ -69,7 +68,7 @@ public class Model
                 if (nPoints < 256) {
                 	cellArray[i][j] = data[offset++] & 0xff;
                 } else {
-                	cellArray[i][j] = FileOperations.read2Bytes(data, offset, false, true);
+                	cellArray[i][j] = DataOperations.read2Bytes(data, offset, false, true);
                     offset += 2;
                 }
         }

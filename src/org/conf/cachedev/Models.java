@@ -3,20 +3,36 @@ package org.conf.cachedev;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-
-import org.DataOperations;
+import java.util.Map.Entry;
 
 public class Models
 {
 	private static HashMap<Integer, String> modelNames;
+	private static final int HEADER_SIZE = 80;
 	private Model model;
 	
 	public Models(File f)
 	{
 		try {
-			modelNames = FileOperations.readHashMap(f);
+			modelNames = FileOperations.readHashMap(f, ";");
 		} catch(IOException e) {e.printStackTrace();}
 	}
+	
+	public String getModelName(int modelID)
+	{
+		if (modelNames.containsKey(modelID))
+			return modelNames.get(modelID);
+		return null;
+	}
+	
+	public int getModelID(String modelName)
+	{
+		for (Entry<Integer, String> entry : modelNames.entrySet())
+			if (entry.getValue().equals(modelName))
+				return entry.getKey();
+		return -1;
+	}
+	
 	public Models()
 	{
 		
@@ -50,39 +66,39 @@ public class Models
 		                         + 4*someArray.length
 		                         + 4*cellArray.length*cellArray[0].length];
 		int offset = 0;
-		offset = FileOperations.write2Bytes(dataIn, offset, nPoints, true);
-		offset = FileOperations.write2Bytes(dataIn, offset, nSides, true);
+		offset = DataOperations.write2Bytes(dataIn, offset, nPoints, true);
+		offset = DataOperations.write2Bytes(dataIn, offset, nSides, true);
 		for (int i = 0; i < xCoords.length; ++i)
-			offset = FileOperations.write2Bytes(dataIn, offset, xCoords[i], true);
+			offset = DataOperations.write2Bytes(dataIn, offset, xCoords[i], true);
 		for (int i = 0; i < zCoords.length; ++i)
-			offset = FileOperations.write2Bytes(dataIn, offset, zCoords[i], true);
+			offset = DataOperations.write2Bytes(dataIn, offset, zCoords[i], true);
 		for (int i = 0; i < yCoords.length; ++i)
-			offset = FileOperations.write2Bytes(dataIn, offset, yCoords[i], true);
+			offset = DataOperations.write2Bytes(dataIn, offset, yCoords[i], true);
 
 		for (int i = 0; i < pointsPerCell.length; ++i)
-			offset = FileOperations.writeByte(dataIn, offset, pointsPerCell[i]);
+			offset = DataOperations.writeByte(dataIn, offset, pointsPerCell[i]);
 
         for (int i = 0; i < nSides; ++i)
-        	offset = FileOperations.write2Bytes(dataIn, offset, color1[i], true);
+        	offset = DataOperations.write2Bytes(dataIn, offset, color1[i], true);
         for (int i = 0; i < nSides; ++i)
-        	offset = FileOperations.write2Bytes(dataIn, offset, color2[i], true);
+        	offset = DataOperations.write2Bytes(dataIn, offset, color2[i], true);
 
         for (int i = 0; i < nSides; ++i)
-        	offset = FileOperations.writeByte(dataIn, offset, someArray[i]);
+        	offset = DataOperations.writeByte(dataIn, offset, someArray[i]);
         
 		for (int i = 0; i < cellArray.length; ++i)
 			for (int j = 0; j < cellArray[i].length; ++j)
-				offset = FileOperations.writeByte(dataIn, offset, cellArray[i][j]);
+				offset = DataOperations.writeByte(dataIn, offset, cellArray[i][j]);
 		model = new Model(dataIn);
 		try{
-			FileOperations.write(formatSTL(new byte[80]), new File("src/org/conf/cachedev/test.stl"));
+			FileOperations.write(formatSTL(new byte[HEADER_SIZE]), new File("src/org/conf/cachedev/test.stl"));
 		}catch(Exception e){e.printStackTrace();}
 	}
 	
 	public void saveSTL(File dst)
 	{
 		try{
-			FileOperations.write(formatSTL(new byte[80]), dst);
+			FileOperations.write(formatSTL(new byte[HEADER_SIZE]), dst);
 		}catch(Exception e){e.printStackTrace();}
 	}
 	
@@ -93,27 +109,27 @@ public class Models
 		int[] zCoords = model.getZCoords();
 		float[][] normals = model.getNormals();
 		int[][] triangleCellArray = model.getTriangleCellArray();
-		if (header.length != 80)
-			header = FileOperations.arrayCopy(header, 80);
+		if (header.length != HEADER_SIZE)
+			header = DataOperations.arrayCopy(header, HEADER_SIZE);
 		int nTriangles = triangleCellArray.length;
-		byte[] data = new byte[80+4+nTriangles*(Float.BYTES*(12)+2)];
+		byte[] data = new byte[HEADER_SIZE+4+nTriangles*(Float.BYTES*(12)+2)];
 		int offset = 0;
-		offset = FileOperations.writeArray(data, offset, header);
-		offset = FileOperations.write4Bytes(data, offset, nTriangles, false);
+		offset = DataOperations.writeArray(data, offset, header);
+		offset = DataOperations.write4Bytes(data, offset, nTriangles, false);
 		for (int i = 0; i < nTriangles; ++i)
 		{
 			for (float normal : normals[i])
-				offset = FileOperations.writeFloat(data, offset, normal, false);
+				offset = DataOperations.writeFloat(data, offset, normal, false);
 			for (int point : triangleCellArray[i])
 			{
-				offset = FileOperations.writeFloat(data, offset,
+				offset = DataOperations.writeFloat(data, offset,
 						(float)xCoords[point], false);
-				offset = FileOperations.writeFloat(data, offset,
+				offset = DataOperations.writeFloat(data, offset,
 						(float)yCoords[point], false);
-				offset = FileOperations.writeFloat(data, offset,
+				offset = DataOperations.writeFloat(data, offset,
 						(float)zCoords[point], false);
 			}
-			offset = FileOperations.write2Bytes(data, offset, 0, false);
+			offset = DataOperations.write2Bytes(data, offset, 0, false);
 				
 		}
 		return data;

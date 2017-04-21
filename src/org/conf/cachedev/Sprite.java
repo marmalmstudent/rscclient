@@ -1,14 +1,7 @@
 package org.conf.cachedev;
 
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-
-public class Sprite {
-	
+public class Sprite
+{
 	protected int width, height, xShift, yShift,
 	cameraAngle1, cameraAngle2;
 	protected boolean requiresShift;
@@ -16,11 +9,6 @@ public class Sprite {
 	protected int[] pixelData;
 	protected String entryName;
 	private static final int HEADER_SIZE = 25;
-	
-	public Sprite(String name)
-	{
-		entryName = name;
-	}
 	
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
@@ -33,6 +21,44 @@ public class Sprite {
 	public byte[] getHeader() { return header; }
 	public byte[] getImage() { return image; }
 	public byte[] getData() { return data; }
+
+	public Sprite(byte[] data)
+	{
+		int offset = 0;
+		width = DataOperations.readInt(data, offset, true);
+		offset += 4;
+		height = DataOperations.readInt(data, offset, true);
+		offset += 4;
+		requiresShift = DataOperations.readBoolean(data, 8);
+		offset += 1;
+		xShift = DataOperations.readInt(data, offset, true);
+		offset += 4;
+		yShift = DataOperations.readInt(data, offset, true);
+		offset += 4;
+		cameraAngle1 = DataOperations.readInt(data, offset, true);
+		offset += 4;
+		cameraAngle2 = DataOperations.readInt(data, offset, true);
+		offset += 4;
+
+		pixelData = new int[(data.length - offset)/4];
+		for (int i = offset, imageOffset = 0; i < data.length; i += 4)
+			pixelData[imageOffset++] = DataOperations.readInt(data, i, true);
+	}
+	
+	public Sprite(int[] pixelData, int width, int height,
+			boolean requiresShift, int xShift, int yShift,
+			int cameraAngle1, int cameraAngle2)
+	{
+		this.pixelData = pixelData;
+		this.width = width;
+		this.height = height;
+		this.requiresShift = requiresShift;
+		this.xShift = xShift;
+		this.yShift = yShift;
+		this.cameraAngle1 = cameraAngle1;
+		this.cameraAngle2 = cameraAngle2;
+		
+	}
 	
 	/**
 	 * Formats the header data and image data into
@@ -40,61 +66,24 @@ public class Sprite {
 	 */
 	protected void packDataDat()
 	{
-		data = new byte[25 + width*height*4];
-		FileOperations.write4Bytes(data, 0, width, true);
-		FileOperations.write4Bytes(data, 4, height, true);
-		FileOperations.writeBoolean(data, 8, requiresShift);
-		FileOperations.write4Bytes(data, 9, xShift, true);
-		FileOperations.write4Bytes(data, 13, yShift, true);
-		FileOperations.write4Bytes(data, 17, cameraAngle1, true);
-		FileOperations.write4Bytes(data, 21, cameraAngle2, true);
+		data = new byte[HEADER_SIZE + width*height*4];
+		int offset = 0;
+		DataOperations.write4Bytes(data, offset, width, true);
+		offset += 4;
+		DataOperations.write4Bytes(data, offset, height, true);
+		offset += 4;
+		DataOperations.writeBoolean(data, offset, requiresShift);
+		offset += 1;
+		DataOperations.write4Bytes(data, offset, xShift, true);
+		offset += 4;
+		DataOperations.write4Bytes(data, offset, yShift, true);
+		offset += 4;
+		DataOperations.write4Bytes(data, offset, cameraAngle1, true);
+		offset += 4;
+		DataOperations.write4Bytes(data, offset, cameraAngle2, true);
+		offset += 4;
 		packImageDat();
-		FileOperations.writeArray(data, HEADER_SIZE, image);
-	}
-	
-	/**
-	 * Unpacks the header data into the header variables
-	 * (width, height, requiresShift, xShift, yShift,
-	 *  cameraAngle1, cameraAngle2) and the image data
-	 * into pixelData.
-	 */
-	protected void unpackDataDat()
-	{
-		width = FileOperations.readInt(data, 0, true);
-		height = FileOperations.readInt(data, 4, true);
-		requiresShift = FileOperations.readBoolean(data, 8);
-		xShift = FileOperations.readInt(data, 9, true);
-		yShift = FileOperations.readInt(data, 13, true);
-		cameraAngle1 = FileOperations.readInt(data, 17, true);
-		cameraAngle2 = FileOperations.readInt(data, 21, true);
-		unpackImage();
-	}
-	
-	/**
-	 * Unpacks the image data into the pixelData array.
-	 */
-	protected void unpackImage()
-	{
-		int dataSizeBytes = data.length - HEADER_SIZE;
-		if (dataSizeBytes != width*height*4)
-			return; // data is corrupted or wrong format
-		pixelData = new int[dataSizeBytes/4];
-		int imageOffset = 0;
-		for (int i = HEADER_SIZE; i < data.length; i += 4)
-			pixelData[imageOffset++] = FileOperations.readInt(data, i, true);
-	}
-
-	/**
-	 * loads a png image and stores the data in the pixelData array.
-	 * @param file the (image) file.
-	 * @throws IOException
-	 */
-	protected void loadImage(File file) throws IOException
-	{
-		Dimension d = FileOperations.getImageDimension(file);
-		width = d.width;
-		height = d.height;
-		pixelData = FileOperations.readImage(file, width, height);
+		DataOperations.writeArray(data, offset, image);
 	}
 
 	/**
@@ -113,12 +102,19 @@ public class Sprite {
 			image[offset++] = (byte)(i & 0xff);
 		}
 	}
+	
+	protected void packDataPNG()
+	{
+		data = new byte[width*height*4];
+		packImagePNG();
+		DataOperations.writeArray(data, 0, image);
+	}
 
 	/**
 	 * Formats the data contained in pixelData into a png image
 	 * format (i.e. argb).
 	 */
-	protected byte[] packImagePNG()
+	protected void packImagePNG()
 	{
 		image = new byte[4*pixelData.length];
 		int offset = 0;
@@ -128,70 +124,6 @@ public class Sprite {
 			image[offset++] = (byte)((i >> 8) & 0xff);
 			image[offset++] = (byte)(i & 0xff);
 			image[offset++] = (byte)((i >> 24) & 0xff);
-		}
-		return image;
-	}
-	
-	/**
-	 * Loads a png file. The transparency conversions have to
-	 * be provided by the class that invokes this method.
-	 * @param src
-	 */
-	protected void loadPNG(File src)
-	{
-		try
-		{
-			loadImage(src);
-		} catch (IOException ioe) { ioe.printStackTrace(); }
-	}
-	
-	/**
-	 * Writes a png file. The transparency conversions have to
-	 * be provided by the class that invokes this method.
-	 * @param dst
-	 */
-	protected void writePNG(File dst)
-	{
-		packImagePNG();
-		try {
-			FileOperations.writeImageAlpha(image, width, height, dst);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
-	
-	/**
-	 * reads a dat file.
-	 * @param unzip TODO
-	 * @param dst
-	 */
-	protected void loadDat(File src, boolean unzip)
-	{
-		try
-		{
-			if (unzip)
-				data = FileOperations.readZip(src, entryName);
-			else
-				data = FileOperations.read(src);
-		} catch (IOException ioe) { ioe.printStackTrace(); }
-		if (data == null)
-			return;
-		unpackDataDat();
-	}
-	
-	/**
-	 * Writes a dat file. The header data have to be set
-	 * in the class that invokes this method.
-	 * @param dst
-	 */
-	protected void writeDat(File dst)
-	{
-		packImageDat();
-        packDataDat();
-		try {
-			FileOperations.write(data, dst);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
 		}
 	}
 }

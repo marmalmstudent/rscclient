@@ -7,13 +7,22 @@ public class Main {
 
 	public static final String cacheFolder = "src/org/conf/client/";
 	public static final String cacheDataFolder = "src/org/conf/client/data/";
-	public static final String devFolder = "src/org/conf/cachedev/devtmp/";
-	public static final String devFolderSprite = devFolder+"Sprites/";
+	public static final String devFolder = "src/org/conf/cachedev/dev/";
+	public static final String devFolderSpriteNames = "src/org/conf/cachedev/spritenames";
+	public static final String devFolderSprites = devFolder+"Sprites/";
+	public static final String devFolderSpritesDat = devFolderSprites+"dat/";
+	public static final String devFolderSpritesPNG = devFolderSprites+"png/";
+	public static final String devFolderModelNames = "src/org/conf/cachedev/modelnames";
 	public static final String devFolderModels = devFolder+"models36/";
-	public static final String devFolderLandscape = devFolder+"Landscape/";
-	public static final String devFolderSound = devFolder+"sounds1/";
+	public static final String devFolderModelsOb3 = devFolderModels+"ob3/";
+	public static final String devFolderModelsStl = devFolderModels+"stl/";
+	public static final String devFolderLandscapes = devFolder+"Landscape/";
+	public static final String devFolderSounds = devFolder+"sounds1/";
+	public static final String devFolderSoundsPCM = devFolderSounds+"pcm/";
+	public static final String devFolderSoundsWAV = devFolderSounds+"wav/";
 	public static final int MAX_SPRITES = 4000;
 	public static final int MAX_MODELS = 500;
+	public static final int MAX_SOUNDS = 50;
 	
 	public static void main(String args[])
 	{
@@ -21,17 +30,42 @@ public class Main {
 		/* Convert models to stl format. */
 		try {
 			workonModels();
+			workoffModels();
 		} catch (Exception e) { e.printStackTrace(); }
-		Models model = new Models(new File("src/org/conf/cachedev/modelnames"));
-		for (int i = 0; i < 500; ++i)
+		
+		Models model = new Models(new File(devFolderModelNames));
+		for (int i = 0; i < MAX_MODELS; ++i)
 		{
-			File src = new File(devFolderModels+Integer.toString(i));
+			File src = new File(devFolderModelsOb3+Integer.toString(i));
 			if (!src.exists())
 				continue;
 			model.newModel(src);
-			model.saveSTL(new File("src/org/conf/cachedev/obj_stl/"+Integer.toString(i)+".stl"));
+			model.saveSTL(new File(devFolderModelsStl+model.getModelName(i)+".stl"));
 		}
-		/* EOF. */
+		/* Convert sprites to png format. */
+		try {
+			workonSprites();
+			workoffSprites();
+		} catch (Exception e) { e.printStackTrace(); }
+		
+		Sprites sprite = new Sprites(new File(devFolderSpriteNames));
+		for (int i = 0; i < TextureSprite.TEXTURES_START; ++i)
+		{
+			File src = new File(devFolderSpritesDat+Integer.toString(i));
+			if (!src.exists())
+				continue;
+			sprite.newCharacterDat(src);
+			sprite.writePNG(new File(devFolderSpritesPNG+sprite.getSpriteName(i)+".png"));
+		}
+		for (int i = TextureSprite.TEXTURES_START; i < MAX_SPRITES; ++i)
+		{
+			File src = new File(devFolderSpritesDat+Integer.toString(i));
+			if (!src.exists())
+				continue;
+			sprite.newTextureDat(src);
+			sprite.writePNG(new File(devFolderSpritesPNG+sprite.getSpriteName(i)+".png"));
+		}
+		
 		/*
 		try {
 			workonSprites();
@@ -60,16 +94,38 @@ public class Main {
         	File dir = new File(devFolder); // root folder
         	if (!dir.exists())
         		dir.mkdirs();
-        	dir = new File(devFolderSprite); // Sprites (2D-stuff)
+        	/* Sprites */
+        	dir = new File(devFolderSprites); // Sprites (2D-stuff)
         	if (!dir.exists())
         		dir.mkdirs();
+        	dir = new File(devFolderSpritesDat); // data files
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	dir = new File(devFolderSpritesPNG); // image files
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	/* 3D Models */
         	dir = new File(devFolderModels); // Models (3D-stuff)
         	if (!dir.exists())
         		dir.mkdirs();
-        	dir = new File(devFolderLandscape); // Ground tiles
+        	dir = new File(devFolderModelsOb3); // data files
         	if (!dir.exists())
         		dir.mkdirs();
-        	dir = new File(devFolderSound); // Sound effects
+        	dir = new File(devFolderModelsStl); // models for blender/maya
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	/* Landscape */
+        	dir = new File(devFolderLandscapes); // Ground tiles
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	/* Sounds */
+        	dir = new File(devFolderSounds); // Sound effects
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	dir = new File(devFolderSoundsPCM); // data files
+        	if (!dir.exists())
+        		dir.mkdirs();
+        	dir = new File(devFolderSoundsWAV); // wave files
         	if (!dir.exists())
         		dir.mkdirs();
         	return true;
@@ -81,7 +137,7 @@ public class Main {
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheFolder+"Sprites.zip"), devFolderSprite);
+			FileOperations.unzipArchive(new File(cacheFolder+"Sprites.zip"), devFolderSpritesDat);
 		}
 		catch(IOException ioe)
 		{
@@ -93,7 +149,7 @@ public class Main {
 	{
 		try
 		{
-			FileOperations.zipArchive(devFolderSprite, new File(cacheFolder+"Sprites.zip"), MAX_SPRITES);
+			FileOperations.zipArchive(devFolderSpritesDat, new File(cacheFolder+"Sprites.zip"), MAX_SPRITES);
 		}
 		catch(IOException ioe)
 		{
@@ -105,7 +161,7 @@ public class Main {
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheDataFolder+"models36.zip"), devFolderModels);
+			FileOperations.unzipArchive(new File(cacheDataFolder+"models36.zip"), devFolderModelsOb3);
 		}
 		catch(IOException ioe)
 		{
@@ -117,7 +173,7 @@ public class Main {
 	{
 		try
 		{
-			FileOperations.zipArchive(devFolderModels, new File(cacheDataFolder+"models36.zip"), MAX_MODELS);
+			FileOperations.zipArchive(devFolderModelsOb3, new File(cacheDataFolder+"models36.zip"), MAX_MODELS);
 		}
 		catch(IOException ioe)
 		{
@@ -129,7 +185,7 @@ public class Main {
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSound);
+			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSoundsPCM);
 		}
 		catch(IOException ioe)
 		{
@@ -139,22 +195,21 @@ public class Main {
 	
 	public static void workoffSounds()
 	{
-		int max_sounds = 50; // TODO: change to static variable in Models.java
 		try
 		{
-			FileOperations.zipArchive(devFolderSound, new File(cacheDataFolder+"sounds1.zip"), max_sounds);
+			FileOperations.zipArchive(devFolderSoundsPCM, new File(cacheDataFolder+"sounds1.zip"), MAX_SOUNDS);
 		}
 		catch(IOException ioe)
 		{
 			ioe.printStackTrace();
 		}
 	}
-	
+	/*
 	public static void testFromPNG()
 	{
-		int textureStart = Textures.TEXTURES_START;
+		int textureStart = TextureSprites.TEXTURES_START;
 		int textureLen = 500;
-		Textures txr, txw;
+		TextureSprites txr, txw;
 		File srcr, srcw, dstr, dstw;
 		for (int i = textureStart; i < textureStart + textureLen; ++i)
 		{
@@ -164,20 +219,20 @@ public class Main {
 			System.out.printf("Processing file %d/%d, (%d%%)\n",
 					i-textureStart, textureLen,
 					100*(i-textureStart)/textureLen);
-			txr = new Textures(Integer.toString(i));
+			txr = new TextureSprites(Integer.toString(i));
 			dstr = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".dat");
 			txr.pngToDat(srcr, dstr, false);
 
 			srcw = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".dat");
 			if (!srcw.exists())
 				continue;
-			txw = new Textures(Integer.toString(i));
+			txw = new TextureSprites(Integer.toString(i));
 			dstw = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".png");
 			txw.datToPNG( srcw, dstw, false);
 		}
-		int spritesStart = Sprites.SPRITES_START;
+		int spritesStart = CharacterSprites.SPRITES_START;
 		int spritesLen = 3000;
-		Sprites spr, spw;
+		CharacterSprites spr, spw;
 		for (int i = spritesStart; i < spritesStart + spritesLen; ++i)
 		{
 			srcr = new File("src/org/conf/utils/sprites_img/"+Integer.toString(i)+".png");
@@ -186,16 +241,16 @@ public class Main {
 			System.out.printf("Processing file %d/%d, (%d%%)\n",
 					i-spritesStart, spritesLen,
 					100*(i-spritesStart)/spritesLen);
-			spr = new Sprites(Integer.toString(i));
+			spr = new CharacterSprites(Integer.toString(i));
 			dstr = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".dat");
 			spr.pngToDat(srcr, dstr, false);
 
 			srcw = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".dat");
 			if (!srcw.exists())
 				continue;
-			spw = new Sprites(Integer.toString(i));
+			spw = new CharacterSprites(Integer.toString(i));
 			dstw = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".png");
 			spw.datToPNG( srcw, dstw, false);
 		}
-	}
+	}*/
 }

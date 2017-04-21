@@ -1,69 +1,109 @@
 package org.conf.cachedev;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
-public class Sprites extends Sprite {
-
-	public static final int SPRITES_START = 0;
-	public Sprites(String name)
+public class Sprites {
+	
+	private HashMap<Integer, String> spriteNames;
+	private Sprite sprite;
+	
+	public Sprites(File f)
 	{
-		super(name);
-	}
-
-	/**
-	 * Converts pixels that are transparent in a png format (i.e.
-	 * alpha channel, 0xff000000, is zero) into pixels that are
-	 * transparent in a dat format (i.e. 0xff00ff).
-	 */
-	private void pngToDatTransparent()
-	{
-		for (int i = 0; i < pixelData.length; ++i)
-			if ((pixelData[i] & 0xff000000) == 0)
-				pixelData[i] = 0;
-	}
-
-	/**
-	 * Converts pixels that are transparent in a dat format (i.e.
-	 * 0xff00ff) into pixels that are transparent in a png format
-	 * (i.e. alpha channel is zero).
-	 */
-	private void datToPNGTransparent()
-	{
-		for (int i = 0; i < pixelData.length; ++i)
-			if (pixelData[i] != 0)
-				pixelData[i] = 0xff000000 + (pixelData[i] & 0xffffff);
+		try {
+			spriteNames = FileOperations.readHashMap(f, ";");
+		} catch(IOException e) {e.printStackTrace();}
 	}
 	
-	/**
-	 * Converts a png image into a dat file.
-	 * @param src the source (png) image.
-	 * @param dst the destination (dat) file.
-	 * @param zip TODO
-	 */
-	public void pngToDat(File src, File dst, boolean zip)
+	public String getSpriteName(int modelID)
 	{
-		loadPNG(src);
-		pngToDatTransparent();
-		/*write*/
-        requiresShift = false;
-        xShift = 0;
-        yShift = 0;
-        cameraAngle1 = width;
-        cameraAngle2 = height;
-        writeDat(dst);
+		if (spriteNames.containsKey(modelID))
+			return spriteNames.get(modelID);
+		return null;
 	}
 	
-	/**
-	 * Converts a dat file into a png image
-	 * @param src the source (dat) file.
-	 * @param dst the destination (png) image.
-	 * @param unzip TODO
-	 */
-	public void datToPNG(File src, File dst, boolean unzip)
+	public int getSpriteID(String modelName)
 	{
-		loadDat(src, unzip);
-		datToPNGTransparent();
-		writePNG(dst);
+		for (Entry<Integer, String> entry : spriteNames.entrySet())
+			if (entry.getValue().equals(modelName))
+				return entry.getKey();
+		return -1;
+	}
+	
+	public void newTexturePNG(File f)
+	{
+		try
+		{
+			Dimension d = FileOperations.getImageDimension(f);
+			int width = d.width;
+			int height = d.height;
+			int[] pixelData = FileOperations.readImage(f, width, height);
+			sprite = new Sprite(pixelData, width, height,
+					false, 0, 0, width, height);
+		} catch (IOException ioe) { ioe.printStackTrace(); }
+	}
+	
+	public void newOtherPNG(File f, boolean requiresShift,
+			int xShift, int yShift,
+			int cameraAngle1, int cameraAngle2)
+	{
+		try
+		{
+			Dimension d = FileOperations.getImageDimension(f);
+			int width = d.width;
+			int height = d.height;
+			int[] pixelData = FileOperations.readImage(f, width, height);
+			sprite = new Sprite(pixelData, width, height,
+					requiresShift, xShift, yShift, cameraAngle1, cameraAngle2);
+		} catch (IOException ioe) { ioe.printStackTrace(); }
+	}
+	
+	public void newTextureDat(File f)
+	{
+		try
+		{
+			byte[] data = FileOperations.read(f);
+			if (data != null)
+				sprite = new TextureSprite(data);
+		} catch (IOException ioe) { ioe.printStackTrace(); }
+	}
+	
+	public void newCharacterDat(File f)
+	{
+		try
+		{
+			byte[] data = FileOperations.read(f);
+			if (data != null)
+				sprite = new CharacterSprite(data);
+		} catch (IOException ioe) { ioe.printStackTrace(); }
+	}
+	
+	protected void writePNG(File dst)
+	{
+		try {
+			sprite.packDataPNG();
+			FileOperations.writeImageAlpha(sprite.getData(), sprite.getWidth(),
+					sprite.getHeight(), dst);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+
+	protected void writeDat(File dst)
+	{
+		sprite.packDataDat();
+		try {
+			FileOperations.write(sprite.getData(), dst);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+	
+	public String toString()
+	{
+		return spriteNames.toString();
 	}
 }
