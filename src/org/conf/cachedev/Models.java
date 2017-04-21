@@ -18,6 +18,11 @@ public class Models
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
+	public HashMap<Integer, String> getModelNames()
+	{
+		return modelNames;
+	}
+	
 	public String getModelName(int modelID)
 	{
 		if (modelNames.containsKey(modelID))
@@ -89,7 +94,7 @@ public class Models
 		for (int i = 0; i < cellArray.length; ++i)
 			for (int j = 0; j < cellArray[i].length; ++j)
 				offset = DataOperations.writeByte(dataIn, offset, cellArray[i][j]);
-		model = new Model(dataIn);
+		model = new Model(dataIn, true);
 		try{
 			FileOperations.write(formatSTL(new byte[HEADER_SIZE]), new File("src/org/conf/cachedev/test.stl"));
 		}catch(Exception e){e.printStackTrace();}
@@ -141,7 +146,21 @@ public class Models
 		{
 			byte[] data = FileOperations.read(f);
 			if (data != null)
-				model = new Model(data);
+				model = new Model(data, true);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void newSTL(File f)
+	{
+		try
+		{
+			byte[] data = FileOperations.read(f);
+			if (data != null)
+				model = new Model(data, true);
 		}
 		catch (IOException e)
 		{

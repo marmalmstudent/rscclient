@@ -2,6 +2,8 @@ package org.conf.cachedev;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class Main {
 
@@ -30,40 +32,34 @@ public class Main {
 		/* Convert models to stl format. */
 		try {
 			workonModels();
-			workoffModels();
 		} catch (Exception e) { e.printStackTrace(); }
 		
 		Models model = new Models(new File(devFolderModelNames));
-		for (int i = 0; i < MAX_MODELS; ++i)
-		{
-			File src = new File(devFolderModelsOb3+Integer.toString(i));
+		HashMap<Integer, String> modelNames = model.getModelNames();
+		for (Entry<Integer, String> entry : modelNames.entrySet())
+		{ /* ob3 to stl */
+			File src = new File(devFolderModelsOb3+Integer.toString(entry.getKey()));
 			if (!src.exists())
 				continue;
 			model.newModel(src);
-			model.saveSTL(new File(devFolderModelsStl+model.getModelName(i)+".stl"));
+			model.saveSTL(new File(devFolderModelsStl+entry.getValue()+".stl"));
 		}
 		/* Convert sprites to png format. */
 		try {
 			workonSprites();
-			workoffSprites();
 		} catch (Exception e) { e.printStackTrace(); }
-		
 		Sprites sprite = new Sprites(new File(devFolderSpriteNames));
-		for (int i = 0; i < TextureSprite.TEXTURES_START; ++i)
+		HashMap<Integer, String> spriteNames = sprite.getSpriteNames();
+		for (Entry<Integer, String> entry : spriteNames.entrySet())
 		{
-			File src = new File(devFolderSpritesDat+Integer.toString(i));
+			File src = new File(devFolderSpritesDat+Integer.toString(entry.getKey()));
 			if (!src.exists())
 				continue;
-			sprite.newCharacterDat(src);
-			sprite.writePNG(new File(devFolderSpritesPNG+sprite.getSpriteName(i)+".png"));
-		}
-		for (int i = TextureSprite.TEXTURES_START; i < MAX_SPRITES; ++i)
-		{
-			File src = new File(devFolderSpritesDat+Integer.toString(i));
-			if (!src.exists())
-				continue;
-			sprite.newTextureDat(src);
-			sprite.writePNG(new File(devFolderSpritesPNG+sprite.getSpriteName(i)+".png"));
+			if (entry.getValue().startsWith("sprite"))
+				sprite.newCharacterDat(src);
+			else if (entry.getValue().startsWith("texture"))
+				sprite.newTextureDat(src);
+			sprite.writePNG(new File(devFolderSpritesPNG+entry.getValue()+".png"));
 		}
 		
 		/*

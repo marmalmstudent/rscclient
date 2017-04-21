@@ -18,6 +18,11 @@ public class Sprites {
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
+	public HashMap<Integer, String> getSpriteNames()
+	{
+		return spriteNames;
+	}
+	
 	public String getSpriteName(int modelID)
 	{
 		if (spriteNames.containsKey(modelID))

@@ -12,6 +12,7 @@ public class Model
 	private int[][] cellArray; // unsigned byte or unsigned short
 	private float[][] normals;
 	private int[][] triangleCellArray;
+	private static final int HEADER_SIZE = 80;
 	
 	public int getFileSize() { return fileSize; }
 	public int getNPoints() { return nPoints; }
@@ -27,7 +28,20 @@ public class Model
 	public float[][] getNormals() { return normals; }
 	public int[][] getTriangleCellArray() { return triangleCellArray; }
 	
-	public Model(byte[] data)
+	public Model(byte[] data, boolean isOb3)
+	{
+		if (isOb3)
+			initOb3(data);
+		else
+			initStl(data);
+	}
+	
+	private void initStl(byte[] data)
+	{
+		// TODO: write some interesting stl (or equivalent) unpacking.
+	}
+	
+	private void initOb3(byte[] data)
 	{
 		int offset = 0;
 		fileSize = DataOperations.readInt(data, offset, true);
