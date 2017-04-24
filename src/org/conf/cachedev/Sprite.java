@@ -29,7 +29,7 @@ public class Sprite
 		offset += 4;
 		height = DataOperations.readInt(data, offset, true);
 		offset += 4;
-		requiresShift = DataOperations.readBoolean(data, 8);
+		requiresShift = DataOperations.readBoolean(data, offset);
 		offset += 1;
 		xShift = DataOperations.readInt(data, offset, true);
 		offset += 4;

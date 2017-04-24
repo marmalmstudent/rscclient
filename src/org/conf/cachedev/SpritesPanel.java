@@ -1,12 +1,13 @@
 package org.conf.cachedev;
 
 import java.awt.GridLayout;
+import java.io.File;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class CacheDevSprites extends JPanel
+public class SpritesPanel extends JPanel
 {
 	/**
 	 * 
@@ -17,9 +18,11 @@ public class CacheDevSprites extends JPanel
 	public JTextField widthTxt, heightTxt, reqShiftTxt,
 	xShiftTxt, yShiftTxt, camAngle1Txt, camAngle2Txt;
 	public static final String SIGN = "sprites_";
+	private CacheDev cd;
 
-	public CacheDevSprites(CacheDev cd)
+	public SpritesPanel(CacheDev cd)
 	{
+		this.cd = cd;
 		setLayout(new GridLayout(7, 2));
 
 		widthLbl = new JLabel("Width");
@@ -75,6 +78,27 @@ public class CacheDevSprites extends JPanel
 		add(camAngle2Txt);
 	}
 	
+	public void fileSelected(File f)
+	{
+		String parent = f.getParentFile().getName();
+		if (parent.equals("png")) {
+			if (f.getName().startsWith("sprite")) {
+				cd.cdc.getSprites().newOtherPNG(f, false, 0, 0, 0, 0);
+			} else if (f.getName().startsWith("texture")) {
+				cd.cdc.getSprites().newTexturePNG(f);
+			}
+			Sprite sprite = cd.cdc.getSprites().getSprite();
+			widthTxt.setText(Integer.toString(sprite.getWidth()));
+			heightTxt.setText(Integer.toString(sprite.getHeight()));
+			reqShiftTxt.setText(sprite.getRequiresShift() ? "true" : "false");
+			xShiftTxt.setText(Integer.toString(sprite.getXShift()));
+			yShiftTxt.setText(Integer.toString(sprite.getYShift()));
+			camAngle1Txt.setText(Integer.toString(sprite.getCameraAngle1()));
+			camAngle2Txt.setText(Integer.toString(sprite.getCameraAngle2()));
+		}
+		
+	}
+	
 	public void handleEvent(String bName)
 	{
 		if (bName.equals(widthTxt.getName()))
@@ -94,9 +118,12 @@ public class CacheDevSprites extends JPanel
 		else if (bName.equals(reqShiftTxt.getName()))
 		{
 			try {
-				Integer.parseInt(reqShiftTxt.getText());
-				xShiftTxt.requestFocus();
-			} catch (NumberFormatException nfe) { reqShiftTxt.setText(""); }
+				if (reqShiftTxt.getText().equalsIgnoreCase("true")
+						|| reqShiftTxt.getText().equalsIgnoreCase("false"))
+					xShiftTxt.requestFocus();
+				else
+					throw new IllegalArgumentException();
+			} catch (IllegalArgumentException iae) { reqShiftTxt.setText(""); }
 		}
 		else if (bName.equals(xShiftTxt.getName()))
 		{

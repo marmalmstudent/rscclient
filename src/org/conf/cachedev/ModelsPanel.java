@@ -6,7 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class CacheDevObjects extends JPanel
+public class ModelsPanel extends JPanel
 {
 
 	/**
@@ -14,7 +14,7 @@ public class CacheDevObjects extends JPanel
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public CacheDevObjects(CacheDev cd)
+	public ModelsPanel(CacheDev cd)
 	{
 		setLayout(new GridLayout(7, 2));
 	}

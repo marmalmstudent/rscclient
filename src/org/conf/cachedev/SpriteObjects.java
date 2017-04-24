@@ -1,18 +1,17 @@
 package org.conf.cachedev;
 
-import java.io.File;
 
-public class TextureSprite extends Sprite
-{
-	public static final int TEXTURES_START = 3220;
+public class SpriteObjects extends Sprite {
+
+	public static final int SPRITES_START = 0;
 	
-	public TextureSprite(byte[] data)
+	public SpriteObjects(byte[] data)
 	{ // dat to png
 		super(data);
 		datToPNGTransparent();
 	}
 	
-	public TextureSprite(int[] pixelData, int width, int height,
+	public SpriteObjects(int[] pixelData, int width, int height,
 			boolean requiresShift, int xShift, int yShift,
 			int cameraAngle1, int cameraAngle2)
 	{ // png to dat
@@ -31,7 +30,7 @@ public class TextureSprite extends Sprite
 	{
 		for (int i = 0; i < pixelData.length; ++i)
 			if ((pixelData[i] & 0xff000000) == 0)
-				pixelData[i] = 0xffff00ff;
+				pixelData[i] = 0;
 	}
 
 	/**
@@ -42,9 +41,7 @@ public class TextureSprite extends Sprite
 	private void datToPNGTransparent()
 	{
 		for (int i = 0; i < pixelData.length; ++i)
-			if (pixelData[i] == 0xff00ff)
-				pixelData[i] = 0;
-			else
+			if (pixelData[i] != 0)
 				pixelData[i] = 0xff000000 + (pixelData[i] & 0xffffff);
 	}
 }

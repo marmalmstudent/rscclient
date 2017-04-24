@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-public class Main {
+import javax.swing.JProgressBar;
+
+public class CDControl
+{
 
 	public static final String cacheFolder = "src/org/conf/client/";
 	public static final String cacheDataFolder = "src/org/conf/client/data/";
@@ -25,42 +28,15 @@ public class Main {
 	public static final int MAX_SPRITES = 4000;
 	public static final int MAX_MODELS = 500;
 	public static final int MAX_SOUNDS = 50;
+	private Sprites sprite;
+	private Models model;
+
 	
 	public static void main(String args[])
 	{
-		onInit();
-		/* Convert models to stl format. */
-		try {
-			workonModels();
-		} catch (Exception e) { e.printStackTrace(); }
-		
-		Models model = new Models(new File(devFolderModelNames));
-		HashMap<Integer, String> modelNames = model.getModelNames();
-		for (Entry<Integer, String> entry : modelNames.entrySet())
-		{ /* ob3 to stl */
-			File src = new File(devFolderModelsOb3+Integer.toString(entry.getKey()));
-			if (!src.exists())
-				continue;
-			model.newModel(src);
-			model.saveSTL(new File(devFolderModelsStl+entry.getValue()+".stl"));
-		}
-		/* Convert sprites to png format. */
-		try {
-			workonSprites();
-		} catch (Exception e) { e.printStackTrace(); }
-		Sprites sprite = new Sprites(new File(devFolderSpriteNames));
-		HashMap<Integer, String> spriteNames = sprite.getSpriteNames();
-		for (Entry<Integer, String> entry : spriteNames.entrySet())
-		{
-			File src = new File(devFolderSpritesDat+Integer.toString(entry.getKey()));
-			if (!src.exists())
-				continue;
-			if (entry.getValue().startsWith("sprite"))
-				sprite.newCharacterDat(src);
-			else if (entry.getValue().startsWith("texture"))
-				sprite.newTextureDat(src);
-			sprite.writePNG(new File(devFolderSpritesPNG+entry.getValue()+".png"));
-		}
+		CDControl cc = new CDControl();
+		cc.extractModels();
+		cc.extractSprites();
 		
 		/*
 		try {
@@ -74,6 +50,23 @@ public class Main {
 			workoffSounds();
 		} catch (Exception e) { e.printStackTrace(); }
 		*/
+	}
+	
+	public CDControl()
+	{
+		onInit();
+		sprite = new Sprites(new File(devFolderSpriteNames));
+		model = new Models(new File(devFolderModelNames));
+	}
+	
+	public Sprites getSprites()
+	{
+		return sprite;
+	}
+	
+	public Models getModels()
+	{
+		return model;
 	}
 	
 	/**
@@ -129,11 +122,11 @@ public class Main {
 		return false;
 	}
 	
-	public static void workonSprites()
+	public void workonSprites()
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheFolder+"Sprites.zip"), devFolderSpritesDat);
+			FileOperations.unzipArchive(new File(cacheFolder+"Sprites.zip"), devFolderSpritesDat, sprite.getSpriteNames());
 		}
 		catch(IOException ioe)
 		{
@@ -141,7 +134,7 @@ public class Main {
 		}
 	}
 	
-	public static void workoffSprites()
+	public void workoffSprites()
 	{
 		try
 		{
@@ -153,11 +146,11 @@ public class Main {
 		}
 	}
 	
-	public static void workonModels()
+	public void workonModels()
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheDataFolder+"models36.zip"), devFolderModelsOb3);
+			FileOperations.unzipArchive(new File(cacheDataFolder+"models36.zip"), devFolderModelsOb3, model.getModelNames());
 		}
 		catch(IOException ioe)
 		{
@@ -165,7 +158,7 @@ public class Main {
 		}
 	}
 	
-	public static void workoffModels()
+	public void workoffModels()
 	{
 		try
 		{
@@ -177,11 +170,11 @@ public class Main {
 		}
 	}
 	
-	public static void workonSounds()
+	public void workonSounds()
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSoundsPCM);
+			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSoundsPCM, null);
 		}
 		catch(IOException ioe)
 		{
@@ -189,7 +182,7 @@ public class Main {
 		}
 	}
 	
-	public static void workoffSounds()
+	public void workoffSounds()
 	{
 		try
 		{
@@ -198,6 +191,39 @@ public class Main {
 		catch(IOException ioe)
 		{
 			ioe.printStackTrace();
+		}
+	}
+
+	/**
+	 * Convert sprites to png format.
+	 */
+	public void extractSprites()
+	{
+		HashMap<Integer, String> spriteNames = sprite.getSpriteNames();
+		for (Entry<Integer, String> entry : spriteNames.entrySet())
+		{
+			File src = new File(devFolderSpritesDat+entry.getValue());
+			if (!src.exists())
+				continue;
+			if (entry.getValue().startsWith("sprite"))
+				sprite.newCharacterDat(src);
+			else if (entry.getValue().startsWith("texture"))
+				sprite.newTextureDat(src);
+			sprite.writePNG(new File(devFolderSpritesPNG+entry.getValue()+".png"));
+		}
+	}
+	
+	public void extractModels()
+	{
+		/* Convert models to stl format. */
+		HashMap<Integer, String> modelNames = model.getModelNames();
+		for (Entry<Integer, String> entry : modelNames.entrySet())
+		{ /* ob3 to stl */
+			File src = new File(devFolderModelsOb3+entry.getValue());
+			if (!src.exists())
+				continue;
+			model.newModel(src);
+			model.saveSTL(new File(devFolderModelsStl+entry.getValue()+".stl"));
 		}
 	}
 	/*

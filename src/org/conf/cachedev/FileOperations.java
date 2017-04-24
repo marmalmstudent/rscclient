@@ -184,9 +184,10 @@ public abstract class FileOperations {
 	 * Unzips the specified archive and extracts the contents to the specified directory.
 	 * @param src The source zip file.
 	 * @param dstDir path/to/destination/dir/
+	 * @param names TODO
 	 * @throws IOException
 	 */
-	public static void unzipArchive(File src, String dstDir) throws IOException
+	public static void unzipArchive(File src, String dstDir, HashMap<Integer, String> names) throws IOException
 	{
 		if (!src.exists())
 			return;
@@ -205,7 +206,7 @@ public abstract class FileOperations {
                 try
                 {
                     byte[] tmp = new byte[4096];
-                    File dst = new File(dstDir+zEntry.getName());
+                    File dst = new File(dstDir+names.get(Integer.parseInt(zEntry.getName())));
                     fos = new FileOutputStream(dst);
                     int size = 0;
                     while((size = zipIs.read(tmp)) != -1)

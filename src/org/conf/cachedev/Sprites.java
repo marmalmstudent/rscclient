@@ -10,12 +10,24 @@ public class Sprites {
 	
 	private HashMap<Integer, String> spriteNames;
 	private Sprite sprite;
+	private int nbrSprites;
 	
 	public Sprites(File f)
 	{
 		try {
 			spriteNames = FileOperations.readHashMap(f, ";");
+			nbrSprites = spriteNames.size();
 		} catch(IOException e) {e.printStackTrace();}
+	}
+	
+	public Sprite getSprite()
+	{
+		return sprite;
+	}
+	
+	public int getNbrSprites()
+	{
+		return nbrSprites;
 	}
 	
 	public HashMap<Integer, String> getSpriteNames()
@@ -72,7 +84,7 @@ public class Sprites {
 		{
 			byte[] data = FileOperations.read(f);
 			if (data != null)
-				sprite = new TextureSprite(data);
+				sprite = new SpriteTextures(data);
 		} catch (IOException ioe) { ioe.printStackTrace(); }
 	}
 	
@@ -82,7 +94,7 @@ public class Sprites {
 		{
 			byte[] data = FileOperations.read(f);
 			if (data != null)
-				sprite = new CharacterSprite(data);
+				sprite = new SpriteObjects(data);
 		} catch (IOException ioe) { ioe.printStackTrace(); }
 	}
 	
