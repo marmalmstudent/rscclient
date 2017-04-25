@@ -22,6 +22,7 @@ public class CDControl
 	public static final String devFolderModelsOb3 = devFolderModels+"ob3/";
 	public static final String devFolderModelsStl = devFolderModels+"stl/";
 	public static final String devFolderLandscapes = devFolder+"Landscape/";
+	public static final String devFolderSoundNames = "src/org/conf/cachedev/soundnames";
 	public static final String devFolderSounds = devFolder+"sounds1/";
 	public static final String devFolderSoundsPCM = devFolderSounds+"pcm/";
 	public static final String devFolderSoundsWAV = devFolderSounds+"wav/";
@@ -30,6 +31,7 @@ public class CDControl
 	public static final int MAX_SOUNDS = 50;
 	private Sprites sprite;
 	private Models model;
+	private Sounds sound;
 
 	
 	public static void main(String args[])
@@ -57,6 +59,7 @@ public class CDControl
 		onInit();
 		sprite = new Sprites(new File(devFolderSpriteNames));
 		model = new Models(new File(devFolderModelNames));
+		sound = new Sounds(new File(devFolderSoundNames));
 	}
 	
 	public Sprites getSprites()
@@ -174,7 +177,7 @@ public class CDControl
 	{
 		try
 		{
-			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSoundsPCM, null);
+			FileOperations.unzipArchive(new File(cacheDataFolder+"sounds1.zip"), devFolderSoundsPCM, sound.getSoundNames());
 		}
 		catch(IOException ioe)
 		{
@@ -206,19 +209,21 @@ public class CDControl
 			if (!src.exists())
 				continue;
 			if (entry.getValue().startsWith("sprite"))
-				sprite.newCharacterDat(src);
+				sprite.newObjectDat(src);
 			else if (entry.getValue().startsWith("texture"))
 				sprite.newTextureDat(src);
 			sprite.writePNG(new File(devFolderSpritesPNG+entry.getValue()+".png"));
 		}
 	}
 	
+	/**
+	 * Convert models from ob3 to stl format.
+	 */
 	public void extractModels()
 	{
-		/* Convert models to stl format. */
 		HashMap<Integer, String> modelNames = model.getModelNames();
 		for (Entry<Integer, String> entry : modelNames.entrySet())
-		{ /* ob3 to stl */
+		{
 			File src = new File(devFolderModelsOb3+entry.getValue());
 			if (!src.exists())
 				continue;
@@ -226,53 +231,36 @@ public class CDControl
 			model.saveSTL(new File(devFolderModelsStl+entry.getValue()+".stl"));
 		}
 	}
-	/*
-	public static void testFromPNG()
+
+	/**
+	 * Converts sounds from pcm to wav format.
+	 */
+	public void extractSounds()
 	{
-		int textureStart = TextureSprites.TEXTURES_START;
-		int textureLen = 500;
-		TextureSprites txr, txw;
-		File srcr, srcw, dstr, dstw;
-		for (int i = textureStart; i < textureStart + textureLen; ++i)
+		HashMap<Integer, String> soundNames = sound.getSoundNames();
+		for (Entry<Integer, String> entry : soundNames.entrySet())
 		{
-			srcr = new File("src/org/conf/utils/sprites_img/"+Integer.toString(i)+".png");
-			if (!srcr.exists())
+			File src = new File(devFolderSoundsPCM+entry.getValue());
+			if (!src.exists())
 				continue;
-			System.out.printf("Processing file %d/%d, (%d%%)\n",
-					i-textureStart, textureLen,
-					100*(i-textureStart)/textureLen);
-			txr = new TextureSprites(Integer.toString(i));
-			dstr = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".dat");
-			txr.pngToDat(srcr, dstr, false);
-
-			srcw = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".dat");
-			if (!srcw.exists())
-				continue;
-			txw = new TextureSprites(Integer.toString(i));
-			dstw = new File("src/org/conf/cachedev/Textures/"+Integer.toString(i)+".png");
-			txw.datToPNG( srcw, dstw, false);
+			sound.newPCM(src);
+			sound.saveWAV(new File(devFolderModelsStl+entry.getValue()+".wav"));
 		}
-		int spritesStart = CharacterSprites.SPRITES_START;
-		int spritesLen = 3000;
-		CharacterSprites spr, spw;
-		for (int i = spritesStart; i < spritesStart + spritesLen; ++i)
+	}
+	
+	/**
+	 * Converts sounds from wav to pcm format.
+	 */
+	public void insertSounds()
+	{
+		HashMap<Integer, String> soundNames = sound.getSoundNames();
+		for (Entry<Integer, String> entry : soundNames.entrySet())
 		{
-			srcr = new File("src/org/conf/utils/sprites_img/"+Integer.toString(i)+".png");
-			if (!srcr.exists())
+			File src = new File(devFolderSoundsWAV+entry.getValue()+".wav");
+			if (!src.exists())
 				continue;
-			System.out.printf("Processing file %d/%d, (%d%%)\n",
-					i-spritesStart, spritesLen,
-					100*(i-spritesStart)/spritesLen);
-			spr = new CharacterSprites(Integer.toString(i));
-			dstr = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".dat");
-			spr.pngToDat(srcr, dstr, false);
-
-			srcw = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".dat");
-			if (!srcw.exists())
-				continue;
-			spw = new CharacterSprites(Integer.toString(i));
-			dstw = new File("src/org/conf/cachedev/Sprites/"+Integer.toString(i)+".png");
-			spw.datToPNG( srcw, dstw, false);
+			sound.newWAV(src);
+			sound.savePCM(new File(devFolderSoundsPCM+entry.getValue()));
 		}
-	}*/
+	}
 }

@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class ModelsPanel extends JPanel
+public class SoundsPanel extends JPanel
 {
 
 	/**
@@ -16,10 +16,10 @@ public class ModelsPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 	public JLabel placeholder1Lbl, placeholder2Lbl;
 	public JTextField placeholder1Txt, placeholder2Txt;
-	public static final String SIGN = "models_";
+	public static final String SIGN = "sounds_";
 	private CacheDev cd;
 
-	public ModelsPanel(CacheDev cd)
+	public SoundsPanel(CacheDev cd)
 	{
 		this.cd = cd;
 		setLayout(new GridLayout(7, 2));

@@ -12,7 +12,6 @@ public class Model
 	private int[][] cellArray; // unsigned byte or unsigned short
 	private float[][] normals;
 	private int[][] triangleCellArray;
-	private static final int HEADER_SIZE = 80;
 	
 	public int getFileSize() { return fileSize; }
 	public int getNPoints() { return nPoints; }

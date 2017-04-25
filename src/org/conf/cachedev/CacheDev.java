@@ -8,13 +8,17 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class CacheDev extends JFrame implements ActionListener
+public class CacheDev extends JFrame implements ActionListener, ChangeListener
 {
 	/**
 	 * 
@@ -24,14 +28,16 @@ public class CacheDev extends JFrame implements ActionListener
 	private JTextField pathTxt;
 	private JButton pathBtn;
 
-	private JPanel sidePanel, mainPanel, mpBottom, mpbButtons, mpbProgress, mpCenter;
+	private JPanel mainPanel, mpBottom, mpbButtons, mpbProgress;
+	private JTabbedPane mpCenter;
 	private JProgressBar progress;
 	private SpritesPanel sprites;
-	private JButton spDevInit, spSprites, spModels, spLandscapes,
+	private ModelsPanel models;
+	private SoundsPanel sounds;
+	private JButton spSprites, spModels, spLandscapes,
 	spSounds;
 	private JButton mpbWorkon, mpbWorkoff, mpbImport, mpbExport;
 	
-	public static final String SP_SIGN = "sp_";
 	public static final String FP_SIGN = "fp_";
 	public static final String MPB_SIGN = "mpb_";
 	private final int spButtons = 10;
@@ -45,37 +51,20 @@ public class CacheDev extends JFrame implements ActionListener
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		/* Side panel */
-		sidePanel = new JPanel(new GridLayout(10, 1));
-		
-		spDevInit = new JButton("Initialize\nDirectories");
-		spDevInit.setName(SP_SIGN+"devinit");
-		spDevInit.addActionListener(this);
-		
-		spSprites = new JButton("Sprites");
-		spSprites.setName(SP_SIGN+"sprites");
-		spSprites.addActionListener(this);
-		
-		spModels = new JButton("Models");
-		spModels.setName(SP_SIGN+"models");
-		spModels.addActionListener(this);
-		
-		spLandscapes = new JButton("Landscapes");
-		spLandscapes.setName(SP_SIGN+"landscapes");
-		spLandscapes.addActionListener(this);
-		
-		spSounds = new JButton("Sounds");
-		spSounds.setName(SP_SIGN+"sounds");
-		spSounds.addActionListener(this);
-		
-		sidePanel.add(spDevInit);
-		sidePanel.add(spSprites);
-		sidePanel.add(spModels);
-		sidePanel.add(spLandscapes);
-		sidePanel.add(spSounds);
-		add(sidePanel, BorderLayout.WEST);
-		
 		mainPanel = new JPanel(new BorderLayout());
+		/* */
+		mpCenter = new JTabbedPane();
+		mpCenter.addChangeListener(this);
+        
+		sprites = new SpritesPanel(this);
+		mpCenter.addTab(CDConstants.DB_NAMES[CDConstants.SPRITES_ID], sprites);
+		models = new ModelsPanel(this);
+		mpCenter.addTab(CDConstants.DB_NAMES[CDConstants.MODELS_ID], models);
+		sounds = new SoundsPanel(this);
+		mpCenter.addTab(CDConstants.DB_NAMES[CDConstants.SOUNDS_ID], sounds);
+	
+		mpCenter.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		/* */
 
 		filePanel = new JPanel(new BorderLayout());
 		pathTxt = new JTextField("");
@@ -90,8 +79,6 @@ public class CacheDev extends JFrame implements ActionListener
 		filePanel.add(pathBtn, BorderLayout.EAST);
 		mainPanel.add(filePanel, BorderLayout.NORTH);
 
-		sprites = new SpritesPanel(this);
-		mpCenter = new JPanel(new BorderLayout());
 		mainPanel.add(mpCenter, BorderLayout.CENTER);
 		
 		mpBottom = new JPanel(new BorderLayout());
@@ -143,48 +130,6 @@ public class CacheDev extends JFrame implements ActionListener
 	}
 	
 	/**
-	 * Sidepanel events.
-	 * @param e
-	 */
-	private void handleSPEvents(JButton b)
-	{
-		String bName = b.getName();
-		if (bName.equals(spSprites.getName()))
-		{
-			if (!spSelected[CDConstants.SPRITES_ID])
-			{
-				for (int i = 0; i < spButtons; ++i)
-					spSelected[i] = false;
-				mpCenter.removeAll();
-				mpCenter.add(sprites, BorderLayout.CENTER);
-				mpCenter.revalidate();
-			}
-			spSelected[CDConstants.SPRITES_ID] = true;
-		}
-		else if (bName.equals(spModels.getName()))
-		{
-			if (!spSelected[CDConstants.MODELS_ID])
-				for (int i = 0; i < spButtons; ++i)
-					spSelected[i] = false;
-			spSelected[CDConstants.MODELS_ID] = true;	
-		}
-		else if (bName.equals(spLandscapes.getName()))
-		{
-			if (!spSelected[CDConstants.LANDSCAPES_ID])
-				for (int i = 0; i < spButtons; ++i)
-					spSelected[i] = false;
-			spSelected[CDConstants.LANDSCAPES_ID] = true;
-		}
-		else if (bName.equals(spSounds.getName()))
-		{
-			if (!spSelected[CDConstants.SOUNDS_ID])
-				for (int i = 0; i < spButtons; ++i)
-					spSelected[i] = false;
-			spSelected[CDConstants.SOUNDS_ID] = true;
-		}
-	}
-	
-	/**
 	 * Mainpanel bottom bar events.
 	 * @param e
 	 */
@@ -224,18 +169,18 @@ public class CacheDev extends JFrame implements ActionListener
 			else if (spSelected[CDConstants.LANDSCAPES_ID])
 				; // TODO
 			else if (spSelected[CDConstants.SOUNDS_ID])
-				; // TODO
+				cdc.insertSounds();
 		}
 		else if (bName.equals(mpbExport.getName()))
 		{ // convert imported file
 			if (spSelected[CDConstants.SPRITES_ID])
-				cdc.extractSprites(); // TODO
+				cdc.extractSprites();
 			else if (spSelected[CDConstants.MODELS_ID])
-				cdc.extractModels(); // TODO
+				cdc.extractModels();
 			else if (spSelected[CDConstants.LANDSCAPES_ID])
 				; // TODO
 			else if (spSelected[CDConstants.SOUNDS_ID])
-				; // TODO
+				cdc.extractSounds();
 		}
 	}
 	
@@ -277,11 +222,11 @@ public class CacheDev extends JFrame implements ActionListener
 			if (spSelected[CDConstants.SPRITES_ID]) {
 				sprites.fileSelected(new File(path));
 			} else if (spSelected[CDConstants.MODELS_ID])
-				; // TODO: set values for models
+				models.fileSelected(new File(path));
 			else if (spSelected[CDConstants.LANDSCAPES_ID])
 				; // TODO: set values for landscapes
 			else if (spSelected[CDConstants.SOUNDS_ID])
-				; // TODO: set values for sounds
+				sounds.fileSelected(new File(path));
 		}
 		if (rVal == JFileChooser.CANCEL_OPTION)
 		{ // "Cancel"
@@ -290,15 +235,14 @@ public class CacheDev extends JFrame implements ActionListener
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e)
+	{
 		// TODO Auto-generated method stub
 		if (e.getSource() instanceof JButton)
 		{
 			JButton b = (JButton) e.getSource();
 			String bName = b.getName();
-			if (bName.startsWith(SP_SIGN))
-				handleSPEvents(b); // sidepanel
-			else if (bName.startsWith(MPB_SIGN))
+			if (bName.startsWith(MPB_SIGN))
 				handleMPBEvents(b); // main panel bottom
 			else if (bName.startsWith(FP_SIGN))
 				handleFPEvents(b); // file panel
@@ -308,9 +252,33 @@ public class CacheDev extends JFrame implements ActionListener
 			JTextField t = (JTextField) e.getSource();
 			String tName = t.getName();
 			if (tName.startsWith(SpritesPanel.SIGN))
-			{ // sprite panel
-				sprites.handleEvent(tName);
-			}
+				sprites.handleEvent(tName); // sprite panel
+			else if (tName.startsWith(ModelsPanel.SIGN))
+				models.handleEvent(tName); // models panel
+			else if (tName.startsWith(SoundsPanel.SIGN))
+				sounds.handleEvent(tName); // models panel
 		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+	    JTabbedPane tabSource = (JTabbedPane) e.getSource();
+	    String tab = tabSource.getTitleAt(tabSource.getSelectedIndex());
+	    if (tab.equals(CDConstants.DB_NAMES[CDConstants.SPRITES_ID])) {
+	    	for (int i = 0; i < spButtons; spSelected[i++] = false);
+	    	spSelected[CDConstants.SPRITES_ID] = true;
+	    }
+	    else if (tab.equals(CDConstants.DB_NAMES[CDConstants.MODELS_ID])) {
+	    	for (int i = 0; i < spButtons; spSelected[i++] = false);
+	    	spSelected[CDConstants.MODELS_ID] = true;
+	    }
+	    else if (tab.equals(CDConstants.DB_NAMES[CDConstants.LANDSCAPES_ID])) {
+	    	for (int i = 0; i < spButtons; spSelected[i++] = false);
+	    	spSelected[CDConstants.LANDSCAPES_ID] = true;
+	    }
+	    else if (tab.equals(CDConstants.DB_NAMES[CDConstants.SOUNDS_ID])) {
+	    	for (int i = 0; i < spButtons; spSelected[i++] = false);
+	    	spSelected[CDConstants.SOUNDS_ID] = true;
+	    }
 	}
 }

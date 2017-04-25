@@ -88,7 +88,7 @@ public class Sprites {
 		} catch (IOException ioe) { ioe.printStackTrace(); }
 	}
 	
-	public void newCharacterDat(File f)
+	public void newObjectDat(File f)
 	{
 		try
 		{
