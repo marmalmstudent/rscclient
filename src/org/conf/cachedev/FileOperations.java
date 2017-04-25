@@ -20,6 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -237,7 +238,7 @@ public abstract class FileOperations {
         }
 	}
 	
-	public static void zipArchive(String srcDir, File dst, int maxFiles) throws IOException
+	public static void zipArchive(String srcDir, File dst, HashMap<Integer, String> names) throws IOException
 	{
 		FileOutputStream fOut = null;
 		BufferedOutputStream buffOut = null; // to avoid calling the system to write file
@@ -250,16 +251,16 @@ public abstract class FileOperations {
 			fOut = new FileOutputStream(dst);
 			buffOut = new BufferedOutputStream(fOut);
 			out = new ZipOutputStream(buffOut);
-			for (int i = 0; i < maxFiles; ++i)
+			for (Entry<Integer, String> entry : names.entrySet())
 			{
-				File f = new File(srcDir+Integer.toString(i));
+				File f = new File(srcDir+entry.getValue());
 				if (!f.exists())
 					continue; // file not found
 				try
 				{
 					fIn = new FileInputStream(f);
 					buffIn = new BufferedInputStream(fIn);
-					zEntry = new ZipEntry(Integer.toString(i));
+					zEntry = new ZipEntry(Integer.toString(entry.getKey()));
     				out.putNextEntry(zEntry);
     				/* Create buffer to control the data flow */
                     byte[] tmp = new byte[4096];

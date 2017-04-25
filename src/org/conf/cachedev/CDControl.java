@@ -32,27 +32,6 @@ public class CDControl
 	private Sprites sprite;
 	private Models model;
 	private Sounds sound;
-
-	
-	public static void main(String args[])
-	{
-		CDControl cc = new CDControl();
-		cc.extractModels();
-		cc.extractSprites();
-		
-		/*
-		try {
-			workonSprites();
-			workoffSprites();
-			
-			workonModels();
-			workoffModels();
-
-			workonSounds();
-			workoffSounds();
-		} catch (Exception e) { e.printStackTrace(); }
-		*/
-	}
 	
 	public CDControl()
 	{
@@ -141,7 +120,7 @@ public class CDControl
 	{
 		try
 		{
-			FileOperations.zipArchive(devFolderSpritesDat, new File(cacheFolder+"Sprites.zip"), MAX_SPRITES);
+			FileOperations.zipArchive(devFolderSpritesDat, new File(cacheFolder+"Sprites.zip"), sprite.getSpriteNames());
 		}
 		catch(IOException ioe)
 		{
@@ -165,7 +144,7 @@ public class CDControl
 	{
 		try
 		{
-			FileOperations.zipArchive(devFolderModelsOb3, new File(cacheDataFolder+"models36.zip"), MAX_MODELS);
+			FileOperations.zipArchive(devFolderModelsOb3, new File(cacheDataFolder+"models36.zip"), model.getModelNames());
 		}
 		catch(IOException ioe)
 		{
@@ -189,7 +168,7 @@ public class CDControl
 	{
 		try
 		{
-			FileOperations.zipArchive(devFolderSoundsPCM, new File(cacheDataFolder+"sounds1.zip"), MAX_SOUNDS);
+			FileOperations.zipArchive(devFolderSoundsPCM, new File(cacheDataFolder+"sounds1.zip"), sound.getSoundNames());
 		}
 		catch(IOException ioe)
 		{
@@ -244,7 +223,7 @@ public class CDControl
 			if (!src.exists())
 				continue;
 			sound.newPCM(src);
-			sound.saveWAV(new File(devFolderModelsStl+entry.getValue()+".wav"));
+			sound.saveWAV(new File(devFolderSoundsWAV+entry.getValue()+".wav"));
 		}
 	}
 	
