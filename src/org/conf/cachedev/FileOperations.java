@@ -13,10 +13,12 @@ import java.awt.image.WritableRaster;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -316,5 +318,32 @@ public abstract class FileOperations {
 		    br.close();
 		}
 		return map;
+	}
+	
+	public static void writeHashMap(File mapFile,
+			HashMap<Integer, String> names, String delimiter) throws IOException
+	{
+		BufferedWriter bw = new BufferedWriter(new FileWriter(mapFile));
+		try
+		{
+			for (Entry<Integer, String> entry : names.entrySet())
+				bw.write(entry.getKey()+","+entry.getValue()+delimiter);
+		}
+		finally
+		{
+		    bw.close();
+		}
+	}
+	
+	public static String getFileName(File f, String extension)
+	{
+		String name = f.getName();
+		extension = extension.toLowerCase();
+		int end = name.toLowerCase().indexOf(extension);
+		byte[] filename = new byte[end];
+		byte[] fullname = name.getBytes();
+		for(int i = 0; i < end; ++i)
+			filename[i] = fullname[i];
+		return new String(filename);
 	}
 }

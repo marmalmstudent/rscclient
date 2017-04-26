@@ -1,6 +1,7 @@
 package org.conf.cachedev;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 public abstract class DataOperations
 {
@@ -112,5 +113,9 @@ public abstract class DataOperations
 				newArray[i++] = array[j++]);
 		return newArray;
 	}
-
+	
+	public static int getNextKey(HashMap<Integer, String> names)
+	{
+		return names.size(); // placeholder
+	}
 }

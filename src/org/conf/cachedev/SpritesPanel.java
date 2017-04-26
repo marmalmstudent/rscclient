@@ -7,7 +7,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class SpritesPanel extends JPanel
+import org.conf.cachedev.sprites.Sprite;
+
+public abstract class SpritesPanel extends JPanel
 {
 	/**
 	 * 
@@ -17,9 +19,11 @@ public class SpritesPanel extends JPanel
 	xShiftLbl, yShiftLbl, camAngle1Lbl, camAngle2Lbl;
 	public JTextField widthTxt, heightTxt, reqShiftTxt,
 	xShiftTxt, yShiftTxt, camAngle1Txt, camAngle2Txt;
-	public static final String SIGN = "sprites_";
-	private CacheDev cd;
 
+	protected File selectedFile;
+	protected CacheDev cd;
+	public static final String SIGN = "sprites_";
+	
 	public SpritesPanel(CacheDev cd)
 	{
 		this.cd = cd;
@@ -78,16 +82,70 @@ public class SpritesPanel extends JPanel
 		add(camAngle2Txt);
 	}
 	
+	public boolean validateEntry()
+	{
+		JTextField[] tf = {
+				widthTxt, heightTxt, xShiftTxt,
+				yShiftTxt, camAngle1Txt, camAngle2Txt
+		};
+		boolean valid = true;
+		for (JTextField text : tf)
+		{
+			try
+			{
+				Integer.parseInt(text.getText());
+			}
+			catch (NumberFormatException nfe)
+			{
+				widthTxt.setText("");
+				valid = false;
+			}
+		}
+		if (!reqShiftTxt.getText().equalsIgnoreCase("true")
+				&& !reqShiftTxt.getText().equalsIgnoreCase("false"))
+			valid = false;
+		return valid;
+	}
+	
+	public abstract void exportSprite();
+	public abstract boolean importSprite();
+	
+	public boolean checkValidEntries()
+	{
+		if (selectedFile == null || !selectedFile.exists())
+			return false;
+		String parent = selectedFile.getParentFile().getName();
+		if (parent.equals("png")) {
+			if (!validateEntry())
+				return false;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * What happens when the user selects a file from the
+	 * JFileChooser.
+	 * @param f
+	 */
 	public void fileSelected(File f)
 	{
+		selectedFile = f;
 		String parent = f.getParentFile().getName();
 		if (parent.equals("png")) {
-			if (f.getName().startsWith("sprite")) {
-				cd.cdc.getSprites().newOtherPNG(f, false, 0, 0, 0, 0);
-			} else if (f.getName().startsWith("texture")) {
-				cd.cdc.getSprites().newTexturePNG(f);
+			File datFile = new File(FileOperations.getFileName(f, ".png"));
+			Sprite sprite;
+			if (datFile.exists())
+			{
+				cd.cdc.getTexture().newDat(datFile);
+				sprite = cd.cdc.getTexture().getSprite();
+				cd.cdc.getTexture().newPNG(f, sprite.getRequiresShift(),
+						sprite.getXShift(), sprite.getYShift(),
+						sprite.getCameraAngle1(), sprite.getCameraAngle2());
 			}
-			Sprite sprite = cd.cdc.getSprites().getSprite();
+			else
+				cd.cdc.getTexture().newPNG(f, false, 0, 0, 0, 0);
+			sprite = cd.cdc.getTexture().getSprite();
 			widthTxt.setText(Integer.toString(sprite.getWidth()));
 			heightTxt.setText(Integer.toString(sprite.getHeight()));
 			reqShiftTxt.setText(sprite.getRequiresShift() ? "true" : "false");
@@ -96,9 +154,8 @@ public class SpritesPanel extends JPanel
 			camAngle1Txt.setText(Integer.toString(sprite.getCameraAngle1()));
 			camAngle2Txt.setText(Integer.toString(sprite.getCameraAngle2()));
 		}
-		
 	}
-	
+
 	public void handleEvent(String bName)
 	{
 		if (bName.equals(widthTxt.getName()))

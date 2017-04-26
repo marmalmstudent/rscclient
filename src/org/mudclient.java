@@ -3733,11 +3733,11 @@ public class mudclient extends GameWindowMiddleMan
         loadSprite(SPRITE_MEDIA_START + 23, "media", 1);
         loadSprite(SPRITE_MEDIA_START + 24, "media", 1);
         loadSprite(SPRITE_MEDIA_START + 25, "media", 2);
-        loadSprite(SPRITE_UTIL_START, "media", 2);
-        loadSprite(SPRITE_UTIL_START + 2, "media", 4);
-        loadSprite(SPRITE_UTIL_START + 6, "media", 2);
-        loadSprite(SPRITE_PROJECTILE_START, "media", 7);
-        loadSprite(SPRITE_LOGO_START, "media", 1);
+        loadSprite(SPRITE_UTIL_START, "util", 2);
+        loadSprite(SPRITE_UTIL_START + 2, "util", 4);
+        loadSprite(SPRITE_UTIL_START + 6, "util", 2);
+        loadSprite(SPRITE_PROJECTILE_START, "projectile", 7);
+        loadSprite(SPRITE_LOGO_START, "logo", 1);
 
         int i = EntityHandler.invPictureCount();
         for (int j = 1; i > 0; j++) {
@@ -3746,35 +3746,37 @@ public class mudclient extends GameWindowMiddleMan
             if (k > 30) {
                 k = 30;
             }
-            loadSprite(SPRITE_ITEM_START + (j - 1) * 30, "media.object", k);
+            loadSprite(SPRITE_ITEM_START + (j - 1) * 30, "item", k);
         }
     }
 
     private final void loadEntity() {
         drawLoadingBarText(45, "Unpacking entities");
-        int animationNumber = 0;
+        int animation = 0;
         label0:
-        for (int animationIndex = 0; animationIndex < EntityHandler.animationCount(); animationIndex++) {
-            String s = EntityHandler.getAnimationDef(animationIndex).getName();
-            for (int nextAnimationIndex = 0; nextAnimationIndex < animationIndex; nextAnimationIndex++) {
-                if (!EntityHandler.getAnimationDef(nextAnimationIndex).getName().equalsIgnoreCase(s)) {
-                    continue;
-                }
-                EntityHandler.getAnimationDef(animationIndex).number = EntityHandler.getAnimationDef(nextAnimationIndex).getNumber();
-                continue label0;
-            }
-
-            loadSprite(animationNumber, "entity", 15);
-            if (EntityHandler.getAnimationDef(animationIndex).hasA()) {
-                loadSprite(animationNumber + 15, "entity", 3);
-            }
-
-            if (EntityHandler.getAnimationDef(animationIndex).hasF()) {
-                loadSprite(animationNumber + 18, "entity", 9);
-            }
-            EntityHandler.getAnimationDef(animationIndex).number = animationNumber;
-            animationNumber += 27;
-        }
+        	for (int anim = 0; anim < EntityHandler.animationCount(); anim++)
+        	{
+        		String s = EntityHandler.getAnimationDef(anim).getName();
+        		for (int nextAnim = 0; nextAnim < anim; nextAnim++)
+        		{ // find the next animation
+        			if (!EntityHandler.getAnimationDef(nextAnim).getName().equalsIgnoreCase(s)) {
+        				continue;
+        			}
+        			EntityHandler.getAnimationDef(anim).number = EntityHandler.getAnimationDef(nextAnim).getNumber();
+        			continue label0;
+        		}
+        		
+        		loadSprite(animation, "entity", 15);
+        		if (EntityHandler.getAnimationDef(anim).hasA()) {
+        			loadSprite(animation + 15, "entity", 3);
+        		}
+        		
+        		if (EntityHandler.getAnimationDef(anim).hasF()) {
+        			loadSprite(animation + 18, "entity", 9);
+        		}
+        		EntityHandler.getAnimationDef(anim).number = animation;
+        		animation += 27;
+        	}
     }
 
     private final void loadTextures() {

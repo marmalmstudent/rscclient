@@ -19,7 +19,8 @@ import javax.swing.*;
 
 public class GameImage implements ImageProducer, ImageObserver {
     public Sprite[] sprites;
-    private ZipFile spriteArchive;
+    private ZipFile spriteArchive, entityArchive, mediaArchive, utilArchive,
+    itemArchive, logoArchive, projectileArchive, textureArchive;
     public BufferedImage loginScreen;
 
     public GameImage(int width, int height, int k, Component component)
@@ -47,8 +48,14 @@ public class GameImage implements ImageProducer, ImageObserver {
             component.prepareImage(image, component);
         }
         try {
-            spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.zip"));
-            //spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.rscd"));
+            //spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.zip"));
+            entityArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Entity.zip"));
+            mediaArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Media.zip"));
+            utilArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Util.zip"));
+            itemArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Item.zip"));
+            logoArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Logo.zip"));
+            projectileArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Projectile.zip"));
+            textureArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Texture.zip"));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -61,15 +68,31 @@ public class GameImage implements ImageProducer, ImageObserver {
         	e.printStackTrace();
         }
     }
-
+    
     public boolean loadSprite(int id, String packageName) {
+    	if (packageName.equals("entity"))
+        	return loadArchive(id, entityArchive);
+    	else if (packageName.equals("media"))
+        	return loadArchive(id, mediaArchive);
+    	else if (packageName.equals("util"))
+        	return loadArchive(id, utilArchive);
+    	else if (packageName.equals("item"))
+        	return loadArchive(id, itemArchive);
+    	else if (packageName.equals("logo"))
+        	return loadArchive(id, logoArchive);
+    	else if (packageName.equals("projectile"))
+        	return loadArchive(id, projectileArchive);
+    	else if (packageName.equals("texture"))
+        	return loadArchive(id, textureArchive);
+    	return false;
+    }
+
+    private boolean loadArchive(int id, ZipFile archive) {
         try {
-            ZipEntry e = spriteArchive.getEntry(String.valueOf(id));
-            if (e == null) {
-                System.err.println("Missing sprite: " + id);
+            ZipEntry e = archive.getEntry(String.valueOf(id));
+            if (e == null)
                 return false;
-            }
-            ByteBuffer data = DataConversions.streamToBuffer(new BufferedInputStream(spriteArchive.getInputStream(e)));
+            ByteBuffer data = DataConversions.streamToBuffer(new BufferedInputStream(archive.getInputStream(e)));
             sprites[id] = Sprite.unpack(data);
             return true;
         }
