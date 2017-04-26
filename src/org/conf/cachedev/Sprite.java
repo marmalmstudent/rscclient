@@ -1,11 +1,9 @@
-package org.conf.cachedev.sprites;
+package org.conf.cachedev;
 
-import org.conf.cachedev.DataOperations;
-
-public class Sprite extends SpriteObject
+public class Sprite
 {
 	protected int width, height, xShift, yShift,
-	cameraAngle1, cameraAngle2;
+	totalWidth, totalHeight, transparentMask;
 	protected boolean requiresShift;
 	protected byte[] header, image, data;
 	protected int[] pixelData;
@@ -17,15 +15,16 @@ public class Sprite extends SpriteObject
 	public boolean getRequiresShift() { return requiresShift; }
 	public int getXShift() { return xShift; }
 	public int getYShift() { return yShift; }
-	public int getCameraAngle1() { return cameraAngle1; }
-	public int getCameraAngle2() { return cameraAngle2; }
+	public int getTotalWidth() { return totalWidth; }
+	public int getTotalHeight() { return totalHeight; }
 	public int[] getPixelData() { return pixelData; }
 	public byte[] getHeader() { return header; }
 	public byte[] getImage() { return image; }
 	public byte[] getData() { return data; }
 
-	public Sprite(byte[] data)
+	public Sprite(byte[] data, int transparentMask)
 	{
+		this.transparentMask = transparentMask;
 		int offset = 0;
 		width = DataOperations.readInt(data, offset, true);
 		offset += 4;
@@ -37,19 +36,20 @@ public class Sprite extends SpriteObject
 		offset += 4;
 		yShift = DataOperations.readInt(data, offset, true);
 		offset += 4;
-		cameraAngle1 = DataOperations.readInt(data, offset, true);
+		totalWidth = DataOperations.readInt(data, offset, true);
 		offset += 4;
-		cameraAngle2 = DataOperations.readInt(data, offset, true);
+		totalHeight = DataOperations.readInt(data, offset, true);
 		offset += 4;
 
 		pixelData = new int[(data.length - offset)/4];
 		for (int i = offset, imageOffset = 0; i < data.length; i += 4)
 			pixelData[imageOffset++] = DataOperations.readInt(data, i, true);
+		datToPNGTransparent();
 	}
 	
 	public Sprite(int[] pixelData, int width, int height,
 			boolean requiresShift, int xShift, int yShift,
-			int cameraAngle1, int cameraAngle2)
+			int totalWidth, int totalHeight, int transparentMask)
 	{
 		this.pixelData = pixelData;
 		this.width = width;
@@ -57,9 +57,10 @@ public class Sprite extends SpriteObject
 		this.requiresShift = requiresShift;
 		this.xShift = xShift;
 		this.yShift = yShift;
-		this.cameraAngle1 = cameraAngle1;
-		this.cameraAngle2 = cameraAngle2;
-		
+		this.totalWidth = totalWidth;
+		this.totalHeight = totalHeight;
+		this.transparentMask = transparentMask;
+		pngToDatTransparent();
 	}
 	
 	/**
@@ -80,9 +81,9 @@ public class Sprite extends SpriteObject
 		offset += 4;
 		DataOperations.write4Bytes(data, offset, yShift, true);
 		offset += 4;
-		DataOperations.write4Bytes(data, offset, cameraAngle1, true);
+		DataOperations.write4Bytes(data, offset, totalWidth, true);
 		offset += 4;
-		DataOperations.write4Bytes(data, offset, cameraAngle2, true);
+		DataOperations.write4Bytes(data, offset, totalHeight, true);
 		offset += 4;
 		packImageDat();
 		DataOperations.writeArray(data, offset, image);
@@ -134,11 +135,10 @@ public class Sprite extends SpriteObject
 	 * alpha channel, 0xff000000, is zero) into pixels that are
 	 * transparent in a dat format (i.e. 0xff00ff).
 	 */
-	@Override
 	protected void pngToDatTransparent() {
 		for (int i = 0; i < pixelData.length; ++i)
 			if ((pixelData[i] & 0xff000000) == 0)
-				pixelData[i] = 0;
+				pixelData[i] = transparentMask;
 	}
 
 	/**
@@ -146,10 +146,11 @@ public class Sprite extends SpriteObject
 	 * 0xff00ff) into pixels that are transparent in a png format
 	 * (i.e. alpha channel is zero).
 	 */
-	@Override
 	protected void datToPNGTransparent() {
 		for (int i = 0; i < pixelData.length; ++i)
-			if (pixelData[i] != 0)
+			if (pixelData[i] == (transparentMask & 0xffffff))
+				pixelData[i] = 0;
+			else
 				pixelData[i] = 0xff000000 + (pixelData[i] & 0xffffff);
 	}
 }

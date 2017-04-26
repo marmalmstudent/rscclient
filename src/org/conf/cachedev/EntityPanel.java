@@ -1,5 +1,7 @@
 package org.conf.cachedev;
 
+import java.io.File;
+
 public class EntityPanel extends SpritesPanel
 {
 	/**
@@ -14,21 +16,19 @@ public class EntityPanel extends SpritesPanel
 
 	@Override
 	public void exportSprite() {
-		cd.cdc.extractEntity();
+		cd.cdc.extractSprite(cd.cdc.getEntity(), 0,
+				CDConst.EntityDatDir, CDConst.EntityPNGDir);
 	}
 
 	@Override
 	public boolean importSprite() {
-		if (super.checkValidEntries())
-		{
-			cd.cdc.insertEntity(selectedFile,
-					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
-					Integer.parseInt(xShiftTxt.getText()),
-					Integer.parseInt(yShiftTxt.getText()),
-					Integer.parseInt(camAngle1Txt.getText()),
-					Integer.parseInt(camAngle2Txt.getText()));
-			return true;
-		}
-		return false;
+		return super.importSprite(cd.cdc.getEntity(),
+				CDConst.EntityDatDir, 0);
+	}
+
+	@Override
+	public void fileSelected(File f) {
+		super.fileSelected(f, CDConst.EntityDatDir,
+				cd.cdc.getEntity(), 0);
 	}
 }

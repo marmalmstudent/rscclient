@@ -481,9 +481,9 @@ public class mudclient extends GameWindowMiddleMan
                     k4 += 15;
                 if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasA()) {
                     int l4 = k4 + EntityHandler.getAnimationDef(k3).getNumber();
-                    i4 = (i4 * k) / ((GameImage) (gameGraphics)).sprites[l4].getSomething1();
-                    j4 = (j4 * l) / ((GameImage) (gameGraphics)).sprites[l4].getSomething2();
-                    int i5 = (k * ((GameImage) (gameGraphics)).sprites[l4].getSomething1()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(k3).getNumber()].getSomething1();
+                    i4 = (i4 * k) / ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth();
+                    j4 = (j4 * l) / ((GameImage) (gameGraphics)).sprites[l4].getTotalHeight();
+                    int i5 = (k * ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(k3).getNumber()].getTotalWidth();
                     i4 -= (i5 - k) / 2;
                     int colour = EntityHandler.getAnimationDef(k3).getCharColour();
                     int skinColour = 0;
@@ -930,9 +930,9 @@ public class mudclient extends GameWindowMiddleMan
                 if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasA())
                 {
                     int k5 = j5 + EntityHandler.getAnimationDef(l3).getNumber();
-                    k4 = (k4 * k) / ((GameImage) (gameGraphics)).sprites[k5].getSomething1();
-                    i5 = (i5 * l) / ((GameImage) (gameGraphics)).sprites[k5].getSomething2();
-                    int l5 = (k * ((GameImage) (gameGraphics)).sprites[k5].getSomething1()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getSomething1();
+                    k4 = (k4 * k) / ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth();
+                    i5 = (i5 * l) / ((GameImage) (gameGraphics)).sprites[k5].getTotalHeight();
+                    int l5 = (k * ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getTotalWidth();
                     k4 -= (l5 - k) / 2;
                     int colour = EntityHandler.getAnimationDef(l3).getCharColour();
                     int skinColour = chrSkinClrs[plr.colourSkinType];
@@ -3839,7 +3839,7 @@ public class mudclient extends GameWindowMiddleMan
                 }
                 indices[l1] = (byte) l2;
             }
-            gameCamera.method298(i, indices, dictionary, sprite.getSomething1() / 64 - 1);
+            gameCamera.method298(i, indices, dictionary, sprite.getTotalWidth() / 64 - 1);
         }
     }
 

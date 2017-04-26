@@ -1,5 +1,7 @@
 package org.conf.cachedev;
 
+import java.io.File;
+
 public class ProjectilePanel extends SpritesPanel
 {
 	/**
@@ -14,21 +16,19 @@ public class ProjectilePanel extends SpritesPanel
 
 	@Override
 	public void exportSprite() {
-		cd.cdc.extractProjectile();
+		cd.cdc.extractSprite(cd.cdc.getProjectile(), 0,
+				CDConst.ProjectileDatDir, CDConst.ProjectilePNGDir);
 	}
 
 	@Override
 	public boolean importSprite() {
-		if (super.checkValidEntries())
-		{
-			cd.cdc.insertProjectile(selectedFile,
-					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
-					Integer.parseInt(xShiftTxt.getText()),
-					Integer.parseInt(yShiftTxt.getText()),
-					Integer.parseInt(camAngle1Txt.getText()),
-					Integer.parseInt(camAngle2Txt.getText()));
-			return true;
-		}
-		return false;
+		return super.importSprite(cd.cdc.getProjectile(),
+				CDConst.ProjectileDatDir, 0);
+	}
+
+	@Override
+	public void fileSelected(File f) {
+		super.fileSelected(f, CDConst.ProjectileDatDir,
+				cd.cdc.getProjectile(), 0);
 	}
 }

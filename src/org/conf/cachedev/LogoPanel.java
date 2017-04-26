@@ -1,5 +1,7 @@
 package org.conf.cachedev;
 
+import java.io.File;
+
 public class LogoPanel extends SpritesPanel
 {
 	/**
@@ -14,21 +16,19 @@ public class LogoPanel extends SpritesPanel
 
 	@Override
 	public void exportSprite() {
-		cd.cdc.extractLogo();
+		cd.cdc.extractSprite(cd.cdc.getLogo(), 0,
+				CDConst.LogoDatDir, CDConst.LogoPNGDir);
 	}
 
 	@Override
 	public boolean importSprite() {
-		if (super.checkValidEntries())
-		{
-			cd.cdc.insertLogo(selectedFile,
-					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
-					Integer.parseInt(xShiftTxt.getText()),
-					Integer.parseInt(yShiftTxt.getText()),
-					Integer.parseInt(camAngle1Txt.getText()),
-					Integer.parseInt(camAngle2Txt.getText()));
-			return true;
-		}
-		return false;
+		return super.importSprite(cd.cdc.getLogo(),
+				CDConst.LogoDatDir, 0);
+	}
+
+	@Override
+	public void fileSelected(File f) {
+		super.fileSelected(f, CDConst.LogoDatDir,
+				cd.cdc.getLogo(), 0);
 	}
 }

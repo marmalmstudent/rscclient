@@ -108,9 +108,9 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		mpbButtons.add(mpbExport);
 		
 		progress = new JProgressBar();
-		progress.setString("Ready when moving!");
+		progress.setString("Progress bar placeholder");
 		progress.setStringPainted(true);
-		progress.setIndeterminate(true);
+		//progress.setIndeterminate(true); // bar moves back and forth
         mpbProgress.add(progress);
         
         mpBottom.add(mpbButtons, BorderLayout.NORTH);
@@ -137,44 +137,87 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 	private void handleMPBEvents(JButton b)
 	{
 		String bName = b.getName();
-		if (spSelected[CDConst.SPRITES_ID]) {
-			if (bName.equals(mpbWorkon.getName())) {
+		if (spSelected[CDConst.SPRITES_ID])
+		{
+			if (bName.equals(mpbWorkon.getName()))
+			{
 				sprites.handleWorkon();
-			} else if (bName.equals(mpbWorkoff.getName())) {
+			}
+			else if (bName.equals(mpbWorkoff.getName()))
+			{
 				sprites.handleWorkoff();
-			} else if (bName.equals(mpbImport.getName())) {
+			}
+			else if (bName.equals(mpbImport.getName()))
+			{
 				sprites.handleInsert();
-			} else if (bName.equals(mpbExport.getName())) {
+			}
+			else if (bName.equals(mpbExport.getName()))
+			{
 				sprites.handleExtract();
 			}
-		} else if (spSelected[CDConst.MODELS_ID]) {
-			if (bName.equals(mpbWorkon.getName())) {
-				cdc.workonModels();
-			} else if (bName.equals(mpbWorkoff.getName())) {
-				cdc.workoffModels();
-			} else if (bName.equals(mpbImport.getName())) {
+		}
+		else if (spSelected[CDConst.MODELS_ID])
+		{
+			if (bName.equals(mpbWorkon.getName()))
+			{
+				cdc.workon(CDConst.cacheDataDir+CDConst.ModelArchive,
+						CDConst.ModelsOb3Dir,
+						cdc.getModels().getModelNames());
+			}
+			else if (bName.equals(mpbWorkoff.getName()))
+			{
+				cdc.workoff(CDConst.cacheDataDir+CDConst.ModelArchive,
+						CDConst.ModelsOb3Dir,
+						cdc.getModels().getModelNames());
+			}
+			else if (bName.equals(mpbImport.getName()))
+			{
 				; // TODO
-			} else if (bName.equals(mpbExport.getName())) {
+			}
+			else if (bName.equals(mpbExport.getName()))
+			{
 				cdc.extractModels();
 			}
-		} else if (spSelected[CDConst.LANDSCAPES_ID]) {
-			if (bName.equals(mpbWorkon.getName())) {
-				; // TODO
-			} else if (bName.equals(mpbWorkoff.getName())) {
-				; // TODO
-			} else if (bName.equals(mpbImport.getName())) {
-				; // TODO
-			} else if (bName.equals(mpbExport.getName())) {
+		}
+		else if (spSelected[CDConst.LANDSCAPES_ID])
+		{
+			if (bName.equals(mpbWorkon.getName()))
+			{
 				; // TODO
 			}
-		} else if (spSelected[CDConst.SOUNDS_ID]) {
-			if (bName.equals(mpbWorkon.getName())) {
-				cdc.workonSounds();
-			} else if (bName.equals(mpbWorkoff.getName())) {
-				cdc.workoffSounds();
-			} else if (bName.equals(mpbImport.getName())) {
+			else if (bName.equals(mpbWorkoff.getName()))
+			{
+				; // TODO
+			}
+			else if (bName.equals(mpbImport.getName()))
+			{
+				; // TODO
+			}
+			else if (bName.equals(mpbExport.getName()))
+			{
+				; // TODO
+			}
+		}
+		else if (spSelected[CDConst.SOUNDS_ID])
+		{
+			if (bName.equals(mpbWorkon.getName()))
+			{
+				cdc.workon(CDConst.cacheDataDir+CDConst.SoundArchive,
+						CDConst.SoundsPCMDir,
+						cdc.getSounds().getSoundNames());
+			}
+			else if (bName.equals(mpbWorkoff.getName()))
+			{
+				cdc.workoff(CDConst.cacheDataDir+CDConst.SoundArchive,
+						CDConst.SoundsPCMDir,
+						cdc.getSounds().getSoundNames());
+			}
+			else if (bName.equals(mpbImport.getName()))
+			{
 				cdc.insertSounds();
-			} else if (bName.equals(mpbExport.getName())) {
+			}
+			else if (bName.equals(mpbExport.getName()))
+			{
 				cdc.extractSounds();
 			}
 		}

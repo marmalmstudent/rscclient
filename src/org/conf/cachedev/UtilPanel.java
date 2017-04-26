@@ -1,5 +1,7 @@
 package org.conf.cachedev;
 
+import java.io.File;
+
 public class UtilPanel extends SpritesPanel
 {
 	/**
@@ -14,21 +16,19 @@ public class UtilPanel extends SpritesPanel
 
 	@Override
 	public void exportSprite() {
-		cd.cdc.extractUtil();
+		cd.cdc.extractSprite(cd.cdc.getUtil(), 0,
+				CDConst.UtilDatDir, CDConst.UtilPNGDir);
 	}
 
 	@Override
 	public boolean importSprite() {
-		if (super.checkValidEntries())
-		{
-			cd.cdc.insertUtil(selectedFile,
-					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
-					Integer.parseInt(xShiftTxt.getText()),
-					Integer.parseInt(yShiftTxt.getText()),
-					Integer.parseInt(camAngle1Txt.getText()),
-					Integer.parseInt(camAngle2Txt.getText()));
-			return true;
-		}
-		return false;
+		return super.importSprite(cd.cdc.getUtil(),
+				CDConst.UtilDatDir, 0);
+	}
+
+	@Override
+	public void fileSelected(File f) {
+		super.fileSelected(f, CDConst.UtilDatDir,
+				cd.cdc.getUtil(), 0);
 	}
 }

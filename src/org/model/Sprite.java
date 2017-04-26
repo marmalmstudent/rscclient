@@ -26,8 +26,8 @@ public class Sprite {
     private int xShift = 0;
     private int yShift = 0;
 
-    private int something1 = 0;
-    private int something2 = 0;
+    private int totalWidth = 0;
+    private int totalHeight = 0;
 
     public Sprite() {
         pixels = new int[0];
@@ -41,17 +41,17 @@ public class Sprite {
         this.height = height;
     }
 
-    public void setSomething(int something1, int something2) {
-        this.something1 = something1;
-        this.something2 = something2;
+    public void setTotalSize(int width, int height) {
+        this.totalWidth = width;
+        this.totalHeight = height;
     }
 
-    public int getSomething1() {
-        return something1;
+    public int getTotalWidth() {
+        return totalWidth;
     }
 
-    public int getSomething2() {
-        return something2;
+    public int getTotalHeight() {
+        return totalHeight;
     }
 
     public void setName(int id, String packageName) {
@@ -165,8 +165,8 @@ public class Sprite {
         out.putInt(xShift);
         out.putInt(yShift);
 
-        out.putInt(something1);
-        out.putInt(something2);
+        out.putInt(totalWidth);
+        out.putInt(totalHeight);
 
         for (int c = 0; c < pixels.length; c++) {
             out.putInt(pixels[c]);
@@ -190,8 +190,8 @@ public class Sprite {
         int xShift = in.getInt();
         int yShift = in.getInt();
 
-        int something1 = in.getInt();
-        int something2 = in.getInt();
+        int totalWidth = in.getInt();
+        int totalHeight = in.getInt();
 
         int[] pixels = new int[width * height];
         if (in.remaining() < (pixels.length * 4)) {
@@ -204,7 +204,7 @@ public class Sprite {
         Sprite sprite = new Sprite(pixels, width, height);
         sprite.setRequiresShift(requiresShift);
         sprite.setShift(xShift, yShift);
-        sprite.setSomething(something1, something2);
+        sprite.setTotalSize(totalWidth, totalHeight);
 
         return sprite;
 	}

@@ -432,7 +432,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         Sprite sprite = new Sprite(pixels, width, height);
         sprite.setShift(0, 0);
         sprite.setRequiresShift(false);
-        sprite.setSomething(width, height);
+        sprite.setTotalSize(width, height);
 
         sprites[index] = sprite;
     }
@@ -449,7 +449,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         Sprite sprite = new Sprite(pixels, width, height);
         sprite.setShift(0, 0);
         sprite.setRequiresShift(false);
-        sprite.setSomething(width, height);
+        sprite.setTotalSize(width, height);
 
         sprites[index] = sprite;
     }
@@ -521,8 +521,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             int k2 = (spriteHeightInit << 16) / newHeight; // instead of using decimals i guess
             if (sprites[spriteId].requiresShift())
             {
-                int l2 = sprites[spriteId].getSomething1();
-                int j3 = sprites[spriteId].getSomething2();
+                int l2 = sprites[spriteId].getTotalWidth();
+                int j3 = sprites[spriteId].getTotalHeight();
                 j2 = (l2 << 16) / newWidth;
                 k2 = (j3 << 16) / newHeight;
                 startX += ((sprites[spriteId].getXShift() * newWidth + l2) - 1) / l2;
@@ -646,8 +646,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             int k2 = (spriteWidthInit << 16) / newWidth;
             int l2 = (spriteHeightInit << 16) / newHeight;
             if (sprites[spriteId].requiresShift()) {
-                int i3 = sprites[spriteId].getSomething1();
-                int k3 = sprites[spriteId].getSomething2();
+                int i3 = sprites[spriteId].getTotalWidth();
+                int k3 = sprites[spriteId].getTotalHeight();
                 k2 = (i3 << 16) / newWidth;
                 l2 = (k3 << 16) / newHeight;
                 startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
@@ -720,8 +720,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             int k2 = (spriteWidthInit << 16) / newWidth;
             int l2 = (spriteHeightInit << 16) / newHeight;
             if (sprites[spriteId].requiresShift()) {
-                int i3 = sprites[spriteId].getSomething1();
-                int k3 = sprites[spriteId].getSomething2();
+                int i3 = sprites[spriteId].getTotalWidth();
+                int k3 = sprites[spriteId].getTotalHeight();
                 k2 = (i3 << 16) / newWidth;
                 l2 = (k3 << 16) / newHeight;
                 startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
@@ -1018,8 +1018,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             }
 
         }
-        int i2 = -sprites[k].getSomething1() / 2;
-        int j2 = -sprites[k].getSomething2() / 2;
+        int i2 = -sprites[k].getTotalWidth() / 2;
+        int j2 = -sprites[k].getTotalHeight() / 2;
         if (sprites[k].requiresShift()) {
             i2 += sprites[k].getXShift();
             j2 += sprites[k].getYShift();
@@ -1334,8 +1334,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             int l3 = -(l1 << 16) / newHeight;
             if (sprites[spriteId].requiresShift())
             {
-                int something1 = sprites[spriteId].getSomething1();
-                int something2 = sprites[spriteId].getSomething2();
+                int something1 = sprites[spriteId].getTotalWidth();
+                int something2 = sprites[spriteId].getTotalHeight();
                 j3 = (something1 << 16) / newWidth;
                 k3 = (something2 << 16) / newHeight;
                 int xShift = sprites[spriteId].getXShift();

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-public class Sounds
+public class SoundHandle
 {
 	public static final int HEADER_SIZE = 44;
 	
@@ -29,7 +29,7 @@ public class Sounds
 	private static HashMap<Integer, String> soundNames;
 	private Sound sound;
 	
-	public Sounds(File f)
+	public SoundHandle(File f)
 	{
 		try {
 			soundNames = FileOperations.readHashMap(f, ";");

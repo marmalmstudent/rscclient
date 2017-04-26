@@ -1,5 +1,7 @@
 package org.conf.cachedev;
 
+import java.io.File;
+
 public class MediaPanel extends SpritesPanel
 {
 	/**
@@ -14,21 +16,19 @@ public class MediaPanel extends SpritesPanel
 
 	@Override
 	public void exportSprite() {
-		cd.cdc.extractMedia();
+		cd.cdc.extractSprite(cd.cdc.getMedia(), 0,
+				CDConst.MediaDatDir, CDConst.MediaPNGDir);
 	}
 
 	@Override
 	public boolean importSprite() {
-		if (super.checkValidEntries())
-		{
-			cd.cdc.insertMedia(selectedFile,
-					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
-					Integer.parseInt(xShiftTxt.getText()),
-					Integer.parseInt(yShiftTxt.getText()),
-					Integer.parseInt(camAngle1Txt.getText()),
-					Integer.parseInt(camAngle2Txt.getText()));
-			return true;
-		}
-		return false;
+		return super.importSprite(cd.cdc.getMedia(),
+				CDConst.MediaDatDir, 0);
+	}
+
+	@Override
+	public void fileSelected(File f) {
+		super.fileSelected(f, CDConst.MediaDatDir,
+				cd.cdc.getMedia(), 0);
 	}
 }

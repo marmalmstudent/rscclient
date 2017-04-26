@@ -7,8 +7,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.conf.cachedev.sprites.Sprite;
-
 public abstract class SpritesPanel extends JPanel
 {
 	/**
@@ -16,9 +14,9 @@ public abstract class SpritesPanel extends JPanel
 	 */
 	private static final long serialVersionUID = 1L;
 	public JLabel widthLbl, heightLbl, reqShiftLbl,
-	xShiftLbl, yShiftLbl, camAngle1Lbl, camAngle2Lbl;
+	xShiftLbl, yShiftLbl, totalWidthLbl, totalHeightLbl;
 	public JTextField widthTxt, heightTxt, reqShiftTxt,
-	xShiftTxt, yShiftTxt, camAngle1Txt, camAngle2Txt;
+	xShiftTxt, yShiftTxt, totalWidthTxt, totalHeightTxt;
 
 	protected File selectedFile;
 	protected CacheDev cd;
@@ -39,10 +37,10 @@ public abstract class SpritesPanel extends JPanel
 		xShiftLbl.setName(SIGN+"xshiftlbl");
 		yShiftLbl = new JLabel("Y Shift");
 		yShiftLbl.setName(SIGN+"yshiftlbl");
-		camAngle1Lbl = new JLabel("Camera Angle 1");
-		camAngle1Lbl.setName(SIGN+"camangle1lbl");
-		camAngle2Lbl = new JLabel("Camera Angle 2");
-		camAngle2Lbl.setName(SIGN+"camangle2lbl");
+		totalWidthLbl = new JLabel("Total Width");
+		totalWidthLbl.setName(SIGN+"totalwidthlbl");
+		totalHeightLbl = new JLabel("Total Height");
+		totalHeightLbl.setName(SIGN+"totalheightlbl");
 		
 		widthTxt = new JTextField("");
 		widthTxt.setName(SIGN+"widthtxt");
@@ -59,12 +57,12 @@ public abstract class SpritesPanel extends JPanel
 		yShiftTxt = new JTextField("");
 		yShiftTxt.setName(SIGN+"yShifttxt");
 		yShiftTxt.addActionListener(cd);
-		camAngle1Txt = new JTextField("");
-		camAngle1Txt.setName(SIGN+"camAngle1txt");
-		camAngle1Txt.addActionListener(cd);
-		camAngle2Txt = new JTextField("");
-		camAngle2Txt.setName(SIGN+"camAngle2txt");
-		camAngle2Txt.addActionListener(cd);
+		totalWidthTxt = new JTextField("");
+		totalWidthTxt.setName(SIGN+"totalwidthtxt");
+		totalWidthTxt.addActionListener(cd);
+		totalHeightTxt = new JTextField("");
+		totalHeightTxt.setName(SIGN+"totalheighttxt");
+		totalHeightTxt.addActionListener(cd);
 
 		add(widthLbl);
 		add(widthTxt);
@@ -76,17 +74,17 @@ public abstract class SpritesPanel extends JPanel
 		add(xShiftTxt);
 		add(yShiftLbl);
 		add(yShiftTxt);
-		add(camAngle1Lbl);
-		add(camAngle1Txt);
-		add(camAngle2Lbl);
-		add(camAngle2Txt);
+		add(totalWidthLbl);
+		add(totalWidthTxt);
+		add(totalHeightLbl);
+		add(totalHeightTxt);
 	}
 	
 	public boolean validateEntry()
 	{
 		JTextField[] tf = {
 				widthTxt, heightTxt, xShiftTxt,
-				yShiftTxt, camAngle1Txt, camAngle2Txt
+				yShiftTxt, totalWidthTxt, totalHeightTxt
 		};
 		boolean valid = true;
 		for (JTextField text : tf)
@@ -103,24 +101,55 @@ public abstract class SpritesPanel extends JPanel
 		}
 		if (!reqShiftTxt.getText().equalsIgnoreCase("true")
 				&& !reqShiftTxt.getText().equalsIgnoreCase("false"))
+		{
+			reqShiftTxt.setText("");
 			valid = false;
+		}
 		return valid;
 	}
 	
 	public abstract void exportSprite();
 	public abstract boolean importSprite();
-	
-	public boolean checkValidEntries()
+
+	public boolean importSprite(SpriteHandle handle,
+			String datDir, int transparentMask)
 	{
-		if (selectedFile == null || !selectedFile.exists())
-			return false;
-		String parent = selectedFile.getParentFile().getName();
-		if (parent.equals("png")) {
-			if (!validateEntry())
-				return false;
+		if (checkValidEntries())
+		{
+			cd.cdc.insertSprite(handle, datDir, selectedFile,
+					Boolean.getBoolean(reqShiftTxt.getText().toLowerCase()),
+					Integer.parseInt(xShiftTxt.getText()),
+					Integer.parseInt(yShiftTxt.getText()),
+					Integer.parseInt(totalWidthTxt.getText()),
+					Integer.parseInt(totalHeightTxt.getText()),
+					transparentMask);
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean checkValidEntries()
+	{
+		return selectedFile != null && selectedFile.exists()
+				&& isImage(selectedFile) && validateEntry();
+	}
+	
+	public void importDatValues(File f, String datDir,
+			SpriteHandle handle, int transparentMask)
+	{
+		File datFile = new File(datDir
+				+ FileOperations.getFileName(f, ".png"));
+		if (datFile.exists())
+		{
+			handle.newDat(datFile, transparentMask);
+			Sprite sprite = handle.getSprite();
+			handle.newPNG(f, sprite.getRequiresShift(),
+					sprite.getXShift(), sprite.getYShift(),
+					sprite.getTotalWidth(), sprite.getTotalHeight(),
+					transparentMask);
+		}
+		else
+			handle.newPNG(f, false, 0, 0, 0, 0, 0);
 	}
 	
 	/**
@@ -128,34 +157,39 @@ public abstract class SpritesPanel extends JPanel
 	 * JFileChooser.
 	 * @param f
 	 */
-	public void fileSelected(File f)
+	public abstract void fileSelected(File f);
+	
+	public void fileSelected(File f, String datDir,
+			SpriteHandle handle, int transparentMask)
 	{
 		selectedFile = f;
-		String parent = f.getParentFile().getName();
-		if (parent.equals("png")) {
-			File datFile = new File(FileOperations.getFileName(f, ".png"));
-			Sprite sprite;
-			if (datFile.exists())
-			{
-				cd.cdc.getTexture().newDat(datFile);
-				sprite = cd.cdc.getTexture().getSprite();
-				cd.cdc.getTexture().newPNG(f, sprite.getRequiresShift(),
-						sprite.getXShift(), sprite.getYShift(),
-						sprite.getCameraAngle1(), sprite.getCameraAngle2());
-			}
-			else
-				cd.cdc.getTexture().newPNG(f, false, 0, 0, 0, 0);
-			sprite = cd.cdc.getTexture().getSprite();
-			widthTxt.setText(Integer.toString(sprite.getWidth()));
-			heightTxt.setText(Integer.toString(sprite.getHeight()));
-			reqShiftTxt.setText(sprite.getRequiresShift() ? "true" : "false");
-			xShiftTxt.setText(Integer.toString(sprite.getXShift()));
-			yShiftTxt.setText(Integer.toString(sprite.getYShift()));
-			camAngle1Txt.setText(Integer.toString(sprite.getCameraAngle1()));
-			camAngle2Txt.setText(Integer.toString(sprite.getCameraAngle2()));
+		if (isImage(f))
+		{
+			importDatValues(f, datDir, handle, transparentMask);
+			setSpriteText(handle.getSprite());
 		}
 	}
+	
+	public boolean isImage(File f)
+	{
+		return FileOperations.getFileExtension(f).equals(".png");
+	}
+	
+	public void setSpriteText(Sprite sprite)
+	{
+		widthTxt.setText(Integer.toString(sprite.getWidth()));
+		heightTxt.setText(Integer.toString(sprite.getHeight()));
+		reqShiftTxt.setText(sprite.getRequiresShift() ? "true" : "false");
+		xShiftTxt.setText(Integer.toString(sprite.getXShift()));
+		yShiftTxt.setText(Integer.toString(sprite.getYShift()));
+		totalWidthTxt.setText(Integer.toString(sprite.getTotalWidth()));
+		totalHeightTxt.setText(Integer.toString(sprite.getTotalHeight()));
+	}
 
+	/**
+	 * 
+	 * @param bName
+	 */
 	public void handleEvent(String bName)
 	{
 		if (bName.equals(widthTxt.getName()))
@@ -193,22 +227,22 @@ public abstract class SpritesPanel extends JPanel
 		{
 			try {
 				Integer.parseInt(yShiftTxt.getText());
-				camAngle1Txt.requestFocus();
+				totalWidthTxt.requestFocus();
 			} catch (NumberFormatException nfe) { yShiftTxt.setText(""); }
 		}
-		else if (bName.equals(camAngle1Txt.getName()))
+		else if (bName.equals(totalWidthTxt.getName()))
 		{
 			try {
-				Integer.parseInt(camAngle1Txt.getText());
-				camAngle2Txt.requestFocus();
-			} catch (NumberFormatException nfe) { camAngle1Txt.setText(""); }
+				Integer.parseInt(totalWidthTxt.getText());
+				totalHeightTxt.requestFocus();
+			} catch (NumberFormatException nfe) { totalWidthTxt.setText(""); }
 		}
-		else if (bName.equals(camAngle2Txt.getName()))
+		else if (bName.equals(totalHeightTxt.getName()))
 		{
 			try {
-				Integer.parseInt(camAngle2Txt.getText());
+				Integer.parseInt(totalHeightTxt.getText());
 				widthTxt.requestFocus();
-			} catch (NumberFormatException nfe) { camAngle2Txt.setText(""); }
+			} catch (NumberFormatException nfe) { totalHeightTxt.setText(""); }
 		}
 	}
 }

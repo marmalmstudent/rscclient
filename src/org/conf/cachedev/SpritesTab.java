@@ -12,7 +12,6 @@ public class SpritesTab extends JTabbedPane implements ChangeListener
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final String SIGN = "sp_";
 	private EntityPanel entity;
 	private ItemPanel item;
 	private LogoPanel logo;
@@ -88,59 +87,112 @@ public class SpritesTab extends JTabbedPane implements ChangeListener
 	
 	public void handleWorkon()
 	{
-		if (spSelected[CDConst.ENTITY_ID]) {
-			System.out.println("Entity workon!");
-			cd.cdc.workonEntity();
-		} else if (spSelected[CDConst.ITEM_ID]) {
-			cd.cdc.workonItem();
-		} else if (spSelected[CDConst.LOGO_ID]) {
-			cd.cdc.workonLogo();
-		} else if (spSelected[CDConst.MEDIA_ID]) {
-			cd.cdc.workonMedia();
-		} else if (spSelected[CDConst.PROJECTILE_ID]) {
-			cd.cdc.workonProjectile();
-		} else if (spSelected[CDConst.TEXTURE_ID]) {
-			cd.cdc.workonTexture();
-		} else if (spSelected[CDConst.UTIL_ID]) {
-			cd.cdc.workonUtil();
+		if (spSelected[CDConst.ENTITY_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.EntityArchive,
+					CDConst.EntityDatDir,
+					cd.cdc.getEntity().getSpriteNames());
+		}
+		else if (spSelected[CDConst.ITEM_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.ItemArchive,
+					CDConst.ItemDatDir,
+					cd.cdc.getItem().getSpriteNames());
+		}
+		else if (spSelected[CDConst.LOGO_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.LogoArchive,
+					CDConst.LogoDatDir,
+					cd.cdc.getLogo().getSpriteNames());
+		}
+		else if (spSelected[CDConst.MEDIA_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.MediaArchive,
+					CDConst.MediaDatDir,
+					cd.cdc.getMedia().getSpriteNames());
+		}
+		else if (spSelected[CDConst.PROJECTILE_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.ProjectileArchive,
+					CDConst.ProjectileDatDir,
+					cd.cdc.getProjectile().getSpriteNames());
+		}
+		else if (spSelected[CDConst.TEXTURE_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.TextureArchive,
+					CDConst.TextureDatDir,
+					cd.cdc.getTexture().getSpriteNames());
+		}
+		else if (spSelected[CDConst.UTIL_ID])
+		{
+			cd.cdc.workon(CDConst.cacheSpriteDir+CDConst.UtilArchive,
+					CDConst.UtilDatDir,
+					cd.cdc.getUtil().getSpriteNames());
 		}
 	}
 	
 	public void handleWorkoff()
 	{
-		if (spSelected[CDConst.ENTITY_ID]) {
-			cd.cdc.workoffEntity();
-		} else if (spSelected[CDConst.ITEM_ID]) {
-			cd.cdc.workoffItem();
-		} else if (spSelected[CDConst.LOGO_ID]) {
-			cd.cdc.workoffLogo();
-		} else if (spSelected[CDConst.MEDIA_ID]) {
-			cd.cdc.workoffMedia();
-		} else if (spSelected[CDConst.PROJECTILE_ID]) {
-			cd.cdc.workoffProjectile();
-		} else if (spSelected[CDConst.TEXTURE_ID]) {
-			cd.cdc.workoffTexture();
-		} else if (spSelected[CDConst.UTIL_ID]) {
-			cd.cdc.workoffUtil();
+		if (spSelected[CDConst.ENTITY_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.EntityArchive,
+					CDConst.EntityDatDir,
+					cd.cdc.getEntity().getSpriteNames());
+		}
+		else if (spSelected[CDConst.ITEM_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.ItemArchive,
+					CDConst.ItemDatDir,
+					cd.cdc.getItem().getSpriteNames());
+		}
+		else if (spSelected[CDConst.LOGO_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.LogoArchive,
+					CDConst.LogoDatDir,
+					cd.cdc.getLogo().getSpriteNames());
+		}
+		else if (spSelected[CDConst.MEDIA_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.MediaArchive,
+					CDConst.MediaDatDir,
+					cd.cdc.getMedia().getSpriteNames());
+		}
+		else if (spSelected[CDConst.PROJECTILE_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.ProjectileArchive,
+					CDConst.ProjectileDatDir,
+					cd.cdc.getProjectile().getSpriteNames());
+		}
+		else if (spSelected[CDConst.TEXTURE_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.TextureArchive,
+					CDConst.TextureDatDir,
+					cd.cdc.getTexture().getSpriteNames());
+		}
+		else if (spSelected[CDConst.UTIL_ID])
+		{
+			cd.cdc.workoff(CDConst.cacheSpriteDir+CDConst.UtilArchive,
+					CDConst.UtilDatDir,
+					cd.cdc.getUtil().getSpriteNames());
 		}
 	}
 	
 	public void handleInsert()
 	{
 		if (spSelected[CDConst.ENTITY_ID]) {
-			entity.checkValidEntries();
+			entity.importSprite();
 		} else if (spSelected[CDConst.ITEM_ID]) {
-			item.checkValidEntries();
+			item.importSprite();
 		} else if (spSelected[CDConst.LOGO_ID]) {
-			logo.checkValidEntries();
+			logo.importSprite();
 		} else if (spSelected[CDConst.MEDIA_ID]) {
-			media.checkValidEntries();
+			media.importSprite();
 		} else if (spSelected[CDConst.PROJECTILE_ID]) {
-			projectile.checkValidEntries();
+			projectile.importSprite();
 		} else if (spSelected[CDConst.TEXTURE_ID]) {
-			texture.checkValidEntries();
+			texture.importSprite();
 		} else if (spSelected[CDConst.UTIL_ID]) {
-			util.checkValidEntries();
+			util.importSprite();
 		}
 	}
 	

@@ -337,13 +337,45 @@ public abstract class FileOperations {
 	
 	public static String getFileName(File f, String extension)
 	{
-		String name = f.getName();
+		String name = f.getName().toLowerCase();
 		extension = extension.toLowerCase();
-		int end = name.toLowerCase().indexOf(extension);
-		byte[] filename = new byte[end];
+		int extLen = extension.length();
+		int end = -1;
+		for (int i = 0; i != -1; i = name.indexOf(extension, i+extLen))
+			end = i;
+		if (end == -1)
+			return name; // extension not found
 		byte[] fullname = name.getBytes();
-		for(int i = 0; i < end; ++i)
-			filename[i] = fullname[i];
+		byte[] filename = new byte[end];
+		for(int i = 0, j = 0; j < end; filename[j++] = fullname[i++]);
 		return new String(filename);
+	}
+	
+	public static String getFileExtension(File f)
+	{
+		String name = f.getName().toLowerCase();
+		int end = -1;
+		for (int i = 0; i != -1; i = name.indexOf(".", i+1))
+			end = i;
+		if (end == -1)
+			return null; // file has no extension
+		byte[] fullname = name.getBytes();
+		byte[] filename = new byte[fullname.length-end];
+		for(int i = end, j = 0; i < fullname.length && j < end;
+				filename[j++] = fullname[i++]);
+		return new String(filename);
+	}
+	
+	/**
+	 * Creates the directory if it does not exist.
+	 * @param dir The directory
+	 * @return true if the directory was created. false if it
+	 * already exists or an error occurred.
+	 */
+	public static boolean mkdir(File dir)
+	{
+    	if (!dir.exists())
+    		return dir.mkdirs();
+    	return false;
 	}
 }

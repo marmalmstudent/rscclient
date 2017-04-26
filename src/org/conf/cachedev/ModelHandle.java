@@ -1,20 +1,17 @@
-package org.conf.cachedev.models;
+package org.conf.cachedev;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.conf.cachedev.DataOperations;
-import org.conf.cachedev.FileOperations;
-
-public class Models
+public class ModelHandle
 {
 	private static HashMap<Integer, String> modelNames;
 	private static final int HEADER_SIZE = 80;
 	private Model model;
 	
-	public Models(File f)
+	public ModelHandle(File f)
 	{
 		try {
 			modelNames = FileOperations.readHashMap(f, ";");

@@ -1,6 +1,4 @@
-package org.conf.cachedev.models;
-
-import org.conf.cachedev.DataOperations;
+package org.conf.cachedev;
 
 public class Model
 {
