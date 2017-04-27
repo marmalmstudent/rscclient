@@ -1,0 +1,25 @@
+Entity:
+	Human:
+		normal:	width 64, height 102
+		fight:	width 84, height 102
+	Monster:
+		normal: any
+		fight: same as normal
+
+Item:
+	width 48, height 32
+
+Logo:
+	same as image dimensions
+
+Media:
+	generally same as image dimensions
+
+Projectiles:
+	width 32, height 32
+
+Textures:
+	same as image dimensions
+
+Util:
+	same as image dimensions
