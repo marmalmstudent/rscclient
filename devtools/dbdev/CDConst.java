@@ -26,7 +26,7 @@ public abstract class CDConst
 	public static final String devRootDir = "devtools/dbdev/";
 	public static final String namesDir = devRootDir+"names/";
 	
-	public static final String devDir = devRootDir+"dev/";
+	public static final String devDir = "local/dev/";
 	
 	/* Sprites */
 	public static final String SpriteDir = devDir+"Sprites/";

@@ -2,5 +2,5 @@ bin/
 media
 .classpath
 .project
-dbdev/dev
+local/
 trash/

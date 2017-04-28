@@ -33,7 +33,7 @@ import javax.imageio.ImageIO;
 
 public abstract class FileOperations {
 
-	public static final int MAX_FILE_SIZE = 1000000; // 1 Mb
+	public static final int MAX_FILE_SIZE = 20000000; // 1 Mb
 
 	public FileOperations() {}
 
@@ -153,7 +153,6 @@ public abstract class FileOperations {
 		int dataSize = 0;
 		try
 		{
-
 			ZipEntry e = archive.getEntry(entryName);
 			if (e == null)
 				return null; // entry not found
