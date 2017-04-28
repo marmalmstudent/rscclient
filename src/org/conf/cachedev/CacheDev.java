@@ -33,6 +33,7 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 	private JProgressBar progress;
 	private SpritesTab sprites;
 	private ModelsPanel models;
+	private LandscapesPanel landscapes;
 	private SoundsPanel sounds;
 	private JButton mpbWorkon, mpbWorkoff, mpbImport, mpbExport;
 	
@@ -58,6 +59,8 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		mpCenter.addTab(CDConst.DB_NAMES[CDConst.SPRITES_ID], sprites);
 		models = new ModelsPanel(this);
 		mpCenter.addTab(CDConst.DB_NAMES[CDConst.MODELS_ID], models);
+		landscapes = new LandscapesPanel(this);
+		mpCenter.addTab(CDConst.DB_NAMES[CDConst.LANDSCAPES_ID], landscapes);
 		sounds = new SoundsPanel(this);
 		mpCenter.addTab(CDConst.DB_NAMES[CDConst.SOUNDS_ID], sounds);
 		
@@ -183,11 +186,15 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		{
 			if (bName.equals(mpbWorkon.getName()))
 			{
-				; // TODO
+				cdc.workon(CDConst.cacheDir+CDConst.LandscapeArchive,
+						CDConst.LandscapesHeiDir,
+						cdc.getLandscape().getLandscapeNames());
 			}
 			else if (bName.equals(mpbWorkoff.getName()))
 			{
-				; // TODO
+				cdc.workoff(CDConst.cacheDir+CDConst.LandscapeArchive,
+						CDConst.LandscapesHeiDir,
+						cdc.getLandscape().getLandscapeNames());
 			}
 			else if (bName.equals(mpbImport.getName()))
 			{
@@ -195,7 +202,7 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 			}
 			else if (bName.equals(mpbExport.getName()))
 			{
-				; // TODO
+				cdc.extractLandscapes();
 			}
 		}
 		else if (spSelected[CDConst.SOUNDS_ID])
@@ -244,7 +251,7 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		} else if (spSelected[CDConst.MODELS_ID])
 			models.fileSelected(path);
 		else if (spSelected[CDConst.LANDSCAPES_ID])
-			; // TODO: set values for landscapes
+			landscapes.fileSelected(path);
 		else if (spSelected[CDConst.SOUNDS_ID])
 			sounds.fileSelected(path);
 	}
@@ -306,6 +313,8 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 				sprites.handleEvent(tName); // sprite panel
 			else if (tName.startsWith(ModelsPanel.SIGN))
 				models.handleEvent(tName); // models panel
+			else if (tName.startsWith(LandscapesPanel.SIGN))
+				landscapes.handleEvent(tName); // models panel
 			else if (tName.startsWith(SoundsPanel.SIGN))
 				sounds.handleEvent(tName); // models panel
 		}

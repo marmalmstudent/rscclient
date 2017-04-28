@@ -368,7 +368,7 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void setPixelColour(int x, int y, int colour) {
+    public void setMinimapPixel(int x, int y, int colour) {
         if (x < imageX || y < imageY || x >= imageWidth || y >= imageHeight) {
             return;
         }

@@ -134,7 +134,7 @@ public class Camera {
                 l1, i2
         };
         aModel_423.method181(2, ai, 0, 0);
-        aModel_423.anIntArray258[anInt415] = k1;
+        aModel_423.entityType[anInt415] = k1;
         aModel_423.aByteArray259[anInt415++] = 0;
         return anInt415 - 1;
     }

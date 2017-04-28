@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.conf.cachedev.FileOperations;
 import org.model.Sprite;
 import org.util.Config;
 import org.util.DataConversions;
@@ -541,6 +542,7 @@ public class GameWindow extends JApplet
 
 	protected Socket makeSocket(String address, int port) throws IOException
 	{
+		System.out.println(InetAddress.getByName(address)+", "+port);
 		Socket socket = new Socket(InetAddress.getByName(address), port);
 		socket.setSoTimeout(30000);
 		socket.setTcpNoDelay(true);

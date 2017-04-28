@@ -85,7 +85,7 @@ public class Model {
         }
         if (!aBoolean263) {
             aByteArray259 = new byte[nbrSides];
-            anIntArray258 = new int[nbrSides];
+            entityType = new int[nbrSides];
         }
         if (aBoolean260) {
             anIntArray275 = xCoords;
@@ -539,7 +539,7 @@ public class Model {
 
         int i1 = model.method181(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
         if (!model.aBoolean263 && !aBoolean263)
-            model.anIntArray258[i1] = anIntArray258[j];
+            model.entityType[i1] = entityType[j];
         model.anIntArray241[i1] = anIntArray241[j];
         model.anIntArray240[i1] = anIntArray240[j];
         model.anIntArray239[i1] = anIntArray239[j];
@@ -1031,7 +1031,7 @@ public class Model {
     public boolean aBoolean255;
     public boolean isGiantCrystal;
     public int anInt257;
-    public int anIntArray258[];
+    public int entityType[];
     public byte aByteArray259[];
     private boolean aBoolean260;
     public boolean aBoolean261;

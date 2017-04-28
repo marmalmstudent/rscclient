@@ -2,6 +2,7 @@ package org;
 
 import java.io.*;
 
+import org.conf.cachedev.FileOperations;
 import org.entityhandling.EntityHandler;
 import org.util.misc;
 
@@ -145,7 +146,7 @@ public class DataOperations {
         return s;
     }
     
-    public static int storeDB(byte database[]) {
+    public static int storeDB(byte database[], String outPath) {
         int nDBEntries = getUnsigned2Bytes(database, 0);
         int offset = 2 + nDBEntries * 10;
         int dbEntryLength, dbEntryIdentifier;
@@ -160,17 +161,14 @@ public class DataOperations {
             		+ (database[i * 10 + 11] & 0xff);
             System.out.printf("%d: %d, ", i, dbEntryIdentifier);
             
-            /*
             out = new byte[dbEntryLength];
             for (int j = 0; j < dbEntryLength; ++j)
             	out[j] = (byte)(database[offset + j]);
             
             try {
-            	System.out.println();
-            	//misc.writeToFile(out, "src/org/conf/utils/cache/data/sounds1/sound"+i+".pcm");
-            	misc.writeToFile(out, "src/org/conf/utils/cache/data/models3d/"+i+".ob3");
+            	FileOperations.write(out, new File(outPath+"_"+i));
+            	//misc.writeToFile(out, outPath+i);
             } catch (IOException ioe) {ioe.printStackTrace();}
-            */
             offset += dbEntryLength;
         }
         System.out.printf("\n");
@@ -216,18 +214,6 @@ public class DataOperations {
         int entryIdentifier = getIdentifier(entry);
         int offset = 2 + nDBEntries * 10;
         int dbEntryIdentifier, dbEntryLength;
-        /*
-        if (entry.startsWith("tree2")
-        		&& (entry.endsWith(".ob3") || entry.endsWith(".OB3")))
-        {
-        	storeDB(entry, database);
-        	System.out.printf("Printing "+nDBEntries+" entries to database\n");
-        }*//*
-        if (entry.endsWith(".pcm") || entry.endsWith(".PCM"))
-        {
-        	storeDB(entry, database);
-        	System.out.printf("Printing to database\n");
-        }*/
         for (int i = 0; i < nDBEntries; i++) {
             dbEntryIdentifier = ((database[i * 10 + 2] & 0xff) << 24)
             		+ ((database[i * 10 + 3] & 0xff) << 16)
@@ -260,7 +246,7 @@ public class DataOperations {
      * ...
      * dataN(lengthN)
      * 
-     * @param entry A sting containing the sought entry
+     * @param entry A string containing the sought entry
      * @param database The database where the entry should be found.
      * @return the the length (in bytes) of the entry.
      */

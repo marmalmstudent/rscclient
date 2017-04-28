@@ -602,7 +602,7 @@ public class EngineHandle {
                                 int l21 = model.method181(3, ai, 0xbc614e, k7);
                                 selectedX[l21] = tile_x;
                                 selectedY[l21] = tile_y;
-                                model.anIntArray258[l21] = 0x30d40 + l21;
+                                model.entityType[l21] = 0x30d40 + l21;
                             }
                             if (i10 != 0xbc614e) {
                                 ai7[0] = tile_y + tile_x * 96 + 1;
@@ -611,7 +611,7 @@ public class EngineHandle {
                                 int i22 = model.method181(3, ai7, 0xbc614e, i10);
                                 selectedX[i22] = tile_x;
                                 selectedY[i22] = tile_y;
-                                model.anIntArray258[i22] = 0x30d40 + i22;
+                                model.entityType[i22] = 0x30d40 + i22;
                             }
                         } else {
                             if (k7 != 0xbc614e) {
@@ -621,7 +621,7 @@ public class EngineHandle {
                                 int j22 = model.method181(3, ai, 0xbc614e, k7);
                                 selectedX[j22] = tile_x;
                                 selectedY[j22] = tile_y;
-                                model.anIntArray258[j22] = 0x30d40 + j22;
+                                model.entityType[j22] = 0x30d40 + j22;
                             }
                             if (i10 != 0xbc614e) {
                                 ai7[0] = tile_y + tile_x * 96 + 96;
@@ -630,7 +630,7 @@ public class EngineHandle {
                                 int k22 = model.method181(3, ai7, 0xbc614e, i10);
                                 selectedX[k22] = tile_x;
                                 selectedY[k22] = tile_y;
-                                model.anIntArray258[k22] = 0x30d40 + k22;
+                                model.entityType[k22] = 0x30d40 + k22;
                             }
                         }
                     } else if (k7 != 0xbc614e) {
@@ -642,7 +642,7 @@ public class EngineHandle {
                         int l19 = model.method181(4, ai1, 0xbc614e, k7);
                         selectedX[l19] = tile_x;
                         selectedY[l19] = tile_y;
-                        model.anIntArray258[l19] = 0x30d40 + l19;
+                        model.entityType[l19] = 0x30d40 + l19;
                     }
                 }
 
@@ -666,7 +666,7 @@ public class EngineHandle {
                         int i20 = model.method181(4, ai2, l7, 0xbc614e);
                         selectedX[i20] = k4;
                         selectedY[i20] = i6;
-                        model.anIntArray258[i20] = 0x30d40 + i20;
+                        model.entityType[i20] = 0x30d40 + i20;
                         method413(k4, i6, 0, l7, l7);
                     } else
                     if (getGroundTexturesOverlay(k4, i6) == 0
@@ -686,7 +686,7 @@ public class EngineHandle {
                             int j20 = model.method181(4, ai3, i8, 0xbc614e);
                             selectedX[j20] = k4;
                             selectedY[j20] = i6;
-                            model.anIntArray258[j20] = 0x30d40 + j20;
+                            model.entityType[j20] = 0x30d40 + j20;
                             method413(k4, i6, 0, i8, i8);
                         }
                         if (getGroundTexturesOverlay(k4, i6 - 1) > 0
@@ -703,7 +703,7 @@ public class EngineHandle {
                             int k20 = model.method181(4, ai4, j8, 0xbc614e);
                             selectedX[k20] = k4;
                             selectedY[k20] = i6;
-                            model.anIntArray258[k20] = 0x30d40 + k20;
+                            model.entityType[k20] = 0x30d40 + k20;
                             method413(k4, i6, 0, j8, j8);
                         }
                         if (getGroundTexturesOverlay(k4 + 1, i6) > 0
@@ -720,7 +720,7 @@ public class EngineHandle {
                             int l20 = model.method181(4, ai5, k8, 0xbc614e);
                             selectedX[l20] = k4;
                             selectedY[l20] = i6;
-                            model.anIntArray258[l20] = 0x30d40 + l20;
+                            model.entityType[l20] = 0x30d40 + l20;
                             method413(k4, i6, 0, k8, k8);
                         }
                         if (getGroundTexturesOverlay(k4 - 1, i6) > 0
@@ -737,7 +737,7 @@ public class EngineHandle {
                             int i21 = model.method181(4, ai6, l8, 0xbc614e);
                             selectedX[i21] = k4;
                             selectedY[i21] = i6;
-                            model.anIntArray258[i21] = 0x30d40 + i21;
+                            model.entityType[i21] = 0x30d40 + i21;
                             method413(k4, i6, 0, l8, l8);
                         }
                     }
@@ -796,9 +796,9 @@ public class EngineHandle {
                         walkableValue[i2][k2] |= 0x20;
                     }
                     if (flag) {
-                        gameImage.setPixelColour(i2 * 3, k2 * 3, k1);
-                        gameImage.setPixelColour(i2 * 3 + 1, k2 * 3 + 1, k1);
-                        gameImage.setPixelColour(i2 * 3 + 2, k2 * 3 + 2, k1);
+                        gameImage.setMinimapPixel(i2 * 3, k2 * 3, k1);
+                        gameImage.setMinimapPixel(i2 * 3*2 + 1, k2 * 3 + 1, k1);
+                        gameImage.setMinimapPixel(i2 * 3*2 + 2, k2 * 3 + 2, k1);
                     }
                 }
                 if (k3 > 12000 && k3 < 24000 && EntityHandler.getDoorDef(k3 - 12001).getUnknown() == 0) {
@@ -807,9 +807,9 @@ public class EngineHandle {
                         walkableValue[i2][k2] |= 0x10;
                     }
                     if (flag) {
-                        gameImage.setPixelColour(i2 * 3 + 2, k2 * 3, k1);
-                        gameImage.setPixelColour(i2 * 3 + 1, k2 * 3 + 1, k1);
-                        gameImage.setPixelColour(i2 * 3, k2 * 3 + 2, k1);
+                        gameImage.setMinimapPixel(i2 * 3 + 2, k2 * 3, k1);
+                        gameImage.setMinimapPixel(i2 * 3 + 1, k2 * 3 + 1, k1);
+                        gameImage.setMinimapPixel(i2 * 3, k2 * 3 + 2, k1);
                     }
                 }
             }
@@ -1311,9 +1311,9 @@ public class EngineHandle {
         int l3 = model.insertCoordPointNoDuplicate(k2, -anIntArrayArray581[l][i1], l2);
         int i4 = model.method181(4, new int[]{i3, j3, k3, l3}, k1, l1);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
-            model.anIntArray258[i4] = 30000 + i;
+            model.entityType[i4] = 30000 + i;
         } else {
-            model.anIntArray258[i4] = 0;
+            model.entityType[i4] = 0;
         }
     }
 

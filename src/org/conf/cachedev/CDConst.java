@@ -75,20 +75,23 @@ public abstract class CDConst
 	public static final String TexturePNGDir = TextureDir+"png/";
 
 	/* Models */
-	public static final String ModelArchive = "models36.zip";
+	public static final String ModelArchive = "models.zip";
 	public static final String ModelNames = namesDir+"modelnames";
-	public static final String ModelsDir = devDir+"models36/";
+	public static final String ModelsDir = devDir+"models/";
 	public static final String ModelsOb3Dir = ModelsDir+"ob3/";
 	public static final String ModelsStlDir = ModelsDir+"stl/";
 
 	/* Landscapes */
 	public static final String LandscapeArchive = "Landscape.zip";
+	public static final String LandscapeNames = namesDir+"landscapenames";
 	public static final String LandscapesDir = devDir+"Landscape/";
+	public static final String LandscapesHeiDir = LandscapesDir+"hei/";
+	public static final String LandscapesStlDir = LandscapesDir+"stl/";
 
 	/* Sounds */
-	public static final String SoundArchive = "sounds1.zip";
+	public static final String SoundArchive = "sounds.zip";
 	public static final String SoundNames = namesDir+"soundnames";
-	public static final String SoundsDir = devDir+"sounds1/";
+	public static final String SoundsDir = devDir+"sounds/";
 	public static final String SoundsPCMDir = SoundsDir+"pcm/";
 	public static final String SoundsWAVDir = SoundsDir+"wav/";
 }

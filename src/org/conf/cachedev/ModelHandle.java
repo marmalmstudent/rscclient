@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 public class ModelHandle
 {
-	private static HashMap<Integer, String> modelNames;
+	private static HashMap<String, String> modelNames;
 	private static final int HEADER_SIZE = 80;
 	private Model model;
 	
@@ -18,7 +18,7 @@ public class ModelHandle
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
-	public HashMap<Integer, String> getModelNames()
+	public HashMap<String, String> getModelNames()
 	{
 		return modelNames;
 	}
@@ -30,12 +30,12 @@ public class ModelHandle
 		return null;
 	}
 	
-	public int getModelID(String modelName)
+	public String getModelID(String modelName)
 	{
-		for (Entry<Integer, String> entry : modelNames.entrySet())
+		for (Entry<String, String> entry : modelNames.entrySet())
 			if (entry.getValue().equals(modelName))
 				return entry.getKey();
-		return -1;
+		return null;
 	}
 	
 	public void test()
@@ -149,7 +149,7 @@ public class ModelHandle
 		{
 			byte[] data = FileOperations.read(f);
 			if (data != null)
-				model = new Model(data, true);
+				model = new Model(data, false);
 		}
 		catch (IOException e)
 		{

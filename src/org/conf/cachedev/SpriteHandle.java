@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 public class SpriteHandle {
 	
-	protected HashMap<Integer, String> names;
+	protected HashMap<String, String> names;
 	protected Sprite sprite;
 	protected int nbrSprites;
 	
@@ -30,7 +30,7 @@ public class SpriteHandle {
 		return nbrSprites;
 	}
 	
-	public HashMap<Integer, String> getSpriteNames()
+	public HashMap<String, String> getSpriteNames()
 	{
 		return names;
 	}
@@ -42,12 +42,12 @@ public class SpriteHandle {
 		return null;
 	}
 	
-	public int getSpriteID(String modelName)
+	public String getSpriteID(String modelName)
 	{
-		for (Entry<Integer, String> entry : names.entrySet())
+		for (Entry<String, String> entry : names.entrySet())
 			if (entry.getValue().equals(modelName))
 				return entry.getKey();
-		return -1;
+		return null;
 	}
 	
 	public void writePNG(File dst)

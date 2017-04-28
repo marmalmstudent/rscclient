@@ -1015,7 +1015,7 @@ public class mudclient extends GameWindowMiddleMan
     
     private final void loadModel() throws IOException
     {
-    	ZipFile objectArchive = new ZipFile(new File(Config.CONF_DIR + "/data/models36.zip"));
+    	ZipFile objectArchive = new ZipFile(new File(Config.CONF_DIR + "/data/models.zip"));
         try {
         	for (int j = 0; j < EntityHandler.getModelCount(); j++)
         	{
@@ -3293,10 +3293,10 @@ public class mudclient extends GameWindowMiddleMan
                 break;
             int k1 = ai[j1];
             Model model = models[j1];
-            if (model.anIntArray258[k1] <= 65535 || model.anIntArray258[k1] >= 0x30d40 && model.anIntArray258[k1] <= 0x493e0)
+            if (model.entityType[k1] <= 65535 || model.entityType[k1] >= 0x30d40 && model.entityType[k1] <= 0x493e0)
                 if (model == gameCamera.aModel_423) {
-                    int i2 = model.anIntArray258[k1] % 10000;
-                    int l2 = model.anIntArray258[k1] / 10000;
+                    int i2 = model.entityType[k1] % 10000;
+                    int l2 = model.entityType[k1] / 10000;
                     if (l2 == 1) {
                         String s = "";
                         int k3 = 0;
@@ -3598,7 +3598,7 @@ public class mudclient extends GameWindowMiddleMan
                     }
                 } else {
                     if (k1 >= 0)
-                        k1 = model.anIntArray258[k1] - 0x30d40;
+                        k1 = model.entityType[k1] - 0x30d40;
                     if (k1 >= 0)
                         j = k1;
                 }
@@ -5661,7 +5661,7 @@ public class mudclient extends GameWindowMiddleMan
         try
         {
             drawLoadingBarText(90, "Unpacking Sound effects");
-            sounds = load("sounds1.mem");   
+            sounds = load("sounds.mem");   
             audioReader = new AudioReader();
             return;
         }
@@ -8387,11 +8387,11 @@ public class mudclient extends GameWindowMiddleMan
     }
 
     private final void setPixelsAndAroundColour(int x, int y, int colour) {
-        gameGraphics.setPixelColour(x, y, colour);
-        gameGraphics.setPixelColour(x - 1, y, colour);
-        gameGraphics.setPixelColour(x + 1, y, colour);
-        gameGraphics.setPixelColour(x, y - 1, colour);
-        gameGraphics.setPixelColour(x, y + 1, colour);
+        gameGraphics.setMinimapPixel(x, y, colour);
+        gameGraphics.setMinimapPixel(x - 1, y, colour);
+        gameGraphics.setMinimapPixel(x + 1, y, colour);
+        gameGraphics.setMinimapPixel(x, y - 1, colour);
+        gameGraphics.setMinimapPixel(x, y + 1, colour);
     }
 
     private final void method119() {

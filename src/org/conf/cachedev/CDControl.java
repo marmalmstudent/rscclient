@@ -10,6 +10,7 @@ public class CDControl
 	private SpriteHandle entity, media, util, item,
 	logo, projectile, texture;
 	private ModelHandle model;
+	private LandscapeHandle landscape;
 	private SoundHandle sound;
 	
 	public CDControl()
@@ -23,6 +24,7 @@ public class CDControl
 		projectile = new SpriteHandle(new File(CDConst.ProjectileNames));
 		texture = new SpriteHandle(new File(CDConst.TextureNames));
 		model = new ModelHandle(new File(CDConst.ModelNames));
+		landscape = new LandscapeHandle(new File(CDConst.LandscapeNames));
 		sound = new SoundHandle(new File(CDConst.SoundNames));
 	}
 	
@@ -34,6 +36,7 @@ public class CDControl
 	public SpriteHandle getProjectile() { return projectile; }
 	public SpriteHandle getTexture() { return texture; }
 	public ModelHandle getModels() { return model; }
+	public LandscapeHandle getLandscape() { return landscape; }
 	public SoundHandle getSounds() { return sound; }
 	
 	private static void makeSpriteDirs() throws Exception
@@ -72,6 +75,8 @@ public class CDControl
 	private static void makeLandscapeDirs() throws Exception
 	{
 		FileOperations.mkdir(new File(CDConst.LandscapesDir)); // Ground tiles
+		FileOperations.mkdir(new File(CDConst.LandscapesHeiDir));
+		FileOperations.mkdir(new File(CDConst.LandscapesStlDir));
 	}
 	
 	private static void makeSoundDirs() throws Exception
@@ -108,7 +113,7 @@ public class CDControl
 	}
 	
 	public void workon(String archivePath, String datDir,
-			HashMap<Integer, String> names)
+			HashMap<String, String> names)
 	{
 		try {
 			FileOperations.unzipArchive(
@@ -117,7 +122,7 @@ public class CDControl
 	}
 	
 	public void workoff(String archivePath, String datDir,
-			HashMap<Integer, String> names) {
+			HashMap<String, String> names) {
 		try {
 			FileOperations.zipArchive(datDir,
 					new File(archivePath), names);
@@ -128,8 +133,8 @@ public class CDControl
 			SpriteHandle handle, int transparentMask,
 			String datDir, String pngDir)
 	{
-		HashMap<Integer, String> entityNames = handle.getSpriteNames();
-		for (Entry<Integer, String> entry : entityNames.entrySet())
+		HashMap<String, String> entityNames = handle.getSpriteNames();
+		for (Entry<String, String> entry : entityNames.entrySet())
 		{
 			File src = new File(datDir+entry.getValue());
 			if (!src.exists())
@@ -144,8 +149,8 @@ public class CDControl
 	 */
 	public void extractModels()
 	{
-		HashMap<Integer, String> modelNames = model.getModelNames();
-		for (Entry<Integer, String> entry : modelNames.entrySet())
+		HashMap<String, String> modelNames = model.getModelNames();
+		for (Entry<String, String> entry : modelNames.entrySet())
 		{
 			File src = new File(CDConst.ModelsOb3Dir+entry.getValue());
 			if (!src.exists())
@@ -154,14 +159,30 @@ public class CDControl
 			model.saveSTL(new File(CDConst.ModelsStlDir+entry.getValue()+".stl"));
 		}
 	}
+	
+	/**
+	 * Convert models from hei to stl format.
+	 */
+	public void extractLandscapes()
+	{
+		HashMap<String, String> landscapeNames = landscape.getLandscapeNames();
+		for (Entry<String, String> entry : landscapeNames.entrySet())
+		{
+			File src = new File(CDConst.LandscapesHeiDir+entry.getValue());
+			if (!src.exists())
+				continue;
+			landscape.newLandscape(src);
+			landscape.saveSTL(new File(CDConst.LandscapesStlDir+entry.getValue()+".stl"));
+		}
+	}
 
 	/**
 	 * Converts sounds from pcm to wav format.
 	 */
 	public void extractSounds()
 	{
-		HashMap<Integer, String> soundNames = sound.getSoundNames();
-		for (Entry<Integer, String> entry : soundNames.entrySet())
+		HashMap<String, String> soundNames = sound.getSoundNames();
+		for (Entry<String, String> entry : soundNames.entrySet())
 		{
 			File src = new File(CDConst.SoundsPCMDir+entry.getValue());
 			if (!src.exists())
@@ -189,8 +210,8 @@ public class CDControl
 	 */
 	public void insertSounds()
 	{
-		HashMap<Integer, String> soundNames = sound.getSoundNames();
-		for (Entry<Integer, String> entry : soundNames.entrySet())
+		HashMap<String, String> soundNames = sound.getSoundNames();
+		for (Entry<String, String> entry : soundNames.entrySet())
 		{
 			File src = new File(CDConst.SoundsWAVDir+entry.getValue()+".wav");
 			if (!src.exists())

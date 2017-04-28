@@ -32,11 +32,11 @@ import javax.imageio.ImageIO;
 
 
 public abstract class FileOperations {
-	
+
 	public static final int MAX_FILE_SIZE = 1000000; // 1 Mb
-	
+
 	public FileOperations() {}
-	
+
 	public static void main(String args[])
 	{
 		int offset = 0;
@@ -45,15 +45,15 @@ public abstract class FileOperations {
 				+ (array[offset] & 0xff);
 		System.out.printf("%d, %d",(int)((short)out), out);
 	}
-	
+
 	public static Dimension getImageDimension(File file) throws IOException
 	{
 		BufferedImage img = ImageIO.read(file);
 		return new Dimension(img.getWidth(), img.getHeight());
 	}
-	
+
 	public static int[] readImage(File file, int width, int height)
-	throws IOException
+			throws IOException
 	{
 		BufferedImage img = ImageIO.read(file);
 		int[] pixelDataRaw = new int[width*height*4];
@@ -66,7 +66,7 @@ public abstract class FileOperations {
 			pixelData[pdOffs++] = DataOperations.rgbaToInt(pixelDataRaw, i);
 		return pixelData;
 	}
-	
+
 	/**
 	 * Reads the file and returns the data.
 	 * @param f the file that will be read.
@@ -82,7 +82,7 @@ public abstract class FileOperations {
 		{
 			fIn = new FileInputStream(f);
 			buffIn = new BufferedInputStream(fIn);
-            
+
 			int fileSize = buffIn.available();
 			if (fileSize > MAX_FILE_SIZE)
 			{
@@ -131,7 +131,7 @@ public abstract class FileOperations {
 				stream.close();
 		}
 	}
-	
+
 	public static void writeImageAlpha(byte[] pixelData, int width,
 			int height, File file) throws IOException
 	{
@@ -145,44 +145,44 @@ public abstract class FileOperations {
 		BufferedImage image = new BufferedImage(cm, raster, true, null);
 		ImageIO.write(image, "png", file);
 	}
-	
+
 	public static byte[] readZip(File src, String entryName) throws IOException
 	{
-    	ZipFile archive = new ZipFile(src);
+		ZipFile archive = new ZipFile(src);
 		byte out[] = null;
 		int dataSize = 0;
-        try
-        {
-        	
-        	ZipEntry e = archive.getEntry(entryName);
-        	if (e == null)
-        		return null; // entry not found
-        	System.out.printf("Entry Name: %s\n", e.getName());
-        	//DataInputStream inStream = new DataInputStream(archive.getInputStream(e));
-        	InputStream inStream = archive.getInputStream(e);
-        	int fileSize = inStream.available();
-        	if (fileSize > MAX_FILE_SIZE)
-        	{
-        		System.err.printf("File too big (%d > %d)",
-        				fileSize, MAX_FILE_SIZE);
-        	}
-        	else
-        	{
-        		byte[] buffer = new byte[MAX_FILE_SIZE];
-        		dataSize = inStream.read(buffer);
-        		out = new byte[dataSize];
-        		for (int i = 0; i < dataSize; ++i)
-        			out[i] = buffer[i];
-        	}
-        }
-        finally
-        {
-        	archive.close();
-        }
-        System.out.printf("unzip: %s, %d, %d\n", entryName, out.length, dataSize);
-        return out;
+		try
+		{
+
+			ZipEntry e = archive.getEntry(entryName);
+			if (e == null)
+				return null; // entry not found
+			System.out.printf("Entry Name: %s\n", e.getName());
+			//DataInputStream inStream = new DataInputStream(archive.getInputStream(e));
+			InputStream inStream = archive.getInputStream(e);
+			int fileSize = inStream.available();
+			if (fileSize > MAX_FILE_SIZE)
+			{
+				System.err.printf("File too big (%d > %d)",
+						fileSize, MAX_FILE_SIZE);
+			}
+			else
+			{
+				byte[] buffer = new byte[MAX_FILE_SIZE];
+				dataSize = inStream.read(buffer);
+				out = new byte[dataSize];
+				for (int i = 0; i < dataSize; ++i)
+					out[i] = buffer[i];
+			}
+		}
+		finally
+		{
+			archive.close();
+		}
+		System.out.printf("unzip: %s, %d, %d\n", entryName, out.length, dataSize);
+		return out;
 	}
-	
+
 	/**
 	 * Unzips the specified archive and extracts the contents to the specified directory.
 	 * @param src The source zip file.
@@ -190,70 +190,72 @@ public abstract class FileOperations {
 	 * @param names TODO
 	 * @throws IOException
 	 */
-	public static void unzipArchive(File src, String dstDir, HashMap<Integer, String> names) throws IOException
+	public static void unzipArchive(File src, String dstDir,
+			HashMap<String, String> names) throws IOException
 	{
 		if (!src.exists())
 			return;
 		FileInputStream fIn = null;
 		BufferedInputStream buffIn = null; // to avoid calling the system to read file
-        ZipInputStream zipIs = null;
-        ZipEntry zEntry = null;
-        FileOutputStream fos = null;
-        try
-        {
-        	fIn = new FileInputStream(src);
-        	buffIn = new BufferedInputStream(fIn);
-            zipIs = new ZipInputStream(buffIn);
-            while((zEntry = zipIs.getNextEntry()) != null)
-            {
-                try
-                {
-                    byte[] tmp = new byte[4096];
-                    File dst = new File(dstDir+names.get(Integer.parseInt(zEntry.getName())));
-                    fos = new FileOutputStream(dst);
-                    int size = 0;
-                    while((size = zipIs.read(tmp)) != -1)
-                    {
-                        fos.write(tmp, 0 , size);
-                    }
-                    fos.flush();
-                }
-                catch(Exception ex)
-                {
-                     ex.printStackTrace();
-                }
-                finally
-                {
-                	if (fos != null)
-                		fos.close();
-                }
-            }
-        }
-        finally
-        {
-        	if (zipIs != null)
-        		zipIs.close();
-        	if (buffIn != null)
-        		buffIn.close();
-        	if (fIn != null)
-        		fIn.close();
-        }
+		ZipInputStream zipIs = null;
+		ZipEntry zEntry = null;
+		FileOutputStream fos = null;
+		try
+		{
+			fIn = new FileInputStream(src);
+			buffIn = new BufferedInputStream(fIn);
+			zipIs = new ZipInputStream(buffIn);
+			while((zEntry = zipIs.getNextEntry()) != null)
+			{
+				try
+				{
+					byte[] tmp = new byte[4096];
+					File dst = new File(dstDir+names.get(zEntry.getName()));
+					fos = new FileOutputStream(dst);
+					int size = 0;
+					while((size = zipIs.read(tmp)) != -1)
+					{
+						fos.write(tmp, 0 , size);
+					}
+					fos.flush();
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				finally
+				{
+					if (fos != null)
+						fos.close();
+				}
+			}
+		}
+		finally
+		{
+			if (zipIs != null)
+				zipIs.close();
+			if (buffIn != null)
+				buffIn.close();
+			if (fIn != null)
+				fIn.close();
+		}
 	}
-	
-	public static void zipArchive(String srcDir, File dst, HashMap<Integer, String> names) throws IOException
+
+	public static void zipArchive(String srcDir, File dst,
+			HashMap<String, String> names) throws IOException
 	{
 		FileOutputStream fOut = null;
 		BufferedOutputStream buffOut = null; // to avoid calling the system to write file
 		ZipOutputStream out = null;
-        ZipEntry zEntry = null;
-        FileInputStream fIn = null;
-        BufferedInputStream buffIn = null;
+		ZipEntry zEntry = null;
+		FileInputStream fIn = null;
+		BufferedInputStream buffIn = null;
 		try
 		{
 			fOut = new FileOutputStream(dst);
 			buffOut = new BufferedOutputStream(fOut);
 			out = new ZipOutputStream(buffOut);
-			for (Entry<Integer, String> entry : names.entrySet())
+			for (Entry<String, String> entry : names.entrySet())
 			{
 				File f = new File(srcDir+entry.getValue());
 				if (!f.exists())
@@ -262,79 +264,80 @@ public abstract class FileOperations {
 				{
 					fIn = new FileInputStream(f);
 					buffIn = new BufferedInputStream(fIn);
-					zEntry = new ZipEntry(Integer.toString(entry.getKey()));
-    				out.putNextEntry(zEntry);
-    				/* Create buffer to control the data flow */
-                    byte[] tmp = new byte[4096];
-                    int size;
+					zEntry = new ZipEntry(entry.getKey());
+					out.putNextEntry(zEntry);
+					/* Create buffer to control the data flow */
+					byte[] tmp = new byte[4096];
+					int size;
 					while((size = buffIn.read(tmp)) != -1)
 						out.write(tmp, 0, size);
 					out.closeEntry();
 				}
-                catch(Exception ex)
-                {
-                     ex.printStackTrace();
-                }
-                finally
-                {
-                	/* Close any open streams */
-                	if (buffIn != null)
-                		buffIn.close();
-                	if (fIn != null)
-                		fIn.close();
-                }
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				finally
+				{
+					/* Close any open streams */
+					if (buffIn != null)
+						buffIn.close();
+					if (fIn != null)
+						fIn.close();
+				}
 			}
 		}
 		finally
 		{
-        	/* Close any open streams */
-        	if (out != null)
-        		out.close();
-        	if (buffOut != null)
-        		buffOut.close();
-        	if (fOut != null)
-        		fOut.close();
+			/* Close any open streams */
+			if (out != null)
+				out.close();
+			if (buffOut != null)
+				buffOut.close();
+			if (fOut != null)
+				fOut.close();
 		}
 	}
-	
-	public static HashMap<Integer, String> readHashMap(File mapFile, String delimiter) throws IOException
+
+	public static HashMap<String, String> readHashMap(File mapFile,
+			String delimiter) throws IOException
 	{
-		HashMap<Integer, String> map = null;
+		HashMap<String, String> map = null;
 		BufferedReader br = new BufferedReader(new FileReader(mapFile));
 		try
 		{
-		    String line = br.readLine();
-		    String[] entries = line.split(delimiter);
-		    map = new HashMap<Integer, String>(entries.length);
-		    for (String str : entries)
-		    {
-		    	String[] entry = str.split(",");
-		    	if (!map.containsValue(entry[1]))
-		    		map.put(Integer.parseInt(entry[0]), entry[1]);
-		    }
+			String line = br.readLine();
+			String[] entries = line.split(delimiter);
+			map = new HashMap<String, String>(entries.length);
+			for (String str : entries)
+			{
+				String[] entry = str.split(",");
+				if (!map.containsValue(entry[1]))
+					map.put(entry[0], entry[1]);
+			}
 		}
 		finally
 		{
-		    br.close();
+			br.close();
 		}
 		return map;
 	}
-	
+
 	public static void writeHashMap(File mapFile,
-			HashMap<Integer, String> names, String delimiter) throws IOException
+			HashMap<String, String> names, String delimiter) throws IOException
 	{
 		BufferedWriter bw = new BufferedWriter(new FileWriter(mapFile));
 		try
 		{
-			for (Entry<Integer, String> entry : names.entrySet())
+			for (Entry<String, String> entry : names.entrySet())
 				bw.write(entry.getKey()+","+entry.getValue()+delimiter);
 		}
 		finally
 		{
-		    bw.close();
+			bw.close();
 		}
 	}
-	
+
 	public static String getFileName(File f, String extension)
 	{
 		String name = f.getName().toLowerCase();
@@ -350,7 +353,7 @@ public abstract class FileOperations {
 		for(int i = 0, j = 0; j < end; filename[j++] = fullname[i++]);
 		return new String(filename);
 	}
-	
+
 	public static String getFileExtension(File f)
 	{
 		String name = f.getName().toLowerCase();
@@ -365,7 +368,7 @@ public abstract class FileOperations {
 				filename[j++] = fullname[i++]);
 		return new String(filename);
 	}
-	
+
 	/**
 	 * Creates the directory if it does not exist.
 	 * @param dir The directory
@@ -374,8 +377,8 @@ public abstract class FileOperations {
 	 */
 	public static boolean mkdir(File dir)
 	{
-    	if (!dir.exists())
-    		return dir.mkdirs();
-    	return false;
+		if (!dir.exists())
+			return dir.mkdirs();
+		return false;
 	}
 }

@@ -26,7 +26,7 @@ public class SoundHandle
 	public static final String Subchunk2ID = "data";
 	public static int Subchunk2Size;
 	
-	private static HashMap<Integer, String> soundNames;
+	private static HashMap<String, String> soundNames;
 	private Sound sound;
 	
 	public SoundHandle(File f)
@@ -36,7 +36,7 @@ public class SoundHandle
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
-	public HashMap<Integer, String> getSoundNames()
+	public HashMap<String, String> getSoundNames()
 	{
 		return soundNames;
 	}
@@ -48,12 +48,12 @@ public class SoundHandle
 		return null;
 	}
 	
-	public int getSoundID(String modelName)
+	public String getSoundID(String modelName)
 	{
-		for (Entry<Integer, String> entry : soundNames.entrySet())
+		for (Entry<String, String> entry : soundNames.entrySet())
 			if (entry.getValue().equals(modelName))
 				return entry.getKey();
-		return -1;
+		return null;
 	}
 	
 	public void newPCM(File f)
