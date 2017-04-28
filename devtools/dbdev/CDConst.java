@@ -21,10 +21,9 @@ public abstract class CDConst
 			"Projectile", "Texture", "Util"
 	};
 
-	public static final String cacheDir = "src/org/conf/client/";
-	public static final String cacheDataDir = "src/org/conf/client/data/";
-	public static final String cacheSpriteDir = "src/org/conf/client/Sprites/";
-	public static final String devRootDir = "src/dbdev/";
+	public static final String cacheDir = "database/";
+	public static final String cacheSpriteDir = cacheDir+"Sprites/";
+	public static final String devRootDir = "devtools/dbdev/";
 	public static final String namesDir = devRootDir+"names/";
 	
 	public static final String devDir = devRootDir+"dev/";

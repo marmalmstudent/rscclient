@@ -1014,7 +1014,7 @@ public class mudclient extends GameWindowMiddleMan
     
     private final void loadModel() throws IOException
     {
-    	ZipFile objectArchive = new ZipFile(new File(Config.CONF_DIR + "/data/models.zip"));
+    	ZipFile objectArchive = new ZipFile(new File(Config.DATABASE_DIR + "models.zip"));
         try {
         	for (int j = 0; j < EntityHandler.getModelCount(); j++)
         	{
@@ -4861,7 +4861,7 @@ public class mudclient extends GameWindowMiddleMan
     }
 
     protected final byte[] load(String filename) {
-        return super.load(Config.CONF_DIR + File.separator + "data" + File.separator + filename);
+        return super.load(Config.DATABASE_DIR + File.separator + filename);
     }
     
     private void drawOptionsPanelMisc()
@@ -5661,7 +5661,7 @@ public class mudclient extends GameWindowMiddleMan
         try
         {
             drawLoadingBarText(90, "Unpacking Sound effects");
-            sounds = load("sounds.mem");   
+            sounds = load("sounds.mem");
             audioReader = new AudioReader();
             return;
         }
@@ -7475,12 +7475,6 @@ public class mudclient extends GameWindowMiddleMan
         if (configSoundEffects) {
             return;
         }
-        /*
-        System.out.print("\n[");
-        for (byte i : sounds)
-        	System.out.print(i+", ");
-        System.out.print("]\n");
-        */
         audioReader.loadData(sounds, DataOperations.getEntryOffset(s + ".pcm", sounds), DataOperations.getEntryLength(s + ".pcm", sounds));
     }
     

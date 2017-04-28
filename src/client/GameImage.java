@@ -47,20 +47,21 @@ public class GameImage implements ImageProducer, ImageObserver {
             component.prepareImage(image, component);
         }
         try {
-            entityArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Entity.zip"));
-            mediaArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Media.zip"));
-            utilArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Util.zip"));
-            itemArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Item.zip"));
-            logoArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Logo.zip"));
-            projectileArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Projectile.zip"));
-            textureArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Texture.zip"));
+            entityArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Entity.zip"));
+            mediaArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Media.zip"));
+            utilArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Util.zip"));
+            itemArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Item.zip"));
+            logoArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Logo.zip"));
+            projectileArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Projectile.zip"));
+            textureArchive = new ZipFile(new File(Config.DATABASE_DIR + "Sprites/Texture.zip"));
         }
         catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
         try {
-        	loginScreen = ImageIO.read(new File(Config.CONF_DIR + "Loading.png"));
+        	
+        	loginScreen = ImageIO.read(new File(Config.DATABASE_DIR + "Loading.png"));
         } catch (IOException e)
         {
         	e.printStackTrace();

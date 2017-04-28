@@ -1476,7 +1476,7 @@ public class EngineHandle {
         sectors = new Sector[NBR_VISIBLE_SECTORS*NBR_VISIBLE_SECTORS];
 
         try {
-            tileArchive = new ZipFile(new File(Config.CONF_DIR + "/Landscape.zip"));
+            tileArchive = new ZipFile(new File(Config.DATABASE_DIR + "/Landscape.zip"));
             //tileArchive = new ZipFile(new File(Config.CONF_DIR + "/Landscape.rscd"));
         }
         catch (Exception e) {

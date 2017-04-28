@@ -163,13 +163,13 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		{
 			if (bName.equals(mpbWorkon.getName()))
 			{
-				cdc.workon(CDConst.cacheDataDir+CDConst.ModelArchive,
+				cdc.workon(CDConst.cacheDir+CDConst.ModelArchive,
 						CDConst.ModelsOb3Dir,
 						cdc.getModels().getModelNames());
 			}
 			else if (bName.equals(mpbWorkoff.getName()))
 			{
-				cdc.workoff(CDConst.cacheDataDir+CDConst.ModelArchive,
+				cdc.workoff(CDConst.cacheDir+CDConst.ModelArchive,
 						CDConst.ModelsOb3Dir,
 						cdc.getModels().getModelNames());
 			}
@@ -209,13 +209,13 @@ public class CacheDev extends JFrame implements ActionListener, ChangeListener
 		{
 			if (bName.equals(mpbWorkon.getName()))
 			{
-				cdc.workon(CDConst.cacheDataDir+CDConst.SoundArchive,
+				cdc.workon(CDConst.cacheDir+CDConst.SoundArchive,
 						CDConst.SoundsPCMDir,
 						cdc.getSounds().getSoundNames());
 			}
 			else if (bName.equals(mpbWorkoff.getName()))
 			{
-				cdc.workoff(CDConst.cacheDataDir+CDConst.SoundArchive,
+				cdc.workoff(CDConst.cacheDir+CDConst.SoundArchive,
 						CDConst.SoundsPCMDir,
 						cdc.getSounds().getSoundNames());
 			}
