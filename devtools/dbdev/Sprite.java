@@ -21,6 +21,7 @@ public class Sprite
 	public byte[] getHeader() { return header; }
 	public byte[] getImage() { return image; }
 	public byte[] getData() { return data; }
+	public int getTransparendMask() { return transparentMask; }
 
 	public Sprite(byte[] data, int transparentMask)
 	{
