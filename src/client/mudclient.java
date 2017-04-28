@@ -1,25 +1,24 @@
-package org;
+package client;
 
-import org.entityhandling.EntityHandler;
-import org.entityhandling.defs.ItemDef;
-import org.entityhandling.defs.NPCDef;
-import org.menus.AbuseWindow;
-import org.menus.BankPanel;
-import org.menus.FriendsPanel;
-import org.menus.InGameButton;
-import org.menus.InGameFrame;
-import org.menus.InGameGridPanel;
-import org.menus.InventoryPanel;
-import org.menus.MagicPanel;
-import org.menus.OptionsPanel;
-import org.menus.PlayerInfoPanel;
-import org.menus.TradeConfirmPanel;
-import org.menus.TradePanel;
-import org.model.Sprite;
-import org.recorder.Recorder;
-import org.util.Config;
-import org.util.DataConversions;
-import org.util.misc;
+import client.entityhandling.EntityHandler;
+import client.entityhandling.defs.ItemDef;
+import client.entityhandling.defs.NPCDef;
+import client.menus.AbuseWindow;
+import client.menus.BankPanel;
+import client.menus.FriendsPanel;
+import client.menus.InGameButton;
+import client.menus.InGameFrame;
+import client.menus.InGameGridPanel;
+import client.menus.InventoryPanel;
+import client.menus.MagicPanel;
+import client.menus.OptionsPanel;
+import client.menus.PlayerInfoPanel;
+import client.menus.TradeConfirmPanel;
+import client.menus.TradePanel;
+import client.model.Sprite;
+import client.util.Config;
+import client.util.DataConversions;
+import client.util.misc;
 
 import javax.imageio.ImageIO;
 
@@ -4558,6 +4557,7 @@ public class mudclient extends GameWindowMiddleMan
     {
     	if (keyCode == 122)
     	{ // F11
+    		/* TODO: not using recorder anymore.
         	recording = !recording;
         	if (recording) {
         		try {
@@ -4574,7 +4574,7 @@ public class mudclient extends GameWindowMiddleMan
         	} else {
         		frames.add(null);
         		displayMessage("Movie saved.", 3, 0);
-        	}
+        	}*/
     	}
     	else if (keyCode == 123)
     	{ // F12

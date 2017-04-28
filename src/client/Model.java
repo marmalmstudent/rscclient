@@ -1,10 +1,10 @@
-package org;
+package client;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.entityhandling.EntityHandler;
-import org.util.misc;
+import client.entityhandling.EntityHandler;
+import client.util.misc;
 
 public class Model {
 

@@ -1,4 +1,4 @@
-package org;
+package client;
 
 import java.math.BigInteger;
 import java.util.zip.CRC32;

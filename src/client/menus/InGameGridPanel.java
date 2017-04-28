@@ -1,6 +1,6 @@
-package org.menus;
+package client.menus;
 
-import org.mudclient;
+import client.mudclient;
 
 public abstract class InGameGridPanel extends InGamePanel
 {

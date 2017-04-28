@@ -1,18 +1,17 @@
-package org.entityhandling;
+package client.entityhandling;
 
-import org.entityhandling.defs.DoorDef;
-import org.entityhandling.defs.ElevationDef;
-import org.entityhandling.defs.GameObjectDef;
-import org.entityhandling.defs.ItemDef;
-import org.entityhandling.defs.NPCDef;
-import org.entityhandling.defs.PrayerDef;
-import org.entityhandling.defs.SpellDef;
-import org.entityhandling.defs.TileDef;
-import org.entityhandling.defs.extras.AnimationDef;
-import org.entityhandling.defs.extras.TextureDef;
-import org.util.Config;
-import org.util.ParseXML;
-import org.util.PersistenceManager;
+import client.entityhandling.defs.DoorDef;
+import client.entityhandling.defs.ElevationDef;
+import client.entityhandling.defs.GameObjectDef;
+import client.entityhandling.defs.ItemDef;
+import client.entityhandling.defs.NPCDef;
+import client.entityhandling.defs.PrayerDef;
+import client.entityhandling.defs.SpellDef;
+import client.entityhandling.defs.TileDef;
+import client.entityhandling.defs.extras.AnimationDef;
+import client.entityhandling.defs.extras.TextureDef;
+import client.util.Config;
+import client.util.ParseXML;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -177,29 +176,6 @@ public class EntityHandler {
 		spells = pxml.unpackSpellDef(new File(Config.CONF_DIR + "Spells"));
 		textures = pxml.unpackTextureDef(new File(Config.CONF_DIR + "Textures"));
 		tiles = pxml.unpackTileDef(new File(Config.CONF_DIR + "Tiles"));
-		/*
-    	npcs = (NPCDef[]) PersistenceManager.load(Config.CONF_DIR + "NPCs", 4);
-    	items = (ItemDef[]) PersistenceManager.load(Config.CONF_DIR + "Items", 3);
-    	textures = (TextureDef[]) PersistenceManager.load(Config.CONF_DIR + "Textures", 8);
-    	animations = (AnimationDef[]) PersistenceManager.load(Config.CONF_DIR + "Animations", 0);
-    	spells = (SpellDef[]) PersistenceManager.load(Config.CONF_DIR + "Spells", 7);
-    	prayers = (PrayerDef[]) PersistenceManager.load(Config.CONF_DIR + "Prayers", 6);
-    	tiles = (TileDef[]) PersistenceManager.load(Config.CONF_DIR + "Tiles", 9);
-    	doors = (DoorDef[]) PersistenceManager.load(Config.CONF_DIR + "Doors", 1);
-    	elevation = (ElevationDef[]) PersistenceManager.load(Config.CONF_DIR + "Elevation", 2);
-    	objects = (GameObjectDef[]) PersistenceManager.load(Config.CONF_DIR + "Objects", 5);
-    	*//*
-    	npcs = (NPCDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "NPCs.rscd"));
-    	items = (ItemDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Items.rscd"));
-    	textures = (TextureDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Textures.rscd"));
-    	animations = (AnimationDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Animations.rscd"));
-    	spells = (SpellDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Spells.rscd"));
-    	prayers = (PrayerDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Prayers.rscd"));
-    	tiles = (TileDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Tiles.rscd"));
-    	doors = (DoorDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Doors.rscd"));
-    	elevation = (ElevationDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Elevation.rscd"));
-    	objects = (GameObjectDef[]) PersistenceManager.load(new File(Config.CONF_DIR, "Objects.rscd"));
-    	*/
     	for (int id = 0; id < items.length; id++) {
     		if (items[id].getSprite() + 1 > invPictureCount) {
     			invPictureCount = items[id].getSprite() + 1;

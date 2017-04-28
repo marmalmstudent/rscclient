@@ -1,9 +1,9 @@
-package org;
+package client;
 
-import org.entityhandling.EntityHandler;
-import org.model.Sector;
-import org.util.Config;
-import org.util.DataConversions;
+import client.entityhandling.EntityHandler;
+import client.model.Sector;
+import client.util.Config;
+import client.util.DataConversions;
 
 import java.io.BufferedInputStream;
 import java.io.File;

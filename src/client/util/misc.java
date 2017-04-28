@@ -1,4 +1,4 @@
-package org.util;
+package client.util;
 
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
@@ -13,8 +13,8 @@ import java.nio.ByteOrder;
 
 import javax.imageio.ImageIO;
 
-import org.DataOperations;
-import org.mudclient;
+import client.DataOperations;
+import client.mudclient;
 
 public class misc {
 

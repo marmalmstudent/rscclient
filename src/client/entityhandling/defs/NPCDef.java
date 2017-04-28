@@ -1,6 +1,6 @@
-package org.entityhandling.defs;
+package client.entityhandling.defs;
 
-import org.entityhandling.defs.extras.ItemDropDef;
+import client.entityhandling.defs.extras.ItemDropDef;
 
 /**
  * The definition wrapper for npcs

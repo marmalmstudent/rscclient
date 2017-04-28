@@ -1,9 +1,9 @@
-package org.menus;
+package client.menus;
 
 import java.awt.Rectangle;
 
-import org.GameImage;
-import org.model.Sprite;
+import client.GameImage;
+import client.model.Sprite;
 
 public class TradeConfirmPanel extends InGameGridPanel
 {

@@ -1,8 +1,8 @@
-package org;
+package client;
 
-import org.model.Sprite;
-import org.util.Config;
-import org.util.DataConversions;
+import client.model.Sprite;
+import client.util.Config;
+import client.util.DataConversions;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -15,11 +15,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 
 public class GameImage implements ImageProducer, ImageObserver {
     public Sprite[] sprites;
-    private ZipFile spriteArchive, entityArchive, mediaArchive, utilArchive,
+    private ZipFile entityArchive, mediaArchive, utilArchive,
     itemArchive, logoArchive, projectileArchive, textureArchive;
     public BufferedImage loginScreen;
 
@@ -37,7 +36,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         sprites = new Sprite[k];
         if (width > 1 && height > 1 && component != null) {
-            colourModel = new DirectColorModel(32, 0xff0000, 65280, 255);
+            colourModel = new DirectColorModel(32, 0xff0000, 0xff00, 0xff);
             image = component.createImage(this);
 
             completePixels();
@@ -48,21 +47,20 @@ public class GameImage implements ImageProducer, ImageObserver {
             component.prepareImage(image, component);
         }
         try {
-            //spriteArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites.zip"));
-            entityArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Entity.zip"));
-            mediaArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Media.zip"));
-            utilArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Util.zip"));
-            itemArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Item.zip"));
-            logoArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Logo.zip"));
-            projectileArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Projectile.zip"));
-            textureArchive = new ZipFile(new File(Config.CONF_DIR + "/Sprites/Texture.zip"));
+            entityArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Entity.zip"));
+            mediaArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Media.zip"));
+            utilArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Util.zip"));
+            itemArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Item.zip"));
+            logoArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Logo.zip"));
+            projectileArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Projectile.zip"));
+            textureArchive = new ZipFile(new File(Config.CONF_DIR + "Sprites/Texture.zip"));
         }
         catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
         try {
-        	loginScreen = ImageIO.read(new File("src/org/conf/client/Loading.png"));
+        	loginScreen = ImageIO.read(new File(Config.CONF_DIR + "Loading.png"));
         } catch (IOException e)
         {
         	e.printStackTrace();

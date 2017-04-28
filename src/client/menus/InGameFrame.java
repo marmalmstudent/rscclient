@@ -1,4 +1,4 @@
-package org.menus;
+package client.menus;
 
 import java.awt.Rectangle;
 

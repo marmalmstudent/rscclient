@@ -1,4 +1,4 @@
-package org.menus;
+package client.menus;
 
 public abstract class InGamePanel extends InGameComponent
 {

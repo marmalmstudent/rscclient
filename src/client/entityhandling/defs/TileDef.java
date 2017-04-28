@@ -1,4 +1,4 @@
-package org.entityhandling.defs;
+package client.entityhandling.defs;
 
 public class TileDef {
     public int colour;

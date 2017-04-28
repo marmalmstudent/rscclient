@@ -1,4 +1,4 @@
-package org;
+package client;
 
 
 public class Menu {

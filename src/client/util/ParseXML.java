@@ -1,10 +1,7 @@
-package org.util;
+package client.util;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,18 +12,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sun.misc.IOUtils;
-
-import org.apache.tools.ant.util.FileUtils;
-import org.entityhandling.defs.*;
-import org.entityhandling.defs.extras.*;
-
-
-
+import client.entityhandling.defs.*;
+import client.entityhandling.defs.extras.*;
 
 public class ParseXML
 {
-	private String dbEntryType;
+	//private String dbEntryType;
 	private Document dom;
 	private AnimationDef[] animDef;
 	private DoorDef[] doorDef;
@@ -38,14 +29,15 @@ public class ParseXML
 	private SpellDef[] spellDef;
 	private TextureDef[] txtrDef;
 	private TileDef[] tileDef;
+	/*
 	private static String[] fileNames = {"Animations", "Doors",
 			"Elevation", "Items", "NPCs", "Objects", "Prayers",
-			"Spells", "Textures", "Tiles"};
+			"Spells", "Textures", "Tiles"};*/
 	private static String[] dbEntryHeader = {"AnimationDef",
 			"DoorDef", "ElevationDef", "ItemDef", "NPCDef",
 			"GameObjectDef", "PrayerDef", "SpellDef",
 			"TextureDef", "TileDef"};
-	private int currentFile = -1;
+	//private int currentFile = -1;
 	
 	public ParseXML()
 	{
@@ -561,6 +553,7 @@ public class ParseXML
 		return null;
 	}
 	
+	/*
 	public static void main(String[] args){
 		//create an instance
 		ParseXML dpe = new ParseXML();
@@ -574,38 +567,38 @@ public class ParseXML
 		dpe.unpackSpellDef(new File("src/org/conf/client/Spells"));
 		dpe.unpackTextureDef(new File("src/org/conf/client/Textures"));
 		dpe.unpackTileDef(new File("src/org/conf/client/Tiles"));
-	}
+	}*/
 	
 
-	private static final String dataTypes[] = {"AnimationDef", "DoorDef", "ElevationDef",
+	public static final String dataTypes[] = {"AnimationDef", "DoorDef", "ElevationDef",
 			"ItemDef", "NPCDef", "GameObjectDef", "PrayerDef", "SpellDef", "TextureDef",
 			"TileDef"};
-    private static final String[] AnimationsDef = {"name", "charColour",
+	public static final String[] AnimationsDef = {"name", "charColour",
     		"genderModel", "hasA", "hasF", "number"};
-    private static final String[] DoorDef = {"name", "description", "command1", "command2",
+	public static final String[] DoorDef = {"name", "description", "command1", "command2",
     		"modelVar1", "modelVar2", "modelVar3", "doorType", "unknown"};
-    private static final String[] ElevationDef = {"unknown1", "unknown2"};
-    private static final String[] ItemDef = {"name", "description", "command", "sprite",
+	public static final String[] ElevationDef = {"unknown1", "unknown2"};
+	public static final String[] ItemDef = {"name", "description", "command", "sprite",
     		"basePrice", "stackable", "wieldable", "pictureMask"};
-    private static final String[] NPCDef = {"name", "description", "command", "attack",
+	public static final String[] NPCDef = {"name", "description", "command", "attack",
     		"strength", "hits", "defense", "attackable", "aggressive", "respawnTime",
     		"sprites", "hairColour", "topColour", "bottomColour", "skinColour", "camera1",
     		"camera2", "walkModel", "combatModel", "combatSprite", "drops"};
-	private static final String[][] NPCDefArray = {{null}, {null}, {null}, {null},
+	public static final String[][] NPCDefArray = {{null}, {null}, {null}, {null},
 			{null}, {null}, {null}, {null},
 			{null}, {null}, {"int"},
 		{null}, {null}, {null}, {null}, {null}, {null},
 		{null}, {null}, {null}, {"ItemDropDef"}};
-	private static final String[] ItemDropDef = {"id", "amount", "weight"};
-	private static final String[] GameObjectDef = {"name", "description" ,"command1", "command2",
+	public static final String[] ItemDropDef = {"id", "amount", "weight"};
+	public static final String[] GameObjectDef = {"name", "description" ,"command1", "command2",
 			"type", "width", "height", "groundItemVar", "objectModel"};
-	private static final String[] PrayerDef = {"reqLevel", "drainRate", "name", "description"};
-	private static final String[] SpellDef = {"reqLevel", "type", "runeCount", "requiredRunes",
+	public static final String[] PrayerDef = {"reqLevel", "drainRate", "name", "description"};
+	public static final String[] SpellDef = {"reqLevel", "type", "runeCount", "requiredRunes",
 			"exp", "name", "description"};
-	private static final String[][] SpellDefArray = {{null}, {null}, {null}, {"entry"}, {null},
+	public static final String[][] SpellDefArray = {{null}, {null}, {null}, {"entry"}, {null},
 			{null}, {null}};
-	private static final String[][][] SpellDefArrayArray = {{{null}}, {{null}}, {{null}},
+	public static final String[][][] SpellDefArrayArray = {{{null}}, {{null}}, {{null}},
 			{{"int"}}, {{null}}, {{null}}, {{null}}};
-	private static final String[] TextureDef = {"dataName", "animationName"};
-	private static final String[] TileDef = {"colour", "unknown", "objectType"};
+	public static final String[] TextureDef = {"dataName", "animationName"};
+	public static final String[] TileDef = {"colour", "unknown", "objectType"};
 }

@@ -1,4 +1,4 @@
-package org.entityhandling.defs.extras;
+package client.entityhandling.defs.extras;
 
 public class AnimationDef {
     public String name;

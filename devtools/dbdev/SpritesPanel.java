@@ -1,4 +1,4 @@
-package org.conf.cachedev;
+package dbdev;
 
 import java.awt.GridLayout;
 import java.io.File;

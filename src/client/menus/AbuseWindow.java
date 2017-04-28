@@ -1,7 +1,7 @@
-package org.menus;
-import org.DataOperations;
-import org.GameImageMiddleMan;
-import org.mudclient;
+package client.menus;
+import client.DataOperations;
+import client.GameImageMiddleMan;
+import client.mudclient;
 
 public class AbuseWindow
 {

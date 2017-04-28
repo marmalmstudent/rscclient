@@ -1,10 +1,10 @@
-package org;
+package client;
 
 import java.io.*;
 
-import org.conf.cachedev.FileOperations;
-import org.entityhandling.EntityHandler;
-import org.util.misc;
+import client.entityhandling.EntityHandler;
+import client.util.misc;
+import dbdev.FileOperations;
 
 public class DataOperations {
 

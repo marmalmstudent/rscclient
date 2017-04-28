@@ -1,16 +1,13 @@
-package org.util;
+package client.util;
 
-import com.bombaydigital.vault.HexString;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.util.Random;
 
 public final class DataConversions {
 
-    private static MessageDigest md;
     private static Random rand = new Random();
     private static char characters[] = {
             ' ', 'e', 't', 'a', 'o', 'i', 'h', 'n', 's', 'r',
@@ -21,19 +18,6 @@ public final class DataConversions {
             '\'', '@', '#', '+', '=', '\243', '$', '%', '"', '[',
             ']'
     };
-
-    /**
-     * Creates an instance of the message digest used for
-     * creating md5 hashes
-     */
-    static {
-        try {
-            md = MessageDigest.getInstance("MD5");
-        }
-        catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-    }
 
     /**
      * Returns a ByteBuffer containing everything available from the given InputStream
@@ -268,14 +252,5 @@ public final class DataConversions {
             }
         }
         return s;
-    }
-
-    /**
-     * returns the md5 hash of a string
-     */
-    public static String md5(String s) {
-        md.reset();
-        md.update(s.getBytes());
-        return HexString.bufferToHex(md.digest());
     }
 }

@@ -1,4 +1,4 @@
-package org.conf.cachedev;
+package dbdev;
 
 import java.awt.Dimension;
 import java.awt.Point;

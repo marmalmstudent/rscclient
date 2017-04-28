@@ -1,4 +1,4 @@
-package org.conf.cachedev;
+package dbdev;
 
 public abstract class CDConst
 {
@@ -24,7 +24,7 @@ public abstract class CDConst
 	public static final String cacheDir = "src/org/conf/client/";
 	public static final String cacheDataDir = "src/org/conf/client/data/";
 	public static final String cacheSpriteDir = "src/org/conf/client/Sprites/";
-	public static final String devRootDir = "src/org/conf/cachedev/";
+	public static final String devRootDir = "src/dbdev/";
 	public static final String namesDir = devRootDir+"names/";
 	
 	public static final String devDir = devRootDir+"dev/";

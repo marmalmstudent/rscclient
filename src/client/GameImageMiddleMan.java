@@ -1,4 +1,4 @@
-package org;
+package client;
 
 import java.awt.*;
 

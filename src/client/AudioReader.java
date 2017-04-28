@@ -1,11 +1,10 @@
-package org;
+package client;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.util.misc;
-
+import client.util.misc;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 

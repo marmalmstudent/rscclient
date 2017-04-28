@@ -1,4 +1,4 @@
-package org;
+package client;
 
 import java.applet.Applet;
 import java.awt.*;
@@ -18,10 +18,10 @@ import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.conf.cachedev.FileOperations;
-import org.model.Sprite;
-import org.util.Config;
-import org.util.DataConversions;
+import client.model.Sprite;
+import client.util.Config;
+import client.util.DataConversions;
+import dbdev.FileOperations;
 
 public class GameWindow extends JApplet 
 	implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, WindowListener, ComponentListener

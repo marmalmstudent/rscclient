@@ -1,4 +1,4 @@
-package org.conf.cachedev;
+package dbdev;
 
 public class Model
 {

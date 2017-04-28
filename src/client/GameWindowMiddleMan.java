@@ -1,12 +1,12 @@
-package org;
+package client;
 
 import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.menus.FriendsPanel;
-import org.util.Config;
-import org.util.DataConversions;
+import client.menus.FriendsPanel;
+import client.util.Config;
+import client.util.DataConversions;
 
 public abstract class GameWindowMiddleMan extends GameWindow {
 	

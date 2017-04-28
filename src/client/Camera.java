@@ -1,4 +1,4 @@
-package org;
+package client;
 
 public class Camera {
 	private mudclient mc;

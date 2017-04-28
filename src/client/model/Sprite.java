@@ -1,4 +1,4 @@
-package org.model;
+package client.model;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.util.PersistenceManager;
 
 public class Sprite {
     private static final int TRANSPARENT = Color.BLACK.getRGB();
@@ -116,9 +115,10 @@ public class Sprite {
      * IO Operations *
      */
 
+    /*
     public void serializeTo(File file) throws IOException {
         PersistenceManager.write(file, this);
-    }
+    }*/
     /*
     public static Sprite deserializeFrom(File file) throws IOException, ClassNotFoundException {
         return (Sprite) PersistenceManager.load(file);

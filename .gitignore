@@ -2,5 +2,5 @@ bin/
 media
 .classpath
 .project
-src/org/conf/cachedev/dev
-src/org/conf/utils
+dbdev/dev
+trash/

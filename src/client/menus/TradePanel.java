@@ -1,10 +1,10 @@
-package org.menus;
+package client.menus;
 
 import java.awt.Rectangle;
 
-import org.GameImage;
-import org.mudclient;
-import org.model.Sprite;
+import client.GameImage;
+import client.mudclient;
+import client.model.Sprite;
 
 public class TradePanel extends InGameGridPanel
 {
