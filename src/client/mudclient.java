@@ -469,9 +469,9 @@ public class mudclient extends GameWindowMiddleMan
 				int j4 = 0;
 				int k4 = j2;
 				if (flag && i2 >= 1 && i2 <= 3
-						&& EntityHandler.getAnimationDef(k3).hasF())
+						&& EntityHandler.getAnimationDef(k3).hasFlip())
 					k4 += 15;
-				if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasA()) {
+				if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasAttack()) {
 					int l4 = k4 + EntityHandler.getAnimationDef(k3).getNumber();
 					i4 = (i4 * k) / ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth();
 					j4 = (j4 * l) / ((GameImage) (gameGraphics)).sprites[l4].getTotalHeight();
@@ -899,7 +899,7 @@ public class mudclient extends GameWindowMiddleMan
 				int i5 = 0;
 				int j5 = j2;
 				if (flag && i2 >= 1 && i2 <= 3)
-					if (EntityHandler.getAnimationDef(l3).hasF())
+					if (EntityHandler.getAnimationDef(l3).hasFlip())
 						j5 += 15;
 					else if (l2 == 4 && i2 == 1) {
 						k4 = -22;
@@ -926,7 +926,7 @@ public class mudclient extends GameWindowMiddleMan
 						i5 = 5;
 						j5 = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					}
-				if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasA())
+				if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasAttack())
 				{
 					int k5 = j5 + EntityHandler.getAnimationDef(l3).getNumber();
 					k4 = (k4 * k) / ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth();
@@ -3766,11 +3766,11 @@ public class mudclient extends GameWindowMiddleMan
 				}
 
 				loadSprite(animation, "entity", 15);
-				if (EntityHandler.getAnimationDef(anim).hasA()) {
+				if (EntityHandler.getAnimationDef(anim).hasAttack()) {
 					loadSprite(animation + 15, "entity", 3);
 				}
 
-				if (EntityHandler.getAnimationDef(anim).hasF()) {
+				if (EntityHandler.getAnimationDef(anim).hasFlip()) {
 					loadSprite(animation + 18, "entity", 9);
 				}
 				EntityHandler.getAnimationDef(anim).number = animation;

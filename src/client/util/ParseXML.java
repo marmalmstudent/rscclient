@@ -251,8 +251,8 @@ public class ParseXML
 		ad.name = getTextValue(el, "name");
 		ad.charColour = getIntValue(el, "charColour");
 		ad.genderModel = getIntValue(el, "genderModel");
-		ad.hasA = getBoolValue(el, "hasA");
-		ad.hasF = getBoolValue(el, "hasF");
+		ad.hasAttack = getBoolValue(el, "hasA");
+		ad.hasFlip = getBoolValue(el, "hasF");
 		ad.number = getIntValue(el, "number");
 		return ad;
 	}
