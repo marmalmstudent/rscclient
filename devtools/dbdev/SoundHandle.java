@@ -28,6 +28,7 @@ public class SoundHandle
 	
 	private static HashMap<String, String> soundNames;
 	private Sound sound;
+	private DataOperations dataOps;
 	
 	public SoundHandle(File f)
 	{
@@ -88,28 +89,28 @@ public class SoundHandle
 	{
 		byte[] soundData = sound.getSoundData();
 		byte[] data = new byte[soundData.length + HEADER_SIZE];
+		dataOps = new DataOperations(data);
 		Subchunk2Size = soundData.length;
 		ChunkSize = soundData.length + HEADER_SIZE - 8; // exclude ChunkID and ChunkSize
-		int offset = 0;
-		for (int i = 0; i < 4; ++i)
-			offset = DataOperations.writeByte(data, offset, (int)ChunkID.charAt(i));
-		offset = DataOperations.write4Bytes(data, offset, ChunkSize, false);
-		for (int i = 0; i < 4; ++i)
-			offset = DataOperations.writeByte(data, offset, Format.charAt(i));
-		for (int i = 0; i < 4; ++i)
-			offset = DataOperations.writeByte(data, offset, Subchunk1ID.charAt(i));
-		offset = DataOperations.write4Bytes(data, offset, Subchunk1Size, false);
-		offset = DataOperations.write2Bytes(data, offset, AudioFormat, false);
-		offset = DataOperations.write2Bytes(data, offset, NumChannels, false);
-		offset = DataOperations.write4Bytes(data, offset, SampleRate, false);
-		offset = DataOperations.write4Bytes(data, offset, ByteRate, false);
-		offset = DataOperations.write2Bytes(data, offset, NumChannels, false);
-		offset = DataOperations.write2Bytes(data, offset, BitsPerSample, false);
-		for (int i = 0; i < 4; ++i)
-			offset = DataOperations.writeByte(data, offset, Subchunk2ID.charAt(i));
-		offset = DataOperations.write4Bytes(data, offset, Subchunk2Size, false);
+		for (int i = 0; i < 4;
+				dataOps.writeByte((int)ChunkID.charAt(i++)));
+		dataOps.write4Bytes(ChunkSize, false);
+		for (int i = 0; i < 4;
+				dataOps.writeByte(Format.charAt(i++)));
+		for (int i = 0; i < 4;
+				dataOps.writeByte(Subchunk1ID.charAt(i++)));
+		dataOps.write4Bytes(Subchunk1Size, false);
+		dataOps.write2Bytes(AudioFormat, false);
+		dataOps.write2Bytes(NumChannels, false);
+		dataOps.write4Bytes(SampleRate, false);
+		dataOps.write4Bytes(ByteRate, false);
+		dataOps.write2Bytes(NumChannels, false);
+		dataOps.write2Bytes(BitsPerSample, false);
+		for (int i = 0; i < 4;
+				dataOps.writeByte(Subchunk2ID.charAt(i++)));
+		dataOps.write4Bytes(Subchunk2Size, false);
 		// write soundData, little
-		DataOperations.writeArray(data, offset, soundData);
+		dataOps.writeArray(soundData);
 		return data;
 	}
 	
@@ -117,7 +118,8 @@ public class SoundHandle
 	{
 		byte[] soundData = sound.getSoundData();
 		byte[] data = new byte[soundData.length];
-		DataOperations.writeArray(data, 0, soundData);
+		dataOps = new DataOperations(data);
+		dataOps.writeArray(soundData);
 		return data;		
 	}
 	

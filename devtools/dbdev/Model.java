@@ -11,6 +11,7 @@ public class Model
 	private int[][] cellArray; // unsigned byte or unsigned short
 	private float[][] normals;
 	private int[][] triangleCellArray;
+	private DataOperations dataOps;
 	
 	public int getFileSize() { return fileSize; }
 	public int getNPoints() { return nPoints; }
@@ -41,13 +42,10 @@ public class Model
 	
 	private void initOb3(byte[] data)
 	{
-		int offset = 0;
-		fileSize = DataOperations.readInt(data, offset, true);
-		offset += 4;
-        nPoints = DataOperations.read2Bytes(data, offset, false, true);
-        offset += 2;
-        nSides = DataOperations.read2Bytes(data, offset, false, true);
-        offset += 2;
+		dataOps = new DataOperations(data);
+		fileSize = dataOps.readInt(true);
+        nPoints = dataOps.read2Bytes(false, true);
+        nSides = dataOps.read2Bytes(false, true);
         xCoords = new int[nPoints];
         yCoords = new int[nPoints];
         zCoords = new int[nPoints];
@@ -56,33 +54,32 @@ public class Model
         color2 = new int[nSides];
         someArray = new int[nSides];
         cellArray = new int[nSides][];
-        for (int i = 0; i < nPoints; offset += 2)
-        	xCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
-        for (int i = 0; i < nPoints; offset += 2)
-        	zCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
-        for (int i = 0; i < nPoints; offset += 2)
-        	yCoords[i++] = DataOperations.read2Bytes(data, offset, true, true);
-        for (int i = 0; i < nSides; i++)
-            pointsPerCell[i] = data[offset++] & 0xff;
+        for (int i = 0; i < nPoints;
+        		xCoords[i++] = dataOps.read2Bytes(true, true));
+        for (int i = 0; i < nPoints;
+        		zCoords[i++] = dataOps.read2Bytes(true, true));
+        for (int i = 0; i < nPoints;
+        		yCoords[i++] = dataOps.read2Bytes(true, true));
+        for (int i = 0; i < nSides;
+        		pointsPerCell[i++] = dataOps.readByte(false));
 
-        for (int i = 0; i < nSides; offset += 2)
-        	color1[i++] = DataOperations.read2Bytes(data, offset, true, true);
-        for (int i = 0; i < nSides; offset += 2)
-        	color2[i++] = DataOperations.read2Bytes(data, offset, true, true);
+        for (int i = 0; i < nSides;
+        		color1[i++] = dataOps.read2Bytes(true, true));
+        for (int i = 0; i < nSides;
+        		color2[i++] = dataOps.read2Bytes(true, true));
 
-        for (int i = 0; i < nSides; i++)
-        	someArray[i] = data[offset++] & 0xff;
+        for (int i = 0; i < nSides;
+        		someArray[i++] = dataOps.readByte(false));
 
         for (int i = 0; i < nSides; i++)
         {
         	cellArray[i] = new int[pointsPerCell[i]];
-            for (int j = 0; j < pointsPerCell[i]; j++)
-                if (nPoints < 256) {
-                	cellArray[i][j] = data[offset++] & 0xff;
-                } else {
-                	cellArray[i][j] = DataOperations.read2Bytes(data, offset, false, true);
-                    offset += 2;
-                }
+            if (nPoints < 256)
+                for (int j = 0; j < pointsPerCell[i];
+                		cellArray[i][j++] = dataOps.readByte(false));
+            else
+                for (int j = 0; j < pointsPerCell[i];
+                		cellArray[i][j++] = dataOps.read2Bytes(false, true));
         }
         initNormals();
 	}

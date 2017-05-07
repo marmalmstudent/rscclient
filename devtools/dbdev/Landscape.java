@@ -18,6 +18,7 @@ public class Landscape
 	private float[] xCoords, yCoords, zCoords;
 	private float[][] normals;
 	private int[][] triangleCellArray;
+	private DataOperations dataOps;
 
 	public float[] getXCoords() { return xCoords; }
 	public float[] getYCoords() { return yCoords; }
@@ -41,6 +42,7 @@ public class Landscape
 	{
 		if (data.length < 10*LandscapeSize)
 			throw new IOException("Provided buffer too short");
+		dataOps = new DataOperations(data);
 		groundElevation = new int[LandscapeSize];
 		groundTexture = new int[LandscapeSize];
 		groundOverlay = new int[LandscapeSize];
@@ -50,13 +52,13 @@ public class Landscape
 		diagonalWalls = new int[LandscapeSize];
 		for (int i = 0, offset = 0; offset < LandscapeSize; ++offset, i += 4)
 		{
-			groundElevation[offset] = data[i++] & 0xff;
-			groundTexture[offset] = data[i++];
-			groundOverlay[offset] = data[i++];
-			roofTexture[offset] = data[i++];
-			horizontalWall[offset] = data[i++];
-			verticalWall[offset] = data[i++];
-			diagonalWalls[offset] = DataOperations.readInt(data, i, true);
+			groundElevation[offset] = dataOps.readByte(false);
+			groundTexture[offset] = dataOps.readByte(true);
+			groundOverlay[offset] = dataOps.readByte(true);
+			roofTexture[offset] = dataOps.readByte(true);
+			horizontalWall[offset] = dataOps.readByte(true);
+			verticalWall[offset] = dataOps.readByte(true);
+			diagonalWalls[offset] = dataOps.readInt(true);
 		}
 		formatCoords();
 		initNormals();

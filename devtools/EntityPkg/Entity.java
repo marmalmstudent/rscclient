@@ -1,20 +1,21 @@
-package dbdev;
+package EntityPkg;
 
 import java.util.HashMap;
+
+import dbdev.DataOperations;
 
 public class Entity
 {
 	private Sprite[] entities;
+	private DataOperations dataOps;
 	private int entityWidth, entityHeight, imageWidth, imageHeight;
-	public static final int ROWS = 5;
+	public static int ROWS;
 	public static final int COLS = 3;
 	public static final int ROW_SPACE = 5;
 	public static final int COL_SPACE = 5;
-	public static final int X_MARGIN = 5;
-	public static final int Y_MARGIN = 5;
 	private static final byte[] BG_COLOR = {
-			(byte)0xff /* red */,
-			(byte)0x0 /* green */,
+			(byte)0x0 /* red */,
+			(byte)0xff /* green */,
 			(byte)0xff /* blue */,
 			(byte)0xff /* alpha */
 	};
@@ -24,10 +25,11 @@ public class Entity
 		if (!checkTotalSize(entity))
 			throw new IllegalArgumentException("image dimensions does not match");
 		entities = entity;
+		ROWS = entity.length/COLS;
 		entityWidth = entity[0].getTotalWidth();
 		entityHeight = entity[0].getTotalHeight();
-		imageWidth = 2*X_MARGIN + COLS*(entityWidth+COL_SPACE)-COL_SPACE;
-		imageHeight = 2*Y_MARGIN + ROWS*(entityHeight+ROW_SPACE)-ROW_SPACE;
+		imageWidth = 2*COL_SPACE + COLS*(entityWidth+COL_SPACE)-COL_SPACE;
+		imageHeight = 2*ROW_SPACE + ROWS*(entityHeight+ROW_SPACE)-ROW_SPACE;
 	}
 	
 	public int imageWidth() { return imageWidth; }
@@ -59,14 +61,16 @@ public class Entity
 	{
 		int imgW = imageWidth, imgH = imageHeight;
 		byte[] data = new byte[4*imgW*imgH];
-		setBackground(data);
+		dataOps = new DataOperations(data);
+		setBackground(dataOps.data);
 		for (int row = 0; row < ROWS; ++row)
 			for (int col = 0; col < COLS; ++col)
-				entityImage(data, row, col);
-		return data;
+				entityImage(row, col);
+		
+		return dataOps.data;
 	}
 	
-	private void entityImage(byte[] data, int row, int col)
+	private void entityImage(int row, int col)
 	{
 		int colskip = entityWidth+COL_SPACE;
 		int yskip = imageWidth;
@@ -77,9 +81,11 @@ public class Entity
 		int xUprBnd = xLowBnd + entities[row*COLS + col].getWidth();
 		int yLowBnd = entities[row*COLS + col].getYShift();
 		int yUprBnd = yLowBnd + entities[row*COLS + col].getHeight();
-		byte[] tmp = new byte[4];
-		DataOperations.write4Bytes(tmp, 0, entities[row*COLS + col].getTransparendMask(), true);
-		byte[] transparent = {tmp[1], tmp[2], tmp[3], tmp[0]};
+		byte[] transparent = {
+				(byte)((entities[row*COLS + col].getTransparendMask() >> 16) & 0xff),
+				(byte)((entities[row*COLS + col].getTransparendMask() >> 8) & 0xff),
+				(byte)(entities[row*COLS + col].getTransparendMask() & 0xff),
+				(byte)((entities[row*COLS + col].getTransparendMask() >> 24) & 0xff)};
 		int offset = 0;
 		int x = 0, y = 0, i = 0;
 		try {
@@ -88,10 +94,10 @@ public class Entity
 					if (x < xLowBnd || x >= xUprBnd
 							|| y < yLowBnd || y >= yUprBnd)
 						for (i = 0; i < 4; ++i)
-							data[4*(row*rowskip + (y+Y_MARGIN)*yskip + col*colskip + (x + X_MARGIN)) + i] = transparent[i];
+							dataOps.data[4*(row*rowskip + (y+ROW_SPACE)*yskip + col*colskip + (x + COL_SPACE)) + i] = transparent[i];
 					else
 						for (i = 0; i < 4; ++i)
-							data[4*(row*rowskip + (y+Y_MARGIN)*yskip + col*colskip + (x + X_MARGIN)) + i] = entityImage[offset++];
+							dataOps.data[4*(row*rowskip + (y+ROW_SPACE)*yskip + col*colskip + (x + COL_SPACE)) + i] = entityImage[offset++];
 		} catch (ArrayIndexOutOfBoundsException e)
 		{
 			System.out.printf("Row: %d\nCol: %d\ny: %d\nx: %d\ni: %d\n",

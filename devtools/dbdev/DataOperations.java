@@ -3,8 +3,16 @@ package dbdev;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-public abstract class DataOperations
+public class DataOperations
 {
+	public byte[] data;
+	public int offset;
+	public DataOperations(byte[] data)
+	{
+		this.data = data;
+		offset = 0;
+	}
+
 	public static int rgbaToInt(int array[], int offset)
 	{
 		return ((array[offset+3] & 0xff) << 24)
@@ -13,105 +21,115 @@ public abstract class DataOperations
 				+ (array[offset+2] & 0xff);
 	}
 	
-	public static int readInt(byte array[], int offset, boolean bigEndian)
+	public int readInt(boolean bigEndian)
 	{
-		return ((array[offset] & 0xff) << 24)
-				+ ((array[offset+1] & 0xff) << 16)
-				+ ((array[offset+2] & 0xff) << 8)
-				+ (array[offset+3] & 0xff);
+		offset += 4;
+		return ((data[offset-4] & 0xff) << 24)
+				+ ((data[offset-3] & 0xff) << 16)
+				+ ((data[offset-2] & 0xff) << 8)
+				+ (data[offset-1] & 0xff);
 	}
 	
-	public static int read2Bytes(byte array[], int offset, boolean signed, boolean bigEndian)
+	public int read2Bytes(boolean signed, boolean bigEndian)
 	{
-		int out = ((array[offset] & 0xff) << 8)
-				+ (array[offset+1] & 0xff);
+		offset += 2;
+		int out = ((data[offset-2] & 0xff) << 8)
+				+ (data[offset-1] & 0xff);
 		if (signed)
 			out = (int)((short)out);
 		return out;
 	}
 	
-	public static boolean readBoolean(byte array[], int offset)
+	public int readByte(boolean signed)
 	{
-		return array[offset] != 0;
+		if (signed)
+			return (int)data[offset++];
+		else
+			return data[offset++] & 0xff;
+		
 	}
 	
-	public static float readFloat(byte[] array, int offset, boolean bigEndian)
+	public boolean readBoolean()
+	{
+		return data[offset++] != 0;
+	}
+	
+	public float readFloat(boolean bigEndian)
 	{
 		byte[] tmp = new byte[4];
 		for (int i = 0; i < 4; ++i)
-			tmp[i] = array[offset++];
+			tmp[i] = data[offset++];
 		return ByteBuffer.wrap(tmp).getFloat();
 	}
 	
-	public static int write4Bytes(byte array[], int offset, int val, boolean bigEndian)
+	public void write4Bytes(int val, boolean bigEndian)
 	{
 		if (bigEndian)
 		{
-			array[offset++] = (byte)((val >> 24) & 0xff);
-			array[offset++] = (byte)((val >> 16) & 0xff);
-			array[offset++] = (byte)((val >> 8) & 0xff);
-			array[offset++] = (byte)(val & 0xff);
+			data[offset++] = (byte)((val >> 24) & 0xff);
+			data[offset++] = (byte)((val >> 16) & 0xff);
+			data[offset++] = (byte)((val >> 8) & 0xff);
+			data[offset++] = (byte)(val & 0xff);
 		}
 		else
 		{
-			array[offset++] = (byte)(val & 0xff);
-			array[offset++] = (byte)((val >> 8) & 0xff);
-			array[offset++] = (byte)((val >> 16) & 0xff);
-			array[offset++] = (byte)((val >> 24) & 0xff);
+			data[offset++] = (byte)(val & 0xff);
+			data[offset++] = (byte)((val >> 8) & 0xff);
+			data[offset++] = (byte)((val >> 16) & 0xff);
+			data[offset++] = (byte)((val >> 24) & 0xff);
 		}
-		return offset;
 	}
 	
-	public static int write2Bytes(byte array[], int offset, int val, boolean bigEndian)
+	public void write2Bytes(int val, boolean bigEndian)
 	{
 		if (bigEndian)
 		{
-			array[offset++] = (byte)((val >> 8) & 0xff);
-			array[offset++] = (byte)(val & 0xff);
+			data[offset++] = (byte)((val >> 8) & 0xff);
+			data[offset++] = (byte)(val & 0xff);
 		}
 		else
 		{
-			array[offset++] = (byte)(val & 0xff);
-			array[offset++] = (byte)((val >> 8) & 0xff);
+			data[offset++] = (byte)(val & 0xff);
+			data[offset++] = (byte)((val >> 8) & 0xff);
 		}
-		return offset;
 	}
 	
-	public static int writeByte(byte array[], int offset, int val)
+	public void writeByte(int val)
 	{
-		array[offset++] = (byte)(val & 0xff);
-		return offset;
+		data[offset++] = (byte)(val & 0xff);
 	}
 	
-	public static int writeBoolean(byte array[], int offset, boolean flag)
+	public void writeBoolean(boolean flag)
 	{
-		array[offset++] = (byte)(flag ? 1 : 0);
-		return offset;
+		writeByte(flag ? 1 : 0);
 	}
 	
-	public static int writeArray(byte[] dst, int offset, byte[] src)
+	public void writeArray(byte[] src)
 	{
-	    for (byte b : src)
-	    	dst[offset++] = b;
-	    return offset;
+		for (int i = 0; i < src.length; data[offset++] = src[i++]);
 	}
 	
-	public static int writeFloat(byte[] array, int offset, float f, boolean bigEndian)
+	public void writeString(String str)
+	{
+		writeArray((str+"\0").getBytes());
+	}
+	
+	public String readString()
+	{
+		int i = offset;
+		while (data[offset++] != 0);
+		byte[] dst = new byte[offset-1 - i];
+		for (int j = 0; i < offset-1; dst[j++] = data[i++]);
+		return new String(dst);
+	}
+	
+	public void writeFloat(float f, boolean bigEndian)
 	{
 		byte[] tmp = ByteBuffer.allocate(4).putFloat(f).array();
 		if (bigEndian)
-			for (int i = 0; i < 4; array[offset++] = tmp[i++]);
+			for (int i = 0; i < 4; data[offset++] = tmp[i++]);
 		else
-			for (int i = 3; i >= 0; array[offset++] = tmp[i--]);
-		return offset;
-	}
-	
-	public static byte[] arrayCopy(byte[] array, int newSize)
-	{
-		byte[] newArray = new byte[newSize];
-		for (int i = 0, j = 0; i < newSize && j < array.length;
-				newArray[i++] = array[j++]);
-		return newArray;
+			for (int i = 3; i >= 0; data[offset++] = tmp[i--]);
 	}
 	
 	public static int getNextKey(HashMap<Integer, String> names)

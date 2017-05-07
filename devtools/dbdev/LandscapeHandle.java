@@ -10,6 +10,7 @@ public class LandscapeHandle
 	private static HashMap<String, String> landscapeNames;
 	private static final int HEADER_SIZE = 80;
 	private Landscape landscape;
+	private DataOperations dataOps;
 	
 	public LandscapeHandle(File f)
 	{
@@ -52,27 +53,22 @@ public class LandscapeHandle
 		float[] zCoords = landscape.getZCoords();
 		float[][] normals = landscape.getNormals();
 		int[][] triangleCellArray = landscape.getTriangleCellArray();
-		if (header.length != HEADER_SIZE)
-			header = DataOperations.arrayCopy(header, HEADER_SIZE);
 		int nTriangles = triangleCellArray.length;
 		byte[] data = new byte[HEADER_SIZE+4+nTriangles*(Float.BYTES*(12)+2)];
-		int offset = 0;
-		offset = DataOperations.writeArray(data, offset, header);
-		offset = DataOperations.write4Bytes(data, offset, nTriangles, false);
+		dataOps = new DataOperations(data);
+		dataOps.writeArray(header);
+		dataOps.write4Bytes(nTriangles, false);
 		for (int i = 0; i < nTriangles; ++i)
 		{
 			for (float normal : normals[i])
-				offset = DataOperations.writeFloat(data, offset, normal, false);
+				dataOps.writeFloat(normal, false);
 			for (int point : triangleCellArray[i])
 			{
-				offset = DataOperations.writeFloat(data, offset,
-						(float)xCoords[point], false);
-				offset = DataOperations.writeFloat(data, offset,
-						(float)yCoords[point], false);
-				offset = DataOperations.writeFloat(data, offset,
-						(float)zCoords[point], false);
+				dataOps.writeFloat((float)xCoords[point], false);
+				dataOps.writeFloat((float)yCoords[point], false);
+				dataOps.writeFloat((float)zCoords[point], false);
 			}
-			offset = DataOperations.write2Bytes(data, offset, 0, false);
+			dataOps.write2Bytes(0, false);
 
 		}
 		return data;

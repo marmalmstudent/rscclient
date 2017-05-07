@@ -52,10 +52,12 @@ public abstract class FileOperations {
 		return new Dimension(img.getWidth(), img.getHeight());
 	}
 
-	public static int[] readImage(File file, int width, int height)
+	public static int[] readImage(File file)
 			throws IOException
 	{
 		BufferedImage img = ImageIO.read(file);
+		int width = img.getWidth();
+		int height = img.getHeight();
 		int[] pixelDataRaw = new int[width*height*4];
 		Raster rast = img.getData();
 		rast.getPixels(0, 0, width, height, pixelDataRaw);
@@ -312,6 +314,30 @@ public abstract class FileOperations {
 			{
 				String[] entry = str.split(",");
 				if (!map.containsValue(entry[1]))
+					map.put(entry[0], entry[1]);
+			}
+		}
+		finally
+		{
+			br.close();
+		}
+		return map;
+	}
+
+	public static HashMap<String, String> readEntityHashMap(File mapFile,
+			String delimiter) throws IOException
+	{
+		HashMap<String, String> map = null;
+		BufferedReader br = new BufferedReader(new FileReader(mapFile));
+		try
+		{
+			String line = br.readLine();
+			String[] entries = line.split(delimiter);
+			map = new HashMap<String, String>(entries.length);
+			for (String str : entries)
+			{
+				String[] entry = str.split(",");
+				if (!map.containsValue(entry[0]))
 					map.put(entry[0], entry[1]);
 			}
 		}

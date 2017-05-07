@@ -94,7 +94,7 @@ public class SpriteHandle {
 			Dimension d = FileOperations.getImageDimension(f);
 			int width = d.width;
 			int height = d.height;
-			int[] pixelData = FileOperations.readImage(f, width, height);
+			int[] pixelData = FileOperations.readImage(f);
 			if (requiresShift)
 				sprite = new Sprite(pixelData, width, height,
 						false, 0, 0, width, height, transparentMask);

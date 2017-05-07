@@ -1,0 +1,44 @@
+# .spt file format declaration
+
+/* File header */
+4 bytes: "SPT\0"
+n bytes: name (e.g. "HUMAN LEGS\0")
+1 byte: gender (male: 1 (0b01), female: 2 (0b10), both: 3 (0b11))
+4 bytes: normal width
+4 bytes: normal height
+1 byte: has attack (true / false)
+4 bytes: combat width
+4 bytes: combat height
+1 byte: has flip (true / false)
+
+/* Sprites... format : */
+// image info
+4 bytes: x-shift
+4 bytes: y-shift
+4 bytes: image width
+4 bytes: image height
+n bytes: image data
+// image order:
+0: first foot back, second foot front
+1: feet side by side
+2: first foot front, second foot back
+// angle order: 0 degrees front, 90 degrees side, 180 degrees back
+0: 0 degree
+1: 45 degree
+2: 90 degree
+3: 135 degree
+4: 180 degree
+
+/* Sprites... data */
+// normal
+0d; image info, image 0, 1, 2
+45d; image info, image 0, 1, 2
+90d; image info, image 0, 1, 2
+135d; image info, image 0, 1, 2
+180d; image info, image 0, 1, 2
+// attack
+90d; image info, image 0, 1, 2
+// flip
+45d; image info, image 0, 1, 2
+90d; image info, image 0, 1, 2
+135d; image info, image 0, 1, 2

@@ -1,4 +1,6 @@
-package dbdev;
+package EntityPkg;
+
+import dbdev.DataOperations;
 
 public class Sprite
 {
