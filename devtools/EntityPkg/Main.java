@@ -14,6 +14,7 @@ public class Main
 
 	public static void main(String[] args)
 	{
+		/* For convertinc between entity in png format and spt format */
 		try {
 			Main.modelNames = FileOperations.readEntityHashMap(
 					new File("devtools/dbdev/names/entity2"), ";");
@@ -35,7 +36,7 @@ public class Main
 		{
 			ioe.printStackTrace();
 		}
-		/*
+		/* For assembling individual sprites into an entity
 		Sprite[] sprites;
 		try
 		{
