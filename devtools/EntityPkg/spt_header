@@ -4,11 +4,9 @@
 4 bytes: "SPT\0"
 n bytes: name (e.g. "HUMAN LEGS\0")
 1 byte: gender (male: 1 (0b01), female: 2 (0b10), both: 3 (0b11))
-4 bytes: normal width
-4 bytes: normal height
+4 bytes: width
+4 bytes: height
 1 byte: has attack (true / false)
-4 bytes: combat width
-4 bytes: combat height
 1 byte: has flip (true / false)
 
 /* Sprites... format : */

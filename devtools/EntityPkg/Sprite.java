@@ -25,6 +25,11 @@ public class Sprite
 	public byte[] getImage() { return image; }
 	public byte[] getData() { return data; }
 	public int getTransparendMask() { return transparentMask; }
+	
+	public void setTotalWidth(int w) { totalWidth = w; }
+	public void setTotalHeight(int h) { totalHeight = h; }
+	public void setXShift(int s) { xShift = s; }
+	public void setYShift(int s) { yShift = s; }
 
 	public Sprite(byte[] data, int transparentMask)
 	{
@@ -65,7 +70,8 @@ public class Sprite
 		this.totalWidth = totalWidth;
 		this.totalHeight = totalHeight;
 		this.transparentMask = transparentMask;
-		pngToDatTransparent();
+		datToPNGTransparent();
+		//pngToDatTransparent();
 	}
 	
 	/**
@@ -105,7 +111,7 @@ public class Sprite
 		int offset = 0;
 		for (int i : pixelData)
 		{
-			image[offset++] = (byte)0;
+			image[offset++] = (byte)((i >> 24) & 0xff);
 			image[offset++] = (byte)((i >> 16) & 0xff);
 			image[offset++] = (byte)((i >> 8) & 0xff);
 			image[offset++] = (byte)(i & 0xff);
@@ -156,7 +162,7 @@ public class Sprite
 	protected void datToPNGTransparent() {
 		for (int i = 0; i < pixelData.length; ++i)
 			if (pixelData[i] == (transparentMask & 0xffffff))
-				pixelData[i] = 0;
+				pixelData[i] = transparentMask;
 			else
 				pixelData[i] = 0xff000000 + (pixelData[i] & 0xffffff);
 	}

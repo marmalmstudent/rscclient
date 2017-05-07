@@ -4,100 +4,203 @@ import dbdev.DataOperations;
 
 public class NewEntity
 {
+	private final String ext = "SPT";
 	private String name;
-	private int gender, normWidth, normHeight,
-	atkWidth, atkHeight;
+	private int gender, entityWidth, entityHeight, imageWidth, imageHeight;
 	private boolean hasAttack, hasFlip;
 	private Sprite[] sprites;
 	private DataOperations dataOps;
-	private static int BORDER_COLOR = 0xff00ffff; // cyan-ish
-	private static int TRANSPARENT_COLOR = 0xffff00ff; // magenta-ish
-	private static int COL_SPACE, ROW_SPACE, COLS = 3, ROWS;
+	private static int BORDER_COLOR = 0xff00ffff;
+	private static int TRANSPARENT_COLOR = 0xffff00ff;
+	private static int COL_SPACE = 5, ROW_SPACE = 5, COLS = 3, ROWS;
 	
-	private byte[] data;
-	
-	public NewEntity(Sprite[] spt)
-	{
-		sprites = spt;
-	}
-	
-	public Sprite[] getSprites()
-	{
-		return sprites;
-	}
+	public Sprite[] getSprites() { return sprites; }
+	public int imageWidth() { return imageWidth; }
+	public int imageHeight() { return imageHeight; }
+	public String getName() {return name; }
 	
 	public NewEntity(byte[] data)
 	{
 		initDat(data);
 	}
 	
-	public NewEntity(int[] pixelData)
+	public NewEntity(int[] pixelData, String name, int gender)
 	{
+		this.name = name;
+		this.gender = gender;
 		initPNG(pixelData);
+		switch(sprites.length)
+		{
+		case 18:
+			hasAttack = true;
+			hasFlip = false;
+			break;
+		case 24:
+			hasAttack = false;
+			hasFlip = true;
+			break;
+		case 27:
+			hasAttack = true;
+			hasFlip = true;
+			break;
+		default:
+			hasAttack = false;
+			hasFlip = false;
+			break;
+		}
 	}
-	
+
 	private void initDat(byte[] data)
 	{
-		/* unpack entity in dat-form: unpack header and
-		 * create the sprites.
-		 */
+		dataOps = new DataOperations(data);
+		if (!dataOps.readString().equals(ext))
+			return; // wrong/unknown file extension
+		name = dataOps.readString();
+		gender = dataOps.readByte(false);
+		entityWidth = dataOps.readInt(true);
+		entityHeight = dataOps.readInt(true);
+		hasAttack = dataOps.readBoolean();
+		hasFlip = dataOps.readBoolean();
+		sprites = new Sprite[15 + (hasAttack?3:0) + (hasFlip?9:0)];
+		ROWS = sprites.length / COLS;
+		imageWidth = COLS*entityWidth + (COLS+1)*COL_SPACE;
+		imageHeight = ROWS*entityHeight + (ROWS+1)*ROW_SPACE;
+		for (int i = 0; i < sprites.length; ++i)
+		{
+			int xShift = dataOps.readInt(true);
+			int yShift = dataOps.readInt(true);
+			int width = dataOps.readInt(true);
+			int height = dataOps.readInt(true);
+
+			int[] pixelData = new int[width*height];
+			for (int j = 0; j < pixelData.length;
+					pixelData[j++] = dataOps.readInt(true));
+			sprites[i] = new Sprite(pixelData, width, height,
+					(xShift > 0 || yShift > 0)?true:false,
+							xShift, yShift, entityWidth,
+							entityHeight, TRANSPARENT_COLOR);
+		}
 	}
 
 	private void initPNG(int[] data)
 	{
-		findImageDimensions(data);
-		System.out.printf("%d, %d, %d, %d, %d, %d", normHeight, ROW_SPACE, ROWS, normWidth, COL_SPACE, COLS);
+		findImageLayout(data);
+		imageWidth = COLS*entityWidth + (COLS+1)*COL_SPACE;
+		imageHeight = ROWS*entityHeight + (ROWS+1)*ROW_SPACE;
 		sprites = new Sprite[ROWS*COLS];
 		for (int row = 0; row < ROWS; ++row)
 			for (int col = 0; col < COLS; ++col)
-				unpackImage(imageData(data, row, col), row, col, row*COLS + col);
+				unpackImage(extractSpriteImage(data, row, col), row*COLS + col);
 	}
 	
-	private void addAttackPNG(int[] data)
+	public byte[] formatEntityDat()
 	{
-		findImageDimensions(data);
-		sprites = extendSprites(3);
+		dataOps = new DataOperations(allocateDat());
+		dataOps.writeString(ext);
+		dataOps.writeString(name);
+		dataOps.writeByte(gender);
+		dataOps.write4Bytes(entityWidth, true);
+		dataOps.write4Bytes(entityHeight, true);
+		dataOps.writeBoolean(hasAttack);
+		dataOps.writeBoolean(hasFlip);
+		for (int i = 0; i < sprites.length; ++i)
+		{
+			if (sprites[i] == null)
+				break;
+			dataOps.write4Bytes(sprites[i].getXShift(), true);
+			dataOps.write4Bytes(sprites[i].getYShift(), true);
+			dataOps.write4Bytes(sprites[i].getWidth(), true);
+			dataOps.write4Bytes(sprites[i].getHeight(), true);
+			sprites[i].packImageDat();
+			dataOps.writeArray(sprites[i].getImage());
+		}
+		return dataOps.data;
+	}
+	
+	public byte[] formatEntityPNG()
+	{
+		int imageWidth = COLS*entityWidth + (COLS+1)*COL_SPACE;
+		int imageHeight = ROWS*entityHeight + (ROWS+1)*ROW_SPACE;
+		int imgW = imageWidth, imgH = imageHeight;
+		byte[] data = new byte[4*imgW*imgH];
+		dataOps = new DataOperations(data);
+		setBackground(dataOps.data);
 		for (int row = 0; row < ROWS; ++row)
 			for (int col = 0; col < COLS; ++col)
-				unpackImage(imageData(data, row, col), row, col, 0);
-		
+				entityImage(row, col);
+		return dataOps.data;
 	}
 	
-	private void unpackImage(int[] data, int row, int col, int spriteIdx)
+	private void entityImage(int row, int col)
+	{
+		int colskip = entityWidth+COL_SPACE;
+		int yskip = COLS*entityWidth + (COLS+1)*COL_SPACE; // image width
+		int rowskip = (entityHeight+ROW_SPACE)*yskip;
+		sprites[row*COLS + col].packImagePNG();
+		byte[] entityImage = sprites[row*COLS + col].getImage();
+		int xLowBnd = sprites[row*COLS + col].getXShift();
+		int xUprBnd = xLowBnd + sprites[row*COLS + col].getWidth();
+		int yLowBnd = sprites[row*COLS + col].getYShift();
+		int yUprBnd = yLowBnd + sprites[row*COLS + col].getHeight();
+		byte[] transparent = {
+				(byte)((TRANSPARENT_COLOR >> 16) & 0xff),
+				(byte)((TRANSPARENT_COLOR >> 8) & 0xff),
+				(byte)(TRANSPARENT_COLOR & 0xff),
+				(byte)((TRANSPARENT_COLOR >> 24) & 0xff)};
+		int offset = 0;
+		int x = 0, y = 0, i = 0;
+		try {
+			for (y = 0; y < entityHeight; ++y)
+				for (x = 0; x < entityWidth; ++x)
+					if (x < xLowBnd || x >= xUprBnd
+							|| y < yLowBnd || y >= yUprBnd)
+						for (i = 0; i < 4; ++i)
+							dataOps.data[4*(row*rowskip + (y+ROW_SPACE)*yskip + col*colskip + (x + COL_SPACE)) + i] = transparent[i];
+					else
+						for (i = 0; i < 4; ++i)
+							dataOps.data[4*(row*rowskip + (y+ROW_SPACE)*yskip + col*colskip + (x + COL_SPACE)) + i] = entityImage[offset++];
+		} catch (ArrayIndexOutOfBoundsException e)
+		{
+			System.out.printf("Row: %d\nCol: %d\ny: %d\nx: %d\ni: %d\n",
+					row, col, x, y, i);
+		}
+	}
+	
+	private void unpackImage(int[] data, int spriteIdx)
 	{
 		int xShift = 0, yShift = 0, width = 0, height = 0;
 		// find yShift
 		lab:
-			for (int y = 0; y < normHeight; ++y)
-				for (int x = 0; x < normWidth; ++x)
-					if (data[y*normWidth + x] != 0)
+			for (int y = 0; y < entityHeight; ++y)
+				for (int x = 0; x < entityWidth; ++x)
+					if (data[y*entityWidth + x] != 0)
 					{
 						yShift = y;
 						break lab;
 					}
 		// find height
 		lab:
-			for (int y = normHeight-1; y >= 0; --y)
-				for (int x = 0; x < normWidth; ++x)
-					if (data[y*normWidth + x] != 0)
+			for (int y = entityHeight-1; y >= 0; --y)
+				for (int x = 0; x < entityWidth; ++x)
+					if (data[y*entityWidth + x] != 0)
 					{
 						height = (y+1) - yShift;
 						break lab;
 					}
 		// find x-shift
 		lab:
-			for (int x = 0; x < normWidth; ++x)
-				for (int y = 0; y < normHeight; ++y)
-					if (data[y*normWidth + x] != 0)
+			for (int x = 0; x < entityWidth; ++x)
+				for (int y = 0; y < entityHeight; ++y)
+					if (data[y*entityWidth + x] != 0)
 					{
 						xShift = x;
 						break lab;
 					}
 		// find width
 		lab:
-			for (int x = normWidth-1; x >= 0; --x)
-				for (int y = 0; y < normHeight; ++y)
-					if (data[y*normWidth + x] != 0)
+			for (int x = entityWidth-1; x >= 0; --x)
+				for (int y = 0; y < entityHeight; ++y)
+					if (data[y*entityWidth + x] != 0)
 					{
 						width = (x+1) - xShift;
 						break lab;
@@ -105,7 +208,7 @@ public class NewEntity
 		// create image data without empty rows and cols
 		int[] image = new int[width*height];
 		setBackground(image);
-		int offset = yShift*normWidth + xShift;
+		int offset = yShift*entityWidth + xShift;
 		for (int y = 0; y < height; ++y)
 		{
 			for (int x = 0; x < width; ++x)
@@ -118,35 +221,35 @@ public class NewEntity
 				}
 				image[y*width + x] = data[offset++];
 			}
-			offset += normWidth - width;
+			offset += entityWidth - width;
 		}
 		sprites[spriteIdx] = new Sprite(image, width, height,
 				xShift > 0 || yShift > 0, xShift, yShift,
-				normWidth, normHeight, TRANSPARENT_COLOR);
+				entityWidth, entityHeight, TRANSPARENT_COLOR);
 	}
 	
 	/* Extract sprite image data at row, col from the big image */
-	private int[] imageData(int[] data, int row, int col)
+	private int[] extractSpriteImage(int[] data, int row, int col)
 	{
-		int imageWidth = COLS*normWidth + (COLS+1)*COL_SPACE;
+		int imageWidth = COLS*entityWidth + (COLS+1)*COL_SPACE;
 		// nbr pixels between two columns
-		int colskip = normWidth+COL_SPACE;
+		int colskip = entityWidth+COL_SPACE;
 		// nbr pixels between adjacent pixels in y-direction
 		int yskip = imageWidth;
 		// nbr pixels between two rows
-		int rowskip = (normHeight+ROW_SPACE)*yskip;
+		int rowskip = (entityHeight+ROW_SPACE)*yskip;
 		int offset = ROW_SPACE*imageWidth + COL_SPACE + row*rowskip + col*colskip;
-		int[] pixels = new int[normWidth*normHeight];
-		for (int y = 0; y < normHeight; ++y)
+		int[] pixels = new int[entityWidth*entityHeight];
+		for (int y = 0; y < entityHeight; ++y)
 		{
-			for (int x = 0; x < normWidth; ++x)
-				pixels[y*normWidth + x] = data[offset++];
-			offset += imageWidth - normWidth;
+			for (int x = 0; x < entityWidth; ++x)
+				pixels[y*entityWidth + x] = data[offset++];
+			offset += imageWidth - entityWidth;
 		}
 		return pixels;
 	}
 	
-	private void findImageDimensions(int[] data)
+	private void findImageLayout(int[] data)
 	{
 		int offset = 0;
 		// skip empy
@@ -154,28 +257,31 @@ public class NewEntity
 
 		int tmp = offset;
 		// find width of normal image
-		for (normWidth = 0; data[offset] != BORDER_COLOR; ++offset, ++normWidth);
+		for (entityWidth = 0; data[offset] != BORDER_COLOR;
+				++offset, ++entityWidth);
 		// find column space
-		for (COL_SPACE = 0; data[offset] == BORDER_COLOR; ++offset, ++COL_SPACE);
+		for (COL_SPACE = 0; data[offset] == BORDER_COLOR;
+				++offset, ++COL_SPACE);
 		// find number of columns
 		for(COLS = 1; data[offset] !=BORDER_COLOR
 				&& data[offset-1] == BORDER_COLOR;
-				offset += normWidth + COL_SPACE, ++COLS);
+				offset += entityWidth + COL_SPACE, ++COLS);
 
 		// move cursor back to upper left corner of first image.
 		offset = tmp;
-		int imageWidth = COLS*normWidth + (COLS+1)*COL_SPACE;
+		int imageWidth = COLS*entityWidth + (COLS+1)*COL_SPACE;
 		// find image height
-		for (normHeight = 0; data[offset] != BORDER_COLOR;
-				offset += imageWidth, ++normHeight);
+		for (entityHeight = 0; data[offset] != BORDER_COLOR;
+				offset += imageWidth, ++entityHeight);
 		// find row space
-		for (ROW_SPACE = 0; data[offset] == BORDER_COLOR;
+		for (ROW_SPACE = 0; offset < data.length
+				&& data[offset] == BORDER_COLOR;
 				offset += imageWidth, ++ROW_SPACE);
 		// find number of rows
 		for(ROWS = 1; offset < data.length
 				&& data[offset] !=BORDER_COLOR
 				&& data[offset-imageWidth] == BORDER_COLOR;
-				offset += imageWidth*(normHeight + ROW_SPACE), ++ROWS);
+				offset += imageWidth*(entityHeight + ROW_SPACE), ++ROWS);
 	}
 	
 	private void setBackground(int[] data)
@@ -184,108 +290,26 @@ public class NewEntity
 				data[i++] = TRANSPARENT_COLOR);
 	}
 	
-	private Sprite[] extendSprites(int number)
+	private void setBackground(byte[] data)
 	{
-		Sprite[] tmp = new Sprite[sprites.length + number];
-		for (int i = 0; i < sprites.length; ++i)
-			tmp[i] = sprites[i];
-		return tmp;
-	}
-	
-	/* ###################################################### */
-	
-	private byte[] formatDat()
-	{
-		byte[] data = new byte[getHeaderSize() + getSpriteDataSize()];
-		dataOps = new DataOperations(data);
-		makeHeader();
-		makeSpriteData();
-		return dataOps.data;
-	}
-	
-	private void unpack(byte[] data)
-	{
-		
-	}
-	
-	private int getHeaderSize()
-	{
-		return (name.length()+1) + 19;
-	}
-	
-	private void makeHeader()
-	{
-		byte[] etyName = name.toUpperCase().getBytes();
-		dataOps.writeArray(etyName);
-		dataOps.writeByte(0);
-		dataOps.writeByte(gender);
-		dataOps.write4Bytes(normWidth, true);
-		dataOps.write4Bytes(normHeight, true);
-		dataOps.writeByte(hasAttack ? 1 : 0);
-		dataOps.write4Bytes(atkWidth, true);
-		dataOps.write4Bytes(atkHeight, true);
-		dataOps.writeByte(hasFlip ? 1 : 0);
-	}
-	
-	private int getSpriteDataSize()
-	{
-		int dataSize = 0;
-		int i;
-		for (i = 0; i < 15; ++i)
-			dataSize += 16 + 4*sprites[i].getHeight()*sprites[i].getWidth();
-		if (hasAttack)
+		for (int i = 0; i < data.length;)
 		{
-			int j;
-			for (j = i; j < i + 3; ++j)
-				dataSize += 16 + 4*sprites[i].getHeight()*sprites[i].getWidth();
-			i = j;
+			data[i++] = (byte)((BORDER_COLOR >> 16) & 0xff);
+			data[i++] = (byte)((BORDER_COLOR >> 8) & 0xff);
+			data[i++] = (byte)(BORDER_COLOR & 0xff);
+			data[i++] = (byte)((BORDER_COLOR >> 24) & 0xff);
 		}
-		if (hasFlip)
-		{
-			int j;
-			for (j = i; j < i + 9; ++j)
-				dataSize += 16 + 4*sprites[i].getHeight()*sprites[i].getWidth();
-			i = j;
-		}
-		return dataSize;
 	}
 	
-	private void makeSpriteData()
+	private byte[] allocateDat()
 	{
-		int i;
-		for (i = 0; i < 15; ++i)
+		int size = (ext.length()+1) + (name.length()+1) + 11;
+		for (Sprite spt : sprites)
 		{
-			dataOps.write4Bytes(sprites[i].getXShift(), true);
-			dataOps.write4Bytes(sprites[i].getYShift(), true);
-			dataOps.write4Bytes(sprites[i].getWidth(), true);
-			dataOps.write4Bytes(sprites[i].getHeight(), true);
-			dataOps.writeArray(sprites[i].getImage());
+			if (spt == null)
+				break;
+			size += 16 + spt.getImage().length;
 		}
-		if (hasAttack)
-		{
-			int j;
-			for (j = i; j < i + 3; ++j)
-			{
-				dataOps.write4Bytes(sprites[i].getXShift(), true);
-				dataOps.write4Bytes(sprites[i].getYShift(), true);
-				dataOps.write4Bytes(sprites[i].getWidth(), true);
-				dataOps.write4Bytes(sprites[i].getHeight(), true);
-				dataOps.writeArray(sprites[i].getImage());
-			}
-			i = j;
-		}
-		if (hasFlip)
-		{
-			int j;
-			for (j = i; j < i + 9; ++j)
-			{
-				dataOps.write4Bytes(sprites[i].getXShift(), true);
-				dataOps.write4Bytes(sprites[i].getYShift(), true);
-				dataOps.write4Bytes(sprites[i].getWidth(), true);
-				dataOps.write4Bytes(sprites[i].getHeight(), true);
-				dataOps.writeArray(sprites[i].getImage());
-			}
-			i = j;
-		}
+		return new byte[size];
 	}
 }
