@@ -1,4 +1,4 @@
-package client.entityhandling.defs;
+package entityhandling.defs;
 
 /**
  * The definition wrapper for prayers

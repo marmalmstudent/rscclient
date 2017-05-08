@@ -1,17 +1,16 @@
-package client.entityhandling;
+package entityhandling;
 
-import client.entityhandling.defs.DoorDef;
-import client.entityhandling.defs.ElevationDef;
-import client.entityhandling.defs.GameObjectDef;
-import client.entityhandling.defs.ItemDef;
-import client.entityhandling.defs.NPCDef;
-import client.entityhandling.defs.PrayerDef;
-import client.entityhandling.defs.SpellDef;
-import client.entityhandling.defs.TileDef;
-import client.entityhandling.defs.extras.AnimationDef;
-import client.entityhandling.defs.extras.TextureDef;
 import client.util.Config;
-import client.util.ParseXML;
+import entityhandling.defs.DoorDef;
+import entityhandling.defs.ElevationDef;
+import entityhandling.defs.GameObjectDef;
+import entityhandling.defs.ItemDef;
+import entityhandling.defs.NPCDef;
+import entityhandling.defs.PrayerDef;
+import entityhandling.defs.SpellDef;
+import entityhandling.defs.TileDef;
+import entityhandling.defs.extras.AnimationDef;
+import entityhandling.defs.extras.TextureDef;
 
 import java.io.File;
 import java.util.ArrayList;

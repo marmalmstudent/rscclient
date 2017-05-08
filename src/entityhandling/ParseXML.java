@@ -1,4 +1,4 @@
-package client.util;
+package entityhandling;
 
 import java.io.*;
 import java.util.HashMap;
@@ -12,8 +12,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import client.entityhandling.defs.*;
-import client.entityhandling.defs.extras.*;
+import entityhandling.defs.DoorDef;
+import entityhandling.defs.ElevationDef;
+import entityhandling.defs.GameObjectDef;
+import entityhandling.defs.ItemDef;
+import entityhandling.defs.NPCDef;
+import entityhandling.defs.PrayerDef;
+import entityhandling.defs.SpellDef;
+import entityhandling.defs.TileDef;
+import entityhandling.defs.extras.AnimationDef;
+import entityhandling.defs.extras.ItemDropDef;
+import entityhandling.defs.extras.TextureDef;
 
 public class ParseXML
 {
@@ -38,6 +47,10 @@ public class ParseXML
 			"GameObjectDef", "PrayerDef", "SpellDef",
 			"TextureDef", "TileDef"};
 	//private int currentFile = -1;
+	public static final int ANIMATION_DEF = 0, DOOR_DEF = 1,
+			ELEVATION_DEF = 2, ITEM_DEF = 3, NPC_DEF = 4,
+			GAME_OBJECT_DEF = 5, PRAYER_DEF = 6, SPELL_DEF = 7,
+			TEXTURE_DEF = 8, TILE_DEF = 9;
 	
 	public ParseXML()
 	{
@@ -46,61 +59,61 @@ public class ParseXML
 	public AnimationDef[] unpackAnimationDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(0);
+		parseDocument(ANIMATION_DEF);
 		return animDef;
 	}
 	public DoorDef[] unpackDoorDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(1);
+		parseDocument(DOOR_DEF);
 		return doorDef;
 	}
 	public ElevationDef[] unpackElevationDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(2);
+		parseDocument(ELEVATION_DEF);
 		return elevDef;
 	}
 	public ItemDef[] unpackItemDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(3);
+		parseDocument(ITEM_DEF);
 		return itemDef;
 	}
 	public NPCDef[] unpackNPCDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(4);
+		parseDocument(NPC_DEF);
 		return npcDef;
 	}
 	public GameObjectDef[] unpackGameObjectDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(5);
+		parseDocument(GAME_OBJECT_DEF);
 		return objDef;
 	}
 	public PrayerDef[] unpackPrayerDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(6);
+		parseDocument(PRAYER_DEF);
 		return prayDef;
 	}
 	public SpellDef[] unpackSpellDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(7);
+		parseDocument(SPELL_DEF);
 		return spellDef;
 	}
 	public TextureDef[] unpackTextureDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(8);
+		parseDocument(TEXTURE_DEF);
 		return txtrDef;
 	}
 	public TileDef[] unpackTileDef(File file)
 	{
 		parseXmlFile(file);
-		parseDocument(9);
+		parseDocument(TILE_DEF);
 		return tileDef;
 	}
 	
@@ -141,7 +154,7 @@ public class ParseXML
 		{
 			switch(dbType)
 			{
-			case 0: // animations
+			case ANIMATION_DEF: // animations
 				animDef = new AnimationDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -151,7 +164,7 @@ public class ParseXML
 					animDef[i] = getAnimationDef(el);
 				}
 				break;
-			case 1:
+			case DOOR_DEF:
 				doorDef = new DoorDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -161,7 +174,7 @@ public class ParseXML
 					doorDef[i] = getDoorDef(el);
 				}
 				break;
-			case 2:
+			case ELEVATION_DEF:
 				elevDef = new ElevationDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -171,7 +184,7 @@ public class ParseXML
 					elevDef[i] = getElevationDef(el);
 				}
 				break;
-			case 3:
+			case ITEM_DEF:
 				itemDef = new ItemDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -181,7 +194,7 @@ public class ParseXML
 					itemDef[i] = getItemDef(el);
 				}
 				break;
-			case 4:
+			case NPC_DEF:
 				npcDef = new NPCDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -191,7 +204,7 @@ public class ParseXML
 					npcDef[i] = getNPCDef(el);
 				}
 				break;
-			case 5:
+			case GAME_OBJECT_DEF:
 				objDef = new GameObjectDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -201,7 +214,7 @@ public class ParseXML
 					objDef[i] = getGameObjectDef(el);
 				}
 				break;
-			case 6:
+			case PRAYER_DEF:
 				prayDef = new PrayerDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -211,7 +224,7 @@ public class ParseXML
 					prayDef[i] = getPrayerDef(el);
 				}
 				break;
-			case 7:
+			case SPELL_DEF:
 				spellDef = new SpellDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -221,7 +234,7 @@ public class ParseXML
 					spellDef[i] = getSpellDef(el);
 				}
 				break;
-			case 8:
+			case TEXTURE_DEF:
 				txtrDef = new TextureDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -231,7 +244,7 @@ public class ParseXML
 					txtrDef[i] = getTextureDef(el);
 				}
 				break;
-			case 9:
+			case TILE_DEF:
 				tileDef = new TileDef[nl.getLength()];
 				for(int i = 0 ; i < nl.getLength();i++)
 				{
@@ -290,6 +303,8 @@ public class ParseXML
 		id.basePrice = getIntValue(el, "basePrice");
 		id.stackable = getBoolValue(el, "stackable");
 		id.wieldable = getBoolValue(el, "wieldable");
+		String s = getTextValue(el, "entity");
+		id.entity = s.equalsIgnoreCase("null") ? null : s;
 		id.pictureMask = getIntValue(el, "pictureMask");
 		return id;
 	}

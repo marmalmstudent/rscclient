@@ -1,8 +1,5 @@
 package client;
 
-import client.entityhandling.EntityHandler;
-import client.entityhandling.defs.ItemDef;
-import client.entityhandling.defs.NPCDef;
 import client.menus.AbuseWindow;
 import client.menus.BankPanel;
 import client.menus.FriendsPanel;
@@ -15,10 +12,13 @@ import client.menus.OptionsPanel;
 import client.menus.PlayerInfoPanel;
 import client.menus.TradeConfirmPanel;
 import client.menus.TradePanel;
-import client.model.Sprite;
 import client.util.Config;
 import client.util.DataConversions;
 import client.util.misc;
+import entityhandling.EntityHandler;
+import entityhandling.defs.ItemDef;
+import entityhandling.defs.NPCDef;
+import model.Sprite;
 
 import javax.imageio.ImageIO;
 

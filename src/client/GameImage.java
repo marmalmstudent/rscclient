@@ -1,8 +1,8 @@
 package client;
 
-import client.model.Sprite;
 import client.util.Config;
 import client.util.DataConversions;
+import model.Sprite;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;

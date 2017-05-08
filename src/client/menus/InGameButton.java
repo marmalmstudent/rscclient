@@ -2,7 +2,7 @@ package client.menus;
 
 import java.awt.Rectangle;
 
-import client.model.Sprite;
+import model.Sprite;
 
 public class InGameButton {
 	protected final int notMouseoverColor = 0xffffff;

@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 
 import client.GameImage;
 import client.mudclient;
-import client.model.Sprite;
+import model.Sprite;
 
 public class TradePanel extends InGameGridPanel
 {

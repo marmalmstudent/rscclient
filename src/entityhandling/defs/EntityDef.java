@@ -1,4 +1,4 @@
-package client.entityhandling.defs;
+package entityhandling.defs;
 
 /**
  * The abstract class EntityDef implements methods for

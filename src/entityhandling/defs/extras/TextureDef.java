@@ -1,4 +1,4 @@
-package client.entityhandling.defs.extras;
+package entityhandling.defs.extras;
 
 public class TextureDef {
     public String dataName;

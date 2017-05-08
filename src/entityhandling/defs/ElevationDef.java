@@ -1,4 +1,4 @@
-package client.entityhandling.defs;
+package entityhandling.defs;
 
 public class ElevationDef {
     public int unknown1;

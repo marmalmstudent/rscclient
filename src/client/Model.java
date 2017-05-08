@@ -3,8 +3,8 @@ package client;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import client.entityhandling.EntityHandler;
 import client.util.misc;
+import entityhandling.EntityHandler;
 
 public class Model {
 

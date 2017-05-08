@@ -2,9 +2,9 @@ package client;
 
 import java.io.*;
 
-import client.entityhandling.EntityHandler;
 import client.util.misc;
 import dbdev.FileOperations;
+import entityhandling.EntityHandler;
 
 public class DataOperations {
 

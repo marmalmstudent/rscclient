@@ -1,33 +1,16 @@
-package client.entityhandling.defs;
+package entityhandling.defs;
 
 /**
  * The definition wrapper for items
  */
 public class ItemDef extends EntityDef {
 
-    /**
-     * The command of the object
-     */
     public String command;
-    /**
-     * The base price of the object
-     */
     public int basePrice;
-    /**
-     * The sprite id
-     */
     public int sprite;
-    /**
-     * Whether the item is stackable or not
-     */
     public boolean stackable;
-    /**
-     * Whether the item is wieldable or not
-     */
     public boolean wieldable;
-    /**
-     * PictureMask
-     */
+    public String entity;
     public int pictureMask;
 
     public String getCommand() {
@@ -48,6 +31,10 @@ public class ItemDef extends EntityDef {
 
     public boolean isWieldable() {
         return wieldable;
+    }
+
+    public String getEntity() {
+        return entity;
     }
 
     public int getPictureMask() {

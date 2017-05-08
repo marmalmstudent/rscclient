@@ -3,7 +3,7 @@ package client.menus;
 import java.awt.Rectangle;
 
 import client.GameImage;
-import client.model.Sprite;
+import model.Sprite;
 
 public class TradeConfirmPanel extends InGameGridPanel
 {

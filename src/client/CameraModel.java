@@ -1,6 +1,5 @@
 package client;
 
-
 public class CameraModel {
 
     public CameraModel() {

@@ -1,4 +1,4 @@
-package client.entityhandling.defs;
+package entityhandling.defs;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
