@@ -7255,17 +7255,17 @@ public class mudclient extends GameWindowMiddleMan
 				k5 += 8;
 				tradeConfirmOtherItemCount = data[k5++] & 0xff;
 				for (int l11 = 0; l11 < tradeConfirmOtherItemCount; l11++) {
-					tradeConfirmOtherItems[l11] = DataOperations.getUnsigned2Bytes(data, k5);
+					tradeConfirmOtherItemsI[l11] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
 					k5 += 2;
-					tradeConfirmOtherItemsCount[l11] = DataOperations.readInt(data, k5);
+					tradeConfirmOtherItemsI[l11].amount = DataOperations.readInt(data, k5);
 					k5 += 4;
 				}
 
 				tradeConfirmItemCount = data[k5++] & 0xff;
 				for (int k17 = 0; k17 < tradeConfirmItemCount; k17++) {
-					tradeConfirmItems[k17] = DataOperations.getUnsigned2Bytes(data, k5);
+					tradeConfirmItemsI[k17] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
 					k5 += 2;
-					tradeConfirmItemsCount[k17] = DataOperations.readInt(data, k5);
+					tradeConfirmItemsI[k17].amount = DataOperations.readInt(data, k5);
 					k5 += 4;
 				}
 
@@ -7275,9 +7275,9 @@ public class mudclient extends GameWindowMiddleMan
 				duelOpponentItemCount = data[1] & 0xff;
 				int l5 = 2;
 				for (int i12 = 0; i12 < duelOpponentItemCount; i12++) {
-					duelOpponentItems[i12] = DataOperations.getUnsigned2Bytes(data, l5);
+					duelOpponentItemsI[i12] = new Item(DataOperations.getUnsigned2Bytes(data, l5));
 					l5 += 2;
-					duelOpponentItemsCount[i12] = DataOperations.readInt(data, l5);
+					duelOpponentItemsI[i12].amount = DataOperations.readInt(data, l5);
 					l5 += 4;
 				}
 
@@ -7654,9 +7654,9 @@ public class mudclient extends GameWindowMiddleMan
 					itemsTitleHeight + 12, 1, 0xffffff);
 		for (int line = 0; line < tradeConfirmItemCount; line++)
 		{
-			String s = EntityHandler.getItemDef(tradeConfirmItems[line]).getName();
-			if (EntityHandler.getItemDef(tradeConfirmItems[line]).isStackable())
-				s = s + " x " + method74(tradeConfirmItemsCount[line]);
+			String s = tradeConfirmItemsI[line].name();
+			if (tradeConfirmItemsI[line].stackable())
+				s = s + " x " + method74(tradeConfirmItemsI[line].amount);
 			gameGraphics.drawText(s, tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
 					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
 		}
@@ -7667,9 +7667,9 @@ public class mudclient extends GameWindowMiddleMan
 					itemsTitleHeight + 12, 1, 0xffffff);
 		for (int line = 0; line < tradeConfirmOtherItemCount; line++)
 		{
-			String s1 = EntityHandler.getItemDef(tradeConfirmOtherItems[line]).getName();
-			if (EntityHandler.getItemDef(tradeConfirmOtherItems[line]).isStackable())
-				s1 = s1 + " x " + method74(tradeConfirmOtherItemsCount[line]);
+			String s1 = tradeConfirmOtherItemsI[line].name();
+			if (tradeConfirmOtherItemsI[line].stackable())
+				s1 = s1 + " x " + method74(tradeConfirmOtherItemsI[line].amount);
 			gameGraphics.drawText(s1, tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
 					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
 		}
@@ -8052,11 +8052,16 @@ public class mudclient extends GameWindowMiddleMan
 		for (int i6 = 0; i6 < duelOpponentItemCount; i6++) {
 			int k6 = 9 + byte0 + (i6 % 4) * 49;
 			int l6 = 124 + byte1 + (i6 / 4) * 34;
-			gameGraphics.spriteClip4(k6, l6, 48, 32, SPRITE_ITEM_START + EntityHandler.getItemDef(duelOpponentItems[i6]).getSprite(), EntityHandler.getItemDef(duelOpponentItems[i6]).getPictureMask(), 0, 0, false);
-			if (EntityHandler.getItemDef(duelOpponentItems[i6]).isStackable())
-				gameGraphics.drawString(String.valueOf(duelOpponentItemsCount[i6]), k6 + 1, l6 + 10, 1, 0xffff00);
+			gameGraphics.spriteClip4(k6, l6, 48, 32,
+					SPRITE_ITEM_START + duelOpponentItemsI[i6].icon(),
+					duelOpponentItemsI[i6].color(), 0, 0, false);
+			if (duelOpponentItemsI[i6].stackable())
+				gameGraphics.drawString(Integer.toString(duelOpponentItemsI[i6].amount),
+						k6 + 1, l6 + 10, 1, 0xffff00);
 			if (super.mouseX > k6 && super.mouseX < k6 + 48 && super.mouseY > l6 && super.mouseY < l6 + 32)
-				gameGraphics.drawString(EntityHandler.getItemDef(duelOpponentItems[i6]).getName() + ": @whi@" + EntityHandler.getItemDef(duelOpponentItems[i6]).getDescription(), byte0 + 8, byte1 + 273, 1, 0xffff00);
+				gameGraphics.drawString(
+						duelOpponentItemsI[i6].name() + ": @whi@" + duelOpponentItemsI[i6].description(),
+						byte0 + 8, byte1 + 273, 1, 0xffff00);
 		}
 
 	}
@@ -8587,8 +8592,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		startTime = System.currentTimeMillis();
 		duelMyItemsI = new Item[8];
-		duelMyItems = new int[8];
-		duelMyItemsCount = new int[8];
 		configAutoCameraAngle = true;
 		questionMenuAnswer = new String[10];
 		lastNpcArray = new Mob[500];
@@ -8597,10 +8600,8 @@ public class mudclient extends GameWindowMiddleMan
 		menuText1 = new String[250];
 		duelOpponentAccepted = false;
 		duelMyAccepted = false;
-		tradeConfirmItems = new int[14];
-		tradeConfirmItemsCount = new int[14];
-		tradeConfirmOtherItems = new int[14];
-		tradeConfirmOtherItemsCount = new int[14];
+		tradeConfirmItemsI = new Item[14];
+		tradeConfirmOtherItemsI = new Item[14];
 		serverMessage = "";
 		duelOpponentName = "";
 		inventory = new Item[35];
@@ -8639,8 +8640,7 @@ public class mudclient extends GameWindowMiddleMan
 		sectionYArray = new int[8000];
 		selectedItem = -1;
 		selectedItemName = "";
-		duelOpponentItems = new int[8];
-		duelOpponentItemsCount = new int[8];
+		duelOpponentItemsI = new Item[8];
 		anIntArray757 = new int[50];
 		menuID = new int[250];
 		showCharacterLookScreen = false;
@@ -8779,28 +8779,18 @@ public class mudclient extends GameWindowMiddleMan
 	
 	private int duelMyItemCount;
 	private Item duelMyItemsI[];
-	private int duelMyItems[];
-	private int duelMyItemsCount[];
 	
 	private int tradeConfirmItemCount;
 	private Item tradeConfirmItemsI[];
-	private int tradeConfirmItems[];
-	private int tradeConfirmItemsCount[];
 	
 	private int tradeConfirmOtherItemCount;
 	private Item tradeConfirmOtherItemsI[];
-	private int tradeConfirmOtherItems[];
-	private int tradeConfirmOtherItemsCount[];
 	
 	protected int inventoryCount;
 	protected Item inventory[];
-	protected int inventoryItems[];
-	protected int inventoryItemsCount[];
 	
 	private int duelOpponentItemCount;
 	private Item duelOpponentItemsI[];
-	private int duelOpponentItems[];
-	private int duelOpponentItemsCount[];
 	
 	private int duelConfirmOpponentItemCount;
 	private Item duelConfirmOpponentItemsI[];
