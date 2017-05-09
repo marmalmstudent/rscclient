@@ -8763,12 +8763,62 @@ public class mudclient extends GameWindowMiddleMan
 
 	}
 
+	private Item bankItemsI[];
+	private int bankItems[];
+	private int bankItemsCount[];
+	
+	private int duelMyItemCount;
+	private Item duelMyItemsI[];
+	private int duelMyItems[];
+	private int duelMyItemsCount[];
+	
+	private int tradeConfirmItemCount;
+	private Item tradeConfirmItemsI[];
+	private int tradeConfirmItems[];
+	private int tradeConfirmItemsCount[];
+	
+	private int tradeConfirmOtherItemCount;
+	private Item tradeConfirmOtherItemsI[];
+	private int tradeConfirmOtherItems[];
+	private int tradeConfirmOtherItemsCount[];
+	
+	protected int inventoryCount;
+	protected Item inventory[];
+	protected int inventoryItems[];
+	protected int inventoryItemsCount[];
+	
+	private int duelOpponentItemCount;
+	private Item duelOpponentItemsI[];
+	private int duelOpponentItems[];
+	private int duelOpponentItemsCount[];
+	
+	private int duelConfirmOpponentItemCount;
+	private Item duelConfirmOpponentItemsI[];
+	private int duelConfirmOpponentItems[];
+	private int duelConfirmOpponentItemsCount[];
+
+	private Item newBankItemsI[];
+	private int newBankItems[];
+	private int newBankItemsCount[];
+	
+	private int duelConfirmMyItemCount;
+	private Item duelConfirmMyItemsI[];
+	private int duelConfirmMyItems[];
+	private int duelConfirmMyItemsCount[];
+	
+	protected int tradeOtherItemCount;
+	private Item tradeOtherItemsI[];
+	protected int tradeOtherItems[];
+	protected int tradeOtherItemsCount[];
+	
+	protected int tradeMyItemCount;
+	private Item tradeMyItemsI[];
+	protected int tradeMyItems[];
+	protected int tradeMyItemsCount[];
+	
 	private boolean combatWindow;
 	private int lastLoggedInDays;
 	private int subscriptionLeftDays;
-	private int duelMyItemCount;
-	private int duelMyItems[];
-	private int duelMyItemsCount[];
 	private boolean configAutoCameraAngle;
 	private String questionMenuAnswer[];
 	private int anInt658;
@@ -8782,22 +8832,12 @@ public class mudclient extends GameWindowMiddleMan
 	private String menuText1[];
 	private boolean duelOpponentAccepted;
 	private boolean duelMyAccepted;
-	private int tradeConfirmItemCount;
-	private int tradeConfirmItems[];
-	private int tradeConfirmItemsCount[];
-	private int tradeConfirmOtherItemCount;
-	private int tradeConfirmOtherItems[];
-	private int tradeConfirmOtherItemsCount[];
 	private String serverMessage;
 	private String duelOpponentName;
 	private int mouseOverBankPageText;
 	private int playerCount;
 	private int lastPlayerCount;
 	private int fightCount;
-	protected Item inventory[];
-	protected int inventoryCount;
-	protected int inventoryItems[];
-	protected int inventoryItemsCount[];
 	private int wearing[];
 	private int mobMessageCount;
 	String mobMsg[];
@@ -8869,9 +8909,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int menuWidth;
 	private int menuHeight;
 	private int menuLength;
-	private int duelOpponentItemCount;
-	private int duelOpponentItems[];
-	private int duelOpponentItemsCount[];
 	private int anIntArray757[];
 	private int menuID[];
 	private boolean showCharacterLookScreen;
@@ -8888,9 +8925,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean duelNoPrayer;
 	private boolean duelNoWeapons;
 	private int anIntArray782[];
-	private int duelConfirmOpponentItemCount;
-	private int duelConfirmOpponentItems[];
-	private int duelConfirmOpponentItemsCount[];
 	private int anIntArray786[];
 	private int anIntArray787[];
 	private int anIntArray788[];
@@ -8976,11 +9010,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int characterDesignAcceptButton;
 	private int anIntArray858[];
 	private int anIntArray859[];
-	private int newBankItems[];
-	private int newBankItemsCount[];
-	private int duelConfirmMyItemCount;
-	private int duelConfirmMyItems[];
-	private int duelConfirmMyItemsCount[];
 	private int mobArrayIndexes[];
 	private Menu menuNewUser;
 	private int lastAutoCameraRotatePlayerX;
@@ -9013,15 +9042,10 @@ public class mudclient extends GameWindowMiddleMan
 	private int newUserOkButton;
 	protected int mouseButtonClick;
 	private int cameraHeight;
-	private int bankItems[];
-	private int bankItemsCount[];
 	private boolean notInWilderness;
 	private int selectedSpell;
 	private int screenRotationY;
 	private int anInt911;
-	protected int tradeOtherItemCount;
-	protected int tradeOtherItems[];
-	protected int tradeOtherItemsCount[];
 	private int menuIndexes[];
 	private boolean zoomCamera;
 	private AudioReader audioReader;
@@ -9077,9 +9101,6 @@ public class mudclient extends GameWindowMiddleMan
 	private byte sounds[];
 	private boolean aBooleanArray970[];
 	private int objectCount;
-	protected int tradeMyItemCount;
-	protected int tradeMyItems[];
-	protected int tradeMyItemsCount[];
 	public int windowWidth;
 	public int windowHeight;
 	public int windowHalfWidth;
