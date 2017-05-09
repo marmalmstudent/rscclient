@@ -5777,8 +5777,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final void updateBankItems() {
 		bankItemCount = newBankItemCount;
 		for (int i = 0; i < newBankItemCount; i++) {
-			bankItems[i] = newBankItems[i];
-			bankItemsCount[i] = newBankItemsCount[i];
+			bankItemsI[i] = newBankItemsI[i];
 		}
 
 		for (int j = 0; j < inventoryCount; j++) {
@@ -5787,16 +5786,14 @@ public class mudclient extends GameWindowMiddleMan
 			int k = inventory[j].id;
 			boolean flag = false;
 			for (int l = 0; l < bankItemCount; l++) {
-				if (bankItems[l] != k)
+				if (bankItemsI[l].id != k)
 					continue;
 				flag = true;
 				break;
 			}
 
 			if (!flag) {
-				bankItems[bankItemCount] = k;
-				bankItemsCount[bankItemCount] = 0;
-				bankItemCount++;
+				bankItemsI[bankItemCount++] = new Item(k, 0);
 			}
 		}
 
@@ -8668,8 +8665,7 @@ public class mudclient extends GameWindowMiddleMan
 		shopItemCount = new int[256];
 		anIntArray858 = new int[50];
 		anIntArray859 = new int[50];
-		newBankItems = new int[256];
-		newBankItemsCount = new int[256];
+		newBankItemsI = new Item[256];
 		duelConfirmMyItemsI = new Item[8];
 		mobArrayIndexes = new int[500];
 		objectX = new int[1500];
@@ -8687,8 +8683,6 @@ public class mudclient extends GameWindowMiddleMan
 		cameraHeight = 550; // TODO
 		cameraZoom = 1.0;
 		bankItemsI = new Item[256];
-		bankItems = new int[256];
-		bankItemsCount = new int[256];
 		notInWilderness = false;
 		selectedSpell = -1;
 		anInt911 = 2;
@@ -8759,39 +8753,28 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private Item bankItemsI[];
-	private int bankItems[];
-	private int bankItemsCount[];
+	private Item newBankItemsI[];
 	
 	private int duelMyItemCount;
 	private Item duelMyItemsI[];
-	
-	private int tradeConfirmItemCount;
-	private Item tradeConfirmItemsI[];
-	
-	private int tradeConfirmOtherItemCount;
-	private Item tradeConfirmOtherItemsI[];
-	
-	protected int inventoryCount;
-	protected Item inventory[];
-	
+	private int duelConfirmMyItemCount;
+	private Item duelConfirmMyItemsI[];
 	private int duelOpponentItemCount;
 	private Item duelOpponentItemsI[];
-	
 	private int duelConfirmOpponentItemCount;
 	private Item duelConfirmOpponentItemsI[];
 
-	private Item newBankItemsI[];
-	private int newBankItems[];
-	private int newBankItemsCount[];
-	
-	private int duelConfirmMyItemCount;
-	private Item duelConfirmMyItemsI[];
-	
-	protected int tradeOtherItemCount;
-	private Item tradeOtherItemsI[];
-	
 	protected int tradeMyItemCount;
 	private Item tradeMyItemsI[];
+	private int tradeConfirmItemCount;
+	private Item tradeConfirmItemsI[];
+	protected int tradeOtherItemCount;
+	private Item tradeOtherItemsI[];
+	private int tradeConfirmOtherItemCount;
+	private Item tradeConfirmOtherItemsI[];
+
+	protected int inventoryCount;
+	protected Item inventory[];
 	
 	private boolean combatWindow;
 	private int lastLoggedInDays;
