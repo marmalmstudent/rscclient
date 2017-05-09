@@ -83,10 +83,6 @@ public class mudclient extends GameWindowMiddleMan
 	public static int zoom;
 	public static int fwdbwd;
 	public static int lftrit;
-	public int[] menuActionID;
-	public int[] menuActionCmd1;
-	public int[] menuActionCmd2;
-	public int[] menuActionCmd3;
 	public String loginMessage1;
 	public String loginMessage2;
 	public static mudclient mc;
@@ -6049,6 +6045,8 @@ public class mudclient extends GameWindowMiddleMan
 		showBank = false;
 		super.friendsCount = 0;
 		
+		for (int i = 0; i < rightClickMenu.length; rightClickMenu[i++] = new MenuRightClick());
+		
 		for (int i = 0; i < bankItemsI.length; bankItemsI[i++] = new Item(0));
 		for (int i = 0; i < duelMyItemsI.length; duelMyItemsI[i++] = new Item(0));
 		for (int i = 0; i < tradeConfirmItemsI.length; tradeConfirmItemsI[i++] = new Item(0));
@@ -8584,7 +8582,18 @@ public class mudclient extends GameWindowMiddleMan
 		lastNpcArray = new Mob[500];
 		currentUser = "";
 		currentPass = "";
+		
+		rightClickMenu = new MenuRightClick[250];
 		menuText1 = new String[250];
+		menuText2 = new String[250];
+		menuID = new int[250];
+		menuActionX = new int[250];
+		menuActionY = new int[250];
+		menuActionType = new int[250];
+		menuActionVariable = new int[250];
+		menuActionVariable2 = new int[250];
+		menuIndexes = new int[250];
+		
 		duelOpponentAccepted = false;
 		duelMyAccepted = false;
 		tradeConfirmItemsI = new Item[14];
@@ -8629,7 +8638,6 @@ public class mudclient extends GameWindowMiddleMan
 		selectedItemName = "";
 		duelOpponentItemsI = new Item[8];
 		anIntArray757 = new int[50];
-		menuID = new int[250];
 		showCharacterLookScreen = false;
 		lastPlayerArray = new Mob[500];
 		appletMode = true;
@@ -8656,12 +8664,8 @@ public class mudclient extends GameWindowMiddleMan
 		chrHeadGender = 1;
 		selectedBankItem = -1;
 		selectedBankItemType = -2;
-		menuText2 = new String[250];
 		aBooleanArray827 = new boolean[1500];
 		playerStatBase = new int[18];
-		menuActionType = new int[250];
-		menuActionVariable = new int[250];
-		menuActionVariable2 = new int[250];
 		shopItems = new int[256];
 		shopItemCount = new int[256];
 		anIntArray858 = new int[50];
@@ -8673,8 +8677,6 @@ public class mudclient extends GameWindowMiddleMan
 		objectY = new int[1500];
 		objectType = new int[1500];
 		objectID = new int[1500];
-		menuActionX = new int[250];
-		menuActionY = new int[250];
 		ourPlayer = new Mob();
 		serverIndex = -1;
 		showTradeConfirmWindow = false;
@@ -8688,7 +8690,6 @@ public class mudclient extends GameWindowMiddleMan
 		selectedSpell = -1;
 		anInt911 = 2;
 		tradeOtherItemsI = new Item[14];
-		menuIndexes = new int[250];
 		zoomCamera = false;
 		playerStatExperience = new int[18];
 		cameraAutoAngleDebug = false;
@@ -8777,7 +8778,26 @@ public class mudclient extends GameWindowMiddleMan
 	protected int inventoryCount;
 	protected Item inventory[];
 	
-	private MenuRightClick rightClickMenu;
+	private MenuRightClick[] rightClickMenu;
+	private int menuLength;
+
+	private String[] menuText1;
+	private String[] menuText2;
+	private int[] menuID;
+	private int[] menuActionX;
+	private int[] menuActionY;
+	private int[] menuActionType;
+	private int[] menuActionVariable;
+	private int[] menuActionVariable2;
+	private int menuX;
+	private int menuY;
+	private int menuWidth;
+	private int menuHeight;
+	private int[] menuIndexes;
+	public int[] menuActionID;
+	public int[] menuActionCmd1;
+	public int[] menuActionCmd2;
+	public int[] menuActionCmd3;
 	
 	private boolean combatWindow;
 	private int lastLoggedInDays;
@@ -8792,7 +8812,6 @@ public class mudclient extends GameWindowMiddleMan
 	private String currentUser;
 	private String currentPass;
 	private int lastWalkTimeout;
-	private String menuText1[];
 	private boolean duelOpponentAccepted;
 	private boolean duelMyAccepted;
 	private String serverMessage;
@@ -8867,13 +8886,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int sectionYArray[];
 	private int selectedItem;
 	String selectedItemName;
-	private int menuX;
-	private int menuY;
-	private int menuWidth;
-	private int menuHeight;
-	private int menuLength;
 	private int anIntArray757[];
-	private int menuID[];
 	private boolean showCharacterLookScreen;
 	private int newBankItemCount;
 	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
@@ -8925,7 +8938,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int loginCancelButton;
 	private int selectedBankItem;
 	private int selectedBankItemType;
-	private String menuText2[];
 	int anInt826;
 	private boolean aBooleanArray827[];
 	private int playerStatBase[];
@@ -8942,9 +8954,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int actionPictureType;
 	int actionPictureX;
 	int actionPictureY;
-	private int menuActionType[];
-	private int menuActionVariable[];
-	private int menuActionVariable2[];
 	private int shopItems[];
 	private int shopItemCount[];
 	private int npcAnimationArray[][] = {
@@ -8982,8 +8991,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int objectY[];
 	private int objectType[];
 	private int objectID[];
-	private int menuActionX[];
-	private int menuActionY[];
 	private Mob ourPlayer;
 	int sectionX;
 	int sectionY;
@@ -9009,7 +9016,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int selectedSpell;
 	private int screenRotationY;
 	private int anInt911;
-	private int menuIndexes[];
 	private boolean zoomCamera;
 	private AudioReader audioReader;
 	private int playerStatExperience[];
