@@ -171,8 +171,8 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(duelMyItemCount);
 			for (int i = 0; i < duelMyItemCount; i++)
 			{
-				super.streamClass.add2ByteInt(duelMyItems[i]);
-				super.streamClass.add4ByteInt(duelMyItemsCount[i]);
+				super.streamClass.add2ByteInt(duelMyItemsI[i].id);
+				super.streamClass.add4ByteInt(duelMyItemsI[i].amount);
 			}
 			super.streamClass.formatPacket();
 			duelOpponentAccepted = false;
@@ -317,27 +317,23 @@ public class mudclient extends GameWindowMiddleMan
 		boolean addNewItem = true;
 		for (int i = 0; i < duelMyItemCount; i++)
 		{
-			if (duelMyItems[i] != id)
+			if (duelMyItemsI[i].id != id)
 				continue;
 			if (!EntityHandler.getItemDef(id).isStackable())
 				break;
-			if (inventoryCount(id) < (duelMyItemsCount[i] + amount))
+			if (inventoryCount(id) < (duelMyItemsI[i].amount + amount))
 			{
 				displayMessage("@cya@You do not have that many"
 						+ EntityHandler.getItemDef(id).getName()
 						+ " to offer", 3, 0);
 				return;
 			}
-			duelMyItemsCount[i] += amount;
+			duelMyItemsI[i].amount += amount;
 			addNewItem = false;
 			break;
 		}
 		if (addNewItem)
-		{
-			duelMyItems[duelMyItemCount] = id;
-			duelMyItemsCount[duelMyItemCount] = amount;
-			duelMyItemCount++;
-		}
+			duelMyItemsI[duelMyItemCount++] = new Item(id, amount);
 		formatPacket(123, -1, -1);
 	}
 
@@ -1246,12 +1242,12 @@ public class mudclient extends GameWindowMiddleMan
 			{
 				int slotX = bankPan.getGridX() + col*(InGameGridPanel.ITEM_SLOT_WIDTH);
 				int slotY = bankPan.getGridY() + row*(InGameGridPanel.ITEM_SLOT_HEIGHT);
-				drawItemBox(bankPan, bankItems[k7], slotX, slotY,
+				drawItemBox(bankPan, bankItemsI[k7].id, slotX, slotY,
 						selectedBankItem == k7,
-						k7 < bankItemCount && bankItems[k7] != -1);
-				if (k7 < bankItemCount && bankItems[k7] != -1)
-					drawBankText(slotX, slotY, bankItemsCount[k7],
-							inventoryCount(bankItems[k7]));
+						k7 < bankItemCount && bankItemsI[k7].id != -1);
+				if (k7 < bankItemCount && bankItemsI[k7].id != -1)
+					drawBankText(slotX, slotY, bankItemsI[k7].amount,
+							inventoryCount(bankItemsI[k7].id));
 				k7++;
 			}
 		}
@@ -1410,9 +1406,9 @@ public class mudclient extends GameWindowMiddleMan
 		if (selectedBankItem < 0)
 			selectedBankItemId = -1;
 		else
-			selectedBankItemId = bankItems[selectedBankItem];
+			selectedBankItemId = bankItemsI[selectedBankItem].id;
 		if (selectedBankItemId != -1) {
-			int selectedBankItemCount = bankItemsCount[selectedBankItem];
+			int selectedBankItemCount = bankItemsI[selectedBankItem].amount;
 			if (selectedBankItemCount > 0) {
 				gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
 						bankPan.getBottomInfoBoxX() + 2, bankPan.getBottomInfoBoxY() + 15, 1, 0xffffff);
@@ -1500,9 +1496,9 @@ public class mudclient extends GameWindowMiddleMan
 				int slotYMin = row * itemSlotHeight - 1;
 				if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + itemSlotWidth
 						&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + itemSlotHeight
-						&& itemIdx < bankItemCount && bankItems[itemIdx] != -1)
+						&& itemIdx < bankItemCount && bankItemsI[itemIdx].id != -1)
 				{
-					selectedBankItemType = bankItems[itemIdx];
+					selectedBankItemType = bankItemsI[itemIdx].id;
 					selectedBankItem = itemIdx;
 				}
 				itemIdx++;
@@ -1520,10 +1516,10 @@ public class mudclient extends GameWindowMiddleMan
 		if (selectedBankItem < 0)
 			selectedBankItemId = -1;
 		else
-			selectedBankItemId = bankItems[selectedBankItem];
+			selectedBankItemId = bankItemsI[selectedBankItem].id;
 		if (selectedBankItemId != -1)
 		{
-			int selectedBankItemCount = bankItemsCount[selectedBankItem];
+			int selectedBankItemCount = bankItemsI[selectedBankItem].amount;
 			int depAmt = bankPan.getDepAmt(super.mouseX, super.mouseY,
 					inventoryCount(selectedBankItemId));
 			if (depAmt != 0)
@@ -1560,7 +1556,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (selectedBankItem >= bankItemCount || selectedBankItem < 0)
 			selectedBankItem = -1;
 		if (selectedBankItem != -1
-				&& bankItems[selectedBankItem] != selectedBankItemType)
+				&& bankItemsI[selectedBankItem].id != selectedBankItemType)
 		{
 			selectedBankItem = -1;
 			selectedBankItemType = -2;
@@ -6057,7 +6053,17 @@ public class mudclient extends GameWindowMiddleMan
 		showBank = false;
 		super.friendsCount = 0;
 		
+		for (int i = 0; i < bankItemsI.length; bankItemsI[i++] = new Item(0));
+		for (int i = 0; i < duelMyItemsI.length; duelMyItemsI[i++] = new Item(0));
+		for (int i = 0; i < tradeConfirmItemsI.length; tradeConfirmItemsI[i++] = new Item(0));
+		for (int i = 0; i < tradeConfirmOtherItemsI.length; tradeConfirmOtherItemsI[i++] = new Item(0));
 		for (int i = 0; i < inventory.length; inventory[i++] = new Item(0));
+		for (int i = 0; i < duelOpponentItemsI.length; duelOpponentItemsI[i++] = new Item(0));
+		for (int i = 0; i < duelConfirmOpponentItemsI.length; duelConfirmOpponentItemsI[i++] = new Item(0));
+		for (int i = 0; i < newBankItemsI.length; newBankItemsI[i++] = new Item(0));
+		for (int i = 0; i < duelConfirmMyItemsI.length; duelConfirmMyItemsI[i++] = new Item(0));
+		for (int i = 0; i < tradeOtherItemsI.length; tradeOtherItemsI[i++] = new Item(0));
+		for (int i = 0; i < tradeMyItemsI.length; tradeMyItemsI[i++] = new Item(0));
 	}
 
 	private void drawTradePanel()
@@ -7839,11 +7845,11 @@ public class mudclient extends GameWindowMiddleMan
 						int l1 = 0;
 						int k2 = inventory[k].id;
 						for (int k3 = 0; k3 < duelMyItemCount; k3++)
-							if (duelMyItems[k3] == k2)
+							if (duelMyItemsI[k3].id == k2)
 								if (inventory[k].stackable()) {
 									for (int i4 = 0; i4 < itemIncrement; i4++) {
-										if (duelMyItemsCount[k3] < inventory[k].amount)
-											duelMyItemsCount[k3]++;
+										if (duelMyItemsI[k3].amount < inventory[k].amount)
+											duelMyItemsI[k3].amount++;
 										flag1 = true;
 									}
 
@@ -7854,8 +7860,7 @@ public class mudclient extends GameWindowMiddleMan
 						if (inventoryCount(k2) <= l1)
 							flag1 = true;
 						if (!flag1 && duelMyItemCount < 8) {
-							duelMyItems[duelMyItemCount] = k2;
-							duelMyItemsCount[duelMyItemCount] = 1;
+							duelMyItemsI[duelMyItemCount] = new Item(k2, 1);
 							duelMyItemCount++;
 							flag1 = true;
 						}
@@ -7863,8 +7868,8 @@ public class mudclient extends GameWindowMiddleMan
 							super.streamClass.createPacket(123);
 							super.streamClass.addByte(duelMyItemCount);
 							for (int duelItem = 0; duelItem < duelMyItemCount; duelItem++) {
-								super.streamClass.add2ByteInt(duelMyItems[duelItem]);
-								super.streamClass.add4ByteInt(duelMyItemsCount[duelItem]);
+								super.streamClass.add2ByteInt(duelMyItemsI[duelItem].id);
+								super.streamClass.add4ByteInt(duelMyItemsI[duelItem].amount);
 							}
 
 							super.streamClass.formatPacket();
@@ -7876,17 +7881,16 @@ public class mudclient extends GameWindowMiddleMan
 				if (i > 8 && j > 30 && i < 205 && j < 129) {
 					int l = (i - 9) / 49 + ((j - 31) / 34) * 4;
 					if (l >= 0 && l < duelMyItemCount) {
-						int j1 = duelMyItems[l];
+						int j1 = duelMyItemsI[l].id;
 						for (int i2 = 0; i2 < itemIncrement; i2++) {
-							if (EntityHandler.getItemDef(j1).isStackable() && duelMyItemsCount[l] > 1) {
-								duelMyItemsCount[l]--;
+							if (EntityHandler.getItemDef(j1).isStackable() && duelMyItemsI[l].amount > 1) {
+								duelMyItemsI[l].amount--;
 								continue;
 							}
 							duelMyItemCount--;
 							mouseDownTime = 0;
 							for (int l2 = l; l2 < duelMyItemCount; l2++) {
-								duelMyItems[l2] = duelMyItems[l2 + 1];
-								duelMyItemsCount[l2] = duelMyItemsCount[l2 + 1];
+								duelMyItemsI[l2] = duelMyItemsI[l2 + 1];
 							}
 
 							break;
@@ -7895,8 +7899,8 @@ public class mudclient extends GameWindowMiddleMan
 						super.streamClass.createPacket(123);
 						super.streamClass.addByte(duelMyItemCount);
 						for (int i3 = 0; i3 < duelMyItemCount; i3++) {
-							super.streamClass.add2ByteInt(duelMyItems[i3]);
-							super.streamClass.add4ByteInt(duelMyItemsCount[i3]);
+							super.streamClass.add2ByteInt(duelMyItemsI[i3].id);
+							super.streamClass.add4ByteInt(duelMyItemsI[i3].amount);
 						}
 
 						super.streamClass.formatPacket();
@@ -8034,11 +8038,15 @@ public class mudclient extends GameWindowMiddleMan
 		for (int j5 = 0; j5 < duelMyItemCount; j5++) {
 			int l5 = 9 + byte0 + (j5 % 4) * 49;
 			int j6 = 31 + byte1 + (j5 / 4) * 34;
-			gameGraphics.spriteClip4(l5, j6, 48, 32, SPRITE_ITEM_START + EntityHandler.getItemDef(duelMyItems[j5]).getSprite(), EntityHandler.getItemDef(duelMyItems[j5]).getPictureMask(), 0, 0, false);
-			if (EntityHandler.getItemDef(duelMyItems[j5]).isStackable())
-				gameGraphics.drawString(String.valueOf(duelMyItemsCount[j5]), l5 + 1, j6 + 10, 1, 0xffff00);
+			gameGraphics.spriteClip4(l5, j6, 48, 32, SPRITE_ITEM_START + duelMyItemsI[j5].icon(),
+					duelMyItemsI[j5].color(), 0, 0, false);
+			if (duelMyItemsI[j5].stackable())
+				gameGraphics.drawString(Integer.toString(duelMyItemsI[j5].amount),
+						l5 + 1, j6 + 10, 1, 0xffff00);
 			if (super.mouseX > l5 && super.mouseX < l5 + 48 && super.mouseY > j6 && super.mouseY < j6 + 32)
-				gameGraphics.drawString(EntityHandler.getItemDef(duelMyItems[j5]).getName() + ": @whi@" + EntityHandler.getItemDef(duelMyItems[j5]).getDescription(), byte0 + 8, byte1 + 273, 1, 0xffff00);
+				gameGraphics.drawString(
+						duelMyItemsI[j5].name() + ": @whi@" + duelMyItemsI[j5].description(),
+						byte0 + 8, byte1 + 273, 1, 0xffff00);
 		}
 
 		for (int i6 = 0; i6 < duelOpponentItemCount; i6++) {
@@ -8578,6 +8586,7 @@ public class mudclient extends GameWindowMiddleMan
 			localhost = "unknown";
 		}
 		startTime = System.currentTimeMillis();
+		duelMyItemsI = new Item[8];
 		duelMyItems = new int[8];
 		duelMyItemsCount = new int[8];
 		configAutoCameraAngle = true;
@@ -8690,6 +8699,7 @@ public class mudclient extends GameWindowMiddleMan
 		serverMessageBoxTop = false;
 		cameraHeight = 550; // TODO
 		cameraZoom = 1.0;
+		bankItemsI = new Item[256];
 		bankItems = new int[256];
 		bankItemsCount = new int[256];
 		notInWilderness = false;
