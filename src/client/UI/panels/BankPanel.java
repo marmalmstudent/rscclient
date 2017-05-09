@@ -3,10 +3,14 @@ package client.UI.panels;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
+import client.mudclient;
+import client.UI.InGameButton;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
 import client.UI.InGameGrid;
 import client.UI.InGamePanel;
+import entityhandling.EntityHandler;
+import model.Item;
 
 public class BankPanel extends InGamePanel
 {
@@ -121,4 +125,140 @@ public class BankPanel extends InGamePanel
 	
     public int getBankCountTextColor() { return bankCountTextColor; }
     public int getInvCountTextColor() { return invCountTextColor; }
+    
+	public void drawBankInfo()
+	{
+		graphics.drawBoxAlpha(
+				getTopInfoBoxX(), getTopInfoBoxY(),
+				getTopInfoBoxWidth(), getTopInfoBoxHeight(),
+				getBGColor(), getBGAlpha());
+		graphics.drawString("Number in bank in green",
+				getTopInfoBoxX(),
+				getTopInfoBoxY() + 12, 1, 0x00ff00);
+		graphics.drawString("Number held in blue",
+				getTopInfoBoxX() + getTopInfoBoxWidth() - 111,
+				getTopInfoBoxY() + 12, 1, 0x00ffff);
+	}
+	
+	public void drawBankDepWithPanel(Item[] bankItems, Item[] invItems,
+			int selectedBankItemIdx, int mouseX, int mouseY)
+	{
+		graphics.drawBoxAlpha(
+				getBottomInfoBoxX(), getBottomInfoBoxY(),
+				getBottomInfoBoxWidth(), getBottomInfoBoxHeight(),
+				getBGColor(), getBGAlpha());
+		graphics.drawLineX(
+				getBottomInfoBoxX(),
+				getBottomInfoBoxY() + getBottomInfoBoxHeight()/2,
+				getBottomInfoBoxWidth(), 0);
+		if (selectedBankItemIdx == -1)
+		{
+			graphics.drawText("Select an object to withdraw or deposit",
+					getBottomInfoBoxX() + getBottomInfoBoxWidth()/2,
+					getBottomInfoBoxY() + 15, 3, 0xffff00);
+			return;
+		}
+		int selectedBankItemId;
+		if (selectedBankItemIdx < 0)
+			selectedBankItemId = -1;
+		else
+			selectedBankItemId = bankItems[selectedBankItemIdx].id;
+		if (selectedBankItemId != -1) {
+			int selectedBankItemCount = bankItems[selectedBankItemIdx].amount;
+			if (selectedBankItemCount > 0) {
+				graphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
+						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 15, 1, 0xffffff);
+				drawBankWithText(getWithButtonPanel(), selectedBankItemCount,
+						mouseX, mouseY);
+			}
+			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems) > 0) {
+				graphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
+						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 40, 1, 0xffffff);
+				drawBankDepText(getDepButtonPanel(), bankItems, invItems,
+						selectedBankItemIdx, mouseX, mouseY);
+			}
+		}
+	}
+
+	public void drawBankWithText(InGameButtonPanel btnPan,
+			int selectedBankItemCount, int mouseX, int mouseY)
+	{
+		int yOffset = 10;
+
+		InGameButton button;
+		int count = 1;
+		for (int i = 0; i < btnPan.getNbrButtons()-1; ++i)
+		{
+			button = btnPan.getButton(i); 
+			if (selectedBankItemCount >= count)
+			{
+				if (button.isMouseOverButton(mouseX, mouseY))
+					graphics.drawString(
+							button.getButtonText(), button.getX() + 2,
+							button.getY() + yOffset, 1,
+							button.getMouseOverColor());
+				else
+
+					graphics.drawString(
+							button.getButtonText(), button.getX() + 2,
+							button.getY() + yOffset, 1,
+							button.getMouseNotOverColor());
+			}
+
+			count *= 10;
+		}
+		button = btnPan.getButton(
+				btnPan.getNbrButtons()-1);
+		if (button.isMouseOverButton(mouseX, mouseY))
+			graphics.drawString(
+					button.getButtonText(), button.getX() + 2,
+					button.getY() + yOffset, 1,
+					button.getMouseOverColor());
+		else
+			graphics.drawString(
+					button.getButtonText(), button.getX() + 2,
+					button.getY() + yOffset, 1,
+					button.getMouseNotOverColor());
+	}
+
+	public void drawBankDepText(InGameButtonPanel btnPan,
+			Item[] bankItems, Item[] invItems,
+			int selectedBankItemIdx, int mouseX, int mouseY)
+	{
+		int yOffset = 10;
+
+		InGameButton button;
+		int count = 1;
+		for (int i = 0; i < btnPan.getNbrButtons()-1; ++i)
+		{
+			button = btnPan.getButton(i);
+			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems) >= count)
+			{
+				if (button.isMouseOverButton(mouseX, mouseY))
+					graphics.drawString(
+							button.getButtonText(), button.getX() + 2,
+							button.getY() + yOffset, 1,
+							button.getMouseOverColor());
+				else
+
+					graphics.drawString(
+							button.getButtonText(), button.getX() + 2,
+							button.getY() + yOffset, 1,
+							button.getMouseNotOverColor());
+			}
+			count *= 10;
+		}
+		button = btnPan.getButton(
+				btnPan.getNbrButtons()-1);
+		if (button.isMouseOverButton(mouseX, mouseY))
+			graphics.drawString(
+					button.getButtonText(), button.getX() + 2,
+					button.getY() + yOffset, 1,
+					button.getMouseOverColor());
+		else
+			graphics.drawString(
+					button.getButtonText(), button.getX() + 2,
+					button.getY() + yOffset, 1,
+					button.getMouseNotOverColor());
+	}
 }

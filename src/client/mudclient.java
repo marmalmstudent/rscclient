@@ -591,6 +591,20 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		return amount;
 	}
+	
+	public static int itemCount(Item item, Item[] items)
+	{
+		int amount = 0;
+		for (int index = 0; index < items.length; index++)
+		{
+			if (items[index].id == item.id)
+				if (!item.stackable())
+					++amount;
+				else
+					amount += items[index].amount;
+		}
+		return amount;
+	}
 
 	/**
 	 * Handles updating the welcome login screen, displaying the option to
@@ -1605,8 +1619,14 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		bankPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawBankTabs();
-		drawBankInfo();
-		drawBankGrid();
+		bankPan.drawBankInfo();
+		InGameGrid bankGrid = bankPan.getBankGrid();
+		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
+		bankGrid.drawStorableGrid(bankItemsI, itemIdx, bankItemCount,
+				bankPan.getBankCountTextColor(), selectedBankItem, inventory, 0, inventoryCount,
+				0x00ffff);
+		/* needs fixing, item amounts don't add up and game seems to run slow */
+		//bankPan.drawBankDepWithPanel(bankItemsI, inventory, selectedBankItem, super.mouseX, super.mouseY);
 		drawBankDepWithPanel();
 	}
 
@@ -1729,7 +1749,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final void drawInventoryMenu(boolean flag)
 	{
 		invPan.getFrame().drawComponent(super.mouseX, super.mouseY);
-		invPan.getInvGrid().drawInventoryGrid(inventory,
+		invPan.getInvGrid().drawStaticGrid(inventory,
 				inventoryCount, wearing,
 				invPan.getInvCountTextColor());
 		if (!flag)

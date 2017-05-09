@@ -50,11 +50,13 @@ public class InGameGrid extends InGamePanel
         		|| mouseY > y + height));
 	}
 
-	public void drawStorableGrid(Item[] depositedItems, Item[] withdrawnItems,
-			int itemStart, int itemCount, int selectedIdx,
-			int depositedTextColor, int withdrawnTextColor)
+	public void drawStorableGrid(
+			Item[] depositedItems, int depItemStart, int depItemCount,
+			int depositedTextColor, int selectedDepIdx,
+			Item[] withdrawnItems, int withItemStart, int withItemCount,
+			int withdrawnTextColor)
 	{
-		int itemIdx = itemStart;
+		int itemIdx = depItemStart;
 		for (int row = 0; row < nRows; row++)
 		{
 			for (int col = 0; col < nCols; col++)
@@ -62,14 +64,14 @@ public class InGameGrid extends InGamePanel
 				int slotX = x + col*ITEM_SLOT_WIDTH;
 				int slotY = y + row*ITEM_SLOT_HEIGHT;
 				drawItemBox(depositedItems[itemIdx], slotX, slotY,
-						selectedIdx == itemIdx,
-						itemIdx < itemCount && depositedItems[itemIdx].id != -1);
-				if (itemIdx < itemCount && depositedItems[itemIdx].id != -1)
+						selectedDepIdx == itemIdx,
+						itemIdx < depItemCount && depositedItems[itemIdx].id != -1);
+				if (itemIdx < depItemCount && depositedItems[itemIdx].id != -1)
 				{
-					drawDepositedText(col, row, depositedItems[itemIdx].amount,
+					drawDepositedText(slotX, slotY, depositedItems[itemIdx].amount,
 							depositedTextColor);
 					drawWithdrawnText(slotX, slotY,
-							itemCount(depositedItems[itemIdx], withdrawnItems),
+							mudclient.itemCount(depositedItems[itemIdx], withdrawnItems),
 							withdrawnTextColor);
 				}
 				itemIdx++;
@@ -77,7 +79,7 @@ public class InGameGrid extends InGamePanel
 		}
 	}
 
-	public void drawInventoryGrid(Item[] items, int itemCount, int[] selected,
+	public void drawStaticGrid(Item[] items, int itemCount, int[] selected,
 			int textColor)
 	{
 		for (int j = 0; j < getSlots(); j++)
@@ -93,20 +95,7 @@ public class InGameGrid extends InGamePanel
 				drawDepositedText(col, row, items[j].amount, textColor);
 		}
 	}
-	
-	private int itemCount(Item item, Item[] items)
-	{
-		int amount = 0;
-		for (int index = 0; index < items.length; index++)
-		{
-			if (items[index].id == item.id)
-				if (!item.stackable())
-					++amount;
-				else
-					amount += items[index].amount;
-		}
-		return amount;
-	}
+
 	public void drawDepositedText(int col, int row, int amount, int color)
 	{
 		graphics.drawString(mudclient.getAbbreviatedValue(amount),
