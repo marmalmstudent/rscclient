@@ -12,6 +12,7 @@ public class ItemDef extends EntityDef {
     public boolean wieldable;
     public String entity;
     public int pictureMask;
+    public int id;
 
     public String getCommand() {
         return command;
@@ -39,6 +40,10 @@ public class ItemDef extends EntityDef {
 
     public int getPictureMask() {
         return pictureMask;
+    }
+    
+    public int getID() {
+    	return id;
     }
 
 }
