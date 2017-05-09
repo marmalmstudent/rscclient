@@ -4744,9 +4744,9 @@ public class mudclient extends GameWindowMiddleMan
 					for (int i2 = 0; i2 < 8; i2++) {
 						int l2 = 7 + i2 * 49;
 						int l3 = 28 + i1 * 34;
-						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItems[k] != -1) {
+						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItemsI[k].id != -1) {
 							selectedShopItemIndex = k;
-							selectedShopItemType = shopItems[k];
+							selectedShopItemType = shopItemsI[k].id;
 						}
 						k++;
 					}
@@ -4754,19 +4754,20 @@ public class mudclient extends GameWindowMiddleMan
 				}
 
 				if (selectedShopItemIndex >= 0) {
-					int j2 = shopItems[selectedShopItemIndex];
+					int j2 = shopItemsI[selectedShopItemIndex].id;
 					if (j2 != -1) {
-						if (shopItemCount[selectedShopItemIndex] > 0 && i > 298 && j >= 204 && i < 408 && j <= 215) {
+						if (shopItemsI[selectedShopItemIndex].amount > 0
+								&& i > 298 && j >= 204 && i < 408 && j <= 215) {
 							int i4 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
 							super.streamClass.createPacket(128);
-							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex]);
+							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].id);
 							super.streamClass.add4ByteInt(i4);
 							super.streamClass.formatPacket();
 						}
 						if (inventoryCount(j2) > 0 && i > 2 && j >= 229 && i < 112 && j <= 240) {
 							int j4 = (shopItemSellPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
 							super.streamClass.createPacket(255);
-							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex]);
+							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].id);
 							super.streamClass.add4ByteInt(j4);
 							super.streamClass.formatPacket();
 						}
@@ -4806,10 +4807,14 @@ public class mudclient extends GameWindowMiddleMan
 				else
 					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, k2, 160);
 				gameGraphics.drawBoxEdge(j5, i6, 50, 35, 0);
-				if (shopItems[k3] != -1) {
-					gameGraphics.spriteClip4(j5, i6, 48, 32, SPRITE_ITEM_START + EntityHandler.getItemDef(shopItems[k3]).getSprite(), EntityHandler.getItemDef(shopItems[k3]).getPictureMask(), 0, 0, false);
-					gameGraphics.drawString(String.valueOf(shopItemCount[k3]), j5 + 1, i6 + 10, 1, 65280);
-					gameGraphics.drawBoxTextRight(String.valueOf(inventoryCount(shopItems[k3])), j5 + 47, i6 + 10, 1, 65535);
+				if (shopItemsI[k3].id != -1) {
+					gameGraphics.spriteClip4(j5, i6, 48, 32,
+							SPRITE_ITEM_START + shopItemsI[k3].icon(),
+							shopItemsI[k3].color(), 0, 0, false);
+					gameGraphics.drawString(Integer.toString(shopItemsI[k3].amount),
+							j5 + 1, i6 + 10, 1, 65280);
+					gameGraphics.drawBoxTextRight(Integer.toString(inventoryCount(shopItemsI[k3].id)),
+							j5 + 47, i6 + 10, 1, 65535);
 				}
 				k3++;
 			}
@@ -4821,9 +4826,9 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawText("Select an object to buy or sell", byte0 + 204, byte1 + 214, 3, 0xffff00);
 			return;
 		}
-		int i5 = shopItems[selectedShopItemIndex];
+		int i5 = shopItemsI[selectedShopItemIndex].id;
 		if (i5 != -1) {
-			if (shopItemCount[selectedShopItemIndex] > 0) {
+			if (shopItemsI[selectedShopItemIndex].amount > 0) {
 				int j6 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
 				gameGraphics.drawString("Buy a new " + EntityHandler.getItemDef(i5).getName() + " for " + j6 + "gp", byte0 + 2, byte1 + 214, 1, 0xffff00);
 				int k1 = 0xffffff;
@@ -7126,12 +7131,12 @@ public class mudclient extends GameWindowMiddleMan
 				shopItemSellPriceModifier = data[i4++] & 0xff;
 				shopItemBuyPriceModifier = data[i4++] & 0xff;
 				for (int i22 = 0; i22 < 40; i22++)
-					shopItems[i22] = -1;
+					shopItemsI[i22] = new Item(-1);
 
 				for (int j25 = 0; j25 < j11; j25++) {
-					shopItems[j25] = DataOperations.getUnsigned2Bytes(data, i4);
+					shopItemsI[j25] = new Item(DataOperations.getUnsigned2Bytes(data, i4));
 					i4 += 2;
-					shopItemCount[j25] = DataOperations.getUnsigned2Bytes(data, i4);
+					shopItemsI[j25].amount = DataOperations.getUnsigned2Bytes(data, i4);
 					i4 += 2;
 				}
 
@@ -7142,7 +7147,7 @@ public class mudclient extends GameWindowMiddleMan
 							break;
 						boolean flag2 = false;
 						for (int j39 = 0; j39 < 40; j39++) {
-							if (shopItems[j39] != inventory[k33].id)
+							if (shopItemsI[j39].id != inventory[k33].id)
 								continue;
 							flag2 = true;
 							break;
@@ -7151,14 +7156,15 @@ public class mudclient extends GameWindowMiddleMan
 						if (inventory[k33].id == 10)
 							flag2 = true;
 						if (!flag2) {
-							shopItems[l28] = inventory[k33].id & 0x7fff;
-							shopItemCount[l28] = 0;
+							shopItemsI[l28] = new Item(inventory[k33].id & 0x7fff, 0);
 							l28--;
 						}
 					}
 
 				}
-				if (selectedShopItemIndex >= 0 && selectedShopItemIndex < 40 && shopItems[selectedShopItemIndex] != selectedShopItemType) {
+				if (selectedShopItemIndex >= 0
+						&& selectedShopItemIndex < 40
+						&& shopItemsI[selectedShopItemIndex].id != selectedShopItemType) {
 					selectedShopItemIndex = -1;
 					selectedShopItemType = -2;
 				}
@@ -8666,8 +8672,7 @@ public class mudclient extends GameWindowMiddleMan
 		selectedBankItemType = -2;
 		aBooleanArray827 = new boolean[1500];
 		playerStatBase = new int[18];
-		shopItems = new int[256];
-		shopItemCount = new int[256];
+		shopItemsI = new Item[256];
 		anIntArray858 = new int[50];
 		anIntArray859 = new int[50];
 		newBankItemsI = new Item[256];
@@ -8754,7 +8759,9 @@ public class mudclient extends GameWindowMiddleMan
 
 	}
 
+	private int bankItemCount;
 	private Item bankItemsI[];
+	private int newBankItemCount;
 	private Item newBankItemsI[];
 	
 	private int duelMyItemCount;
@@ -8777,6 +8784,10 @@ public class mudclient extends GameWindowMiddleMan
 
 	protected int inventoryCount;
 	protected Item inventory[];
+
+	private int groundItemCount;
+
+	private Item shopItemsI[];
 	
 	private MenuRightClick[] rightClickMenu;
 	private int menuLength;
@@ -8870,7 +8881,6 @@ public class mudclient extends GameWindowMiddleMan
 	String selectedItemName;
 	private int anIntArray757[];
 	private boolean showCharacterLookScreen;
-	private int newBankItemCount;
 	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
 	private Mob lastPlayerArray[];
 	private int inputBoxType;
@@ -8936,8 +8946,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int actionPictureType;
 	int actionPictureX;
 	int actionPictureY;
-	private int shopItems[];
-	private int shopItemCount[];
 	private int npcAnimationArray[][] = {
 			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
 			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
@@ -8948,7 +8956,6 @@ public class mudclient extends GameWindowMiddleMan
 			{11, 4, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3},
 			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4, 3}
 	};
-	private int bankItemCount;
 	private int chrDesignHeadBtnLeft;
 	private int chrDesignHeadBtnRight;
 	private int chrDesignHairClrBtnLeft;
@@ -8979,7 +8986,6 @@ public class mudclient extends GameWindowMiddleMan
 	int serverIndex;
 	protected int mouseDownTime;
 	protected int itemIncrement;
-	private int groundItemCount;
 	private int modelFireLightningSpellNumber;
 	private int modelTorchNumber;
 	private int modelClawSpellNumber;
