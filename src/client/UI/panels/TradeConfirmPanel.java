@@ -7,11 +7,13 @@ import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
+import client.UI.InGamePanel;
 import model.Sprite;
 
-public class TradeConfirmPanel extends InGameGridPanel
+public class TradeConfirmPanel extends InGamePanel
 {
-	private int nTradeCols, nTradeRows, middleMarginWidth;
+	private InGameGridPanel invGrid, myOfferGrid, otherOfferGrid;
+	private int middleMarginWidth;
 	private int plrTextBoxHeight, opntTextBoxHeight, itemInfoBarHeight;
     private InGameButton acceptBtn, declineBtn;
     
@@ -19,18 +21,17 @@ public class TradeConfirmPanel extends InGameGridPanel
 	{
 		graphics = g;
 		frame = new InGameFrame("", g);
-    	nCols = 5;
-    	nRows = 6;
-    	nTradeCols = 4;
-    	nTradeRows = 3;
+		invGrid = new InGameGridPanel(6, 5);
+		myOfferGrid = new InGameGridPanel(3, 4);
+		otherOfferGrid = new InGameGridPanel(3, 4);
         middleMarginWidth = 11;
         plrTextBoxHeight = 18;
         opntTextBoxHeight = 22;
         itemInfoBarHeight = 20;
-        setHeight(plrTextBoxHeight + 2*(nTradeRows*ITEM_SLOT_HEIGHT+1)
+        setHeight(plrTextBoxHeight + myOfferGrid.getHeight() + otherOfferGrid.getHeight()
         		+ opntTextBoxHeight + itemInfoBarHeight);
-        setWidth((nTradeCols*ITEM_SLOT_WIDTH+1)
-        		+ middleMarginWidth + (nCols*ITEM_SLOT_WIDTH+1));
+        setWidth(invGrid.getWidth()
+        		+ middleMarginWidth + myOfferGrid.getWidth());
         setX(xCenter - width/2);
         setY(yCenter - height/2);
 	    frame.setBounds(new Rectangle(x, y, width, height));
@@ -56,7 +57,7 @@ public class TradeConfirmPanel extends InGameGridPanel
 	    		sprite.getWidth() + 2*sprite.getXShift(),
 	    		sprite.getHeight() + 2*sprite.getYShift());
 	    acceptBtn = new InGameButton(accptBtn.x, accptBtn.y,
-	    		accptBtn.width, accptBtn.height, "");	
+	    		accptBtn.width, accptBtn.height, "");
 	    acceptBtn.setSprite(sprite, index);
 	}
 

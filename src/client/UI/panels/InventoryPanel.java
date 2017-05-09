@@ -5,37 +5,32 @@ import java.awt.Rectangle;
 import client.GameImageMiddleMan;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
+import client.UI.InGamePanel;
 
-public class InventoryPanel extends InGameGridPanel
+public class InventoryPanel extends InGamePanel
 {
     private final int invCountTextColor = 0xffff00;
+    private InGameGridPanel invGrid;
     
     public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan g)
     {
     	graphics = g;
 		frame = new InGameFrame("Inventory", g);
-        nCols = 5;
-        nRows = 6;
-	    setHeight(getGridHeight());
-	    setWidth(getGridWidth());
+		invGrid = new InGameGridPanel(6, 5);
+	    setHeight(invGrid.getHeight());
+	    setWidth(invGrid.getWidth());
 	    // TODO: revise these when the bottom menu is done.
 	    setX(xCenter*2 - width - 3);
 	    setY(yCenter*2 - height - 35);
 	    frame.setBounds(new Rectangle(x, y, width, height));
-		gridY =  getY();
-		gridX = getX();
+	    invGrid.setLocation(getX(), getY());
     }
 	public int getInvCountTextColor() { return invCountTextColor; }
-	public int getInvGridX() { return getX(); }
-	public int getInvGridY() { return getY(); }
+	
+	public InGameGridPanel getInvGrid() { return invGrid; }
 	
 	public boolean isMouseOverInvGrid(int mouseX, int mouseY)
 	{
-		//gameGFX.drawBoxAlpha(10, 10, 200, 200, 0xffff00, 0x7f);
-		//gameGraphics.drawBoxAlpha(210, 210, 200, 200, 0xff00ff, 0x7f);
-		return (mouseX >= getInvGridX()
-        		&& mouseY >= getInvGridY()
-        		&& mouseX < getInvGridX() + getGridWidth() 
-        		&& mouseY < getInvGridY() + getGridHeight());
+		return invGrid.isMouseOver(mouseX, mouseY);
 	}
 }

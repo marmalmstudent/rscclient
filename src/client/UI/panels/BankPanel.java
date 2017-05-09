@@ -6,9 +6,11 @@ import client.GameImageMiddleMan;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
+import client.UI.InGamePanel;
 
-public class BankPanel extends InGameGridPanel
+public class BankPanel extends InGamePanel
 {
+    private InGameGridPanel bankGrid;
     private int topInfoBoxHeight, bottomInfoBoxHeight;
     private final int bankCountTextColor = 0x00ff00;
     private final int invCountTextColor = 0x00ffff;
@@ -24,17 +26,15 @@ public class BankPanel extends InGameGridPanel
 	{
 		graphics = g;
 		frame = new InGameFrame("Bank", g);
-	    nRows = 6;
-	    nCols = 8;
+		bankGrid = new InGameGridPanel(6, 8);
 	    topInfoBoxHeight = 17;
 	    bottomInfoBoxHeight = 47;
-	    setHeight(getTopInfoBoxHeight() + getGridHeight() + getBottomInfoBoxHeight());
-	    setWidth(getGridWidth());
+	    setHeight(getTopInfoBoxHeight() + bankGrid.getHeight() + getBottomInfoBoxHeight());
+	    setWidth(bankGrid.getWidth());
 	    setX(xCenter - width / 2);
 	    setY(yCenter - height / 2);
 	    frame.setBounds(new Rectangle(x, y, width, height));
-		gridY =  getTopInfoBoxY() + getTopInfoBoxHeight();
-		gridX = getX();
+	    bankGrid.setLocation(getX(), getTopInfoBoxY() + getTopInfoBoxHeight());
 	    int buttonWidth = 65;
 	    int buttonHeight = frame.getTitleBarHeight();
 	    int nButtons = tabButtonText.length;
@@ -103,7 +103,8 @@ public class BankPanel extends InGameGridPanel
 					return i+1;
 		return 0;
 	}
-	
+
+	public InGameGridPanel getBankGrid() { return bankGrid; }
 	
 	public int getTopInfoBoxHeight() { return topInfoBoxHeight; }
 	public int getTopInfoBoxWidth() { return getWidth(); }
@@ -111,9 +112,9 @@ public class BankPanel extends InGameGridPanel
 	public int getTopInfoBoxY() { return getY(); }
 	
 	public int getBottomInfoBoxHeight() { return bottomInfoBoxHeight; }
-	public int getBottomInfoBoxWidth() { return getGridWidth(); }
+	public int getBottomInfoBoxWidth() { return bankGrid.getWidth(); }
 	public int getBottomInfoBoxX() { return getX(); }
-	public int getBottomInfoBoxY() { return getGridY() + getGridHeight(); }
+	public int getBottomInfoBoxY() { return bankGrid.getY() + bankGrid.getHeight(); }
 	public InGameButtonPanel getTabButtonPanel() { return tabBtnPanel; }
 	public InGameButtonPanel getDepButtonPanel() { return depBtnPanel; }
 	public InGameButtonPanel getWithButtonPanel() { return withBtnPanel; }

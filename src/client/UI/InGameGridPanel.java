@@ -1,8 +1,6 @@
 package client.UI;
 
-import client.mudclient;
-
-public abstract class InGameGridPanel extends InGamePanel
+public class InGameGridPanel extends InGamePanel
 {
     public static final int ITEM_SLOT_WIDTH = 49;
     public static final int ITEM_SLOT_HEIGHT = 34;
@@ -23,17 +21,26 @@ public abstract class InGameGridPanel extends InGamePanel
     public int getGridBGAlpha() { return gridBGAlpha; }
     public int getGridLineColor() { return gridLineColor; }
     public int getGridLineAlpha() { return gridLineAlpha; }
-    
-	public int getGridHeight() { return nRows*ITEM_SLOT_HEIGHT+1; }
-	public int getGridWidth() { return nCols*ITEM_SLOT_WIDTH+1; }
-	public int getGridX() { return gridX; }
-	public int getGridY() { return gridY; }
+	
+	public InGameGridPanel(int rows, int cols)
+	{
+		nRows = rows;
+		nCols = cols;
+		height = nRows*ITEM_SLOT_HEIGHT+1;
+		width = nCols*ITEM_SLOT_WIDTH+1;
+	}
+	
+	public void setLocation(int x, int y)
+	{
+		this.x = x;
+		this.y = y;
+	}
 	
 	public boolean isMouseOverGrid(int mouseX, int mouseY)
 	{
-    	return (!(mouseX < getGridX()
-        		|| mouseY < getGridY()
-        		|| mouseX > getGridX() + getGridWidth()
-        		|| mouseY > getGridY() + getGridHeight()));
+    	return (!(mouseX < x
+        		|| mouseY < y
+        		|| mouseX > x + width
+        		|| mouseY > y + height));
 	}
 }
