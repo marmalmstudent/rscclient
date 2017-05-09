@@ -18,10 +18,7 @@ public class InGameButton extends InGameComponent {
 		this.height = height;
 		buttonText = text;
 	}
-	public int getX() { return x; }
-	public int getY() { return y; }
-	public int getWidth() { return width; }
-	public int getHeight() { return height; }
+	
 	public String getButtonText() { return buttonText; }
 	public int getMouseNotOverColor() { return notMouseoverColor; }
 	public int getMouseOverColor() { return mouseoverColor; }
@@ -43,5 +40,7 @@ public class InGameButton extends InGameComponent {
 				&& mouseY < y + height);
 	}
 	
-	public void setButtonText(String text) { buttonText = text; }
+	public void setButtonText(String text) {
+		buttonText = text;
+	}
 }

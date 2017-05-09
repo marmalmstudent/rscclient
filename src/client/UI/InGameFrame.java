@@ -111,4 +111,39 @@ public class InGameFrame extends InGameComponent
     public int getTextLeftOffset() { return textLeftOffset; }
     public int getTextRightOffset() { return textRightOffset; }
     public int getTextYOffset() { return textYOffset; }
+    
+
+
+	public void drawComponent(int mouseX, int mouseY)
+	{
+		graphics.drawBoxAlpha(
+				getTitleBarX(), getTitleBarY(),
+				getTitleBarWidth(), getTitleBarHeight(),
+				getTitleBarColor(), getTitleBarAlpha());
+		graphics.drawString(getTitleText(),
+				getTitleBarX() + getTextLeftOffset(),
+				getTitleBarY() + getTextYOffset(), 1,
+				getTitleTextColor());
+		graphics.drawBoxTextRight(getCloseButton().getButtonText(),
+				(getCloseButton().getX() + getCloseButton().getWidth()
+						+ getTextRightOffset()),
+				getCloseButton().getY() + getTextYOffset(), 1,
+				getCloseButtonColor(mouseX, mouseY));
+		graphics.drawBoxAlpha(
+				getTopMarginX(), getTopMarginY(),
+				getTopMarginWidth(), getTopMarginHeight(),
+				getMarginBGColor(), getMarginBGAlpha());
+		graphics.drawBoxAlpha(
+				getBottomMarginX(), getBottomMarginY(),
+				getBottomMarginWidth(), getBottomMarginHeight(),
+				getMarginBGColor(), getMarginBGAlpha());
+		graphics.drawBoxAlpha(
+				getLeftMarginX(), getLeftMarginY(),
+				getLeftMarginWidth(), getLeftMarginHeight(),
+				getMarginBGColor(), getMarginBGAlpha());
+		graphics.drawBoxAlpha(
+				getRightMarginX(), getRightMarginY(),
+				getRightMarginWidth(), getRightMarginHeight(),
+				getMarginBGColor(), getMarginBGAlpha());
+	}
 }

@@ -1598,7 +1598,7 @@ public class mudclient extends GameWindowMiddleMan
 				return;
 			}
 		}
-		drawInGameFrame(bankPan.getFrame());
+		bankPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawBankTabs();
 		drawBankInfo();
 		drawBankGrid();
@@ -1752,7 +1752,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawInventoryMenu(boolean flag)
 	{
-		drawInGameFrame(invPan.getFrame());
+		invPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawInventoryGrid();
 		if (!flag)
 			return;
@@ -1973,39 +1973,6 @@ public class mudclient extends GameWindowMiddleMan
 		logoutTimeout = 1000;
 	}
 
-	private void drawInGameFrame(InGameFrame frame)
-	{
-		gameGraphics.drawBoxAlpha(
-				frame.getTitleBarX(), frame.getTitleBarY(),
-				frame.getTitleBarWidth(), frame.getTitleBarHeight(),
-				frame.getTitleBarColor(), frame.getTitleBarAlpha());
-		gameGraphics.drawString(frame.getTitleText(),
-				frame.getTitleBarX() + frame.getTextLeftOffset(),
-				frame.getTitleBarY() + frame.getTextYOffset(), 1,
-				frame.getTitleTextColor());
-		gameGraphics.drawBoxTextRight(frame.getCloseButton().getButtonText(),
-				(frame.getCloseButton().getX() + frame.getCloseButton().getWidth()
-						+ frame.getTextRightOffset()),
-				frame.getCloseButton().getY() + frame.getTextYOffset(), 1,
-				frame.getCloseButtonColor(super.mouseX, super.mouseY));
-		gameGraphics.drawBoxAlpha(
-				frame.getTopMarginX(), frame.getTopMarginY(),
-				frame.getTopMarginWidth(), frame.getTopMarginHeight(),
-				frame.getMarginBGColor(), frame.getMarginBGAlpha());
-		gameGraphics.drawBoxAlpha(
-				frame.getBottomMarginX(), frame.getBottomMarginY(),
-				frame.getBottomMarginWidth(), frame.getBottomMarginHeight(),
-				frame.getMarginBGColor(), frame.getMarginBGAlpha());
-		gameGraphics.drawBoxAlpha(
-				frame.getLeftMarginX(), frame.getLeftMarginY(),
-				frame.getLeftMarginWidth(), frame.getLeftMarginHeight(),
-				frame.getMarginBGColor(), frame.getMarginBGAlpha());
-		gameGraphics.drawBoxAlpha(
-				frame.getRightMarginX(), frame.getRightMarginY(),
-				frame.getRightMarginWidth(), frame.getRightMarginHeight(),
-				frame.getMarginBGColor(), frame.getMarginBGAlpha());
-	}
-
 	private void drawPlayerInfoMisc()
 	{
 		gameGraphics.drawPicture(plrPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
@@ -2157,7 +2124,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawPlayerInfoMenu(boolean flag)
 	{
-		drawInGameFrame(plrPan.getFrame());
+		plrPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawInfoPanel();
 		if (anInt826 == 0)
 			drawStatsTab();
@@ -4138,7 +4105,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawFriendsWindow(boolean flag)
 	{
-		drawInGameFrame(friendPan.getFrame());
+		friendPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawFriendPanel();
 		friendsMenu.resetListTextCount(friendsMenuHandle);
 		if (friendTabOn == 0)
@@ -4523,7 +4490,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawMagicWindow(boolean flag)
 	{
-		drawInGameFrame(magicPan.getFrame());
+		magicPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawMagicPanel();
 		if (menuMagicPrayersSelected == 0)
 			drawMagicTab();
@@ -5118,7 +5085,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawOptionsMenu(boolean flag)
 	{
-		drawInGameFrame(optPan.getFrame());
+		optPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawOptionsPanel();
 		drawGameOptions();
 		drawClientAssist();
@@ -6321,7 +6288,7 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 
 		// draw the interface
-		drawInGameFrame(tradePan.getFrame());
+		tradePan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawTradePanel();
 		updateTradeStatus();
 		drawTradeInventoryGrid();
@@ -7731,7 +7698,7 @@ public class mudclient extends GameWindowMiddleMan
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
-		drawInGameFrame(tradeCfrmPan.getFrame());
+		tradeCfrmPan.getFrame().drawComponent(super.mouseX, super.mouseY);
 		drawTradeCfrmPanel();
 		drawTradeItems();
 		updateTradeCfrmButtons();
