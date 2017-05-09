@@ -3,6 +3,7 @@ package client;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
+import client.UI.menus.MenuRightClick;
 import client.UI.panels.AbuseWindow;
 import client.UI.panels.BankPanel;
 import client.UI.panels.FriendsPanel;
@@ -3648,14 +3649,14 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics._mudclient = this;
 		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
 		abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
-		bankPan = new BankPanel(windowHalfWidth, windowHalfHeight);
-		tradePan = new TradePanel(windowHalfWidth, windowHalfHeight);
-		tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight);
+		bankPan = new BankPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		tradePan = new TradePanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
 		invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight);
-		magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight);
-		friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight);
-		optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight);
+		plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
 		Menu.aBoolean220 = false;
 		spellMenu = new Menu(gameGraphics, 5);
 		spellMenuHandle = spellMenu.method162(magicPan.getX(),
@@ -8775,6 +8776,8 @@ public class mudclient extends GameWindowMiddleMan
 
 	protected int inventoryCount;
 	protected Item inventory[];
+	
+	private MenuRightClick rightClickMenu;
 	
 	private boolean combatWindow;
 	private int lastLoggedInDays;

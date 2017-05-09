@@ -2,6 +2,8 @@ package client.UI;
 
 import java.awt.Rectangle;
 
+import client.GameImageMiddleMan;
+
 public class InGameFrame extends InGameComponent
 {
 	protected final int titleBarColor = 0x0000c0;
@@ -24,8 +26,9 @@ public class InGameFrame extends InGameComponent
     protected final int textYOffset = 10;
     protected InGameButton closeButton;
     
-    public InGameFrame(String title)
+    public InGameFrame(String title, GameImageMiddleMan g)
     {
+    	graphics = g;
     	this.title = title;
     }
     

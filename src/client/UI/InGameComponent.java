@@ -1,9 +1,10 @@
 package client.UI;
 
-import client.mudclient;
+import client.GameImageMiddleMan;
 
 public abstract class InGameComponent
 {
+	protected GameImageMiddleMan graphics;
     protected int x, y, width, height;
     
 	public int getWidth() { return width; }

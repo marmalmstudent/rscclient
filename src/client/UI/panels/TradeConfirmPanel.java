@@ -3,6 +3,7 @@ package client.UI.panels;
 import java.awt.Rectangle;
 
 import client.GameImage;
+import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
@@ -14,9 +15,10 @@ public class TradeConfirmPanel extends InGameGridPanel
 	private int plrTextBoxHeight, opntTextBoxHeight, itemInfoBarHeight;
     private InGameButton acceptBtn, declineBtn;
     
-	public TradeConfirmPanel(int xCenter, int yCenter)
+	public TradeConfirmPanel(int xCenter, int yCenter, GameImageMiddleMan g)
 	{
-		frame = new InGameFrame("");
+		graphics = g;
+		frame = new InGameFrame("", g);
     	nCols = 5;
     	nRows = 6;
     	nTradeCols = 4;

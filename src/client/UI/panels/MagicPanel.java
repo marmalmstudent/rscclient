@@ -2,6 +2,7 @@ package client.UI.panels;
 
 import java.awt.Rectangle;
 
+import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
 import client.UI.InGameTabPanel;
@@ -11,9 +12,10 @@ public class MagicPanel extends InGameTabPanel
     public int infoBoxHeight;
     private InGameButton magicTab, prayerTab;
     
-	public MagicPanel(int xCenter, int yCenter)
+	public MagicPanel(int xCenter, int yCenter, GameImageMiddleMan g)
 	{
-		frame = new InGameFrame("Spells");
+		graphics = g;
+		frame = new InGameFrame("Spells", g);
         tabHeight = 24;
         infoBoxHeight = 70;
         setWidth(198+30);

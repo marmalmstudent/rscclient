@@ -2,6 +2,7 @@ package client.UI.panels;
 
 import java.awt.Rectangle;
 
+import client.GameImageMiddleMan;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
 import client.UI.InGameGridPanel;
@@ -19,9 +20,10 @@ public class BankPanel extends InGameGridPanel
     };
     private InGameButtonPanel tabBtnPanel, depBtnPanel, withBtnPanel;
     
-	public BankPanel(int xCenter, int yCenter)
+	public BankPanel(int xCenter, int yCenter, GameImageMiddleMan g)
 	{
-		frame = new InGameFrame("Bank");
+		graphics = g;
+		frame = new InGameFrame("Bank", g);
 	    nRows = 6;
 	    nCols = 8;
 	    topInfoBoxHeight = 17;

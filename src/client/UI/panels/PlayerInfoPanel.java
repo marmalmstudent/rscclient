@@ -2,6 +2,7 @@ package client.UI.panels;
 
 import java.awt.Rectangle;
 
+import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
@@ -30,9 +31,10 @@ public class PlayerInfoPanel extends InGameTabPanel
     private int headerHeight;
     private final int nbrSkillCols = 2;
     
-    public PlayerInfoPanel(int xCenter, int yCenter)
+    public PlayerInfoPanel(int xCenter, int yCenter, GameImageMiddleMan g)
     {
-		frame = new InGameFrame("Info");
+    	graphics = g;
+		frame = new InGameFrame("Info", g);
         tabHeight = 24;
         scrollBoxTitleHeight = 16;
 

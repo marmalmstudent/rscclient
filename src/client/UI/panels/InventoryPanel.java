@@ -9,12 +9,11 @@ import client.UI.InGameGridPanel;
 public class InventoryPanel extends InGameGridPanel
 {
     private final int invCountTextColor = 0xffff00;
-    private GameImageMiddleMan gameGFX;
     
-    public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan gameGraphics)
+    public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan g)
     {
-    	this.gameGFX = gameGraphics;
-		frame = new InGameFrame("Inventory");
+    	graphics = g;
+		frame = new InGameFrame("Inventory", g);
         nCols = 5;
         nRows = 6;
 	    setHeight(getGridHeight());

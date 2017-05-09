@@ -3,6 +3,7 @@ package client.UI.panels;
 import java.awt.Rectangle;
 
 import client.GameImage;
+import client.GameImageMiddleMan;
 import client.mudclient;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
@@ -19,9 +20,10 @@ public class TradePanel extends InGameGridPanel
     itemInfoBar, mdlMarginBar, accptDclnBox;
     private InGameButton acceptBtn, declineBtn;
     
-	public TradePanel(int xCenter, int yCenter)
+	public TradePanel(int xCenter, int yCenter, GameImageMiddleMan g)
 	{
-		frame = new InGameFrame("Trading width: ");
+		graphics = g;
+		frame = new InGameFrame("Trading width: ", g);
 		nCols = 5;
 		nRows = 6;
 		nTradeCols = 4;

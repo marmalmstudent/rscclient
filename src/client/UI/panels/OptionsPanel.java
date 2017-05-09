@@ -2,6 +2,7 @@ package client.UI.panels;
 
 import java.awt.Rectangle;
 
+import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
@@ -31,9 +32,10 @@ public class OptionsPanel extends InGamePanel
 			{"<off>", "<on>"},
 			{"<off>", "<on>"}
 	};
-	public OptionsPanel(int xCenter, int yCenter)
+	public OptionsPanel(int xCenter, int yCenter, GameImageMiddleMan g)
 	{
-		frame = new InGameFrame("Options");
+		graphics = g;
+		frame = new InGameFrame("Options", g);
         setWidth(197);
         setHeight(276);
         setX(xCenter*2 - width - 3);
