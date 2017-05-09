@@ -1,13 +1,19 @@
 package model;
 
 import entityhandling.EntityHandler;
+import entityhandling.defs.ItemDef;
 
 public class Item
 {
-	public String name, description, command;
-	public int id, amount, color;
-	public int icon;
-	public boolean stackable, wieldable;
+	public int id, amount;
+	
+	public int icon() { return EntityHandler.getItemDef(id).getSprite(); }
+	public int color() { return EntityHandler.getItemDef(id).getPictureMask(); }
+	public String name() { return EntityHandler.getItemDef(id).getName(); }
+	public String description() { return EntityHandler.getItemDef(id).getDescription(); }
+	public String command() { return EntityHandler.getItemDef(id).getCommand(); }
+	public boolean stackable() { return EntityHandler.getItemDef(id).isStackable(); }
+	public boolean wieldable() { return EntityHandler.getItemDef(id).isWieldable(); }
 
 	public Item(int id)
 	{
@@ -18,21 +24,5 @@ public class Item
 	{
 		this.id = id;
 		this.amount = amount;
-		if (id < 0 || id >= EntityHandler.itemCount())
-		{
-			icon = -1;
-			color = -1;
-			name = "";
-			description = "";
-			command = "";
-		}
-		else
-		{
-			icon = EntityHandler.getItemDef(id).getSprite();
-			color = EntityHandler.getItemDef(id).getPictureMask();
-			name = EntityHandler.getItemDef(id).getName();
-			description = EntityHandler.getItemDef(id).getDescription();
-			command = EntityHandler.getItemDef(id).getCommand();
-		}
 	}
 }
