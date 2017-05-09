@@ -1,8 +1,10 @@
-package client.menus;
+package client.UI.panels;
 
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
+import client.UI.InGameFrame;
+import client.UI.InGameGridPanel;
 
 public class InventoryPanel extends InGameGridPanel
 {

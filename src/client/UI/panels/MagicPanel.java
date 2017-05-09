@@ -1,6 +1,10 @@
-package client.menus;
+package client.UI.panels;
 
 import java.awt.Rectangle;
+
+import client.UI.InGameButton;
+import client.UI.InGameFrame;
+import client.UI.InGameTabPanel;
 
 public class MagicPanel extends InGameTabPanel
 {

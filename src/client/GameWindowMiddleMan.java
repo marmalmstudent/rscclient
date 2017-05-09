@@ -4,7 +4,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import client.menus.FriendsPanel;
+import client.UI.panels.FriendsPanel;
 import client.util.Config;
 import client.util.DataConversions;
 

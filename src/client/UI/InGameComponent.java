@@ -1,8 +1,8 @@
-package client.menus;
+package client.UI;
 
 import client.mudclient;
 
-public abstract class InGameComponent extends mudclient
+public abstract class InGameComponent
 {
     protected int x, y, width, height;
     

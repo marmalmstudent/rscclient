@@ -1,6 +1,11 @@
-package client.menus;
+package client.UI.panels;
 
 import java.awt.Rectangle;
+
+import client.UI.InGameButton;
+import client.UI.InGameButtonPanel;
+import client.UI.InGameFrame;
+import client.UI.InGamePanel;
 
 public class OptionsPanel extends InGamePanel
 {

@@ -1,4 +1,4 @@
-package client.menus;
+package client.UI;
 
 import java.awt.Rectangle;
 
@@ -12,6 +12,7 @@ public class InGameButton {
 	protected Rectangle bounds;
 	protected Sprite sprite;
 	protected int spriteIdx;
+	
 	public InGameButton(int x, int y, int width, int height, String text)
 	{
 		bounds = new Rectangle(x, y, width, height);
