@@ -2,7 +2,7 @@ package client;
 
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
-import client.UI.InGameGridPanel;
+import client.UI.InGameGrid;
 import client.UI.menus.MenuRightClick;
 import client.UI.panels.AbuseWindow;
 import client.UI.panels.BankPanel;
@@ -1230,14 +1230,14 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private void drawBankGrid()
 	{
-		InGameGridPanel bankGrid = bankPan.getBankGrid();
+		InGameGrid bankGrid = bankPan.getBankGrid();
 		int k7 = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
 		for (int row = 0; row < bankGrid.getRows(); row++)
 		{
 			for (int col = 0; col < bankGrid.getCols(); col++)
 			{
-				int slotX = bankGrid.getX() + col*(InGameGridPanel.ITEM_SLOT_WIDTH);
-				int slotY = bankGrid.getY() + row*(InGameGridPanel.ITEM_SLOT_HEIGHT);
+				int slotX = bankGrid.getX() + col*(InGameGrid.ITEM_SLOT_WIDTH);
+				int slotY = bankGrid.getY() + row*(InGameGrid.ITEM_SLOT_HEIGHT);
 				drawItemBox(bankGrid, bankItemsI[k7].id, slotX, slotY,
 						selectedBankItem == k7,
 						k7 < bankItemCount && bankItemsI[k7].id != -1);
@@ -1249,28 +1249,28 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private void drawItemBox(InGameGridPanel panel, int itemID,
+	private void drawItemBox(InGameGrid panel, int itemID,
 			int slotX, int slotY, boolean selected, boolean drawSprite)
 	{
 		if (selected)
 			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
-					InGameGridPanel.ITEM_SLOT_WIDTH-1,
-					InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
 					panel.getGridBGSelectColor(),
 					panel.getGridBGAlpha());
 		else
 			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
-					InGameGridPanel.ITEM_SLOT_WIDTH-1,
-					InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
 					panel.getGridBGNotSelectColor(),
 					panel.getGridBGAlpha());
 		gameGraphics.drawBoxEdge(slotX, slotY,
-				InGameGridPanel.ITEM_SLOT_WIDTH+1,
-				InGameGridPanel.ITEM_SLOT_HEIGHT+1, panel.getGridLineColor());
+				InGameGrid.ITEM_SLOT_WIDTH+1,
+				InGameGrid.ITEM_SLOT_HEIGHT+1, panel.getGridLineColor());
 		if (drawSprite)
 			gameGraphics.spriteClip4(slotX+1, slotY+1,
-					InGameGridPanel.ITEM_SLOT_WIDTH-1,
-					InGameGridPanel.ITEM_SLOT_HEIGHT-1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
 					SPRITE_ITEM_START + EntityHandler.getItemDef(
 							itemID).getSprite(),
 					EntityHandler.getItemDef(itemID).getPictureMask(),
@@ -1283,8 +1283,8 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawString(getAbbreviatedValue(bankAmount),
 				slotX + 1, slotY + 10, 1, bankPan.getBankCountTextColor());
 		gameGraphics.drawBoxTextRight(getAbbreviatedValue(invAmount),
-				slotX + InGameGridPanel.ITEM_SLOT_WIDTH - 1,
-				slotY + InGameGridPanel.ITEM_SLOT_HEIGHT - 5, 1, 0x00ffff);
+				slotX + InGameGrid.ITEM_SLOT_WIDTH - 1,
+				slotY + InGameGrid.ITEM_SLOT_HEIGHT - 5, 1, 0x00ffff);
 	}
 
 	/**
@@ -1423,7 +1423,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private void drawBankTabs()
 	{
-		InGameGridPanel bankGrid = bankPan.getBankGrid();
+		InGameGrid bankGrid = bankPan.getBankGrid();
 		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
 		int tabMouseover = bankPan.getTabMouseover(super.mouseX,
 				super.mouseY, nTabs);
@@ -1468,7 +1468,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private void switchBankTab()
 	{
-		InGameGridPanel bankGrid = bankPan.getBankGrid();
+		InGameGrid bankGrid = bankPan.getBankGrid();
 		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
 		int tabMouseover = bankPan.getTabMouseover(super.mouseX,
 				super.mouseY, nTabs);
@@ -1483,7 +1483,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private void clickBankItem()
 	{
-		InGameGridPanel bankGrid = bankPan.getBankGrid();
+		InGameGrid bankGrid = bankPan.getBankGrid();
 		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
 		int mouseXGrid = super.mouseX - bankGrid.getX();
 		int mouseYGrid = super.mouseY - bankGrid.getY();
@@ -1536,7 +1536,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private void updateVisibleBankTabs()
 	{
-		InGameGridPanel bankGrid = bankPan.getBankGrid();
+		InGameGrid bankGrid = bankPan.getBankGrid();
 		if (mouseOverBankPageText > 0
 				&& bankItemCount <= bankGrid.getRows()*bankGrid.getCols())
 			mouseOverBankPageText = 0;
@@ -1563,7 +1563,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final String getAbbreviatedValue(int amount)
+	public static final String getAbbreviatedValue(int amount)
 	{
 		String abbrevVal = String.valueOf(amount);
 		if (amount >= 10000000)
@@ -1649,40 +1649,9 @@ public class mudclient extends GameWindowMiddleMan
 	}
 	//TODO: as
 
-	private void drawInventoryGrid()
-	{
-		InGameGridPanel invGrid = invPan.getInvGrid();
-		for (int j = 0; j < invGrid.getSlots(); j++)
-		{
-			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
-			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
-
-			drawItemBox(invGrid, inventory[j].id, col, row,
-					j < inventoryCount && wearing[j] == 1,
-					j < inventoryCount && inventory[j].id != -1);
-			if (j < inventoryCount && inventory[j].id != -1
-					&& inventory[j].stackable())
-				drawInvText(col, row, inventory[j].amount);
-		}
-	}
-
-	private void drawInvText(int col, int row, int amount)
-	{
-		gameGraphics.drawString(getAbbreviatedValue(amount),
-				col + 1, row + 10, 1, invPan.getInvCountTextColor());
-	}
-
-	private void drawInventoryMisc()
-	{
-		gameGraphics.drawPicture(invPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getXShift(),
-				invPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 1].getHeight()
-				- gameGraphics.sprites[SPRITE_MEDIA_START + 1].getYShift(),
-				SPRITE_MEDIA_START + 1);
-	}
-
 	private void handleInventoryMouseover()
 	{
-		InGameGridPanel invGrid = invPan.getInvGrid();
+		InGameGrid invGrid = invPan.getInvGrid();
 		int xInInv = super.mouseX - invGrid.getX();
 		int yInInv = super.mouseY - invGrid.getY();
 		int currentInventorySlot = xInInv / itemSlotWidth
@@ -1760,10 +1729,12 @@ public class mudclient extends GameWindowMiddleMan
 	private final void drawInventoryMenu(boolean flag)
 	{
 		invPan.getFrame().drawComponent(super.mouseX, super.mouseY);
-		drawInventoryGrid();
+		invPan.getInvGrid().drawInventoryGrid(inventory,
+				inventoryCount, wearing,
+				invPan.getInvCountTextColor());
 		if (!flag)
 			return;
-		if (invPan.isMouseOverInvGrid(super.mouseX, super.mouseY))
+		if (invPan.getInvGrid().isMouseOver(super.mouseX, super.mouseY))
 		{
 			handleInventoryMouseover();
 		}
@@ -6097,11 +6068,11 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void drawTradeInventoryGrid()
 	{
-		InGameGridPanel invGrid = tradePan.getInvGrid();
+		InGameGrid invGrid = tradePan.getInvGrid();
 		for (int j = 0; j < invGrid.getSlots(); j++)
 		{
-			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
-			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
 			drawItemBox(invGrid, inventory[j].id, col, row,
 					false, j < inventoryCount && inventory[j].id != -1);
@@ -6109,9 +6080,9 @@ public class mudclient extends GameWindowMiddleMan
 					&& inventory[j].stackable())
 				drawTradeInvText(col, row, inventory[j].amount);
 			if (super.mouseX > col &&
-					super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
-					&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
 					&& j < inventoryCount && inventory[j].id != -1)
 				gameGraphics.drawString(
 						inventory[j].name() + ": @whi@" + inventory[j].description(),
@@ -6123,11 +6094,11 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void drawTradePlrOfferGrid()
 	{
-		InGameGridPanel myOfferGrid = tradePan.getOfferGrid();
+		InGameGrid myOfferGrid = tradePan.getOfferGrid();
 		for (int j = 0; j < myOfferGrid.getSlots(); j++)
 		{
-			int col = myOfferGrid.getX() + (j % myOfferGrid.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
-			int row = myOfferGrid.getY() + (j / myOfferGrid.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+			int col = myOfferGrid.getX() + (j % myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = myOfferGrid.getY() + (j / myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
 			drawItemBox(myOfferGrid, tradeMyItemsI[j].id, col, row,
 					false, j < tradeMyItemCount && tradeMyItemsI[j].id != -1);
@@ -6135,9 +6106,9 @@ public class mudclient extends GameWindowMiddleMan
 					&& tradeMyItemsI[j].stackable())
 				drawTradeInvText(col, row, tradeMyItemsI[j].amount);
 			if (super.mouseX > col &&
-					super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
-					&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
 					&& j < tradeMyItemCount && tradeMyItemsI[j].id != -1)
 				gameGraphics.drawString(tradeMyItemsI[j].name()
 						+ ": @whi@" + tradeMyItemsI[j].description(),
@@ -6149,11 +6120,11 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void drawTradeOpntOfferGrid()
 	{
-		InGameGridPanel otherOfferGrid = tradePan.getOtherOfferGrid();
+		InGameGrid otherOfferGrid = tradePan.getOtherOfferGrid();
 		for (int j = 0; j < otherOfferGrid.getSlots(); j++)
 		{
-			int col = otherOfferGrid.getX() + (j % otherOfferGrid.getCols()) * InGameGridPanel.ITEM_SLOT_WIDTH;
-			int row = otherOfferGrid.getY() + (j / otherOfferGrid.getCols()) * InGameGridPanel.ITEM_SLOT_HEIGHT;
+			int col = otherOfferGrid.getX() + (j % otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = otherOfferGrid.getY() + (j / otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
 			drawItemBox(otherOfferGrid, tradeOtherItemsI[j].id, col, row,
 					false, j < tradeOtherItemCount && tradeOtherItemsI[j].id != -1);
@@ -6161,9 +6132,9 @@ public class mudclient extends GameWindowMiddleMan
 					&& tradeOtherItemsI[j].stackable())
 				drawTradeInvText(col, row, tradeOtherItemsI[j].amount);
 			if (super.mouseX > col &&
-					super.mouseX < col + InGameGridPanel.ITEM_SLOT_WIDTH
+					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
-					&& super.mouseY < row + InGameGridPanel.ITEM_SLOT_HEIGHT
+					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
 					&& j < tradeOtherItemCount && tradeOtherItemsI[j].id != -1)
 				gameGraphics.drawString(tradeOtherItemsI[j].name()
 						+ ": @whi@" + tradeOtherItemsI[j].description(),
@@ -6209,9 +6180,9 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void handleMouseOverTradeInv()
 	{
-		InGameGridPanel invGrid = tradePan.getInvGrid();
-		int slotIdx = (super.mouseX - (invGrid.getX()+1)) / InGameGridPanel.ITEM_SLOT_WIDTH
-				+ ((super.mouseY - (invGrid.getY()+1)) / InGameGridPanel.ITEM_SLOT_HEIGHT) * invGrid.getCols();
+		InGameGrid invGrid = tradePan.getInvGrid();
+		int slotIdx = (super.mouseX - (invGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
+				+ ((super.mouseY - (invGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * invGrid.getCols();
 		if (slotIdx >= 0 && slotIdx < inventoryCount)
 		{
 			boolean flag = false;
@@ -6251,9 +6222,9 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void handleMouseOverPlrTradeOffer()
 	{
-		InGameGridPanel myOfferGrid = tradePan.getOfferGrid();
-		int l = (super.mouseX - (myOfferGrid.getX()+1)) / InGameGridPanel.ITEM_SLOT_WIDTH
-				+ ((super.mouseY - (myOfferGrid.getY()+1)) / InGameGridPanel.ITEM_SLOT_HEIGHT) * myOfferGrid.getCols();
+		InGameGrid myOfferGrid = tradePan.getOfferGrid();
+		int l = (super.mouseX - (myOfferGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
+				+ ((super.mouseY - (myOfferGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * myOfferGrid.getCols();
 		if (l >= 0 && l < tradeMyItemCount)
 		{
 			int j1 = tradeMyItemsI[l].id;

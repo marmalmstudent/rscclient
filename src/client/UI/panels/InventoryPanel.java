@@ -3,20 +3,21 @@ package client.UI.panels;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
+import client.mudclient;
 import client.UI.InGameFrame;
-import client.UI.InGameGridPanel;
+import client.UI.InGameGrid;
 import client.UI.InGamePanel;
 
 public class InventoryPanel extends InGamePanel
 {
     private final int invCountTextColor = 0xffff00;
-    private InGameGridPanel invGrid;
+    private InGameGrid invGrid;
     
     public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan g)
     {
     	graphics = g;
 		frame = new InGameFrame("Inventory", g);
-		invGrid = new InGameGridPanel(6, 5);
+		invGrid = new InGameGrid(6, 5, g);
 	    setHeight(invGrid.getHeight());
 	    setWidth(invGrid.getWidth());
 	    // TODO: revise these when the bottom menu is done.
@@ -27,10 +28,6 @@ public class InventoryPanel extends InGamePanel
     }
 	public int getInvCountTextColor() { return invCountTextColor; }
 	
-	public InGameGridPanel getInvGrid() { return invGrid; }
-	
-	public boolean isMouseOverInvGrid(int mouseX, int mouseY)
-	{
-		return invGrid.isMouseOver(mouseX, mouseY);
-	}
+	public InGameGrid getInvGrid() { return invGrid; }
+
 }

@@ -6,13 +6,13 @@ import client.GameImage;
 import client.GameImageMiddleMan;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
-import client.UI.InGameGridPanel;
+import client.UI.InGameGrid;
 import client.UI.InGamePanel;
 import model.Sprite;
 
 public class TradeConfirmPanel extends InGamePanel
 {
-	private InGameGridPanel invGrid, myOfferGrid, otherOfferGrid;
+	private InGameGrid invGrid, myOfferGrid, otherOfferGrid;
 	private int middleMarginWidth;
 	private int plrTextBoxHeight, opntTextBoxHeight, itemInfoBarHeight;
     private InGameButton acceptBtn, declineBtn;
@@ -21,9 +21,9 @@ public class TradeConfirmPanel extends InGamePanel
 	{
 		graphics = g;
 		frame = new InGameFrame("", g);
-		invGrid = new InGameGridPanel(6, 5);
-		myOfferGrid = new InGameGridPanel(3, 4);
-		otherOfferGrid = new InGameGridPanel(3, 4);
+		invGrid = new InGameGrid(6, 5, g);
+		myOfferGrid = new InGameGrid(3, 4, g);
+		otherOfferGrid = new InGameGrid(3, 4, g);
         middleMarginWidth = 11;
         plrTextBoxHeight = 18;
         opntTextBoxHeight = 22;

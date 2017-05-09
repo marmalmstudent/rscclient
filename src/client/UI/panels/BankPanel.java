@@ -5,12 +5,12 @@ import java.awt.Rectangle;
 import client.GameImageMiddleMan;
 import client.UI.InGameButtonPanel;
 import client.UI.InGameFrame;
-import client.UI.InGameGridPanel;
+import client.UI.InGameGrid;
 import client.UI.InGamePanel;
 
 public class BankPanel extends InGamePanel
 {
-    private InGameGridPanel bankGrid;
+    private InGameGrid bankGrid;
     private int topInfoBoxHeight, bottomInfoBoxHeight;
     private final int bankCountTextColor = 0x00ff00;
     private final int invCountTextColor = 0x00ffff;
@@ -26,7 +26,7 @@ public class BankPanel extends InGamePanel
 	{
 		graphics = g;
 		frame = new InGameFrame("Bank", g);
-		bankGrid = new InGameGridPanel(6, 8);
+		bankGrid = new InGameGrid(6, 8, g);
 	    topInfoBoxHeight = 17;
 	    bottomInfoBoxHeight = 47;
 	    setHeight(getTopInfoBoxHeight() + bankGrid.getHeight() + getBottomInfoBoxHeight());
@@ -104,7 +104,7 @@ public class BankPanel extends InGamePanel
 		return 0;
 	}
 
-	public InGameGridPanel getBankGrid() { return bankGrid; }
+	public InGameGrid getBankGrid() { return bankGrid; }
 	
 	public int getTopInfoBoxHeight() { return topInfoBoxHeight; }
 	public int getTopInfoBoxWidth() { return getWidth(); }

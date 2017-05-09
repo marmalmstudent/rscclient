@@ -7,13 +7,13 @@ import client.GameImageMiddleMan;
 import client.mudclient;
 import client.UI.InGameButton;
 import client.UI.InGameFrame;
-import client.UI.InGameGridPanel;
+import client.UI.InGameGrid;
 import client.UI.InGamePanel;
 import model.Sprite;
 
 public class TradePanel extends InGamePanel
 {
-	private InGameGridPanel invGrid, myOfferGrid, otherOfferGrid;
+	private InGameGrid invGrid, myOfferGrid, otherOfferGrid;
 	private final int invCountTextColor = 0xffff00;
 	private int nTradeCols, nTradeRows, middleMarginWidth;
 	private int plrTextBoxHeight, opntTextBoxHeight, itemInfoBarHeight;
@@ -26,9 +26,9 @@ public class TradePanel extends InGamePanel
 	{
 		graphics = g;
 		frame = new InGameFrame("Trading width: ", g);
-		invGrid = new InGameGridPanel(6, 5);
-		myOfferGrid = new InGameGridPanel(3, 4);
-		otherOfferGrid = new InGameGridPanel(3, 4);
+		invGrid = new InGameGrid(6, 5, g);
+		myOfferGrid = new InGameGrid(3, 4, g);
+		otherOfferGrid = new InGameGrid(3, 4, g);
 
 		middleMarginWidth = 11;
 		plrTextBoxHeight = 18;
@@ -88,9 +88,9 @@ public class TradePanel extends InGamePanel
 	public InGameButton getDeclineButton() { return declineBtn; }
 	public int getInvCountTextColor() { return invCountTextColor; }
 	
-	public InGameGridPanel getOfferGrid() { return myOfferGrid; }
-	public InGameGridPanel getOtherOfferGrid() { return otherOfferGrid; }
-	public InGameGridPanel getInvGrid() { return invGrid; }
+	public InGameGrid getOfferGrid() { return myOfferGrid; }
+	public InGameGrid getOtherOfferGrid() { return otherOfferGrid; }
+	public InGameGrid getInvGrid() { return invGrid; }
 
 	public int getPlrTextBoxX() { return plrTextBox.x; }
 	public int getPlrTextBoxY() { return plrTextBox.y; }
