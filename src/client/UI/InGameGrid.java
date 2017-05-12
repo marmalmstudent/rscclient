@@ -53,8 +53,7 @@ public class InGameGrid extends InGamePanel
 	public void drawStorableGrid(
 			Item[] depositedItems, int depItemStart, int depItemCount,
 			int depositedTextColor, int selectedDepIdx,
-			Item[] withdrawnItems, int withItemStart, int withItemCount,
-			int withdrawnTextColor)
+			Item[] withdrawnItems, int withItemCount, int withdrawnTextColor)
 	{
 		int itemIdx = depItemStart;
 		for (int row = 0; row < nRows; row++)
@@ -71,10 +70,10 @@ public class InGameGrid extends InGamePanel
 					drawDepositedText(slotX, slotY, depositedItems[itemIdx].amount,
 							depositedTextColor);
 					drawWithdrawnText(slotX, slotY,
-							mudclient.itemCount(depositedItems[itemIdx], withdrawnItems),
+							mudclient.itemCount(depositedItems[itemIdx], withdrawnItems, withItemCount),
 							withdrawnTextColor);
 				}
-				itemIdx++;
+				++itemIdx;
 			}
 		}
 	}

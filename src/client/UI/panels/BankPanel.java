@@ -140,8 +140,8 @@ public class BankPanel extends InGamePanel
 				getTopInfoBoxY() + 12, 1, 0x00ffff);
 	}
 	
-	public void drawBankDepWithPanel(Item[] bankItems, Item[] invItems,
-			int selectedBankItemIdx, int mouseX, int mouseY)
+	public void drawBankDepWithPanel(Item[] bankItems, int selectedBankItemIdx,
+			Item[] invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		graphics.drawBoxAlpha(
 				getBottomInfoBoxX(), getBottomInfoBoxY(),
@@ -171,11 +171,11 @@ public class BankPanel extends InGamePanel
 				drawBankWithText(getWithButtonPanel(), selectedBankItemCount,
 						mouseX, mouseY);
 			}
-			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems) > 0) {
+			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems, nInvItems) > 0) {
 				graphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
 						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 40, 1, 0xffffff);
-				drawBankDepText(getDepButtonPanel(), bankItems, invItems,
-						selectedBankItemIdx, mouseX, mouseY);
+				drawBankDepText(getDepButtonPanel(), bankItems, selectedBankItemIdx,
+						invItems, nInvItems, mouseX, mouseY);
 			}
 		}
 	}
@@ -189,41 +189,32 @@ public class BankPanel extends InGamePanel
 		int count = 1;
 		for (int i = 0; i < btnPan.getNbrButtons()-1; ++i)
 		{
-			button = btnPan.getButton(i); 
+			button = btnPan.getButton(i);
 			if (selectedBankItemCount >= count)
 			{
-				if (button.isMouseOverButton(mouseX, mouseY))
-					graphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseOverColor());
-				else
-
-					graphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseNotOverColor());
+				graphics.drawString(
+						button.getButtonText(), button.getX() + 2,
+						button.getY() + yOffset, 1,
+						button.isMouseOverButton(mouseX, mouseY) ?
+								button.getMouseOverColor() :
+									button.getMouseNotOverColor());
 			}
 
 			count *= 10;
 		}
 		button = btnPan.getButton(
 				btnPan.getNbrButtons()-1);
-		if (button.isMouseOverButton(mouseX, mouseY))
-			graphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseOverColor());
-		else
-			graphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseNotOverColor());
+		graphics.drawString(
+				button.getButtonText(), button.getX() + 2,
+				button.getY() + yOffset, 1,
+				button.isMouseOverButton(mouseX, mouseY) ?
+						button.getMouseOverColor() :
+							button.getMouseNotOverColor());
 	}
 
 	public void drawBankDepText(InGameButtonPanel btnPan,
-			Item[] bankItems, Item[] invItems,
-			int selectedBankItemIdx, int mouseX, int mouseY)
+			Item[] bankItems, int selectedBankItemIdx,
+			Item[] invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		int yOffset = 10;
 
@@ -232,33 +223,80 @@ public class BankPanel extends InGamePanel
 		for (int i = 0; i < btnPan.getNbrButtons()-1; ++i)
 		{
 			button = btnPan.getButton(i);
-			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems) >= count)
+			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems, nInvItems) >= count)
 			{
-				if (button.isMouseOverButton(mouseX, mouseY))
-					graphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseOverColor());
-				else
-
-					graphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseNotOverColor());
+				graphics.drawString(
+						button.getButtonText(), button.getX() + 2,
+						button.getY() + yOffset, 1,
+						button.isMouseOverButton(mouseX, mouseY) ?
+								button.getMouseOverColor() :
+									button.getMouseNotOverColor());
 			}
 			count *= 10;
 		}
-		button = btnPan.getButton(
-				btnPan.getNbrButtons()-1);
-		if (button.isMouseOverButton(mouseX, mouseY))
-			graphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseOverColor());
-		else
-			graphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseNotOverColor());
+		button = btnPan.getButton(btnPan.getNbrButtons()-1);
+		graphics.drawString(
+				button.getButtonText(), button.getX() + 2,
+				button.getY() + yOffset, 1,
+				button.isMouseOverButton(mouseX, mouseY) ?
+						button.getMouseOverColor() :
+							button.getMouseNotOverColor());
+	}
+
+	/**
+	 * Checks if the number of items changed in bank such that a tab needs to be
+	 * removed.
+	 */
+	public int updateVisibleBankTabs(int mouseOverBankPageText, int bankItemCount)
+	{
+		if (mouseOverBankPageText > 0
+				&& bankItemCount <= bankGrid.getRows()*bankGrid.getCols())
+			mouseOverBankPageText = 0;
+		if (mouseOverBankPageText > 1
+				&& bankItemCount <= 2*bankGrid.getRows()*bankGrid.getCols())
+			mouseOverBankPageText = 1;
+		if (mouseOverBankPageText > 2
+				&& bankItemCount <= 3*bankGrid.getRows()*bankGrid.getCols())
+			mouseOverBankPageText = 2;
+		return mouseOverBankPageText;
+	}
+
+	public void drawBankTabs(int bankItemCount, int mouseOverBankPageText,
+			int mouseX, int mouseY)
+	{
+		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
+		int tabMouseover = getTabMouseover(mouseX, mouseY, nTabs);
+		if (nTabs > 1)
+		{
+			int color;
+			InGameButton button;
+			for (int i = 0; i < nTabs; ++i)
+			{
+				button = tabBtnPanel.getButton(i);
+				color = button.getMouseNotOverColor();
+				if (i == mouseOverBankPageText)
+					color = button.getButtonSelectedColor();
+				else if (i+1 == tabMouseover)
+					color = button.getMouseOverColor();
+				graphics.drawString(button.getButtonText(),
+						button.getX(),
+						button.getY() + 10, 1, color);
+			}
+		}
+	}
+
+	/**
+	 * Handles what happens when you click on a bank tab
+	 */
+	public int switchBankTab(int bankItemCount, int mouseOverBankPageText,
+			int mouseX, int mouseY)
+	{
+		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
+		int tabMouseover = getTabMouseover(mouseX, mouseY, nTabs);
+		if (tabMouseover > 0)
+		{
+			return tabMouseover - 1;
+		}
+		return mouseOverBankPageText;
 	}
 }

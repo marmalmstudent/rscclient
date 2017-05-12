@@ -592,10 +592,10 @@ public class mudclient extends GameWindowMiddleMan
 		return amount;
 	}
 	
-	public static int itemCount(Item item, Item[] items)
+	public static int itemCount(Item item, Item[] items, int nItems)
 	{
 		int amount = 0;
-		for (int index = 0; index < items.length; index++)
+		for (int index = 0; index < nItems; index++)
 		{
 			if (items[index].id == item.id)
 				if (!item.stackable())
@@ -1238,31 +1238,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	/**
-	 * Draws the banked items (as a grid) in the current tab as well as the amount
-	 * of the items that are in the inventory as well as in the bank.
-	 */
-	private void drawBankGrid()
-	{
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		int k7 = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
-		for (int row = 0; row < bankGrid.getRows(); row++)
-		{
-			for (int col = 0; col < bankGrid.getCols(); col++)
-			{
-				int slotX = bankGrid.getX() + col*(InGameGrid.ITEM_SLOT_WIDTH);
-				int slotY = bankGrid.getY() + row*(InGameGrid.ITEM_SLOT_HEIGHT);
-				drawItemBox(bankGrid, bankItemsI[k7].id, slotX, slotY,
-						selectedBankItem == k7,
-						k7 < bankItemCount && bankItemsI[k7].id != -1);
-				if (k7 < bankItemCount && bankItemsI[k7].id != -1)
-					drawBankText(slotX, slotY, bankItemsI[k7].amount,
-							inventoryCount(bankItemsI[k7].id));
-				k7++;
-			}
-		}
-	}
-
 	private void drawItemBox(InGameGrid panel, int itemID,
 			int slotX, int slotY, boolean selected, boolean drawSprite)
 	{
@@ -1289,207 +1264,6 @@ public class mudclient extends GameWindowMiddleMan
 							itemID).getSprite(),
 					EntityHandler.getItemDef(itemID).getPictureMask(),
 					0, 0, false);
-	}
-
-	private void drawBankText(int slotX, int slotY,
-			int bankAmount, int invAmount)
-	{
-		gameGraphics.drawString(getAbbreviatedValue(bankAmount),
-				slotX + 1, slotY + 10, 1, bankPan.getBankCountTextColor());
-		gameGraphics.drawBoxTextRight(getAbbreviatedValue(invAmount),
-				slotX + InGameGrid.ITEM_SLOT_WIDTH - 1,
-				slotY + InGameGrid.ITEM_SLOT_HEIGHT - 5, 1, 0x00ffff);
-	}
-
-	/**
-	 * Draws the text that allows users to withdraw a selected item from the bank.
-	 * @param selectedBankItemCount Item id of the selected item.
-	 */
-	private void drawBankWithText(int selectedBankItemCount)
-	{
-		int yOffset = 10;
-		int withAmt = bankPan.getWithAmt(super.mouseX, super.mouseY,
-				selectedBankItemCount);
-
-		InGameButton button;
-		int count = 1;
-		for (int i = 0; i < bankPan.getWithButtonPanel().getNbrButtons()-1; ++i)
-		{
-			button = bankPan.getWithButtonPanel().getButton(i); 
-			if (selectedBankItemCount >= count)
-			{
-				if (button.isMouseOverButton(super.mouseX, super.mouseY))
-					gameGraphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseOverColor());
-				else
-
-					gameGraphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseNotOverColor());
-			}
-
-			count *= 10;
-		}
-		button = bankPan.getWithButtonPanel().getButton(
-				bankPan.getWithButtonPanel().getNbrButtons()-1);
-		if (button.isMouseOverButton(super.mouseX, super.mouseY))
-			gameGraphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseOverColor());
-		else
-			gameGraphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseNotOverColor());
-	}
-
-	/**
-	 * Draws the text that allows users to deposit a selected item to the bank.
-	 * @param selectedBankItemId Item id of the selected item.
-	 */
-	private void drawBankDepText(int selectedBankItemId)
-	{
-		int yOffset = 10;
-		int depAmt = bankPan.getDepAmt(super.mouseX, super.mouseY,
-				inventoryCount(selectedBankItemId));
-
-		InGameButton button;
-		int count = 1;
-		for (int i = 0; i < bankPan.getDepButtonPanel().getNbrButtons()-1; ++i)
-		{
-			button = bankPan.getDepButtonPanel().getButton(i);
-			if (inventoryCount(selectedBankItemId) >= count)
-			{
-				if (button.isMouseOverButton(super.mouseX, super.mouseY))
-					gameGraphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseOverColor());
-				else
-
-					gameGraphics.drawString(
-							button.getButtonText(), button.getX() + 2,
-							button.getY() + yOffset, 1,
-							button.getMouseNotOverColor());
-			}
-			count *= 10;
-		}
-		button = bankPan.getDepButtonPanel().getButton(
-				bankPan.getDepButtonPanel().getNbrButtons()-1);
-		if (button.isMouseOverButton(super.mouseX, super.mouseY))
-			gameGraphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseOverColor());
-		else
-			gameGraphics.drawString(
-					button.getButtonText(), button.getX() + 2,
-					button.getY() + yOffset, 1,
-					button.getMouseNotOverColor());
-	}
-
-	/**
-	 * Draws the panel that displays item name and the amount to deposit or withdraw.
-	 */
-	private void drawBankDepWithPanel()
-	{
-		gameGraphics.drawBoxAlpha(
-				bankPan.getBottomInfoBoxX(), bankPan.getBottomInfoBoxY(),
-				bankPan.getBottomInfoBoxWidth(), bankPan.getBottomInfoBoxHeight(),
-				bankPan.getBGColor(), bankPan.getBGAlpha());
-		gameGraphics.drawLineX(
-				bankPan.getBottomInfoBoxX(),
-				bankPan.getBottomInfoBoxY() + bankPan.getBottomInfoBoxHeight()/2,
-				bankPan.getBottomInfoBoxWidth(), 0);
-		if (selectedBankItem == -1)
-		{
-			gameGraphics.drawText("Select an object to withdraw or deposit",
-					bankPan.getBottomInfoBoxX() + bankPan.getBottomInfoBoxWidth()/2,
-					bankPan.getBottomInfoBoxY() + 15, 3, 0xffff00);
-			return;
-		}
-		int selectedBankItemId;
-		if (selectedBankItem < 0)
-			selectedBankItemId = -1;
-		else
-			selectedBankItemId = bankItemsI[selectedBankItem].id;
-		if (selectedBankItemId != -1) {
-			int selectedBankItemCount = bankItemsI[selectedBankItem].amount;
-			if (selectedBankItemCount > 0) {
-				gameGraphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
-						bankPan.getBottomInfoBoxX() + 2, bankPan.getBottomInfoBoxY() + 15, 1, 0xffffff);
-				drawBankWithText(selectedBankItemCount);
-			}
-			if (inventoryCount(selectedBankItemId) > 0) {
-				gameGraphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
-						bankPan.getBottomInfoBoxX() + 2, bankPan.getBottomInfoBoxY() + 40, 1, 0xffffff);
-				drawBankDepText(selectedBankItemId);
-			}
-		}
-	}
-
-	/**
-	 * Draws the bank tabs
-	 */
-	private void drawBankTabs()
-	{
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
-		int tabMouseover = bankPan.getTabMouseover(super.mouseX,
-				super.mouseY, nTabs);
-		if (nTabs > 1)
-		{
-			int color;
-			InGameButton button;
-			for (int i = 0; i < nTabs; ++i)
-			{
-				button = bankPan.getTabButtonPanel().getButton(i);
-				color = button.getMouseNotOverColor();
-				if (i == mouseOverBankPageText)
-					color = button.getButtonSelectedColor();
-				else if (i+1 == tabMouseover)
-					color = button.getMouseOverColor();
-				gameGraphics.drawString(button.getButtonText(),
-						button.getX(),
-						button.getY() + 10, 1, color);
-			}
-		}
-	}
-
-	/**
-	 * Draws information about the bank interface at the top of the bank panel.
-	 */
-	private void drawBankInfo()
-	{
-		gameGraphics.drawBoxAlpha(
-				bankPan.getTopInfoBoxX(), bankPan.getTopInfoBoxY(),
-				bankPan.getTopInfoBoxWidth(), bankPan.getTopInfoBoxHeight(),
-				bankPan.getBGColor(), bankPan.getBGAlpha());
-		gameGraphics.drawString("Number in bank in green",
-				bankPan.getTopInfoBoxX(),
-				bankPan.getTopInfoBoxY() + 12, 1, 0x00ff00);
-		gameGraphics.drawString("Number held in blue",
-				bankPan.getTopInfoBoxX() + bankPan.getTopInfoBoxWidth() - 111,
-				bankPan.getTopInfoBoxY() + 12, 1, 0x00ffff);
-	}
-
-	/**
-	 * Handles what happens when you click on a bank tab
-	 */
-	private void switchBankTab()
-	{
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		int nTabs = bankItemCount/(bankGrid.getRows()*bankGrid.getCols()) + 1;
-		int tabMouseover = bankPan.getTabMouseover(super.mouseX,
-				super.mouseY, nTabs);
-		if (tabMouseover > 0)
-		{
-			mouseOverBankPageText = tabMouseover - 1;
-		}
 	}
 
 	/**
@@ -1545,24 +1319,6 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	/**
-	 * Checks if the number of items changed in bank such that a tab needs to be
-	 * removed.
-	 */
-	private void updateVisibleBankTabs()
-	{
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		if (mouseOverBankPageText > 0
-				&& bankItemCount <= bankGrid.getRows()*bankGrid.getCols())
-			mouseOverBankPageText = 0;
-		if (mouseOverBankPageText > 1
-				&& bankItemCount <= 2*bankGrid.getRows()*bankGrid.getCols())
-			mouseOverBankPageText = 1;
-		if (mouseOverBankPageText > 2
-				&& bankItemCount <= 3*bankGrid.getRows()*bankGrid.getCols())
-			mouseOverBankPageText = 2;
-	}
-
-	/**
 	 * Checks if an invalid item is selected. If so it will clear the reference.
 	 */
 	private void checkSelectedBankItem()
@@ -1583,7 +1339,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (amount >= 10000000)
 			abbrevVal = String.valueOf(amount/1000000) + "M";
 		else if (amount >= 100000)
-			abbrevVal = String.valueOf(amount/1000) + "K";    	
+			abbrevVal = String.valueOf(amount/1000) + "K";
 		return abbrevVal;
 	}
 
@@ -1592,7 +1348,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private final void drawBankBox()
 	{
-		updateVisibleBankTabs();
+		mouseOverBankPageText = bankPan.updateVisibleBankTabs(mouseOverBankPageText, bankItemCount);
 		checkSelectedBankItem();
 		if (mouseButtonClick != 0)
 		{
@@ -1608,7 +1364,7 @@ public class mudclient extends GameWindowMiddleMan
 				clickBankItemMove();
 			else if (bankPan.getTabButtonPanel().isMouseOver(
 					super.mouseX, super.mouseY))
-				switchBankTab();
+				mouseOverBankPageText = bankPan.switchBankTab(bankItemCount, mouseOverBankPageText, super.mouseX, super.mouseY);
 			else if (!bankPan.getFrame().isMouseOver(super.mouseX, super.mouseY)
 					|| (bankPan.getFrame().getCloseButton().isMouseOverButton(
 							super.mouseX, super.mouseY)))
@@ -1618,16 +1374,12 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 		bankPan.getFrame().drawComponent(super.mouseX, super.mouseY);
-		drawBankTabs();
+		bankPan.drawBankTabs(bankItemCount, mouseOverBankPageText, super.mouseX, super.mouseY);
 		bankPan.drawBankInfo();
 		InGameGrid bankGrid = bankPan.getBankGrid();
 		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
-		bankGrid.drawStorableGrid(bankItemsI, itemIdx, bankItemCount,
-				bankPan.getBankCountTextColor(), selectedBankItem, inventory, 0, inventoryCount,
-				0x00ffff);
-		/* needs fixing, item amounts don't add up and game seems to run slow */
-		//bankPan.drawBankDepWithPanel(bankItemsI, inventory, selectedBankItem, super.mouseX, super.mouseY);
-		drawBankDepWithPanel();
+		bankGrid.drawStorableGrid(bankItemsI, itemIdx, bankItemCount, bankPan.getBankCountTextColor(), selectedBankItem, inventory, inventoryCount, 0x00ffff);
+		bankPan.drawBankDepWithPanel(bankItemsI, selectedBankItem, inventory, inventoryCount, super.mouseX, super.mouseY);
 	}
 
 	/**
