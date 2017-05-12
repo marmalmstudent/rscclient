@@ -20,7 +20,7 @@ public class CameraModel {
     protected int anInt363;
     protected int anInt364;
     protected int anInt365;
-    protected int anInt366;
+    protected int color;
     protected boolean aBoolean367;
     protected int anInt368;
     protected int anInt369;
