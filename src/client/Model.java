@@ -13,8 +13,8 @@ public class Model
 		anInt246 = 1;
 		visible = true;
 		aBoolean254 = true;
-		aBoolean255 = false;
-		isGiantCrystal = false;
+		transparentTexture = false;
+		transparent = false;
 		anInt257 = -1;
 		aBoolean260 = false;
 		aBoolean261 = false;
@@ -40,8 +40,8 @@ public class Model
 		anInt246 = 1;
 		visible = true;
 		aBoolean254 = true;
-		aBoolean255 = false;
-		isGiantCrystal = false;
+		transparentTexture = false;
+		transparent = false;
 		anInt257 = -1;
 		anInt270 = 0xbc614e;
 		longestLength = 0xbc614e;
@@ -143,8 +143,8 @@ public class Model
 		anInt246 = 1;
 		visible = true;
 		aBoolean254 = true;
-		aBoolean255 = false;
-		isGiantCrystal = false;
+		transparentTexture = false;
+		transparent = false;
 		anInt257 = -1;
 		aBoolean260 = false;
 		aBoolean261 = false;
@@ -251,8 +251,8 @@ public class Model
         anInt246 = 1;
         visible = true;
         aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
+        transparentTexture = false;
+        transparent = false;
         anInt257 = -1;
         aBoolean260 = false;
         aBoolean261 = false;
@@ -329,8 +329,8 @@ public class Model
         anInt246 = 1;
         visible = true;
         aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
+        transparentTexture = false;
+        transparent = false;
         anInt257 = -1;
         aBoolean264 = false;
         anInt270 = 0xbc614e;
@@ -352,8 +352,8 @@ public class Model
         anInt246 = 1;
         visible = true;
         aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
+        transparentTexture = false;
+        transparent = false;
         anInt257 = -1;
         aBoolean260 = false;
         aBoolean261 = false;
@@ -981,7 +981,7 @@ public class Model
         models[0] = this;
         Model model = new Model(models, 1);
         model.anInt245 = anInt245;
-        model.isGiantCrystal = isGiantCrystal;
+        model.transparent = transparent;
         return model;
     }
 
@@ -1047,8 +1047,8 @@ public class Model
     public int yMin;
     public int yMax;
     public boolean aBoolean254;
-    public boolean aBoolean255;
-    public boolean isGiantCrystal;
+    public boolean transparentTexture;
+    public boolean transparent;
     public int anInt257;
     public int entityType[];
     public byte aByteArray259[];

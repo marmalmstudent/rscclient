@@ -6,14 +6,14 @@ public class Camera {
 	public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int k) {
 		this.mc = mc;
 		nbrColors = 50;
-		anIntArray375 = new int[nbrColors];
+		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
 		drawMinDist = 5;
 		drawModelMaxDist = 1000;
 		drawSpriteMaxDist = 1000;
 		zoom3 = 20;
 		fadeDist = 10;
-		aBoolean386 = false;
+		gradient2Step = false;
 		aDouble387 = 1.1000000000000001D;
 		anInt388 = 1;
 		aBoolean389 = false;
@@ -568,10 +568,10 @@ public class Camera {
 
 				/* Both of these are needed to draw models */
 				makeTriangle(0, 0, 0, 0, k8, triangleScreenX, triangleScreenY, triangleBright, model, l);
-				if (modelRightY > modelLeftY)
-					applyColor(0, 0, ptsPerCell, xDistToPointFromCamera,
-							zDistToPointFromCamera, yDistToPointFromCamera,
-							cm.color, model);
+				if (modelLowerY > modelUpperY)
+					applyColor(0, ptsPerCell, xDistToPointFromCamera, zDistToPointFromCamera,
+							yDistToPointFromCamera, cm.color,
+							model);
 			}
 		}
 
@@ -675,18 +675,18 @@ public class Camera {
 				if (j21 > drawYMax)
 					j21 = drawYMax;
 			}
-			modelLeftY = l14;
-			if (l17 < modelLeftY)
-				modelLeftY = l17;
-			if (l20 < modelLeftY)
-				modelLeftY = l20;
-			modelRightY = j15;
-			if (j18 > modelRightY)
-				modelRightY = j18;
-			if (j21 > modelRightY)
-				modelRightY = j21;
+			modelUpperY = l14;
+			if (l17 < modelUpperY)
+				modelUpperY = l17;
+			if (l20 < modelUpperY)
+				modelUpperY = l20;
+			modelLowerY = j15;
+			if (j18 > modelLowerY)
+				modelLowerY = j18;
+			if (j21 > modelLowerY)
+				modelLowerY = j21;
 			int l21 = 0;
-			for (k = modelLeftY; k < modelRightY; k++) {
+			for (k = modelUpperY; k < modelLowerY; k++) {
 				if (k >= l14 && k < j15) {
 					i = j = l12;
 					l = l21 = l13;
@@ -723,12 +723,12 @@ public class Camera {
 				CameraVariables cameraVariables_6 = cameraVariables[k];
 				cameraVariables_6.leftX = i;
 				cameraVariables_6.rightX = j;
-				cameraVariables_6.anInt372 = l;
-				cameraVariables_6.anInt373 = l21;
+				cameraVariables_6.gradientStart = l;
+				cameraVariables_6.gradientEnd = l21;
 			}
 
-			if (modelLeftY < halfHeight2 - halfHeight)
-				modelLeftY = halfHeight2 - halfHeight;
+			if (modelUpperY < halfHeight2 - halfHeight)
+				modelUpperY = halfHeight2 - halfHeight;
 		} else if (i1 == 4) {
 			int l1 = ai1[0] + halfHeight2;
 			int l2 = ai1[1] + halfHeight2;
@@ -855,22 +855,22 @@ public class Camera {
 				if (i24 > i14)
 					i24 = i14;
 			}
-			modelLeftY = k16;
-			if (k19 < modelLeftY)
-				modelLeftY = k19;
-			if (j22 < modelLeftY)
-				modelLeftY = j22;
-			if (l23 < modelLeftY)
-				modelLeftY = l23;
-			modelRightY = i17;
-			if (i20 > modelRightY)
-				modelRightY = i20;
-			if (k22 > modelRightY)
-				modelRightY = k22;
-			if (i24 > modelRightY)
-				modelRightY = i24;
+			modelUpperY = k16;
+			if (k19 < modelUpperY)
+				modelUpperY = k19;
+			if (j22 < modelUpperY)
+				modelUpperY = j22;
+			if (l23 < modelUpperY)
+				modelUpperY = l23;
+			modelLowerY = i17;
+			if (i20 > modelLowerY)
+				modelLowerY = i20;
+			if (k22 > modelLowerY)
+				modelLowerY = k22;
+			if (i24 > modelLowerY)
+				modelLowerY = i24;
 			int j24 = 0;
-			for (k = modelLeftY; k < modelRightY; k++) {
+			for (k = modelUpperY; k < modelLowerY; k++) {
 				if (k >= k16 && k < i17) {
 					i = j = k14;
 					l = j24 = k15;
@@ -920,29 +920,29 @@ public class Camera {
 				CameraVariables cameraVariables_7 = cameraVariables[k];
 				cameraVariables_7.leftX = i;
 				cameraVariables_7.rightX = j;
-				cameraVariables_7.anInt372 = l;
-				cameraVariables_7.anInt373 = j24;
+				cameraVariables_7.gradientStart = l;
+				cameraVariables_7.gradientEnd = j24;
 			}
 
-			if (modelLeftY < halfHeight2 - halfHeight)
-				modelLeftY = halfHeight2 - halfHeight;
+			if (modelUpperY < halfHeight2 - halfHeight)
+				modelUpperY = halfHeight2 - halfHeight;
 		} else {
-			modelRightY = modelLeftY = ai1[0] += halfHeight2;
+			modelLowerY = modelUpperY = ai1[0] += halfHeight2;
 			for (k = 1; k < i1; k++) {
 				int i2;
-				if ((i2 = ai1[k] += halfHeight2) < modelLeftY)
-					modelLeftY = i2;
-				else if (i2 > modelRightY)
-					modelRightY = i2;
+				if ((i2 = ai1[k] += halfHeight2) < modelUpperY)
+					modelUpperY = i2;
+				else if (i2 > modelLowerY)
+					modelLowerY = i2;
 			}
 
-			if (modelLeftY < halfHeight2 - halfHeight)
-				modelLeftY = halfHeight2 - halfHeight;
-			if (modelRightY >= halfHeight2 + halfHeight)
-				modelRightY = (halfHeight2 + halfHeight) - 1;
-			if (modelLeftY >= modelRightY)
+			if (modelUpperY < halfHeight2 - halfHeight)
+				modelUpperY = halfHeight2 - halfHeight;
+			if (modelLowerY >= halfHeight2 + halfHeight)
+				modelLowerY = (halfHeight2 + halfHeight) - 1;
+			if (modelUpperY >= modelLowerY)
 				return;
-			for (k = modelLeftY; k < modelRightY; k++) {
+			for (k = modelUpperY; k < modelLowerY; k++) {
 				CameraVariables cameraVariables = this.cameraVariables[k];
 				cameraVariables.leftX = 0xa0000;
 				cameraVariables.rightX = 0xfff60000;
@@ -961,12 +961,12 @@ public class Camera {
 					l7 -= j9 * i3;
 					i3 = 0;
 				}
-				if (i4 > modelRightY)
-					i4 = modelRightY;
+				if (i4 > modelLowerY)
+					i4 = modelLowerY;
 				for (k = i3; k <= i4; k++) {
 					CameraVariables cameraVariables_2 = cameraVariables[k];
 					cameraVariables_2.leftX = cameraVariables_2.rightX = i5;
-					cameraVariables_2.anInt372 = cameraVariables_2.anInt373 = l7;
+					cameraVariables_2.gradientStart = cameraVariables_2.gradientEnd = l7;
 					i5 += j6;
 					l7 += j9;
 				}
@@ -981,12 +981,12 @@ public class Camera {
 					i8 -= k9 * i4;
 					i4 = 0;
 				}
-				if (i3 > modelRightY)
-					i3 = modelRightY;
+				if (i3 > modelLowerY)
+					i3 = modelLowerY;
 				for (k = i4; k <= i3; k++) {
 					CameraVariables cameraVariables_3 = cameraVariables[k];
 					cameraVariables_3.leftX = cameraVariables_3.rightX = j5;
-					cameraVariables_3.anInt372 = cameraVariables_3.anInt373 = i8;
+					cameraVariables_3.gradientStart = cameraVariables_3.gradientEnd = i8;
 					j5 += k6;
 					i8 += k9;
 				}
@@ -1006,17 +1006,17 @@ public class Camera {
 						l9 -= l10 * j3;
 						j3 = 0;
 					}
-					if (j4 > modelRightY)
-						j4 = modelRightY;
+					if (j4 > modelLowerY)
+						j4 = modelLowerY;
 					for (int l11 = j3; l11 <= j4; l11++) {
 						CameraVariables cameraVariables_4 = cameraVariables[l11];
 						if (l6 < cameraVariables_4.leftX) {
 							cameraVariables_4.leftX = l6;
-							cameraVariables_4.anInt372 = l9;
+							cameraVariables_4.gradientStart = l9;
 						}
 						if (l6 > cameraVariables_4.rightX) {
 							cameraVariables_4.rightX = l6;
-							cameraVariables_4.anInt373 = l9;
+							cameraVariables_4.gradientEnd = l9;
 						}
 						l6 += j8;
 						l9 += l10;
@@ -1032,17 +1032,17 @@ public class Camera {
 						i10 -= i11 * j4;
 						j4 = 0;
 					}
-					if (j3 > modelRightY)
-						j3 = modelRightY;
+					if (j3 > modelLowerY)
+						j3 = modelLowerY;
 					for (int i12 = j4; i12 <= j3; i12++) {
 						CameraVariables cameraVariables_5 = cameraVariables[i12];
 						if (i7 < cameraVariables_5.leftX) {
 							cameraVariables_5.leftX = i7;
-							cameraVariables_5.anInt372 = i10;
+							cameraVariables_5.gradientStart = i10;
 						}
 						if (i7 > cameraVariables_5.rightX) {
 							cameraVariables_5.rightX = i7;
-							cameraVariables_5.anInt373 = i10;
+							cameraVariables_5.gradientEnd = i10;
 						}
 						i7 += k8;
 						i10 += i11;
@@ -1051,10 +1051,10 @@ public class Camera {
 				}
 			}
 
-			if (modelLeftY < halfHeight2 - halfHeight)
-				modelLeftY = halfHeight2 - halfHeight;
+			if (modelUpperY < halfHeight2 - halfHeight)
+				modelUpperY = halfHeight2 - halfHeight;
 		}
-		if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount && mouseY >= modelLeftY && mouseY < modelRightY) {
+		if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount && mouseY >= modelUpperY && mouseY < modelLowerY) {
 			CameraVariables cameraVariables_1 = cameraVariables[mouseY];
 			if (mouseX >= cameraVariables_1.leftX >> 8 && mouseX <= cameraVariables_1.rightX >> 8 && cameraVariables_1.leftX <= cameraVariables_1.rightX && !model.aBoolean263 && model.aByteArray259[j1] == 0) {
 				visibleModelsArray[currentVisibleModelCount] = model;
@@ -1065,9 +1065,9 @@ public class Camera {
 	}
 
 	private void applyColor(
-			int i, int imgPixXStart, int k,
-			int xDist[], int zDist[], int yDist[],
-			int color, Model model)
+			int imgPixXStart, int k, int xDist[],
+			int zDist[], int yDist[], int color,
+			Model model)
 	{
 		if (color == -2)
 			return; // invisible
@@ -1089,198 +1089,34 @@ public class Camera {
 			int pk0_x = xDist[k] - p0_x;
 			int pk0_z = zDist[k] - p0_z;
 			int pk0_y = yDist[k] - p0_y;
-			if (textureSize[color] == 1)
-			{ // texture is 128x128
-				int nk_y = pk0_x * p0_z - pk0_z * p0_x << 12;
-				int nk_x = pk0_z * p0_y - pk0_y * p0_z << (5 - cameraSizeInt) + 7 + 4;
-				int nk_z = pk0_y * p0_x - pk0_x * p0_y << (5 - cameraSizeInt) + 7;
-				
-				int n1_y = p10_x * p0_z - p10_z * p0_x << 12;
-				int n1_x = p10_z * p0_y - p10_y * p0_z << (5 - cameraSizeInt) + 7 + 4;
-				int n1_z = p10_y * p0_x - p10_x * p0_y << (5 - cameraSizeInt) + 7;
-				
-				int n_y = p10_z * pk0_x - p10_x * pk0_z << 5;
-				int n_x = p10_y * pk0_z - p10_z * pk0_y << (5 - cameraSizeInt) + 4;
-				int n_z = p10_x * pk0_y - p10_y * pk0_x >> cameraSizeInt - 5;
-				
-				int k14 = nk_x >> 4;
-				int i15 = n1_x >> 4;
-				int k15 = n_x >> 4;
-				int i16 = modelLeftY - halfHeight2;
-				int imgPixSkip = width;
-				int imgPixRow = halfWidth2 + modelLeftY * imgPixSkip;
-				byte rowStep = 1;
-				nk_y += nk_z * i16;
-				n1_y += n1_z * i16;
-				n_y += n_z * i16;
-				if (f1Toggle)
-				{
-					if ((modelLeftY & 1) == 1)
-					{
-						modelLeftY++;
-						nk_y += nk_z;
-						n1_y += n1_z;
-						n_y += n_z;
-						imgPixRow += imgPixSkip;
-					}
-					nk_z <<= 1;
-					n1_z <<= 1;
-					n_z <<= 1;
-					imgPixSkip <<= 1;
-					rowStep = 2;
-				}
-				if (model.aBoolean255)
-				{
-					for (i = modelLeftY; i < modelRightY; i += rowStep)
-					{
-						CameraVariables camVar = cameraVariables[i];
-						imgPixXStart = camVar.leftX >> 8;
-						int imgPixXEnd = camVar.rightX >> 8;
-						int lineLength = imgPixXEnd - imgPixXStart;
-						if (lineLength <= 0) {
-							nk_y += nk_z;
-							n1_y += n1_z;
-							n_y += n_z;
-							imgPixRow += imgPixSkip;
-						}
-						else
-						{
-							int i22 = camVar.anInt372;
-							int k23 = (camVar.anInt373 - i22) / lineLength;
-							if (imgPixXStart < -halfWidth)
-							{
-								i22 += (-halfWidth - imgPixXStart) * k23;
-								imgPixXStart = -halfWidth;
-								lineLength = imgPixXEnd - imgPixXStart;
-							}
-							if (imgPixXEnd > halfWidth)
-							{
-								int l17 = halfWidth;
-								lineLength = l17 - imgPixXStart;
-							}
-							drawPartiallyTransparentTexture4Step128(
-									imagePixelArray, texturePixels[color], 0, 0,
-									nk_y + k14 * imgPixXStart,
-									n1_y + i15 * imgPixXStart,
-									n_y + k15 * imgPixXStart,
-									nk_x, n1_x, n_x,
-									lineLength, imgPixRow + imgPixXStart, i22, k23 << 2);
-							nk_y += nk_z;
-							n1_y += n1_z;
-							n_y += n_z;
-							imgPixRow += imgPixSkip;
-						}
-					}
-					return;
-				}
-				if (!aBooleanArray430[color])
-				{
-					for (i = modelLeftY; i < modelRightY; i += rowStep)
-					{
-						CameraVariables cameraVariables_4 = cameraVariables[i];
-						imgPixXStart = cameraVariables_4.leftX >> 8;
-						int imgPixXEnd = cameraVariables_4.rightX >> 8;
-						int lineLength = imgPixXEnd - imgPixXStart;
-						if (lineLength <= 0)
-						{
-							nk_y += nk_z;
-							n1_y += n1_z;
-							n_y += n_z;
-							imgPixRow += imgPixSkip;
-						}
-						else
-						{
-							int j22 = cameraVariables_4.anInt372;
-							int l23 = (cameraVariables_4.anInt373 - j22) / lineLength;
-							if (imgPixXStart < -halfWidth)
-							{
-								j22 += (-halfWidth - imgPixXStart) * l23;
-								imgPixXStart = -halfWidth;
-								lineLength = imgPixXEnd - imgPixXStart;
-							}
-							if (imgPixXEnd > halfWidth)
-								lineLength = halfWidth - imgPixXStart;
-							drawTexture4Step128(
-									imagePixelArray, texturePixels[color],
-									0, 0,
-									nk_y + k14 * imgPixXStart,
-									n1_y + i15 * imgPixXStart,
-									n_y + k15 * imgPixXStart,
-									nk_x, n1_x, n_x,
-									lineLength, imgPixRow + imgPixXStart,
-									j22, l23 << 2);
-							nk_y += nk_z;
-							n1_y += n1_z;
-							n_y += n_z;
-							imgPixRow += imgPixSkip;
-						}
-					}
-					return;
-				}
-				for (i = modelLeftY; i < modelRightY; i += rowStep)
-				{
-					CameraVariables camVar = cameraVariables[i];
-					imgPixXStart = camVar.leftX >> 8;
-					int imgPixXEnd = camVar.rightX >> 8;
-					int lineLength = imgPixXEnd - imgPixXStart;
-					if (lineLength <= 0)
-					{
-						nk_y += nk_z;
-						n1_y += n1_z;
-						n_y += n_z;
-						imgPixRow += imgPixSkip;
-					}
-					else
-					{
-						int k22 = camVar.anInt372;
-						int i24 = (camVar.anInt373 - k22) / lineLength;
-						if (imgPixXStart < -halfWidth)
-						{
-							k22 += (-halfWidth - imgPixXStart) * i24;
-							imgPixXStart = -halfWidth;
-							lineLength = imgPixXEnd - imgPixXStart;
-						}
-						if (imgPixXEnd > halfWidth)
-							lineLength = halfWidth - imgPixXStart;
-						drawTransparentTexture128(
-								imagePixelArray, 0, 0, 0,
-								texturePixels[color],
-								nk_y + k14 * imgPixXStart,
-								n1_y + i15 * imgPixXStart,
-								n_y + k15 * imgPixXStart,
-								nk_x, n1_x, n_x, lineLength,
-								imgPixRow + imgPixXStart, k22, i24);
-						nk_y += nk_z;
-						n1_y += n1_z;
-						n_y += n_z;
-						imgPixRow += imgPixSkip;
-					}
-				}
-				return;
-			}
-			// texture size is 64x64
-			int nk_y = pk0_x * p0_z - pk0_z * p0_x << 11;
-			int nk_x = pk0_z * p0_y - pk0_y * p0_z << (5 - cameraSizeInt) + 6 + 4;
-			int nk_z = pk0_y * p0_x - pk0_x * p0_y << (5 - cameraSizeInt) + 6;
-			int n1_y = p10_x * p0_z - p10_z * p0_x << 11;
-			int n1_x = p10_z * p0_y - p10_y * p0_z << (5 - cameraSizeInt) + 6 + 4;
-			int n1_z = p10_y * p0_x - p10_x * p0_y << (5 - cameraSizeInt) + 6;
+			
+
+			int sizeMod = 6 + textureSize[color]; // 0: 64x64, 1: 128x128
+			int nk_y = pk0_x * p0_z - pk0_z * p0_x << 5 + sizeMod;
+			int nk_x = pk0_z * p0_y - pk0_y * p0_z << (5 - cameraSizeInt) + 4 + sizeMod;
+			int nk_z = pk0_y * p0_x - pk0_x * p0_y << (5 - cameraSizeInt) + sizeMod;
+			int n1_y = p10_x * p0_z - p10_z * p0_x << 5 + sizeMod;
+			int n1_x = p10_z * p0_y - p10_y * p0_z << (5 - cameraSizeInt) + 4 + sizeMod;
+			int n1_z = p10_y * p0_x - p10_x * p0_y << (5 - cameraSizeInt) + sizeMod;
 			int n_y = p10_z * pk0_x - p10_x * pk0_z << 5;
 			int n_x = p10_y * pk0_z - p10_z * pk0_y << (5 - cameraSizeInt) + 4;
 			int n_z = p10_x * pk0_y - p10_y * pk0_x >> cameraSizeInt - 5;
-			int l14 = nk_x >> 4;
-			int j15 = n1_x >> 4;
-			int l15 = n_x >> 4;
-			int j16 = modelLeftY - halfHeight2;
+			
+			int k14 = nk_x >> 4;
+			int i15 = n1_x >> 4;
+			int k15 = n_x >> 4;
+			int i16 = modelUpperY - halfHeight2;
 			int imgPixSkip = width;
-			int imgPixRow = halfWidth2 + modelLeftY * imgPixSkip;
-			byte byte2 = 1;
-			nk_y += nk_z * j16;
-			n1_y += n1_z * j16;
-			n_y += n_z * j16;
-			if (f1Toggle) {
-				if ((modelLeftY & 1) == 1) {
-					modelLeftY++;
+			int imgPixRow = halfWidth2 + modelUpperY * imgPixSkip;
+			byte rowStep = 1;
+			nk_y += nk_z * i16;
+			n1_y += n1_z * i16;
+			n_y += n_z * i16;
+			if (f1Toggle)
+			{
+				if ((modelUpperY & 1) == 1)
+				{
+					modelUpperY++;
 					nk_y += nk_z;
 					n1_y += n1_z;
 					n_y += n_z;
@@ -1290,132 +1126,65 @@ public class Camera {
 				n1_z <<= 1;
 				n_z <<= 1;
 				imgPixSkip <<= 1;
-				byte2 = 2;
+				rowStep = 2;
 			}
-			if (model.aBoolean255) {
-				for (i = modelLeftY; i < modelRightY; i += byte2) {
-					CameraVariables cameraVariables_6 = cameraVariables[i];
-					imgPixXStart = cameraVariables_6.leftX >> 8;
-				int i19 = cameraVariables_6.rightX >> 8;
-				int length = i19 - imgPixXStart;
-				if (length <= 0) {
-					nk_y += nk_z;
-					n1_y += n1_z;
-					n_y += n_z;
-					imgPixRow += imgPixSkip;
-				} else {
-					int l22 = cameraVariables_6.anInt372;
-					int j24 = (cameraVariables_6.anInt373 - l22) / length;
-					if (imgPixXStart < -halfWidth) {
-						l22 += (-halfWidth - imgPixXStart) * j24;
-						imgPixXStart = -halfWidth;
-						length = i19 - imgPixXStart;
-					}
-					if (i19 > halfWidth)
-						length = halfWidth - imgPixXStart;
-					drawPartiallyTransparentTexture4Step64(
-							imagePixelArray, texturePixels[color], 0, 0,
-							nk_y + l14 * imgPixXStart,
-							n1_y + j15 * imgPixXStart,
-							n_y + l15 * imgPixXStart,
-							nk_x, n1_x, n_x,
-							length, imgPixRow + imgPixXStart, l22, j24);
-					nk_y += nk_z;
-					n1_y += n1_z;
-					n_y += n_z;
-					imgPixRow += imgPixSkip;
-				}
-				}
-
-				return;
-			}
-			if (!aBooleanArray430[color])
+			boolean trnspar = model.transparentTexture;
+			boolean seethu = seethrough[color];
+			int nSkip = 4;
+			for (int i = modelUpperY; i < modelLowerY; i += rowStep)
 			{
-				for (i = modelLeftY; i < modelRightY; i += byte2)
-				{
-					CameraVariables cameraVariables_7 = cameraVariables[i];
-					imgPixXStart = cameraVariables_7.leftX >> 8;
-					int imgPixXEnd = cameraVariables_7.rightX >> 8;
-					int length = imgPixXEnd - imgPixXStart;
-					if (length <= 0) {
-						nk_y += nk_z;
-						n1_y += n1_z;
-						n_y += n_z;
-						imgPixRow += imgPixSkip;
-					} else {
-						int i23 = cameraVariables_7.anInt372;
-						int k24 = (cameraVariables_7.anInt373 - i23) / length;
-						if (imgPixXStart < -halfWidth) {
-							i23 += (-halfWidth - imgPixXStart) * k24;
-							imgPixXStart = -halfWidth;
-							length = imgPixXEnd - imgPixXStart;
-						}
-						if (imgPixXEnd > halfWidth) {
-							int l19 = halfWidth;
-							length = l19 - imgPixXStart;
-						}
-						drawTexture4Step64(
-								imagePixelArray, texturePixels[color], 0, 0,
-								nk_y + l14 * imgPixXStart,
-								n1_y + j15 * imgPixXStart,
-								n_y + l15 * imgPixXStart,
-								nk_x, n1_x, n_x, length,
-								imgPixRow + imgPixXStart, i23, k24);
-						nk_y += nk_z;
-						n1_y += n1_z;
-						n_y += n_z;
-						imgPixRow += imgPixSkip;
-					}
-				}
-				return;
-			}
-			for (i = modelLeftY; i < modelRightY; i += byte2) {
-				CameraVariables cameraVariables_8 = cameraVariables[i];
-				imgPixXStart = cameraVariables_8.leftX >> 8;
-				int imgPixXEnd = cameraVariables_8.rightX >> 8;
+				CameraVariables camVar = cameraVariables[i];
+				imgPixXStart = camVar.leftX >> 8;
+				int imgPixXEnd = camVar.rightX >> 8;
 				int lineLength = imgPixXEnd - imgPixXStart;
-				if (lineLength <= 0) {
+				if (lineLength <= 0)
+				{
 					nk_y += nk_z;
 					n1_y += n1_z;
 					n_y += n_z;
 					imgPixRow += imgPixSkip;
-				} else {
-					int j23 = cameraVariables_8.anInt372;
-					int l24 = (cameraVariables_8.anInt373 - j23) / lineLength;
-					if (imgPixXStart < -halfWidth) {
-						j23 += (-halfWidth - imgPixXStart) * l24;
+				}
+				else
+				{
+					int k22 = camVar.gradientStart;
+					int i24 = (camVar.gradientEnd - k22) / lineLength;
+					if (imgPixXStart < -halfWidth)
+					{
+						k22 += (-halfWidth - imgPixXStart) * i24;
 						imgPixXStart = -halfWidth;
 						lineLength = imgPixXEnd - imgPixXStart;
 					}
 					if (imgPixXEnd > halfWidth)
 						lineLength = halfWidth - imgPixXStart;
-					drawTransparentTexture64(
-							imagePixelArray, 0, 0, 0, texturePixels[color],
-							nk_y + l14 * imgPixXStart,
-							n1_y + j15 * imgPixXStart,
-							n_y + l15 * imgPixXStart,
+					drawTexture(
+							imagePixelArray, texturePixels[color], 0,
+							0,
+							nk_y + k14 * imgPixXStart,
+							n1_y + i15 * imgPixXStart,
+							n_y + k15 * imgPixXStart,
 							nk_x, n1_x, n_x, lineLength,
-							imgPixRow + imgPixXStart, j23, l24);
+							imgPixRow + imgPixXStart, k22, i24,
+							nSkip, trnspar, seethu, sizeMod);
 					nk_y += nk_z;
 					n1_y += n1_z;
 					n_y += n_z;
 					imgPixRow += imgPixSkip;
 				}
 			}
-
 			return;
 		}
 		// color is a color
-		for (int j1 = 0; j1 < nbrColors; j1++) {
-			if (anIntArray375[j1] == color)
+		for (int i = 0; i < nbrColors; i++)
+		{
+			if (colorArray[i] == color)
 			{ // color has been used before
-				colorGradient = colorGradientArray[j1];
+				colorGradient = colorGradientArray[i];
 				break;
 			}
-			if (j1 == nbrColors - 1)
+			if (i == nbrColors - 1)
 			{ // color has not been used before
-				int l1 = (int) (Math.random() * (double) nbrColors);
-				anIntArray375[l1] = color;
+				int newIdx = (int) (Math.random() * (double) nbrColors);
+				colorArray[newIdx] = color;
 				color = -1 - color; // convert to color
 				int red = (color >> 10 & 0x1f) * 8;
 				int green = (color >> 5 & 0x1f) * 8;
@@ -1426,147 +1195,112 @@ public class Camera {
 					int tmpRed = (red * j6) >> 16;
 					int tmpGreen = (green * j6) >> 16;
 					int tmpBlue = (blue * j6) >> 16;
-					colorGradientArray[l1][255 - j4] = (tmpRed << 16) + (tmpGreen << 8) + tmpBlue;
+					colorGradientArray[newIdx][255 - j4] = (tmpRed << 16) + (tmpGreen << 8) + tmpBlue;
 				}
-				colorGradient = colorGradientArray[l1];
+				colorGradient = colorGradientArray[newIdx];
 			}
 		}
 
 		int imgPixSkip = width;
-		int imgPixRow = halfWidth2 + modelLeftY * imgPixSkip;
+		int imgPixRow = halfWidth2 + modelUpperY * imgPixSkip;
 		byte yStep = 1;
-		if (f1Toggle) {
-			if ((modelLeftY & 1) == 1) {
-				modelLeftY++;
+		if (f1Toggle)
+		{
+			if ((modelUpperY & 1) == 1)
+			{
+				modelUpperY++;
 				imgPixRow += imgPixSkip;
 			}
 			imgPixSkip <<= 1;
 			yStep = 2;
 		}
-		if (model.isGiantCrystal) {
-			for (i = modelLeftY; i < modelRightY; i += yStep) {
-				CameraVariables cameraVariables = this.cameraVariables[i];
-				imgPixXStart = cameraVariables.leftX >> 8;
+
+		boolean transparent = model.transparent;
+		int nGradSteps = gradient2Step ? 2 : 4;
+		for (int i = modelUpperY; i < modelLowerY; i += yStep)
+		{
+			CameraVariables cameraVariables = this.cameraVariables[i];
+			imgPixXStart = cameraVariables.leftX >> 8;
 			int imgPixXEnd = cameraVariables.rightX >> 8;
 			int lineLength = imgPixXEnd - imgPixXStart;
 			if (lineLength <= 0) {
 				imgPixRow += imgPixSkip;
 			} else {
-				int l7 = cameraVariables.anInt372;
-				int i9 = (cameraVariables.anInt373 - l7) / lineLength;
+				int gradStart = cameraVariables.gradientStart;
+				int gradEnd = (cameraVariables.gradientEnd - gradStart) / lineLength;
 				if (imgPixXStart < -halfWidth) {
-					l7 += (-halfWidth - imgPixXStart) * i9;
+					gradStart += (-halfWidth - imgPixXStart) * gradEnd;
 					imgPixXStart = -halfWidth;
 					lineLength = imgPixXEnd - imgPixXStart;
 				}
 				if (imgPixXEnd > halfWidth)
 					lineLength = halfWidth - imgPixXStart;
-				drawTransparentColorLineGradient4Step(
+				drawColorLine(
 						imagePixelArray, -lineLength,
 						imgPixRow + imgPixXStart, 0,
-						colorGradient, l7, i9);
-				imgPixRow += imgPixSkip;
-			}
-			}
-
-			return;
-		}
-		if (aBoolean386) {
-			for (i = modelLeftY; i < modelRightY; i += yStep) {
-				CameraVariables camVar = cameraVariables[i];
-				imgPixXStart = camVar.leftX >> 8;
-			int imgPixXEnd = camVar.rightX >> 8;
-			int lineLength = imgPixXEnd - imgPixXStart;
-			if (lineLength <= 0) {
-				imgPixRow += imgPixSkip;
-			} else {
-				int i8 = camVar.anInt372;
-				int j9 = (camVar.anInt373 - i8) / lineLength;
-				if (imgPixXStart < -halfWidth) {
-					i8 += (-halfWidth - imgPixXStart) * j9;
-					imgPixXStart = -halfWidth;
-					lineLength = imgPixXEnd - imgPixXStart;
-				}
-				if (imgPixXEnd > halfWidth)
-					lineLength = halfWidth - imgPixXStart;
-				drawColorLineGradient2Step(imagePixelArray, -lineLength, imgPixRow + imgPixXStart, 0, colorGradient, i8, j9);
-				imgPixRow += imgPixSkip;
-			}
-			}
-
-			return;
-		}
-		for (i = modelLeftY; i < modelRightY; i += yStep)
-		{
-			CameraVariables cameraVariables_2 = cameraVariables[i];
-			imgPixXStart = cameraVariables_2.leftX >> 8;
-		int imgPixXEnd = cameraVariables_2.rightX >> 8;
-			int lineLength = (imgPixXEnd - imgPixXStart);
-			if (lineLength <= 0) {
-				imgPixRow += imgPixSkip;
-			} else {
-				int gradStart = cameraVariables_2.anInt372;
-				int gradSkip = (cameraVariables_2.anInt373 - gradStart) / lineLength;
-				if (imgPixXStart < -halfWidth) {
-					gradStart += (-halfWidth - imgPixXStart) * gradSkip;
-					imgPixXStart = -halfWidth;
-					lineLength = imgPixXEnd - imgPixXStart;
-				}
-				if (imgPixXEnd > halfWidth)
-					lineLength = halfWidth - imgPixXStart;
-				drawColorLineGradient4Step(imagePixelArray, -lineLength,
-						imgPixRow + imgPixXStart, 0,
-						colorGradient, gradStart, gradSkip);
+						colorGradient, gradStart, gradEnd,
+						nGradSteps, transparent);
 				imgPixRow += imgPixSkip;
 			}
 		}
-
 	}
 
-	private static void drawTexture4Step128(
+	private static void drawTexture(
 			int pixelArray[], int texturePixels[],
 			int xTexture, int yTexture, int smthXTexture,
 			int smthYTexture, int smthDivision,
 			int smthXTextureStep, int smthYTextureStep,
 			int smthDivisionStep, int length, int offset,
-			int k2, int l2)
+			int k2, int l2,
+			int nSteps, boolean transparent, boolean seethrough, int size)
 	{
 		if (length <= 0)
 			return;
+		int mask = transparent ? 0x7f7f7f : 0x0;
 		int i3 = 0;
 		int j3 = 0;
 		int i4 = 0;
 		if (smthDivision != 0) {
-			xTexture = smthXTexture / smthDivision << 7;
-			yTexture = smthYTexture / smthDivision << 7;
+			xTexture = smthXTexture / smthDivision << size;
+			yTexture = smthYTexture / smthDivision << size;
 		}
+		int yStep = (1 << 2*size) - (1 << size);
+		int txtrStep1 = (1 << 2*size) - 1;
+		int txtrStep2 = (1 << 3*size) * 3;
+		int txtrStep3 = 3*size + 2;
 		if (xTexture < 0)
 			xTexture = 0;
-		else if (xTexture > 0x3f80)
-			xTexture = 0x3f80;
+		else if (xTexture > yStep)
+			xTexture = yStep;
 		smthXTexture += smthXTextureStep;
 		smthYTexture += smthYTextureStep;
 		smthDivision += smthDivisionStep;
 		if (smthDivision != 0) {
-			i3 = smthXTexture / smthDivision << 7;
-			j3 = smthYTexture / smthDivision << 7;
+			i3 = smthXTexture / smthDivision << size;
+			j3 = smthYTexture / smthDivision << size;
 		}
 		if (i3 < 0)
 			i3 = 0;
-		else if (i3 > 0x3f80)
-			i3 = 0x3f80;
+		else if (i3 > yStep)
+			i3 = yStep;
 		int xTextureStep = i3 - xTexture >> 4;
 		int yTextureStep = j3 - yTexture >> 4;
+		int pixelColor = 0;
 		for (int j4 = length >> 4; j4 > 0; j4--)
 		{
 			for (int i = 0; i < 4; ++i)
 			{
-				xTexture = (xTexture & 0x3fff) + (k2 & 0x600000);
-				i4 = k2 >> 23;
+				xTexture = (xTexture & txtrStep1) + (k2 & txtrStep2);
+				i4 = k2 >> txtrStep3;
 				k2 += l2;
 				for (int j = 0; j < 4; ++j)
 				{
-					pixelArray[offset++] = texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> i4;
+					// opposite of (seethrough && pixelColor != 0) in which case nothing should be done
+					pixelColor = texturePixels[(yTexture & yStep) + (xTexture >> size)] >>> i4;
+					if (!seethrough
+							|| pixelColor != 0)
+						pixelArray[offset] = pixelColor + (pixelArray[offset] >> 1 & mask);
+					++offset;
 					xTexture += xTextureStep;
 					yTexture += yTextureStep;
 				}
@@ -1578,13 +1312,13 @@ public class Camera {
 			smthDivision += smthDivisionStep;
 			if (smthDivision != 0)
 			{
-				i3 = smthXTexture / smthDivision << 7;
-				j3 = smthYTexture / smthDivision << 7;
+				i3 = smthXTexture / smthDivision << size;
+				j3 = smthYTexture / smthDivision << size;
 			}
 			if (i3 < 0)
 				i3 = 0;
-			else if (i3 > 0x3f80)
-				i3 = 0x3f80;
+			else if (i3 > yStep)
+				i3 = yStep;
 			xTextureStep = i3 - xTexture >> 4;
 			yTextureStep = j3 - yTexture >> 4;
 		}
@@ -1593,511 +1327,57 @@ public class Camera {
 		{
 			if ((k4 & 3) == 0)
 			{
-				xTexture = (xTexture & 0x3fff) + (k2 & 0x600000);
-				i4 = k2 >> 23;
+				xTexture = (xTexture & txtrStep1) + (k2 & txtrStep2);
+				i4 = k2 >> txtrStep3;
 				k2 += l2;
 			}
-			pixelArray[offset++] = texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> i4;
+			pixelColor = texturePixels[(yTexture & yStep) + (xTexture >> size)] >>> i4;
+			if (!seethrough
+					|| pixelColor != 0)
+				pixelArray[offset] = pixelColor + (pixelArray[offset] >> 1 & mask);
+			++offset;
 			xTexture += xTextureStep;
 			yTexture += yTextureStep;
 		}
 	}
 
-
-	/** Draws textures with pixels that are partially transparent */
-	private static void drawPartiallyTransparentTexture4Step128(
-			int pixelArray[], int texturePixels[], int xTexture,
-			int yTexture, int k, int l, int i1, int j1,
-			int k1, int l1, int i2, int offset, int k2, int l2)
-	{
-		if (i2 <= 0)
-			return;
-		int i3 = 0;
-		int j3 = 0;
-		int i4 = 0;
-		if (i1 != 0) {
-			xTexture = k / i1 << 7;
-			yTexture = l / i1 << 7;
-		}
-		if (xTexture < 0)
-			xTexture = 0;
-		else if (xTexture > 0x3f80)
-			xTexture = 0x3f80;
-		k += j1;
-		l += k1;
-		i1 += l1;
-		if (i1 != 0) {
-			i3 = k / i1 << 7;
-			j3 = l / i1 << 7;
-		}
-		if (i3 < 0)
-			i3 = 0;
-		else if (i3 > 0x3f80)
-			i3 = 0x3f80;
-		int xTextureStep = i3 - xTexture >> 4;
-		int yTextureStep = j3 - yTexture >> 4;
-		for (int j4 = i2 >> 4; j4 > 0; j4--)
-		{
-			for (int i = 0; i < 4; ++i)
-			{
-				xTexture = (xTexture & 0x3fff) + (k2 & 0x600000);
-				i4 = k2 >> 23;
-				k2 += l2;
-				for (int j = 0; j < 4; ++j)
-				{
-					pixelArray[offset++] = (texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> i4) + (pixelArray[offset] >> 1 & 0x7f7f7f);
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-				}
-			}
-			xTexture = i3;
-			yTexture = j3;
-			k += j1;
-			l += k1;
-			i1 += l1;
-			if (i1 != 0) {
-				i3 = k / i1 << 7;
-				j3 = l / i1 << 7;
-			}
-			if (i3 < 0)
-				i3 = 0;
-			else if (i3 > 0x3f80)
-				i3 = 0x3f80;
-			xTextureStep = i3 - xTexture >> 4;
-			yTextureStep = j3 - yTexture >> 4;
-		}
-
-		for (int k4 = 0; k4 < (i2 & 0xf); k4++) {
-			if ((k4 & 3) == 0) {
-				xTexture = (xTexture & 0x3fff) + (k2 & 0x600000);
-				i4 = k2 >> 23;
-				k2 += l2;
-			}
-			pixelArray[offset++] = (texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> i4) + (pixelArray[offset] >> 1 & 0x7f7f7f);
-			xTexture += xTextureStep;
-			yTexture += yTextureStep;
-		}
-	}
-
-	/** Draws textures with pixels that are completely transparent */
-	private static void drawTransparentTexture128(
-			int pixelArray[], int pixelColor, int xTexture,
-			int yTexture, int texturePixels[], int l,
-			int i1, int j1, int k1, int l1,
-			int i2, int length, int offset, int l2, int i3)
-	{
-		if (length <= 0)
-			return;
-		int j3 = 0;
-		int k3 = 0;
-		i3 <<= 2;
-		if (j1 != 0) {
-			j3 = l / j1 << 7;
-			k3 = i1 / j1 << 7;
-		}
-		if (j3 < 0)
-			j3 = 0;
-		else if (j3 > 0x3f80)
-			j3 = 0x3f80;
-		for (int j4 = length; j4 > 0; j4 -= 16)
-		{
-			l += k1;
-			i1 += l1;
-			j1 += i2;
-			xTexture = j3;
-			yTexture = k3;
-			if (j1 != 0)
-			{
-				j3 = l / j1 << 7;
-				k3 = i1 / j1 << 7;
-			}
-			if (j3 < 0)
-				j3 = 0;
-			else if (j3 > 0x3f80)
-				j3 = 0x3f80;
-			int l3 = j3 - xTexture >> 4;
-			int i4 = k3 - yTexture >> 4;
-			int k4 = l2 >> 23;
-			xTexture += l2 & 0x600000;
-			l2 += i3;
-			if (j4 < 16)
-			{
-				for (int l4 = 0; l4 < j4; l4++)
-				{
-					if ((pixelColor = texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> k4) != 0)
-						pixelArray[offset] = pixelColor;
-					offset++;
-					xTexture += l3;
-					yTexture += i4;
-					if ((l4 & 3) == 3)
-					{
-						xTexture = (xTexture & 0x3fff) + (l2 & 0x600000);
-						k4 = l2 >> 23;
-						l2 += i3;
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < 3; ++i)
-				{
-					for (int j = 0; j < 4; ++j)
-					{
-						if ((pixelColor = texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> k4) != 0)
-							pixelArray[offset] = pixelColor;
-						offset++;
-						xTexture += l3;
-						yTexture += i4;
-					}
-					xTexture = (xTexture & 0x3fff) + (l2 & 0x600000);
-					k4 = l2 >> 23;
-					l2 += i3;
-				}
-				for (int j = 0; j < 4; ++j)
-				{
-					if ((pixelColor = texturePixels[(yTexture & 0x3f80) + (xTexture >> 7)] >>> k4) != 0)
-						pixelArray[offset] = pixelColor;
-					offset++;
-					xTexture += l3;
-					yTexture += i4;
-				}
-			}
-		}
-
-	}
-
-	private static void drawTexture4Step64(
-			int imagePixels[], int texturePixels[],
-			int xTexture, int yTexture, int k, int l, int i1, int j1,
-			int k1, int l1, int length, int offset, int k2, int l2) {
-		if (length <= 0)
-			return;
-		int i3 = 0;
-		int j3 = 0;
-		l2 <<= 2;
-		if (i1 != 0) {
-			i3 = k / i1 << 6;
-			j3 = l / i1 << 6;
-		}
-		if (i3 < 0)
-			i3 = 0;
-		else if (i3 > 0xfc0)
-			i3 = 0xfc0;
-		for (int i4 = length; i4 > 0; i4 -= 16)
-		{
-			k += j1;
-			l += k1;
-			i1 += l1;
-			xTexture = i3;
-			yTexture = j3;
-			if (i1 != 0) {
-				i3 = k / i1 << 6;
-				j3 = l / i1 << 6;
-			}
-			if (i3 < 0)
-				i3 = 0;
-			else if (i3 > 0xfc0)
-				i3 = 0xfc0;
-			int xTextureStep = i3 - xTexture >> 4;
-			int yTextureStep = j3 - yTexture >> 4;
-			int j4 = k2 >> 20;
-			xTexture += k2 & 0xc0000;
-			k2 += l2;
-			if (i4 < 16)
-			{
-				for (int k4 = 0; k4 < i4; k4++)
-				{
-					imagePixels[offset++] = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4;
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-					if ((k4 & 3) == 3) {
-						xTexture = (xTexture & 0xfff) + (k2 & 0xc0000);
-						j4 = k2 >> 20;
-						k2 += l2;
-					}
-				}
-			} else {
-				for (int i = 0; i < 3; ++i)
-				{
-					for (int j = 0; j < 4; ++j)
-					{
-						imagePixels[offset++] = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4;
-						xTexture += xTextureStep;
-						yTexture += yTextureStep;
-					}
-					xTexture = (xTexture & 0xfff) + (k2 & 0xc0000);
-					j4 = k2 >> 20;
-					k2 += l2;
-				}
-				for (int j = 0; j < 4; ++j)
-				{
-					imagePixels[offset++] = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4;
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-				}
-			}
-		}
-
-	}
-
-	private static void drawPartiallyTransparentTexture4Step64(
-			int imagePixels[], int texturePixels[],
-			int xTexture, int yTexture, int k, int l,
-			int i1, int j1, int k1, int l1, int i2,
-			int offset, int k2, int l2)
-	{
-		if (i2 <= 0)
-			return;
-		int i3 = 0;
-		int j3 = 0;
-		l2 <<= 2;
-		if (i1 != 0) {
-			i3 = k / i1 << 6;
-			j3 = l / i1 << 6;
-		}
-		if (i3 < 0)
-			i3 = 0;
-		else if (i3 > 0xfc0)
-			i3 = 0xfc0;
-		for (int i4 = i2; i4 > 0; i4 -= 16) {
-			k += j1;
-			l += k1;
-			i1 += l1;
-			xTexture = i3;
-			yTexture = j3;
-			if (i1 != 0) {
-				i3 = k / i1 << 6;
-				j3 = l / i1 << 6;
-			}
-			if (i3 < 0)
-				i3 = 0;
-			else if (i3 > 0xfc0)
-				i3 = 0xfc0;
-			int xTextureStep = i3 - xTexture >> 4;
-				int yTextureStep = j3 - yTexture >> 4;
-				int j4 = k2 >> 20;
-			xTexture += k2 & 0xc0000;
-			k2 += l2;
-			if (i4 < 16) {
-				for (int k4 = 0; k4 < i4; k4++) {
-					imagePixels[offset++] = (texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4) + (imagePixels[offset] >> 1 & 0x7f7f7f);
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-					if ((k4 & 3) == 3) {
-						xTexture = (xTexture & 0xfff) + (k2 & 0xc0000);
-						j4 = k2 >> 20;
-						k2 += l2;
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < 3; ++i)
-				{
-					for (int j = 0; j < 4; ++j)
-					{
-						imagePixels[offset++] = (texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4) + (imagePixels[offset] >> 1 & 0x7f7f7f);
-						xTexture += xTextureStep;
-						yTexture += yTextureStep;
-					}
-					xTexture = (xTexture & 0xfff) + (k2 & 0xc0000);
-					j4 = k2 >> 20;
-					k2 += l2;
-				}
-				for (int j = 0; j < 4; ++j)
-				{
-					imagePixels[offset++] = (texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> j4) + (imagePixels[offset] >> 1 & 0x7f7f7f);
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-				}
-			}
-		}
-
-	}
-
-	private static void drawTransparentTexture64(
-			int imagePixels[], int pixelColor, int xTexture,
-			int yTexture, int texturePixels[], int l,
-			int i1, int j1, int k1, int l1, int i2,
-			int j2, int offset, int l2, int i3)
-	{
-		if (j2 <= 0)
-			return;
-		int j3 = 0;
-		int k3 = 0;
-		i3 <<= 2;
-		if (j1 != 0)
-		{
-			j3 = l / j1 << 6;
-			k3 = i1 / j1 << 6;
-		}
-		if (j3 < 0)
-			j3 = 0;
-		else if (j3 > 0xfc0)
-			j3 = 0xfc0;
-		for (int j4 = j2; j4 > 0; j4 -= 16)
-		{
-			l += k1;
-			i1 += l1;
-			j1 += i2;
-			xTexture = j3;
-			yTexture = k3;
-			if (j1 != 0) {
-				j3 = l / j1 << 6;
-				k3 = i1 / j1 << 6;
-			}
-			if (j3 < 0)
-				j3 = 0;
-			else if (j3 > 0xfc0)
-				j3 = 0xfc0;
-			int xTextureStep = j3 - xTexture >> 4;
-			int yTextureStep = k3 - yTexture >> 4;
-			int k4 = l2 >> 20;
-			xTexture += l2 & 0xc0000;
-			l2 += i3;
-			if (j4 < 16)
-			{
-				for (int l4 = 0; l4 < j4; l4++)
-				{
-					if ((pixelColor = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> k4) != 0)
-						imagePixels[offset] = pixelColor;
-					offset++;
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-					if ((l4 & 3) == 3)
-					{
-						xTexture = (xTexture & 0xfff) + (l2 & 0xc0000);
-						k4 = l2 >> 20;
-						l2 += i3;
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < 3; ++i)
-				{
-					for (int j = 0; j < 4; ++j)
-					{
-						if ((pixelColor = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> k4) != 0)
-							imagePixels[offset] = pixelColor;
-						offset++;
-						xTexture += xTextureStep;
-						yTexture += yTextureStep;
-					}
-					xTexture = (xTexture & 0xfff) + (l2 & 0xc0000);
-					k4 = l2 >> 20;
-					l2 += i3;
-				}
-				for (int j = 0; j < 4; ++j)
-				{
-					if ((pixelColor = texturePixels[(yTexture & 0xfc0) + (xTexture >> 6)] >>> k4) != 0)
-						imagePixels[offset] = pixelColor;
-					offset++;
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
-				}
-			}
-		}
-	}
-
-	private static void drawColorLineGradient2Step(
+	private static void drawColorLine(
 			int imagePixels[], int length, int offset, int pixelColor,
-			int colorGradient[], int gradColOffs, int gradColStep)
+			int colorGradient[], int gradColOffs, int gradColStep,
+			int nSteps, boolean transparent)
 	{
 		if (length >= 0)
 			return;
-		gradColStep <<= 1;
+		int mask = transparent ? 0x7f7f7f : 0x0;
+		gradColStep <<= (nSteps >> 1);
 		pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
 		gradColOffs += gradColStep;
-		int j1 = length / 8;
-		for (int k1 = j1; k1 < 0; k1++) {
-			for (int i = 0; i < 4; ++i)
-			{
-				imagePixels[offset++] = pixelColor;
-				imagePixels[offset++] = pixelColor;
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
-				gradColOffs += gradColStep;
-			}
-		}
 
-		j1 = -(length % 8);
-		for (int l1 = 0; l1 < j1; l1++) {
-			imagePixels[offset++] = pixelColor;
-			if ((l1 & 1) == 1) {
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
-				gradColOffs += gradColStep;
-			}
-		}
-
-	}
-
-	private static void drawTransparentColorLineGradient4Step(
-			int imagePixels[], int length, int offset, int pixelColor,
-			int colorGradient[], int gradColoOffs, int gradColStep)
-	{
-		if (length >= 0)
-			return;
-		gradColStep <<= 2;
-		pixelColor = colorGradient[gradColoOffs >> 8 & 0xff];
-		gradColoOffs += gradColStep;
-		int j1 = length / 16;
-		for (int k1 = j1; k1 < 0; k1++)
+		int step = length / (4 * nSteps);
+		for (int i = step; i < 0; i++)
 		{
-			for (int i = 0; i < 4; ++i)
+			for (int j = 0; j < 4; ++j)
 			{
-				imagePixels[offset++] = pixelColor + (imagePixels[offset] >> 1 & 0x7f7f7f);
-				imagePixels[offset++] = pixelColor + (imagePixels[offset] >> 1 & 0x7f7f7f);
-				imagePixels[offset++] = pixelColor + (imagePixels[offset] >> 1 & 0x7f7f7f);
-				imagePixels[offset++] = pixelColor + (imagePixels[offset] >> 1 & 0x7f7f7f);
-				pixelColor = colorGradient[gradColoOffs >> 8 & 0xff];
-				gradColoOffs += gradColStep;
+				for (int k = 0; k < nSteps; ++k)
+					imagePixels[offset++] = pixelColor;
+				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
+						+ (imagePixels[offset] >> 1 & mask);
+				gradColOffs += gradColStep;
 			}
 		}
 
-		j1 = -(length % 16);
-		for (int l1 = 0; l1 < j1; l1++) {
-			imagePixels[offset++] = pixelColor + (imagePixels[offset] >> 1 & 0x7f7f7f);
-			if ((l1 & 3) == 3) {
-				pixelColor = colorGradient[gradColoOffs >> 8 & 0xff];
-				gradColoOffs += gradColStep;
-				gradColoOffs += gradColStep;
-			}
-		}
-
-	}
-
-	private static void drawColorLineGradient4Step(
-			int imagePixels[], int length, int offset, int pixelColor,
-			int colorGradient[], int gradColOffs, int gradColStep)
-	{
-		if (length >= 0)
-			return;
-		gradColStep <<= 2;
-		pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
-		gradColOffs += gradColStep;
-		int j1 = length / 16;
-		for (int k1 = j1; k1 < 0; k1++)
+		step = -(length % (4 * nSteps));
+		int end = nSteps-1;
+		for (int i = 0; i < step; i++)
 		{
-			for (int i = 0; i < 4; ++i)
-			{
-				imagePixels[offset++] = pixelColor;
-				imagePixels[offset++] = pixelColor;
-				imagePixels[offset++] = pixelColor;
-				imagePixels[offset++] = pixelColor;
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
-				gradColOffs += gradColStep;
-			}
-		}
-
-		j1 = -(length % 16);
-		for (int l1 = 0; l1 < j1; l1++) {
 			imagePixels[offset++] = pixelColor;
-			if ((l1 & 3) == 3) {
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
+			if ((i & end) == end)
+			{
+				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
+						+ (imagePixels[offset] >> 1 & mask);
 				gradColOffs += gradColStep;
 			}
 		}
-
 	}
 
 	public void setCamera(int playerX, int playerZ, int playerY,
@@ -2448,7 +1728,7 @@ public class Camera {
 		anIntArrayArray426 = new int[i][];
 		textureSize = new int[i];
 		aLongArray428 = new long[i];
-		aBooleanArray430 = new boolean[i];
+		seethrough = new boolean[i];
 		texturePixels = new int[i][];
 		aLong431 = 0L;
 		anIntArrayArray432 = new int[j][];
@@ -2460,7 +1740,7 @@ public class Camera {
 		anIntArrayArray426[i] = ai;
 		textureSize[i] = j;
 		aLongArray428[i] = 0L;
-		aBooleanArray430[i] = false;
+		seethrough[i] = false;
 		texturePixels[i] = null;
 		method299(i);
 	}
@@ -2528,7 +1808,7 @@ public class Camera {
 					j1 = 1;
 				else if (j1 == 0xf800ff) {
 					j1 = 0;
-					aBooleanArray430[i] = true;
+					seethrough[i] = true;
 				}
 				ai[j++] = j1;
 			}
@@ -2962,7 +2242,7 @@ public class Camera {
 	}
 
 	int nbrColors;
-	int anIntArray375[];
+	int colorArray[];
 	int colorGradientArray[][];
 	int colorGradient[];
 	public int lastCameraModelCount;
@@ -2975,7 +2255,7 @@ public class Camera {
 	public static int cos1024[] = new int[0x400];
 	private static int sin256[] = new int[0x100];
 	private static int cos256[] = new int[0x100];
-	public boolean aBoolean386;
+	public boolean gradient2Step;
 	public double aDouble387;
 	public int anInt388;
 	private boolean aBoolean389;
@@ -3019,7 +2299,7 @@ public class Camera {
 	int textureSize[];
 	long aLongArray428[];
 	int texturePixels[][];
-	boolean aBooleanArray430[];
+	boolean seethrough[];
 	private static long aLong431;
 	int anIntArrayArray432[][];
 	int anIntArrayArray433[][];
@@ -3027,8 +2307,8 @@ public class Camera {
 	GameImage gameImage;
 	public int imagePixelArray[];
 	CameraVariables cameraVariables[];
-	int modelLeftY;
-	int modelRightY;
+	int modelUpperY;
+	int modelLowerY;
 	int triangleScreenX[];
 	int triangleScreenY[];
 	int triangleBright[];
