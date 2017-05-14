@@ -7,18 +7,18 @@ public class CameraModel {
         anInt369 = -1;
     }
 
-    protected int anInt353;
-    protected int anInt354;
-    protected int anInt355;
-    protected int anInt356;
-    protected int anInt357;
-    protected int anInt358;
-    protected Model aModel_359;
-    protected int anInt360;
+    protected int zMin;
+    protected int xMin;
+    protected int zMax;
+    protected int xMax;
+    protected int yMin;
+    protected int yMax;
+    protected Model model;
+    protected int surface;
     protected int anInt361;
-    protected int anInt362;
-    protected int anInt363;
-    protected int anInt364;
+    protected int xNormal;
+    protected int zNormal;
+    protected int yNormal;
     protected int anInt365;
     protected int color;
     protected boolean aBoolean367;

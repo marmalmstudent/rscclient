@@ -744,7 +744,7 @@ public class EngineHandle {
                 }
             }
 
-            model.method184(true, 40, 48, -50, -10, -50);
+            model.setLightAndGradAndSource(true, 40, 48, -50, -10, -50);
             aModelArray596 = aModel.method182(0, 0, 1536, 1536, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 camera.addModel(aModelArray596[j6]); // floor tiles
@@ -818,7 +818,7 @@ public class EngineHandle {
             gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1, 0, 0, 285, 285);
         }
         // walls, fences etc.
-        aModel.method184(false, 60, 24, -50, -10, -50);
+        aModel.setLightAndGradAndSource(false, 60, 24, -50, -10, -50);
         aModelArrayArray580[k] = aModel.method182(0, 0, 1536, 1536, 8, 64, 338, true);
         for (int l2 = 0; l2 < 64; l2++) {
             camera.addModel(aModelArrayArray580[k][l2]);
@@ -1065,7 +1065,7 @@ public class EngineHandle {
                 }
             }
         }
-        aModel.method184(true, 50, 50, -50, -10, -50);
+        aModel.setLightAndGradAndSource(true, 50, 50, -50, -10, -50);
         aModelArrayArray598[k] = aModel.method182(0, 0, 1536, 1536, 8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
             camera.addModel(aModelArrayArray598[k][l9]);
@@ -1416,10 +1416,10 @@ public class EngineHandle {
                     Model model = models[EntityHandler.getObjectDef(k).modelID].method204(false, true, false, false);
                     int k1 = ((x + x + i1) * 128) / 2;
                     int i2 = ((y + y + j1) * 128) / 2;
-                    model.method190(k1, -getAveragedElevation(k1, i2), i2);
-                    model.method189(0, l * 32, 0);
+                    model.addTranslate(k1, -getAveragedElevation(k1, i2), i2);
+                    model.setRotation(0, l * 32, 0);
                     camera.addModel(model);
-                    model.method185(SECTOR_WIDTH, SECTOR_HEIGHT, -50, -10, -50);
+                    model.setLightAndSource(SECTOR_WIDTH, SECTOR_HEIGHT, -50, -10, -50);
                     if (i1 > 1 || j1 > 1) {
                         for (int k2 = x; k2 < x + i1; k2++) {
                             for (int l2 = y; l2 < y + j1; l2++) {

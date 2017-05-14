@@ -6,249 +6,246 @@ import java.io.IOException;
 import client.util.misc;
 import entityhandling.EntityHandler;
 
-public class Model {
+public class Model
+{
 
-    public Model(int i, int j) {
-        anInt246 = 1;
-        visible = true;
-        aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
-        anInt257 = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
-        aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
-        method174(i, j);
-        anIntArrayArray279 = new int[j][1];
-        for (int k = 0; k < j; k++)
-            anIntArrayArray279[k][0] = k;
+	public Model(int i, int j) {
+		anInt246 = 1;
+		visible = true;
+		aBoolean254 = true;
+		aBoolean255 = false;
+		isGiantCrystal = false;
+		anInt257 = -1;
+		aBoolean260 = false;
+		aBoolean261 = false;
+		aBoolean262 = false;
+		aBoolean263 = false;
+		aBoolean264 = false;
+		anInt270 = 0xbc614e;
+		longestLength = 0xbc614e;
+		lightSourceX = 180;
+		lightSourceZ = 155;
+		lightSourceY = 95;
+		lightSourceDist = 256;
+		featuresLight = 512;
+		globalLight = 32;
+		initArrays(i, j);
+		anIntArrayArray279 = new int[j][1];
+		for (int k = 0; k < j; k++)
+			anIntArrayArray279[k][0] = k;
+		
+	}
 
-    }
+	public Model(int i, int j, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
+		anInt246 = 1;
+		visible = true;
+		aBoolean254 = true;
+		aBoolean255 = false;
+		isGiantCrystal = false;
+		anInt257 = -1;
+		anInt270 = 0xbc614e;
+		longestLength = 0xbc614e;
+		lightSourceX = 180;
+		lightSourceZ = 155;
+		lightSourceY = 95;
+		lightSourceDist = 256;
+		featuresLight = 512;
+		globalLight = 32;
+		aBoolean260 = flag;
+		aBoolean261 = flag1;
+		aBoolean262 = flag2;
+		aBoolean263 = flag3;
+		aBoolean264 = flag4;
+		initArrays(i, j);
+	}
 
-    public Model(int i, int j, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
-        anInt246 = 1;
-        visible = true;
-        aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
-        anInt257 = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
-        aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
-        aBoolean260 = flag;
-        aBoolean261 = flag1;
-        aBoolean262 = flag2;
-        aBoolean263 = flag3;
-        aBoolean264 = flag4;
-        method174(i, j);
-    }
+	private void initArrays(int nbrCoordPoints, int nbrSides)
+	{
+		xCoords = new int[nbrCoordPoints];
+		zCoords = new int[nbrCoordPoints];
+		yCoords = new int[nbrCoordPoints];
+		pointBrightness = new int[nbrCoordPoints];
+		aByteArray233 = new byte[nbrCoordPoints];
+		pointsPerCell = new int[nbrSides];
+		surfaces = new int[nbrSides][];
+		surfaceTexture1 = new int[nbrSides];
+		surfaceTexture2 = new int[nbrSides];
+		lightSourceProjectToSurfNormal = new int[nbrSides];
+		scaleFactor = new int[nbrSides];
+		normalLength = new int[nbrSides];
+		if (!aBoolean264) {
+			xDistToPointFromCamera = new int[nbrCoordPoints];
+			zDistToPointFromCamera = new int[nbrCoordPoints];
+			yDistToPointFromCamera = new int[nbrCoordPoints];
+			xCoordOnScreen = new int[nbrCoordPoints];
+			yCoordOnScreen = new int[nbrCoordPoints];
+		}
+		if (!aBoolean263) {
+			aByteArray259 = new byte[nbrSides];
+			entityType = new int[nbrSides];
+		}
+		if (aBoolean260) {
+			xCoordsDraw = xCoords;
+			zCoordsDraw = zCoords;
+			yCoordsDraw = yCoords;
+		} else {
+			xCoordsDraw = new int[nbrCoordPoints];
+			zCoordsDraw = new int[nbrCoordPoints];
+			yCoordsDraw = new int[nbrCoordPoints];
+		}
+		if (!aBoolean262 || !aBoolean261) {
+			xNormals = new int[nbrSides];
+			zNormals = new int[nbrSides];
+			yNormals = new int[nbrSides];
+		}
+		if (!aBoolean261) {
+			xMinArray = new int[nbrSides];
+			xMaxArray = new int[nbrSides];
+			zMinArray = new int[nbrSides];
+			zMaxArray = new int[nbrSides];
+			yMinArray = new int[nbrSides];
+			yMaxArray = new int[nbrSides];
+		}
+		this.nbrSurfaces = 0;
+		this.nbrCoordPoints = 0;
+		nPoints = nbrCoordPoints;
+		nSides = nbrSides;
+		translateX = translateZ = translateY = 0;
+		rotateX = rotateZ = rotateY = 0;
+		scaleX = scaleZ = scaleY = 256;
+		xSkew_z = ySkew_z = xSkew_y = zSkew_y = ySkew_x = zSkew_x = 256;
+		actions = 0;
+	}
 
-    private void method174(int nbrCoordPoints, int nbrSides) {
-        xCoords = new int[nbrCoordPoints];
-        zCoords = new int[nbrCoordPoints];
-        yCoords = new int[nbrCoordPoints];
-        anIntArray232 = new int[nbrCoordPoints];
-        aByteArray233 = new byte[nbrCoordPoints];
-        pointsPerCell = new int[nbrSides];
-        surfaces = new int[nbrSides][];
-        surfaceTexture1 = new int[nbrSides];
-        surfaceTexture2 = new int[nbrSides];
-        anIntArray241 = new int[nbrSides];
-        anIntArray240 = new int[nbrSides];
-        anIntArray239 = new int[nbrSides];
-        if (!aBoolean264) {
-            anIntArray227 = new int[nbrCoordPoints];
-            anIntArray228 = new int[nbrCoordPoints];
-            anIntArray229 = new int[nbrCoordPoints];
-            anIntArray230 = new int[nbrCoordPoints];
-            anIntArray231 = new int[nbrCoordPoints];
-        }
-        if (!aBoolean263) {
-            aByteArray259 = new byte[nbrSides];
-            entityType = new int[nbrSides];
-        }
-        if (aBoolean260) {
-            anIntArray275 = xCoords;
-            anIntArray276 = zCoords;
-            anIntArray277 = yCoords;
-        } else {
-            anIntArray275 = new int[nbrCoordPoints];
-            anIntArray276 = new int[nbrCoordPoints];
-            anIntArray277 = new int[nbrCoordPoints];
-        }
-        if (!aBoolean262 || !aBoolean261) {
-            anIntArray242 = new int[nbrSides];
-            anIntArray243 = new int[nbrSides];
-            anIntArray244 = new int[nbrSides];
-        }
-        if (!aBoolean261) {
-            anIntArray280 = new int[nbrSides];
-            anIntArray281 = new int[nbrSides];
-            anIntArray282 = new int[nbrSides];
-            anIntArray283 = new int[nbrSides];
-            anIntArray284 = new int[nbrSides];
-            anIntArray285 = new int[nbrSides];
-        }
-        this.nbrSurfaces = 0;
-        this.nbrCoordPoints = 0;
-        anInt271 = nbrCoordPoints;
-        anInt278 = nbrSides;
-        anInt286 = anInt287 = anInt288 = 0;
-        anInt289 = anInt290 = anInt291 = 0;
-        anInt292 = anInt293 = anInt294 = 256;
-        anInt295 = anInt296 = anInt297 = anInt298 = anInt299 = anInt300 = 256;
-        anInt301 = 0;
-    }
+	public void method175() {
+		xDistToPointFromCamera = new int[nbrCoordPoints];
+		zDistToPointFromCamera = new int[nbrCoordPoints];
+		yDistToPointFromCamera = new int[nbrCoordPoints];
+		xCoordOnScreen = new int[nbrCoordPoints];
+		yCoordOnScreen = new int[nbrCoordPoints];
+	}
 
-    public void method175() {
-        anIntArray227 = new int[nbrCoordPoints];
-        anIntArray228 = new int[nbrCoordPoints];
-        anIntArray229 = new int[nbrCoordPoints];
-        anIntArray230 = new int[nbrCoordPoints];
-        anIntArray231 = new int[nbrCoordPoints];
-    }
+	public void method176() {
+		nbrSurfaces = 0;
+		nbrCoordPoints = 0;
+	}
 
-    public void method176() {
-        nbrSurfaces = 0;
-        nbrCoordPoints = 0;
-    }
+	public void method177(int i, int j) {
+		nbrSurfaces -= i;
+		if (nbrSurfaces < 0)
+			nbrSurfaces = 0;
+		nbrCoordPoints -= j;
+		if (nbrCoordPoints < 0)
+			nbrCoordPoints = 0;
+	}
 
-    public void method177(int i, int j) {
-        nbrSurfaces -= i;
-        if (nbrSurfaces < 0)
-            nbrSurfaces = 0;
-        nbrCoordPoints -= j;
-        if (nbrCoordPoints < 0)
-            nbrCoordPoints = 0;
-    }
-
-    public Model(byte database[], int offset, boolean flag) {
-        anInt246 = 1;
-        visible = true;
-        aBoolean254 = true;
-        aBoolean255 = false;
-        isGiantCrystal = false;
-        anInt257 = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
-        aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
-        int nbrCoordPoints = DataOperations.getUnsigned2Bytes(database, offset);
-        offset += 2;
-        int nbrSurfaces = DataOperations.getUnsigned2Bytes(database, offset);
-        offset += 2;
-        method174(nbrCoordPoints, nbrSurfaces);
-        anIntArrayArray279 = new int[nbrSurfaces][1];
-
-        
-        // The spatial coordinate points.
-        for (int i = 0; i < nbrCoordPoints; i++)
-        {
-            xCoords[i] = DataOperations.getSigned2Bytes(database, offset);
-            offset += 2;
-        }
-        for (int i = 0; i < nbrCoordPoints; i++)
-        {
-            zCoords[i] = DataOperations.getSigned2Bytes(database, offset);
-            offset += 2;
-        }
-        for (int i = 0; i < nbrCoordPoints; i++)
-        {
-            yCoords[i] = DataOperations.getSigned2Bytes(database, offset);
-            offset += 2;
-        }
-        
-        /* how many data points should be used to create a surface
-         * (which can be colored or have texture on it).
-         */
-        this.nbrCoordPoints = nbrCoordPoints;
-        for (int i = 0; i < nbrSurfaces; i++)
-        {
-            pointsPerCell[i] = database[offset++] & 0xff;
-        }
-        
-        /* 16-bit colors without alpha mask.
-         * Positive numbers (>= 0x0, <= 0xffff) seems to mean the texture index
-         * (e.g. 0 is sprite 3220)
-         * - red bit mask is   0b0111110000000000 (0x7c00)
-         * - green bit mask is 0b0000001111100000 (0x3e0)
-         * - blue bit mask is  0b0000000000011111 (0x1f)
-         * 32767 (0x7fff) denotes invisible (i think)
-         */
-        for (int i = 0; i < nbrSurfaces; i++)
-        { // bottom/inside/lower i think
-            surfaceTexture1[i] = DataOperations.getSigned2Bytes(database, offset);
-            offset += 2;
-            if (surfaceTexture1[i] == 32767)
-                surfaceTexture1[i] = anInt270;
-        }
-        for (int i = 0; i < nbrSurfaces; i++)
-        { // top/outside/upper i think
-            surfaceTexture2[i] = DataOperations.getSigned2Bytes(database, offset);
-            offset += 2;
-            if (surfaceTexture2[i] == 32767)
-                surfaceTexture2[i] = anInt270;
-        }
-        
-        /* Does not seem to affect anything. Most surfaces
-         * will have k2 != 0. and i can not find any pattern
-         * for those that does not.
-         */
-        for (int i = 0; i < nbrSurfaces; i++)
-        {
-            int k2 = database[offset++] & 0xff;
-            if (k2 == 0)
-                anIntArray241[i] = 0;
-            else
-                anIntArray241[i] = anInt270;
-        }
-        
-        /* store which data points are used to create a surface
-         * for each surface.
-         */
-        for (int i = 0; i < nbrSurfaces; i++) {
-            surfaces[i] = new int[pointsPerCell[i]];
-            for (int j = 0; j < pointsPerCell[i]; j++)
-                if (nbrCoordPoints < 256) {
-                    surfaces[i][j] = database[offset++] & 0xff;
-                } else {
-                    surfaces[i][j] = DataOperations.getUnsigned2Bytes(database, offset);
-                    offset += 2;
-                }
-
-        }
-        this.nbrSurfaces = nbrSurfaces;
-        anInt246 = 1;
-    }
+	public Model(byte database[], int offset, boolean flag) {
+		anInt246 = 1;
+		visible = true;
+		aBoolean254 = true;
+		aBoolean255 = false;
+		isGiantCrystal = false;
+		anInt257 = -1;
+		aBoolean260 = false;
+		aBoolean261 = false;
+		aBoolean262 = false;
+		aBoolean263 = false;
+		aBoolean264 = false;
+		anInt270 = 0xbc614e;
+		longestLength = 0xbc614e;
+		lightSourceX = 180;
+		lightSourceZ = 155;
+		lightSourceY = 95;
+		lightSourceDist = 256;
+		featuresLight = 512;
+		globalLight = 32;
+		int nbrCoordPoints = DataOperations.getUnsigned2Bytes(database, offset);
+		offset += 2;
+		int nbrSurfaces = DataOperations.getUnsigned2Bytes(database, offset);
+		offset += 2;
+		initArrays(nbrCoordPoints, nbrSurfaces);
+		anIntArrayArray279 = new int[nbrSurfaces][1];
+		
+		
+		// The spatial coordinate points.
+		for (int i = 0; i < nbrCoordPoints; i++)
+		{
+			xCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			offset += 2;
+		}
+		for (int i = 0; i < nbrCoordPoints; i++)
+		{
+			zCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			offset += 2;
+		}
+		for (int i = 0; i < nbrCoordPoints; i++)
+		{
+			yCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			offset += 2;
+		}
+		
+		/* how many data points should be used to create a surface
+		 * (which can be colored or have texture on it).
+		 */
+		this.nbrCoordPoints = nbrCoordPoints;
+		for (int i = 0; i < nbrSurfaces; i++)
+		{
+			pointsPerCell[i] = database[offset++] & 0xff;
+		}
+		
+		/* 16-bit colors without alpha mask.
+		 * Positive numbers (>= 0x0, <= 0xffff) seems to mean the texture index
+		 * (e.g. 0 is sprite 3220)
+		 * - red bit mask is   0b0111110000000000 (0x7c00)
+		 * - green bit mask is 0b0000001111100000 (0x3e0)
+		 * - blue bit mask is  0b0000000000011111 (0x1f)
+		 * 32767 (0x7fff) denotes invisible (i think)
+		 */
+		for (int i = 0; i < nbrSurfaces; i++)
+		{ // bottom/inside/lower i think
+			surfaceTexture1[i] = DataOperations.getSigned2Bytes(database, offset);
+			offset += 2;
+			if (surfaceTexture1[i] == 32767)
+				surfaceTexture1[i] = anInt270;
+		}
+		for (int i = 0; i < nbrSurfaces; i++)
+		{ // top/outside/upper i think
+			surfaceTexture2[i] = DataOperations.getSigned2Bytes(database, offset);
+			offset += 2;
+			if (surfaceTexture2[i] == 32767)
+				surfaceTexture2[i] = anInt270;
+		}
+		
+		/* Does not seem to affect anything. Most surfaces
+		 * will have k2 != 0. and i can not find any pattern
+		 * for those that does not.
+		 */
+		for (int i = 0; i < nbrSurfaces; i++)
+		{
+			int k2 = database[offset++] & 0xff;
+			if (k2 == 0)
+				lightSourceProjectToSurfNormal[i] = 0;
+			else
+				lightSourceProjectToSurfNormal[i] = anInt270;
+		}
+		
+		/* store which data points are used to create a surface
+		 * for each surface.
+		 */
+		for (int i = 0; i < nbrSurfaces; i++) {
+			surfaces[i] = new int[pointsPerCell[i]];
+			for (int j = 0; j < pointsPerCell[i]; j++)
+				if (nbrCoordPoints < 256) {
+					surfaces[i][j] = database[offset++] & 0xff;
+				} else {
+					surfaces[i][j] = DataOperations.getUnsigned2Bytes(database, offset);
+					offset += 2;
+				}
+			
+		}
+		this.nbrSurfaces = nbrSurfaces;
+		anInt246 = 1;
+	}
 
     public Model(String path) {
         anInt246 = 1;
@@ -263,13 +260,13 @@ public class Model {
         aBoolean263 = false;
         aBoolean264 = false;
         anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
+        longestLength = 0xbc614e;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
         byte abyte0[] = null;
         try {
             java.io.InputStream inputstream = DataOperations.streamFromPath(path);
@@ -292,7 +289,7 @@ public class Model {
         }
         int l = method206(abyte0);
         int i1 = method206(abyte0);
-        method174(l, i1);
+        initArrays(l, i1);
         anIntArrayArray279 = new int[i1][];
         for (int j3 = 0; j3 < l; j3++) {
             int j1 = method206(abyte0);
@@ -306,8 +303,8 @@ public class Model {
             int j2 = method206(abyte0);
             int k2 = method206(abyte0);
             int l2 = method206(abyte0);
-            anInt307 = method206(abyte0);
-            anInt308 = method206(abyte0);
+            featuresLight = method206(abyte0);
+            globalLight = method206(abyte0);
             int i3 = method206(abyte0);
             int ai[] = new int[i2];
             for (int l3 = 0; l3 < i2; l3++)
@@ -320,9 +317,9 @@ public class Model {
             int j4 = method181(i2, ai, j2, k2);
             anIntArrayArray279[k3] = ai1;
             if (i3 == 0)
-                anIntArray241[j4] = 0;
+                lightSourceProjectToSurfNormal[j4] = 0;
             else
-                anIntArray241[j4] = anInt270;
+                lightSourceProjectToSurfNormal[j4] = anInt270;
         }
 
         anInt246 = 1;
@@ -335,19 +332,15 @@ public class Model {
         aBoolean255 = false;
         isGiantCrystal = false;
         anInt257 = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
         aBoolean264 = false;
         anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
+        longestLength = 0xbc614e;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
         aBoolean260 = flag;
         aBoolean261 = flag1;
         aBoolean262 = flag2;
@@ -368,57 +361,65 @@ public class Model {
         aBoolean263 = false;
         aBoolean264 = false;
         anInt270 = 0xbc614e;
-        anInt302 = 0xbc614e;
-        anInt303 = 180;
-        anInt304 = 155;
-        anInt305 = 95;
-        anInt306 = 256;
-        anInt307 = 512;
-        anInt308 = 32;
+        longestLength = 0xbc614e;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
         method178(models, i, true);
     }
 
-    public void method178(Model models[], int i, boolean flag) {
-        int j = 0;
-        int k = 0;
-        for (int l = 0; l < i; l++) {
-            j += models[l].nbrSurfaces;
-            k += models[l].nbrCoordPoints;
+    public void method178(Model models[], int nModels, boolean flag)
+    {
+        int totNbrSurfaces = 0;
+        int totNbrPoints = 0;
+        for (int i = 0; i < nModels; i++) {
+            totNbrSurfaces += models[i].nbrSurfaces;
+            totNbrPoints += models[i].nbrCoordPoints;
         }
 
-        method174(k, j);
+        initArrays(totNbrPoints, totNbrSurfaces);
         if (flag)
-            anIntArrayArray279 = new int[j][];
-        for (int i1 = 0; i1 < i; i1++) {
-            Model model = models[i1];
+            anIntArrayArray279 = new int[totNbrSurfaces][];
+        for (int i = 0; i < nModels; i++)
+        {
+            Model model = models[i];
             model.method202();
-            anInt308 = model.anInt308;
-            anInt307 = model.anInt307;
-            anInt303 = model.anInt303;
-            anInt304 = model.anInt304;
-            anInt305 = model.anInt305;
-            anInt306 = model.anInt306;
-            for (int j1 = 0; j1 < model.nbrSurfaces; j1++) {
-                int ai[] = new int[model.pointsPerCell[j1]];
-                int ai1[] = model.surfaces[j1];
-                for (int k1 = 0; k1 < model.pointsPerCell[j1]; k1++)
-                    ai[k1] = insertCoordPointNoDuplicate(model.xCoords[ai1[k1]], model.zCoords[ai1[k1]], model.yCoords[ai1[k1]]);
+            globalLight = model.globalLight;
+            featuresLight = model.featuresLight;
+            lightSourceX = model.lightSourceX;
+            lightSourceZ = model.lightSourceZ;
+            lightSourceY = model.lightSourceY;
+            lightSourceDist = model.lightSourceDist;
+            for (int j = 0; j < model.nbrSurfaces; j++)
+            {
+                int cellPoints[] = new int[model.pointsPerCell[j]];
+                int surface[] = model.surfaces[j];
+                for (int k = 0; k < model.pointsPerCell[j]; k++)
+                    cellPoints[k] = insertCoordPointNoDuplicate(
+                    		model.xCoords[surface[k]],
+                    		model.zCoords[surface[k]],
+                    		model.yCoords[surface[k]]);
 
-                int l1 = method181(model.pointsPerCell[j1], ai, model.surfaceTexture1[j1], model.surfaceTexture2[j1]);
-                anIntArray241[l1] = model.anIntArray241[j1];
-                anIntArray240[l1] = model.anIntArray240[j1];
-                anIntArray239[l1] = model.anIntArray239[j1];
+                int l1 = method181(model.pointsPerCell[j],
+                		cellPoints, model.surfaceTexture1[j],
+                		model.surfaceTexture2[j]);
+                lightSourceProjectToSurfNormal[l1] = model.lightSourceProjectToSurfNormal[j];
+                scaleFactor[l1] = model.scaleFactor[j];
+                normalLength[l1] = model.normalLength[j];
                 if (flag)
-                    if (i > 1) {
-                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j1].length + 1];
-                        anIntArrayArray279[l1][0] = i1;
-                        for (int i2 = 0; i2 < model.anIntArrayArray279[j1].length; i2++)
-                            anIntArrayArray279[l1][i2 + 1] = model.anIntArrayArray279[j1][i2];
+                    if (nModels > 1) {
+                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j].length + 1];
+                        anIntArrayArray279[l1][0] = i;
+                        for (int i2 = 0; i2 < model.anIntArrayArray279[j].length; i2++)
+                            anIntArrayArray279[l1][i2 + 1] = model.anIntArrayArray279[j][i2];
 
                     } else {
-                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j1].length];
-                        for (int j2 = 0; j2 < model.anIntArrayArray279[j1].length; j2++)
-                            anIntArrayArray279[l1][j2] = model.anIntArrayArray279[j1][j2];
+                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j].length];
+                        for (int j2 = 0; j2 < model.anIntArrayArray279[j].length; j2++)
+                            anIntArrayArray279[l1][j2] = model.anIntArrayArray279[j][j2];
 
                     }
             }
@@ -436,43 +437,39 @@ public class Model {
      * @param y
      * @return
      */
-    public int insertCoordPointNoDuplicate(int x, int z, int y) {
+    public int insertCoordPointNoDuplicate(int x, int z, int y)
+    {
         for (int i = 0; i < nbrCoordPoints; i++)
             if (xCoords[i] == x && zCoords[i] == z && yCoords[i] == y)
                 return i;
 
-        if (nbrCoordPoints >= anInt271) {
+        if (nbrCoordPoints >= nPoints)
             return -1;
-        } else {
-            xCoords[nbrCoordPoints] = x;
-            zCoords[nbrCoordPoints] = z;
-            yCoords[nbrCoordPoints] = y;
-            return nbrCoordPoints++;
-        }
+        xCoords[nbrCoordPoints] = x;
+        zCoords[nbrCoordPoints] = z;
+        yCoords[nbrCoordPoints] = y;
+        return nbrCoordPoints++;
     }
 
-    public int insertCoordPoint(int x, int z, int y) {
-        if (nbrCoordPoints >= anInt271) {
+    public int insertCoordPoint(int x, int z, int y)
+    {
+        if (nbrCoordPoints >= nPoints)
             return -1;
-        } else {
-            xCoords[nbrCoordPoints] = x;
-            zCoords[nbrCoordPoints] = z;
-            yCoords[nbrCoordPoints] = y;
-            return nbrCoordPoints++;
-        }
+        xCoords[nbrCoordPoints] = x;
+        zCoords[nbrCoordPoints] = z;
+        yCoords[nbrCoordPoints] = y;
+        return nbrCoordPoints++;
     }
 
-    public int method181(int i, int ai[], int j, int k) {
-        if (nbrSurfaces >= anInt278) {
+    public int method181(int pointsInCell, int surfacePoints[], int texture1, int texture2) {
+        if (nbrSurfaces >= nSides)
             return -1;
-        } else {
-            pointsPerCell[nbrSurfaces] = i;
-            surfaces[nbrSurfaces] = ai;
-            surfaceTexture1[nbrSurfaces] = j;
-            surfaceTexture2[nbrSurfaces] = k;
-            anInt246 = 1;
-            return nbrSurfaces++;
-        }
+        pointsPerCell[nbrSurfaces] = pointsInCell;
+        surfaces[nbrSurfaces] = surfacePoints;
+        surfaceTexture1[nbrSurfaces] = texture1;
+        surfaceTexture2[nbrSurfaces] = texture2;
+        anInt246 = 1;
+        return nbrSurfaces++;
     }
 
     public Model[] method182(int i, int j, int k, int l, int i1, int j1, int k1,
@@ -505,8 +502,8 @@ public class Model {
             if (ai[l2] > k1)
                 ai[l2] = k1;
             models[l2] = new Model(ai[l2], ai1[l2], true, true, true, flag, true);
-            models[l2].anInt307 = anInt307;
-            models[l2].anInt308 = anInt308;
+            models[l2].featuresLight = featuresLight;
+            models[l2].globalLight = globalLight;
         }
 
         for (int j3 = 0; j3 < nbrSurfaces; j3++) {
@@ -532,434 +529,454 @@ public class Model {
     public void method183(Model model, int ai[], int i, int j) {
         int ai1[] = new int[i];
         for (int k = 0; k < i; k++) {
-            int l = ai1[k] = model.insertCoordPointNoDuplicate(xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
-            model.anIntArray232[l] = anIntArray232[ai[k]];
+            int l = ai1[k] = model.insertCoordPointNoDuplicate(
+            		xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
+            model.pointBrightness[l] = pointBrightness[ai[k]];
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }
 
         int i1 = model.method181(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
         if (!model.aBoolean263 && !aBoolean263)
             model.entityType[i1] = entityType[j];
-        model.anIntArray241[i1] = anIntArray241[j];
-        model.anIntArray240[i1] = anIntArray240[j];
-        model.anIntArray239[i1] = anIntArray239[j];
+        model.lightSourceProjectToSurfNormal[i1] = lightSourceProjectToSurfNormal[j];
+        model.scaleFactor[i1] = scaleFactor[j];
+        model.normalLength[i1] = normalLength[j];
     }
 
-    public void method184(boolean flag, int i, int j, int k, int l, int i1) {
-        anInt308 = 256 - i * 4;
-        anInt307 = (64 - j) * 16 + 128;
+    public void setLightAndGradAndSource(
+    		boolean shadeGradient, int globalBright, int featureBright,
+    		int xSrc, int zSrc, int ySrc)
+    {
+    	setLightning(globalBright, featureBright);
         if (aBoolean262)
             return;
-        for (int j1 = 0; j1 < nbrSurfaces; j1++)
-            if (flag)
-                anIntArray241[j1] = anInt270;
-            else
-                anIntArray241[j1] = 0;
-
-        anInt303 = k;
-        anInt304 = l;
-        anInt305 = i1;
-        anInt306 = (int) Math.sqrt(k * k + l * l + i1 * i1);
-        method198();
+        setShadowGradient(shadeGradient);
+        setLightsource(xSrc, zSrc, ySrc);
     }
 
-    public void method185(int i, int j, int k, int l, int i1) {
-    	
-        anInt308 = 256 - i * 4;
-        anInt307 = (64 - j) * 16 + 128;
-        if (aBoolean262) {
-            return;
-        } else {
-            anInt303 = k;
-            anInt304 = l;
-            anInt305 = i1;
-            anInt306 = (int) Math.sqrt(k * k + l * l + i1 * i1);
-            method198();
-            return;
-        }
+    public void setLightAndSource(int i, int j, int x, int z, int y)
+    {
+    	setLightning(i, j);
+        setLightsource(x, z, y);
     }
 
-    public void method186(int i, int j, int k) {
-        if (aBoolean262) {
-            return;
-        } else {
-            anInt303 = i;
-            anInt304 = j;
-            anInt305 = k;
-            anInt306 = (int) Math.sqrt(i * i + j * j + k * k);
-            method198();
-            return;
-        }
+    public void setLightning(int i, int j)
+    {
+        //globalLight = 256 - i * 4;
+        globalLight = 0; // makes the world much brighter
+        featuresLight = (64 - j) * 16 + 128;
     }
 
-    public void method187(int i, int j) {
+    public void setShadowGradient(boolean shadeGradient)
+    {
+        if (aBoolean262)
+            return;
+        if (shadeGradient)
+        	for (int i = 0; i < nbrSurfaces;
+        			lightSourceProjectToSurfNormal[i++] = anInt270);
+        else
+        	for (int i = 0; i < nbrSurfaces;
+        			lightSourceProjectToSurfNormal[i++] = 0);
+    }
+
+    public void setLightsource(int x, int z, int y) {
+        if (aBoolean262)
+            return;
+        lightSourceX = x;
+        lightSourceZ = z;
+        lightSourceY = y;
+        lightSourceDist = (int) Math.sqrt(x * x + z * z + y * y);
+        setLightining();
+    }
+
+    public void method187(int i, int j)
+    {
         aByteArray233[i] = (byte) j;
     }
 
-    public void method188(int i, int j, int k) {
-        anInt289 = anInt289 + i & 0xff;
-        anInt290 = anInt290 + j & 0xff;
-        anInt291 = anInt291 + k & 0xff;
-        method192();
+    public void addRotation(int x, int z, int y)
+    {
+    	setRotation(rotateX + x, rotateZ + z, rotateY + y);
+    }
+
+    public void setRotation(int x, int z, int y)
+    {
+        rotateX = x & 0xff;
+        rotateZ = z & 0xff;
+        rotateY = y & 0xff;
+        checkActions();
+        anInt246 = 1; // 1 for 3d model
+    }
+
+    public void addTranslate(int x, int z, int y)
+    {
+    	setTranslate(translateX + x, translateZ + z, translateY + y);
+    }
+
+    public void setTranslate(int x, int z, int y)
+    {
+        translateX = x;
+        translateZ = z;
+        translateY = y;
+        checkActions();
         anInt246 = 1;
     }
 
-    public void method189(int i, int j, int k) {
-        anInt289 = i & 0xff;
-        anInt290 = j & 0xff;
-        anInt291 = k & 0xff;
-        method192();
-        anInt246 = 1;
-    }
-
-    public void method190(int i, int j, int k) {
-        anInt286 += i;
-        anInt287 += j;
-        anInt288 += k;
-        method192();
-        anInt246 = 1;
-    }
-
-    public void method191(int i, int j, int k) {
-        anInt286 = i;
-        anInt287 = j;
-        anInt288 = k;
-        method192();
-        anInt246 = 1;
-    }
-
-    private void method192() {
-        if (anInt295 != 256 || anInt296 != 256 || anInt297 != 256 || anInt298 != 256 || anInt299 != 256 || anInt300 != 256) {
-            anInt301 = 4;
+    private void checkActions()
+    {
+        if (xSkew_z != 256 || ySkew_z != 256
+        		|| xSkew_y != 256 || zSkew_y != 256
+        		|| ySkew_x != 256 || zSkew_x != 256)
+        {
+            actions |= SKEW_MASK + SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
             return;
         }
-        if (anInt292 != 256 || anInt293 != 256 || anInt294 != 256) {
-            anInt301 = 3;
+        if (scaleX != 256 || scaleZ != 256 || scaleY != 256)
+        {
+            actions |= SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
             return;
         }
-        if (anInt289 != 0 || anInt290 != 0 || anInt291 != 0) {
-            anInt301 = 2;
+        if (rotateX != 0 || rotateZ != 0 || rotateY != 0)
+        {
+            actions |= ROTATE_MASK + TRANSLATE_MASK;
             return;
         }
-        if (anInt286 != 0 || anInt287 != 0 || anInt288 != 0) {
-            anInt301 = 1;
-            return;
-        } else {
-            anInt301 = 0;
+        if (translateX != 0 || translateZ != 0 || translateY != 0)
+        {
+            actions |= TRANSLATE_MASK;
             return;
         }
+        actions = 0;
+        return;
     }
 
-    private void method193(int i, int j, int k) {
+    private void translate(int x, int z, int y)
+    {
+        for (int l = 0; l < nbrCoordPoints; l++)
+        {
+            xCoordsDraw[l] += x;
+            zCoordsDraw[l] += z;
+            yCoordsDraw[l] += y;
+        }
+
+    }
+
+    private void rotate(int x, int z, int y)
+    {
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            if (y != 0)
+            {
+                int sin = sin256[y];
+                int cos = cos256[y];
+                int tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos >> 15;
+                zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin >> 15;
+                xCoordsDraw[i] = tmp;
+            }
+            if (x != 0)
+            {
+                int sin = sin256[x];
+                int cos = cos256[x];
+                int tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin >> 15;
+                yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos >> 15;
+                zCoordsDraw[i] = tmp;
+            }
+            if (z != 0)
+            {
+                int sin = sin256[z];
+                int cos = cos256[z];
+                int tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos >> 15;
+                yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin >> 15;
+                xCoordsDraw[i] = tmp;
+            }
+        }
+
+    }
+
+    private void skew(int x_skew_z, int y_skew_z, int x_skew_y,
+    		int z_skew_y, int y_skew_x, int z_skew_x)
+    {
+        for (int k1 = 0; k1 < nbrCoordPoints; k1++)
+        {
+            if (x_skew_z != 0)
+                xCoordsDraw[k1] += zCoordsDraw[k1] * x_skew_z >> 8;
+            if (y_skew_z != 0)
+                yCoordsDraw[k1] += zCoordsDraw[k1] * y_skew_z >> 8;
+            if (x_skew_y != 0)
+                xCoordsDraw[k1] += yCoordsDraw[k1] * x_skew_y >> 8;
+            if (z_skew_y != 0)
+                zCoordsDraw[k1] += yCoordsDraw[k1] * z_skew_y >> 8;
+            if (y_skew_x != 0)
+                yCoordsDraw[k1] += xCoordsDraw[k1] * y_skew_x >> 8;
+            if (z_skew_x != 0)
+                zCoordsDraw[k1] += xCoordsDraw[k1] * z_skew_x >> 8;
+        }
+
+    }
+
+    private void scale(int i, int j, int k) {
         for (int l = 0; l < nbrCoordPoints; l++) {
-            anIntArray275[l] += i;
-            anIntArray276[l] += j;
-            anIntArray277[l] += k;
+            xCoordsDraw[l] = xCoordsDraw[l] * i >> 8;
+            zCoordsDraw[l] = zCoordsDraw[l] * j >> 8;
+            yCoordsDraw[l] = yCoordsDraw[l] * k >> 8;
         }
 
     }
 
-    private void method194(int i, int j, int k) {
-        for (int i3 = 0; i3 < nbrCoordPoints; i3++) {
-            if (k != 0) {
-                int l = anIntArray265[k];
-                int k1 = anIntArray265[k + 256];
-                int j2 = anIntArray276[i3] * l + anIntArray275[i3] * k1 >> 15;
-                anIntArray276[i3] = anIntArray276[i3] * k1 - anIntArray275[i3] * l >> 15;
-                anIntArray275[i3] = j2;
-            }
-            if (i != 0) {
-                int i1 = anIntArray265[i];
-                int l1 = anIntArray265[i + 256];
-                int k2 = anIntArray276[i3] * l1 - anIntArray277[i3] * i1 >> 15;
-                anIntArray277[i3] = anIntArray276[i3] * i1 + anIntArray277[i3] * l1 >> 15;
-                anIntArray276[i3] = k2;
-            }
-            if (j != 0) {
-                int j1 = anIntArray265[j];
-                int i2 = anIntArray265[j + 256];
-                int l2 = anIntArray277[i3] * j1 + anIntArray275[i3] * i2 >> 15;
-                anIntArray277[i3] = anIntArray277[i3] * i2 - anIntArray275[i3] * j1 >> 15;
-                anIntArray275[i3] = l2;
-            }
-        }
-
-    }
-
-    private void method195(int i, int j, int k, int l, int i1, int j1) {
-        for (int k1 = 0; k1 < nbrCoordPoints; k1++) {
-            if (i != 0)
-                anIntArray275[k1] += anIntArray276[k1] * i >> 8;
-            if (j != 0)
-                anIntArray277[k1] += anIntArray276[k1] * j >> 8;
-            if (k != 0)
-                anIntArray275[k1] += anIntArray277[k1] * k >> 8;
-            if (l != 0)
-                anIntArray276[k1] += anIntArray277[k1] * l >> 8;
-            if (i1 != 0)
-                anIntArray277[k1] += anIntArray275[k1] * i1 >> 8;
-            if (j1 != 0)
-                anIntArray276[k1] += anIntArray275[k1] * j1 >> 8;
-        }
-
-    }
-
-    private void method196(int i, int j, int k) {
-        for (int l = 0; l < nbrCoordPoints; l++) {
-            anIntArray275[l] = anIntArray275[l] * i >> 8;
-            anIntArray276[l] = anIntArray276[l] * j >> 8;
-            anIntArray277[l] = anIntArray277[l] * k >> 8;
-        }
-
-    }
-
-    private void method197() {
-        anInt248 = anInt250 = anInt252 = 0xf423f;
-        anInt302 = anInt249 = anInt251 = anInt253 = 0xfff0bdc1;
-        for (int i = 0; i < nbrSurfaces; i++) {
-            int ai[] = surfaces[i];
-            int k = ai[0];
-            int i1 = pointsPerCell[i];
-            int j1;
-            int k1 = j1 = anIntArray275[k];
-            int l1;
-            int i2 = l1 = anIntArray276[k];
-            int j2;
-            int k2 = j2 = anIntArray277[k];
-            for (int j = 0; j < i1; j++) {
-                int l = ai[j];
-                if (anIntArray275[l] < j1)
-                    j1 = anIntArray275[l];
-                else if (anIntArray275[l] > k1)
-                    k1 = anIntArray275[l];
-                if (anIntArray276[l] < l1)
-                    l1 = anIntArray276[l];
-                else if (anIntArray276[l] > i2)
-                    i2 = anIntArray276[l];
-                if (anIntArray277[l] < j2)
-                    j2 = anIntArray277[l];
-                else if (anIntArray277[l] > k2)
-                    k2 = anIntArray277[l];
+    private void findModelBounds()
+    {
+        xMin = zMin = yMin = 999999;
+        longestLength = xMax = zMax = yMax = -999999;
+        for (int i = 0; i < nbrSurfaces; i++)
+        {
+            int surface[] = surfaces[i];
+            int firstPointIdx = surface[0];
+            int pointsInCell = pointsPerCell[i];
+            int xmin;
+            int xmax = xmin = xCoordsDraw[firstPointIdx];
+            int zmin;
+            int zmax = zmin = zCoordsDraw[firstPointIdx];
+            int ymin;
+            int ymax = ymin = yCoordsDraw[firstPointIdx];
+            for (int j = 0; j < pointsInCell; j++) {
+                int point = surface[j];
+                if (xCoordsDraw[point] < xmin)
+                    xmin = xCoordsDraw[point];
+                else if (xCoordsDraw[point] > xmax)
+                    xmax = xCoordsDraw[point];
+                if (zCoordsDraw[point] < zmin)
+                    zmin = zCoordsDraw[point];
+                else if (zCoordsDraw[point] > zmax)
+                    zmax = zCoordsDraw[point];
+                if (yCoordsDraw[point] < ymin)
+                    ymin = yCoordsDraw[point];
+                else if (yCoordsDraw[point] > ymax)
+                    ymax = yCoordsDraw[point];
             }
 
             if (!aBoolean261) {
-                anIntArray280[i] = j1;
-                anIntArray281[i] = k1;
-                anIntArray282[i] = l1;
-                anIntArray283[i] = i2;
-                anIntArray284[i] = j2;
-                anIntArray285[i] = k2;
+                xMinArray[i] = xmin;
+                xMaxArray[i] = xmax;
+                zMinArray[i] = zmin;
+                zMaxArray[i] = zmax;
+                yMinArray[i] = ymin;
+                yMaxArray[i] = ymax;
             }
-            if (k1 - j1 > anInt302)
-                anInt302 = k1 - j1;
-            if (i2 - l1 > anInt302)
-                anInt302 = i2 - l1;
-            if (k2 - j2 > anInt302)
-                anInt302 = k2 - j2;
-            if (j1 < anInt248)
-                anInt248 = j1;
-            if (k1 > anInt249)
-                anInt249 = k1;
-            if (l1 < anInt250)
-                anInt250 = l1;
-            if (i2 > anInt251)
-                anInt251 = i2;
-            if (j2 < anInt252)
-                anInt252 = j2;
-            if (k2 > anInt253)
-                anInt253 = k2;
+            if (xmax - xmin > longestLength)
+                longestLength = xmax - xmin;
+            if (zmax - zmin > longestLength)
+                longestLength = zmax - zmin;
+            if (ymax - ymin > longestLength)
+                longestLength = ymax - ymin;
+            if (xmin < xMin)
+                xMin = xmin;
+            if (xmax > xMax)
+                xMax = xmax;
+            if (zmin < zMin)
+                zMin = zmin;
+            if (zmax > zMax)
+                zMax = zmax;
+            if (ymin < yMin)
+                yMin = ymin;
+            if (ymax > yMax)
+                yMax = ymax;
         }
 
     }
 
-    public void method198() {
+    public void setLightining()
+    {
         if (aBoolean262)
             return;
-        int i = anInt307 * anInt306 >> 8;
+        int i = featuresLight * lightSourceDist >> 8;
         for (int j = 0; j < nbrSurfaces; j++)
-            if (anIntArray241[j] != anInt270)
-                anIntArray241[j] = (anIntArray242[j] * anInt303 + anIntArray243[j] * anInt304 + anIntArray244[j] * anInt305) / i;
+            if (lightSourceProjectToSurfNormal[j] != anInt270)
+                lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
+                		+ zNormals[j] * lightSourceZ
+                		+ yNormals[j] * lightSourceY) / i;
 
-        int ai[] = new int[nbrCoordPoints];
-        int ai1[] = new int[nbrCoordPoints];
-        int ai2[] = new int[nbrCoordPoints];
-        int ai3[] = new int[nbrCoordPoints];
-        for (int k = 0; k < nbrCoordPoints; k++) {
-            ai[k] = 0;
-            ai1[k] = 0;
-            ai2[k] = 0;
-            ai3[k] = 0;
-        }
+        int someXArray[] = new int[nbrCoordPoints];
+        int someZArray[] = new int[nbrCoordPoints];
+        int someYArray[] = new int[nbrCoordPoints];
+        int occurence[] = new int[nbrCoordPoints];
 
-        for (int l = 0; l < nbrSurfaces; l++)
-            if (anIntArray241[l] == anInt270) {
-                for (int i1 = 0; i1 < pointsPerCell[l]; i1++) {
-                    int k1 = surfaces[l][i1];
-                    ai[k1] += anIntArray242[l];
-                    ai1[k1] += anIntArray243[l];
-                    ai2[k1] += anIntArray244[l];
-                    ai3[k1]++;
+        for (int surfaceIdx = 0; surfaceIdx < nbrSurfaces; surfaceIdx++)
+            if (lightSourceProjectToSurfNormal[surfaceIdx] == anInt270)
+            {
+                for (int pointIdx = 0; pointIdx < pointsPerCell[surfaceIdx]; pointIdx++)
+                {
+                    int point = surfaces[surfaceIdx][pointIdx];
+                    someXArray[point] += xNormals[surfaceIdx];
+                    someZArray[point] += zNormals[surfaceIdx];
+                    someYArray[point] += yNormals[surfaceIdx];
+                    occurence[point]++;
                 }
-
             }
 
         for (int j1 = 0; j1 < nbrCoordPoints; j1++)
-            if (ai3[j1] > 0)
-                anIntArray232[j1] = (ai[j1] * anInt303 + ai1[j1] * anInt304 + ai2[j1] * anInt305) / (i * ai3[j1]);
-
+            if (occurence[j1] > 0)
+                pointBrightness[j1] = (someXArray[j1] * lightSourceX
+                		+ someZArray[j1] * lightSourceZ
+                		+ someYArray[j1] * lightSourceY) / (i * occurence[j1]);
     }
 
-    public void method199() {
-        if (aBoolean262 && aBoolean261)
-            return;
-        for (int i = 0; i < nbrSurfaces; i++) {
-            int ai[] = surfaces[i];
-            int j = anIntArray275[ai[0]];
-            int k = anIntArray276[ai[0]];
-            int l = anIntArray277[ai[0]];
-            int i1 = anIntArray275[ai[1]] - j;
-            int j1 = anIntArray276[ai[1]] - k;
-            int k1 = anIntArray277[ai[1]] - l;
-            int l1 = anIntArray275[ai[2]] - j;
-            int i2 = anIntArray276[ai[2]] - k;
-            int j2 = anIntArray277[ai[2]] - l;
-            int k2 = j1 * j2 - i2 * k1;
-            int l2 = k1 * l1 - j2 * i1;
-            int i3;
-            for (i3 = i1 * i2 - l1 * j1; k2 > 8192 || l2 > 8192 || i3 > 8192 || k2 < -8192 || l2 < -8192 || i3 < -8192; i3 >>= 1)
+	public void findNormals()
+	{
+		if (aBoolean262 && aBoolean261)
+			return;
+		for (int i = 0; i < nbrSurfaces; i++)
+		{
+			int surface[] = surfaces[i];
+			int x0 = xCoordsDraw[surface[0]];
+			int z0 = zCoordsDraw[surface[0]];
+			int y0 = yCoordsDraw[surface[0]];
+			int u_x = xCoordsDraw[surface[1]] - x0;
+			int u_z = zCoordsDraw[surface[1]] - z0;
+			int u_y = yCoordsDraw[surface[1]] - y0;
+			int v_x = xCoordsDraw[surface[2]] - x0;
+			int v_z = zCoordsDraw[surface[2]] - z0;
+			int v_y = yCoordsDraw[surface[2]] - y0;
+			
+			int n_x = u_z * v_y - v_z * u_y;
+			int n_z = u_y * v_x - v_y * u_x;
+			int n_y = u_x * v_z - v_x * u_z;
+			while(n_x > 0x2000 || n_z > 0x2000 || n_y > 0x2000
+					|| n_x < -0x2000 || n_z < -0x2000 || n_y < -0x2000)
+			{
+				n_x >>= 1;
+				n_z >>= 1;
+				n_y >>= 1;
+			}
+
+			int n_length = (int) (256D * Math.sqrt(n_x * n_x + n_z * n_z + n_y * n_y));
+			if (n_length <= 0)
+				n_length = 1;
+			xNormals[i] = (n_x * 0x10000) / n_length;
+			zNormals[i] = (n_z * 0x10000) / n_length;
+			yNormals[i] = (n_y * (0x10000)) / n_length;
+			scaleFactor[i] = -1;
+		}
+		setLightining();
+	}
+
+    public void method200()
+    {
+        if (anInt246 == 2)
+        { // 2d-sprites
+            anInt246 = 0;
+            for (int i = 0; i < nbrCoordPoints; i++)
             {
-                k2 >>= 1;
-                l2 >>= 1;
+                xCoordsDraw[i] = xCoords[i];
+                zCoordsDraw[i] = zCoords[i];
+                yCoordsDraw[i] = yCoords[i];
             }
 
-            int j3 = (int) (256D * Math.sqrt(k2 * k2 + l2 * l2 + i3 * i3));
-            if (j3 <= 0)
-                j3 = 1;
-            anIntArray242[i] = (k2 * 0x10000) / j3;
-            anIntArray243[i] = (l2 * 0x10000) / j3;
-            anIntArray244[i] = (i3 * 65535) / j3;
-            anIntArray240[i] = -1;
-        }
-
-        method198();
-    }
-
-    public void method200() {
-        if (anInt246 == 2) {
-            anInt246 = 0;
-            for (int i = 0; i < nbrCoordPoints; i++) {
-                anIntArray275[i] = xCoords[i];
-                anIntArray276[i] = zCoords[i];
-                anIntArray277[i] = yCoords[i];
-            }
-
-            anInt248 = anInt250 = anInt252 = 0xff676981;
-            anInt302 = anInt249 = anInt251 = anInt253 = 0x98967f;
+            xMin = zMin = yMin = 0xff676981;
+            longestLength = xMax = zMax = yMax = 0x98967f;
             return;
         }
-        if (anInt246 == 1) {
+        if (anInt246 == 1)
+        { // 3d objects
             anInt246 = 0;
-            for (int j = 0; j < nbrCoordPoints; j++) {
-                anIntArray275[j] = xCoords[j];
-                anIntArray276[j] = zCoords[j];
-                anIntArray277[j] = yCoords[j];
+            for (int j = 0; j < nbrCoordPoints; j++)
+            {
+                xCoordsDraw[j] = xCoords[j];
+                zCoordsDraw[j] = zCoords[j];
+                yCoordsDraw[j] = yCoords[j];
             }
-
-            if (anInt301 >= 2)
-                method194(anInt289, anInt290, anInt291);
-            if (anInt301 >= 3)
-                method196(anInt292, anInt293, anInt294);
-            if (anInt301 >= 4)
-                method195(anInt295, anInt296, anInt297, anInt298, anInt299, anInt300);
-            if (anInt301 >= 1)
-                method193(anInt286, anInt287, anInt288);
-            method197();
-            method199();
+            if ((actions & ROTATE_MASK) == ROTATE_MASK)
+                rotate(rotateX, rotateZ, rotateY);
+            if ((actions & SCALE_MASK) == SCALE_MASK)
+                scale(scaleX, scaleZ, scaleY);
+            if ((actions & SKEW_MASK) == SKEW_MASK)
+                skew(xSkew_z, ySkew_z, xSkew_y, zSkew_y, ySkew_x, zSkew_x);
+            if ((actions & TRANSLATE_MASK) == TRANSLATE_MASK)
+                translate(translateX, translateZ, translateY);
+            findModelBounds();
+            findNormals();
         }
     }
 
     public void method201(
-    		int cameraYPos, int cameraZPos, int cameraXPos,
-    		int cameraUpDownRot, int cameraLeftRightRot, int j1,
-    		int cameraSieInt, int l1)
+    		int cameraXPos, int cameraZPos, int cameraYPos,
+    		int cameraXRot, int cameraZRot, int cameraYRot,
+    		int cameraSizeInt, int drawMinDist)
     {
         method200();
-        if (anInt252 > Camera.anInt453 || anInt253 < Camera.anInt452
-        		|| anInt248 > Camera.anInt449 || anInt249 < Camera.anInt448
-        		|| anInt250 > Camera.anInt451 || anInt251 < Camera.anInt450)
+        if (yMin > Camera.yMaxHide || yMax < Camera.yMinHide
+        		|| xMin > Camera.xMaxHide || xMax < Camera.xMinHide
+        		|| zMin > Camera.zMaxHide || zMax < Camera.zMinHide)
         {
             visible = false;
             return;
         }
         visible = true;
-        int l2 = 0;
-        int i3 = 0;
-        if (j1 != 0) {
-            l2 = anIntArray266[j1];
-            i3 = anIntArray266[j1 + 1024];
-        }
-        int l3 = 0;
-        int i4 = 0;
-        if (cameraLeftRightRot != 0) {
-            l3 = anIntArray266[cameraLeftRightRot];
-            i4 = anIntArray266[cameraLeftRightRot + 1024];
-        }
-        int j3 = 0;
-        int k3 = 0;
-        if (cameraUpDownRot != 0) {
-            j3 = anIntArray266[cameraUpDownRot];
-            k3 = anIntArray266[cameraUpDownRot + 1024];
-        }
-        for (int j4 = 0; j4 < nbrCoordPoints; j4++) {
-            int k4 = anIntArray275[j4] - cameraYPos;
-            int l4 = anIntArray276[j4] - cameraZPos;
-            int i5 = anIntArray277[j4] - cameraXPos;
-            if (j1 != 0) {
-                int i2 = l4 * l2 + k4 * i3 >> 15;
-                l4 = l4 * i3 - k4 * l2 >> 15;
-                k4 = i2;
+        int ySin = cameraYRot != 0 ? sin1024[cameraYRot] : 0;
+        int yCos = cameraYRot != 0 ? cos1024[cameraYRot] : 0;
+
+        int zSin = cameraZRot != 0 ? sin1024[cameraZRot] : 0;
+        int zCos = cameraZRot != 0 ? cos1024[cameraZRot] : 0;
+
+        int xSin = cameraXRot != 0 ? sin1024[cameraXRot] : 0;
+        int xCos = cameraXRot != 0 ? cos1024[cameraXRot] : 0;
+
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            int u_x = xCoordsDraw[i] - cameraXPos;
+            int u_z = zCoordsDraw[i] - cameraZPos;
+            int u_y = yCoordsDraw[i] - cameraYPos;
+            if (cameraYRot != 0)
+            {
+                int tmp = u_z * ySin + u_x * yCos >> 15;
+                u_z = u_z * yCos - u_x * ySin >> 15;
+                u_x = tmp;
             }
-            if (cameraLeftRightRot != 0) {
-                int j2 = i5 * l3 + k4 * i4 >> 15;
-                i5 = i5 * i4 - k4 * l3 >> 15;
-                k4 = j2;
+            if (cameraZRot != 0)
+            {
+                int tmp = u_y * zSin + u_x * zCos >> 15;
+                u_y = u_y * zCos - u_x * zSin >> 15;
+                u_x = tmp;
             }
-            if (cameraUpDownRot != 0) {
-                int k2 = l4 * k3 - i5 * j3 >> 15;
-                i5 = l4 * j3 + i5 * k3 >> 15;
-                l4 = k2;
+            if (cameraXRot != 0)
+            {
+                int tmp = u_z * xCos - u_y * xSin >> 15;
+                u_y = u_z * xSin + u_y * xCos >> 15;
+                u_z = tmp;
             }
-            if (i5 >= l1)
-                anIntArray230[j4] = (k4 << cameraSieInt) / i5;
+            if (u_y >= drawMinDist)
+                xCoordOnScreen[i] = (u_x << cameraSizeInt) / u_y;
             else
-                anIntArray230[j4] = k4 << cameraSieInt;
-            if (i5 >= l1)
-                anIntArray231[j4] = (l4 << cameraSieInt) / i5;
+                xCoordOnScreen[i] = u_x << cameraSizeInt;
+            if (u_y >= drawMinDist)
+                yCoordOnScreen[i] = (u_z << cameraSizeInt) / u_y;
             else
-                anIntArray231[j4] = l4 << cameraSieInt;
-            anIntArray227[j4] = k4;
-            anIntArray228[j4] = l4;
-            anIntArray229[j4] = i5;
+                yCoordOnScreen[i] = u_z << cameraSizeInt;
+            xDistToPointFromCamera[i] = u_x;
+            zDistToPointFromCamera[i] = u_z;
+            yDistToPointFromCamera[i] = u_y;
         }
 
     }
 
-    public void method202() {
+    public void method202()
+    {
         method200();
-        for (int i = 0; i < nbrCoordPoints; i++) {
-            xCoords[i] = anIntArray275[i];
-            zCoords[i] = anIntArray276[i];
-            yCoords[i] = anIntArray277[i];
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            xCoords[i] = xCoordsDraw[i];
+            zCoords[i] = zCoordsDraw[i];
+            yCoords[i] = yCoordsDraw[i];
         }
 
-        anInt286 = anInt287 = anInt288 = 0;
-        anInt289 = anInt290 = anInt291 = 0;
-        anInt292 = anInt293 = anInt294 = 256;
-        anInt295 = anInt296 = anInt297 = anInt298 = anInt299 = anInt300 = 256;
-        anInt301 = 0;
+        translateX = translateZ = translateY = 0;
+        rotateX = rotateZ = rotateY = 0;
+        scaleX = scaleZ = scaleY = 256;
+        xSkew_z = ySkew_z = xSkew_y = zSkew_y = ySkew_x = zSkew_x = 256;
+        actions = 0;
     }
 
-    public Model method203() {
+    public Model method203()
+    {
         Model models[] = new Model[1];
         models[0] = this;
         Model model = new Model(models, 1);
@@ -968,7 +985,8 @@ public class Model {
         return model;
     }
 
-    public Model method204(boolean flag, boolean flag1, boolean flag2, boolean flag3) {
+    public Model method204(boolean flag, boolean flag1, boolean flag2, boolean flag3)
+    {
         Model models[] = new Model[1];
         models[0] = this;
         Model model = new Model(models, 1, flag, flag1, flag2, flag3);
@@ -976,20 +994,21 @@ public class Model {
         return model;
     }
 
-    public void method205(Model model) {
-        anInt289 = model.anInt289;
-        anInt290 = model.anInt290;
-        anInt291 = model.anInt291;
-        anInt286 = model.anInt286;
-        anInt287 = model.anInt287;
-        anInt288 = model.anInt288;
-        method192();
+    public void method205(Model model)
+    {
+        rotateX = model.rotateX;
+        rotateZ = model.rotateZ;
+        rotateY = model.rotateY;
+        translateX = model.translateX;
+        translateZ = model.translateZ;
+        translateY = model.translateY;
+        checkActions();
         anInt246 = 1;
     }
 
-    public int method206(byte abyte0[]) {
-        for (; abyte0[anInt309] == 10 || abyte0[anInt309] == 13; anInt309++)
-            ;
+    public int method206(byte abyte0[])
+    {
+        for (; abyte0[anInt309] == 10 || abyte0[anInt309] == 13; anInt309++);
         int i = anIntArray268[abyte0[anInt309++] & 0xff];
         int j = anIntArray268[abyte0[anInt309++] & 0xff];
         int k = anIntArray268[abyte0[anInt309++] & 0xff];
@@ -1000,33 +1019,33 @@ public class Model {
     }
 
     public int nbrCoordPoints;
-    public int anIntArray227[];
-    public int anIntArray228[];
-    public int anIntArray229[];
-    public int anIntArray230[];
-    public int anIntArray231[];
-    public int anIntArray232[];
+    public int xDistToPointFromCamera[];
+    public int zDistToPointFromCamera[];
+    public int yDistToPointFromCamera[];
+    public int xCoordOnScreen[];
+    public int yCoordOnScreen[];
+    public int pointBrightness[];
     public byte aByteArray233[];
     public int nbrSurfaces;
     public int pointsPerCell[];
     public int surfaces[][];
     public int surfaceTexture1[];
     public int surfaceTexture2[];
-    public int anIntArray239[];
-    public int anIntArray240[];
-    public int anIntArray241[];
-    public int anIntArray242[];
-    public int anIntArray243[];
-    private int anIntArray244[];
+    public int normalLength[];
+    public int scaleFactor[];
+    public int lightSourceProjectToSurfNormal[];
+    public int xNormals[];
+    public int zNormals[];
+    private int yNormals[];
     public int anInt245;
     public int anInt246;
     public boolean visible;
-    public int anInt248;
-    public int anInt249;
-    public int anInt250;
-    public int anInt251;
-    public int anInt252;
-    public int anInt253;
+    public int xMin;
+    public int xMax;
+    public int zMin;
+    public int zMax;
+    public int yMin;
+    public int yMax;
     public boolean aBoolean254;
     public boolean aBoolean255;
     public boolean isGiantCrystal;
@@ -1038,65 +1057,71 @@ public class Model {
     public boolean aBoolean262;
     public boolean aBoolean263;
     public boolean aBoolean264;
-    private static int anIntArray265[];
-    private static int anIntArray266[];
+    private static int sin256[];
+    private static int cos256[];
+    private static int sin1024[];
+    private static int cos1024[];
     private static byte aByteArray267[];
     private static int anIntArray268[];
     private int anInt270;
-    public int anInt271;
+    public int nPoints;
     public int xCoords[];
     public int zCoords[];
     public int yCoords[];
-    public int anIntArray275[];
-    public int anIntArray276[];
-    public int anIntArray277[];
-    private int anInt278;
+    public int xCoordsDraw[];
+    public int zCoordsDraw[];
+    public int yCoordsDraw[];
+    private int nSides;
     private int anIntArrayArray279[][];
-    private int anIntArray280[];
-    private int anIntArray281[];
-    private int anIntArray282[];
-    private int anIntArray283[];
-    private int anIntArray284[];
-    private int anIntArray285[];
-    private int anInt286;
-    private int anInt287;
-    private int anInt288;
-    private int anInt289;
-    private int anInt290;
-    private int anInt291;
-    private int anInt292;
-    private int anInt293;
-    private int anInt294;
-    private int anInt295;
-    private int anInt296;
-    private int anInt297;
-    private int anInt298;
-    private int anInt299;
-    private int anInt300;
-    private int anInt301;
-    private int anInt302;
-    private int anInt303;
-    private int anInt304;
-    private int anInt305;
-    private int anInt306;
-    protected int anInt307;
-    protected int anInt308;
+    private int xMinArray[];
+    private int xMaxArray[];
+    private int zMinArray[];
+    private int zMaxArray[];
+    private int yMinArray[];
+    private int yMaxArray[];
+    private int translateX;
+    private int translateZ;
+    private int translateY;
+    private int rotateX;
+    private int rotateZ;
+    private int rotateY;
+    private int scaleX;
+    private int scaleZ;
+    private int scaleY;
+    private int xSkew_z;
+    private int ySkew_z;
+    private int xSkew_y;
+    private int zSkew_y;
+    private int ySkew_x;
+    private int zSkew_x;
+    private int actions;
+    private int longestLength;
+    private int lightSourceX;
+    private int lightSourceZ;
+    private int lightSourceY;
+    private int lightSourceDist;
+    protected int featuresLight;
+    protected int globalLight;
     private int anInt309;
+    private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
     static {
-        anIntArray265 = new int[512];
-        anIntArray266 = new int[2048];
+        sin256 = new int[0x100];
+        cos256 = new int[0x100];
+        sin1024 = new int[0x400];
+        cos1024 = new int[0x400];
         aByteArray267 = new byte[64];
         anIntArray268 = new int[256];
-        for (int i = 0; i < 256; i++) {
-            anIntArray265[i] = (int) (Math.sin((double) i * 0.02454369D) * 32768D);
-            anIntArray265[i + 256] = (int) (Math.cos((double) i * 0.02454369D) * 32768D);
-        }
+        for (int i = 0; i < 0x100;
+        		sin256[i++] = (int) (Math.sin((double) i * 0.02454369D) * 32768D));
+        for (int i = 0; i < 0x100;
+        		cos256[i++] = (int) (Math.cos((double) i * 0.02454369D) * 32768D));
 
-        for (int j = 0; j < 1024; j++) {
-            anIntArray266[j] = (int) (Math.sin((double) j * 0.00613592315D) * 32768D);
-            anIntArray266[j + 1024] = (int) (Math.cos((double) j * 0.00613592315D) * 32768D);
-        }
+        for (int i = 0; i < 0x400;
+        		sin1024[i++] = (int) (Math.sin((double) i * 0.00613592315D) * 32768D));
+        for (int i = 0; i < 0x400;
+        		cos1024[i++] = (int) (Math.cos((double) i * 0.00613592315D) * 32768D));
+
         for (int k = 0; k < 10; k++)
             aByteArray267[k] = (byte) (48 + k);
 
