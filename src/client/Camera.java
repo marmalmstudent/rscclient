@@ -567,8 +567,8 @@ public class Camera {
 				}
 
 				/* Both of these are needed to draw models */
-				makeTriangle(0, 0, 0, 0, k8, triangleScreenX, triangleScreenY, triangleBright, model, l);
-				if (modelLowerY > modelUpperY)
+				makeTriangle(0, 0, 0, k8, triangleScreenX, triangleScreenY, triangleBright, model, l);
+				if (modelYMax > modelYMin)
 					applyColor(0, ptsPerCell, xDistToPointFromCamera, zDistToPointFromCamera,
 							yDistToPointFromCamera, cm.color,
 							model);
@@ -578,471 +578,589 @@ public class Camera {
 		aBoolean389 = false;
 	}
 
-	private void makeTriangle(int i, int j, int k, int l, int i1, int ai[], int ai1[],
-			int ai2[], Model model, int j1) {
-		if (i1 == 3) {
-			int vertex1y = ai1[0] + halfHeight2;
-			int vertex2y = ai1[1] + halfHeight2;
-			int vertex3y = ai1[2] + halfHeight2;
-			int vertex1x = ai[0];
-			int vertex2x = ai[1];
-			int vertex3x = ai[2];
-			int vertex1Bright = ai2[0];
-			int vertex2Bright = ai2[1];
-			int vertex3Bright = ai2[2];
+	private void makeTriangle(int xMin, int xMax, int xMinBright, int pointsInSurface,
+			int triangleX[], int triangleY[], int brightness[],
+			Model model, int j1)
+	{
+		if (pointsInSurface == 3)
+		{
+			/* TODO: make this code do what the code after this comment does.
+			int[] p_y = new int[pointsInSurface];
+			for (int i = 0; i < pointsInSurface; p_y[i++] = triangleY[i] + halfHeight2);
+			int[] p_x = new int[pointsInSurface];
+			for (int i = 0; i < pointsInSurface; p_x[i++] = triangleX[i]);
+			int[] p_b = new int[pointsInSurface];
+			for (int i = 0; i < pointsInSurface; p_b[i++] = brightness[i]);
 			int drawYMax = (halfHeight2 + halfHeight) - 1;
-			int l12 = 0;
-			int j13 = 0;
-			int l13 = 0;
-			int j14 = 0;
-			int l14 = 0xbc614e;
-			int j15 = 0xff439eb2;
-			if (vertex3y != vertex1y) {
-				j13 = (vertex3x - vertex1x << 8) / (vertex3y - vertex1y);
-				j14 = (vertex3Bright - vertex1Bright << 8) / (vertex3y - vertex1y);
-				if (vertex1y < vertex3y) {
-					l12 = vertex1x << 8;
-					l13 = vertex1Bright << 8;
-					l14 = vertex1y;
-					j15 = vertex3y;
-				} else {
-					l12 = vertex3x << 8;
-					l13 = vertex3Bright << 8;
-					l14 = vertex3y;
-					j15 = vertex1y;
+			int[] min_x = new int[pointsInSurface];
+			int[] min_b = new int[pointsInSurface];
+			int[] slope_x = new int[pointsInSurface];
+			int[] slope_b = new int[pointsInSurface];
+			int[] min_y = new int[pointsInSurface];
+			for (int i = 0; i < pointsInSurface; min_y[i++] = 9999999);
+			int[] max_y = new int[pointsInSurface];
+			for (int i = 0; i < pointsInSurface; max_y[i++] = -9999999);
+			
+			for (int i = 0; i < pointsInSurface; ++i)
+			{
+				int j = (i + 1) % pointsInSurface;
+				if (p_y[j] != p_y[i])
+				{
+					slope_x[i] = (p_x[j] - p_x[i] << 8) / (p_y[j] - p_y[i]);
+					slope_b[i] = (p_b[j] - p_b[i] << 8) / (p_y[j] - p_y[i]);
+					if (p_y[i] < p_y[j])
+					{
+						min_x[i] = p_x[i] << 8;
+						min_b[i] = p_b[i] << 8;
+						min_y[i] = p_y[i];
+						max_y[i] = p_y[j];
+					} else {
+						min_x[i] = p_x[j] << 8;
+						min_b[i] = p_b[j] << 8;
+						min_y[i] = p_y[j];
+						max_y[i] = p_y[i];
+					}
+					if (min_y[i] < 0) {
+						min_x[i] -= slope_x[i] * min_y[i];
+						min_b[i] -= slope_b[i] * min_y[i];
+						min_y[i] = 0;
+					}
+					if (max_y[i] > drawYMax)
+						max_y[i] = drawYMax;
 				}
-				if (l14 < 0) {
-					l12 -= j13 * l14;
-					l13 -= j14 * l14;
-					l14 = 0;
-				}
-				if (j15 > drawYMax)
-					j15 = drawYMax;
 			}
-			int l15 = 0;
-			int j16 = 0;
-			int l16 = 0;
-			int j17 = 0;
-			int l17 = 0xbc614e;
-			int j18 = 0xff439eb2;
-			if (vertex2y != vertex1y) {
-				j16 = (vertex2x - vertex1x << 8) / (vertex2y - vertex1y);
-				j17 = (vertex2Bright - vertex1Bright << 8) / (vertex2y - vertex1y);
-				if (vertex1y < vertex2y) {
-					l15 = vertex1x << 8;
-					l16 = vertex1Bright << 8;
-					l17 = vertex1y;
-					j18 = vertex2y;
-				} else {
-					l15 = vertex2x << 8;
-					l16 = vertex2Bright << 8;
-					l17 = vertex2y;
-					j18 = vertex1y;
-				}
-				if (l17 < 0) {
-					l15 -= j16 * l17;
-					l16 -= j17 * l17;
-					l17 = 0;
-				}
-				if (j18 > drawYMax)
-					j18 = drawYMax;
-			}
-			int l18 = 0;
-			int j19 = 0;
-			int l19 = 0;
-			int j20 = 0;
-			int l20 = 0xbc614e;
-			int j21 = 0xff439eb2;
-			if (vertex3y != vertex2y) {
-				j19 = (vertex3x - vertex2x << 8) / (vertex3y - vertex2y);
-				j20 = (vertex3Bright - vertex2Bright << 8) / (vertex3y - vertex2y);
-				if (vertex2y < vertex3y) {
-					l18 = vertex2x << 8;
-					l19 = vertex2Bright << 8;
-					l20 = vertex2y;
-					j21 = vertex3y;
-				} else {
-					l18 = vertex3x << 8;
-					l19 = vertex3Bright << 8;
-					l20 = vertex3y;
-					j21 = vertex2y;
-				}
-				if (l20 < 0) {
-					l18 -= j19 * l20;
-					l19 -= j20 * l20;
-					l20 = 0;
-				}
-				if (j21 > drawYMax)
-					j21 = drawYMax;
-			}
-			modelUpperY = l14;
-			if (l17 < modelUpperY)
-				modelUpperY = l17;
-			if (l20 < modelUpperY)
-				modelUpperY = l20;
-			modelLowerY = j15;
-			if (j18 > modelLowerY)
-				modelLowerY = j18;
-			if (j21 > modelLowerY)
-				modelLowerY = j21;
-			int l21 = 0;
-			for (k = modelUpperY; k < modelLowerY; k++) {
-				if (k >= l14 && k < j15) {
-					i = j = l12;
-					l = l21 = l13;
-					l12 += j13;
-					l13 += j14;
-				} else {
-					i = 0xa0000;
-					j = 0xfff60000;
-				}
-				if (k >= l17 && k < j18) {
-					if (l15 < i) {
-						i = l15;
-						l = l16;
+			// find minimum (upper-most) y value
+			modelYMin = min_y[0];
+			for (int i = 1; i < pointsInSurface; ++i)
+				if (min_y[i] < modelYMin)
+					modelYMin = min_y[i];
+			// find maximum (lower-most) y value
+			modelYMax = max_y[0];
+			for (int i = 1; i < pointsInSurface; ++i)
+				if (max_y[i] > modelYMax)
+					modelYMax = max_y[i];
+
+			int xMaxBright = 0;
+			for (int i = modelYMin; i < modelYMax; i++)
+			{
+				xMin = 9999999;
+				xMax = -9999999;
+				for (int j = 0; j < pointsInSurface; ++j)
+				{
+					if (i >= min_y[j] && i < max_y[j])
+					{
+						if (min_x[j] < xMin)
+						{ // found new
+							xMin = min_x[j];
+							xMinBright = min_b[j];
+						}
+						if (min_x[j] > xMax)
+						{
+							xMax = min_x[j];
+							xMaxBright = min_b[j];
+						}
+						min_x[j] += slope_x[j];
+						min_b[j] += slope_b[j];
 					}
-					if (l15 > j) {
-						j = l15;
-						l21 = l16;
-					}
-					l15 += j16;
-					l16 += j17;
 				}
-				if (k >= l20 && k < j21) {
-					if (l18 < i) {
-						i = l18;
-						l = l19;
-					}
-					if (l18 > j) {
-						j = l18;
-						l21 = l19;
-					}
-					l18 += j19;
-					l19 += j20;
-				}
-				CameraVariables cameraVariables_6 = cameraVariables[k];
-				cameraVariables_6.leftX = i;
-				cameraVariables_6.rightX = j;
-				cameraVariables_6.gradientStart = l;
-				cameraVariables_6.gradientEnd = l21;
+				CameraVariables cameraVariables_6 = cameraVariables[i];
+				cameraVariables_6.leftX = xMin;
+				cameraVariables_6.rightX = xMax;
+				cameraVariables_6.leftXBright = xMinBright;
+				cameraVariables_6.rightXBright = xMaxBright;
 			}
 
-			if (modelUpperY < halfHeight2 - halfHeight)
-				modelUpperY = halfHeight2 - halfHeight;
-		} else if (i1 == 4) {
-			int l1 = ai1[0] + halfHeight2;
-			int l2 = ai1[1] + halfHeight2;
-			int l3 = ai1[2] + halfHeight2;
-			int l4 = ai1[3] + halfHeight2;
-			int i6 = ai[0];
-			int k7 = ai[1];
-			int i9 = ai[2];
-			int k10 = ai[3];
-			int k11 = ai2[0];
-			int k12 = ai2[1];
-			int i13 = ai2[2];
-			int k13 = ai2[3];
-			int i14 = (halfHeight2 + halfHeight) - 1;
-			int k14 = 0;
-			int i15 = 0;
-			int k15 = 0;
-			int i16 = 0;
-			int k16 = 0xbc614e;
-			int i17 = 0xff439eb2;
-			if (l4 != l1) {
-				i15 = (k10 - i6 << 8) / (l4 - l1);
-				i16 = (k13 - k11 << 8) / (l4 - l1);
-				if (l1 < l4) {
-					k14 = i6 << 8;
-					k15 = k11 << 8;
-					k16 = l1;
-					i17 = l4;
-				} else {
-					k14 = k10 << 8;
-					k15 = k13 << 8;
-					k16 = l4;
-					i17 = l1;
-				}
-				if (k16 < 0) {
-					k14 -= i15 * k16;
-					k15 -= i16 * k16;
-					k16 = 0;
-				}
-				if (i17 > i14)
-					i17 = i14;
-			}
-			int k17 = 0;
-			int i18 = 0;
-			int k18 = 0;
-			int i19 = 0;
-			int k19 = 0xbc614e;
-			int i20 = 0xff439eb2;
-			if (l2 != l1) {
-				i18 = (k7 - i6 << 8) / (l2 - l1);
-				i19 = (k12 - k11 << 8) / (l2 - l1);
-				if (l1 < l2) {
-					k17 = i6 << 8;
-					k18 = k11 << 8;
-					k19 = l1;
-					i20 = l2;
-				} else {
-					k17 = k7 << 8;
-					k18 = k12 << 8;
-					k19 = l2;
-					i20 = l1;
-				}
-				if (k19 < 0) {
-					k17 -= i18 * k19;
-					k18 -= i19 * k19;
-					k19 = 0;
-				}
-				if (i20 > i14)
-					i20 = i14;
-			}
-			int k20 = 0;
-			int i21 = 0;
-			int k21 = 0;
-			int i22 = 0;
-			int j22 = 0xbc614e;
-			int k22 = 0xff439eb2;
-			if (l3 != l2) {
-				i21 = (i9 - k7 << 8) / (l3 - l2);
-				i22 = (i13 - k12 << 8) / (l3 - l2);
-				if (l2 < l3) {
-					k20 = k7 << 8;
-					k21 = k12 << 8;
-					j22 = l2;
-					k22 = l3;
-				} else {
-					k20 = i9 << 8;
-					k21 = i13 << 8;
-					j22 = l3;
-					k22 = l2;
-				}
-				if (j22 < 0) {
-					k20 -= i21 * j22;
-					k21 -= i22 * j22;
-					j22 = 0;
-				}
-				if (k22 > i14)
-					k22 = i14;
-			}
-			int l22 = 0;
-			int i23 = 0;
-			int j23 = 0;
-			int k23 = 0;
-			int l23 = 0xbc614e;
-			int i24 = 0xff439eb2;
-			if (l4 != l3) {
-				i23 = (k10 - i9 << 8) / (l4 - l3);
-				k23 = (k13 - i13 << 8) / (l4 - l3);
-				if (l3 < l4) {
-					l22 = i9 << 8;
-					j23 = i13 << 8;
-					l23 = l3;
-					i24 = l4;
-				} else {
-					l22 = k10 << 8;
-					j23 = k13 << 8;
-					l23 = l4;
-					i24 = l3;
-				}
-				if (l23 < 0) {
-					l22 -= i23 * l23;
-					j23 -= k23 * l23;
-					l23 = 0;
-				}
-				if (i24 > i14)
-					i24 = i14;
-			}
-			modelUpperY = k16;
-			if (k19 < modelUpperY)
-				modelUpperY = k19;
-			if (j22 < modelUpperY)
-				modelUpperY = j22;
-			if (l23 < modelUpperY)
-				modelUpperY = l23;
-			modelLowerY = i17;
-			if (i20 > modelLowerY)
-				modelLowerY = i20;
-			if (k22 > modelLowerY)
-				modelLowerY = k22;
-			if (i24 > modelLowerY)
-				modelLowerY = i24;
-			int j24 = 0;
-			for (k = modelUpperY; k < modelLowerY; k++) {
-				if (k >= k16 && k < i17) {
-					i = j = k14;
-					l = j24 = k15;
-					k14 += i15;
-					k15 += i16;
-				} else {
-					i = 0xa0000;
-					j = 0xfff60000;
-				}
-				if (k >= k19 && k < i20) {
-					if (k17 < i) {
-						i = k17;
-						l = k18;
-					}
-					if (k17 > j) {
-						j = k17;
-						j24 = k18;
-					}
-					k17 += i18;
-					k18 += i19;
-				}
-				if (k >= j22 && k < k22) {
-					if (k20 < i) {
-						i = k20;
-						l = k21;
-					}
-					if (k20 > j) {
-						j = k20;
-						j24 = k21;
-					}
-					k20 += i21;
-					k21 += i22;
-				}
-				if (k >= l23 && k < i24) {
-					if (l22 < i) {
-						i = l22;
-						l = j23;
-					}
-					if (l22 > j) {
-						j = l22;
-						j24 = j23;
-					}
-					l22 += i23;
-					j23 += k23;
-				}
+			if (modelYMin < halfHeight2 - halfHeight)
+				modelYMin = halfHeight2 - halfHeight;
+			*/
+			int p0y = triangleY[0] + halfHeight2;
+			int p1y = triangleY[1] + halfHeight2;
+			int p2y = triangleY[2] + halfHeight2;
+			int p0x = triangleX[0];
+			int p1x = triangleX[1];
+			int p2x = triangleX[2];
+			int p0Bright = brightness[0];
+			int p1Bright = brightness[1];
+			int p2Bright = brightness[2];
+			int drawYMax = (halfHeight2 + halfHeight) - 1;
 
-				CameraVariables cameraVariables_7 = cameraVariables[k];
-				cameraVariables_7.leftX = i;
-				cameraVariables_7.rightX = j;
-				cameraVariables_7.gradientStart = l;
-				cameraVariables_7.gradientEnd = j24;
+			int min_p10y_x = 0;
+			int slope_10 = 0;
+			int min_p10y_b = 0;
+			int slope_b_10 = 0;
+			int min_p10y = 9999999;
+			int max_p10y = -9999999;
+			if (p1y != p0y) {
+				slope_10 = (p1x - p0x << 8) / (p1y - p0y);
+				slope_b_10 = (p1Bright - p0Bright << 8) / (p1y - p0y);
+				if (p0y < p1y) {
+					min_p10y_x = p0x << 8;
+					min_p10y_b = p0Bright << 8;
+					min_p10y = p0y;
+					max_p10y = p1y;
+				} else {
+					min_p10y_x = p1x << 8;
+					min_p10y_b = p1Bright << 8;
+					min_p10y = p1y;
+					max_p10y = p0y;
+				}
+				if (min_p10y < 0)
+				{
+					min_p10y_x -= slope_10 * min_p10y;
+					min_p10y_b -= slope_b_10 * min_p10y;
+					min_p10y = 0;
+				}
+				if (max_p10y > drawYMax)
+					max_p10y = drawYMax;
 			}
 
-			if (modelUpperY < halfHeight2 - halfHeight)
-				modelUpperY = halfHeight2 - halfHeight;
-		} else {
-			modelLowerY = modelUpperY = ai1[0] += halfHeight2;
-			for (k = 1; k < i1; k++) {
+			int min_p21y_x = 0;
+			int slope_21 = 0;
+			int min_p21y_b = 0;
+			int slope_b_21 = 0;
+			int min_p21y = 9999999;
+			int max_p21y = -9999999;
+			if (p2y != p1y) {
+				slope_21 = (p2x - p1x << 8) / (p2y - p1y);
+				slope_b_21 = (p2Bright - p1Bright << 8) / (p2y - p1y);
+				if (p1y < p2y) {
+					min_p21y_x = p1x << 8;
+					min_p21y_b = p1Bright << 8;
+					min_p21y = p1y;
+					max_p21y = p2y;
+				} else {
+					min_p21y_x = p2x << 8;
+					min_p21y_b = p2Bright << 8;
+					min_p21y = p2y;
+					max_p21y = p1y;
+				}
+				if (min_p21y < 0)
+				{
+					min_p21y_x -= slope_21 * min_p21y;
+					min_p21y_b -= slope_b_21 * min_p21y;
+					min_p21y = 0;
+				}
+				if (max_p21y > drawYMax)
+					max_p21y = drawYMax;
+			}
+
+			int min_p20y_x = 0;
+			int slope_20 = 0;
+			int min_p20y_b = 0;
+			int slope_b_20 = 0;
+			int min_p20y = 9999999;
+			int max_p20y = -9999999;
+			if (p2y != p0y)
+			{
+				slope_20 = (p0x - p2x << 8) / (p0y - p2y);
+				slope_b_20 = (p0Bright - p2Bright << 8) / (p0y - p2y);
+				if (p2y < p0y) {
+					min_p20y_x = p2x << 8;
+					min_p20y_b = p2Bright << 8;
+					min_p20y = p2y;
+					max_p20y = p0y;
+				} else {
+					min_p20y_x = p0x << 8;
+					min_p20y_b = p0Bright << 8;
+					min_p20y = p0y;
+					max_p20y = p2y;
+				}
+				if (min_p20y < 0) {
+					min_p20y_x -= slope_20 * min_p20y;
+					min_p20y_b -= slope_b_20 * min_p20y;
+					min_p20y = 0;
+				}
+				if (max_p20y > drawYMax)
+					max_p20y = drawYMax;
+			}
+			// find minimum (upper-most) y value
+			modelYMin = min_p10y;
+			if (min_p21y < modelYMin)
+				modelYMin = min_p21y;
+			if (min_p10y < modelYMin)
+				modelYMin = min_p20y;
+			// find maximum (lower-most) y value
+			modelYMax = max_p10y;
+			if (max_p21y > modelYMax)
+				modelYMax = max_p21y;
+			if (max_p10y > modelYMax)
+				modelYMax = max_p20y;
+
+			int xMaxBright = 0;
+			for (int i = modelYMin; i < modelYMax; i++)
+			{
+				xMin = 9999999;
+				xMax = -9999999;
+				if (i >= min_p10y && i < max_p10y)
+				{ // inside the p10 line y-bounds
+					if (min_p10y_x < xMin)
+					{ // found new
+						xMin = min_p10y_x;
+						xMinBright = min_p10y_b;
+					}
+					if (min_p10y_x > xMax)
+					{
+						xMax = min_p10y_x;
+						xMaxBright = min_p10y_b;
+					}
+					min_p10y_x += slope_10;
+					min_p10y_b += slope_b_10;
+				}
+				if (i >= min_p21y && i < max_p21y)
+				{
+					if (min_p21y_x < xMin) {
+						xMin = min_p21y_x;
+						xMinBright = min_p21y_b;
+					}
+					if (min_p21y_x > xMax) {
+						xMax = min_p21y_x;
+						xMaxBright = min_p21y_b;
+					}
+					min_p21y_x += slope_21;
+					min_p21y_b += slope_b_21;
+				}
+				if (i >= min_p20y && i < max_p20y)
+				{ // inside the p20 line y-bounds
+					if (min_p20y_x < xMin)
+					{ // found new
+						xMin = min_p20y_x;
+						xMinBright = min_p20y_b;
+					}
+					if (min_p20y_x > xMax)
+					{
+						xMax = min_p20y_x;
+						xMaxBright = min_p20y_b;
+					}
+					min_p20y_x += slope_20;
+					min_p20y_b += slope_b_20;
+				}
+				CameraVariables cameraVariables_6 = cameraVariables[i];
+				cameraVariables_6.leftX = xMin;
+				cameraVariables_6.rightX = xMax;
+				cameraVariables_6.leftXBright = xMinBright;
+				cameraVariables_6.rightXBright = xMaxBright;
+			}
+
+			if (modelYMin < halfHeight2 - halfHeight)
+				modelYMin = halfHeight2 - halfHeight;
+		}
+		else if (pointsInSurface == 4)
+		{
+			int p0y = triangleY[0] + halfHeight2;
+			int p1y = triangleY[1] + halfHeight2;
+			int p2y = triangleY[2] + halfHeight2;
+			int p3y = triangleY[3] + halfHeight2;
+			int p0x = triangleX[0];
+			int p1x = triangleX[1];
+			int p2x = triangleX[2];
+			int p3x = triangleX[3];
+			int p0b = brightness[0];
+			int p1b = brightness[1];
+			int p2b = brightness[2];
+			int p3b = brightness[3];
+			int drawYMax = (halfHeight2 + halfHeight) - 1;
+			int min_p30y_x = 0;
+			int slope_30_x = 0;
+			int min_p30y_b = 0;
+			int slope_30_b = 0;
+			int min_p30y = 9999999;
+			int max_p30y = -9999999;
+			if (p3y != p0y) {
+				slope_30_x = (p3x - p0x << 8) / (p3y - p0y);
+				slope_30_b = (p3b - p0b << 8) / (p3y - p0y);
+				if (p0y < p3y) {
+					min_p30y_x = p0x << 8;
+					min_p30y_b = p0b << 8;
+					min_p30y = p0y;
+					max_p30y = p3y;
+				} else {
+					min_p30y_x = p3x << 8;
+					min_p30y_b = p3b << 8;
+					min_p30y = p3y;
+					max_p30y = p0y;
+				}
+				if (min_p30y < 0) {
+					min_p30y_x -= slope_30_x * min_p30y;
+					min_p30y_b -= slope_30_b * min_p30y;
+					min_p30y = 0;
+				}
+				if (max_p30y > drawYMax)
+					max_p30y = drawYMax;
+			}
+			int min_p10y_x = 0;
+			int slope_10_x = 0;
+			int min_p10y_b = 0;
+			int slope_10_b = 0;
+			int min_p10y = 9999999;
+			int max_p10y = -9999999;
+			if (p1y != p0y) {
+				slope_10_x = (p1x - p0x << 8) / (p1y - p0y);
+				slope_10_b = (p1b - p0b << 8) / (p1y - p0y);
+				if (p0y < p1y) {
+					min_p10y_x = p0x << 8;
+					min_p10y_b = p0b << 8;
+					min_p10y = p0y;
+					max_p10y = p1y;
+				} else {
+					min_p10y_x = p1x << 8;
+					min_p10y_b = p1b << 8;
+					min_p10y = p1y;
+					max_p10y = p0y;
+				}
+				if (min_p10y < 0) {
+					min_p10y_x -= slope_10_x * min_p10y;
+					min_p10y_b -= slope_10_b * min_p10y;
+					min_p10y = 0;
+				}
+				if (max_p10y > drawYMax)
+					max_p10y = drawYMax;
+			}
+			int min_p21y_x = 0;
+			int slope_21_x = 0;
+			int min_p21y_b = 0;
+			int slope_21_b = 0;
+			int min_p21y = 9999999;
+			int max_p21y = -9999999;
+			if (p2y != p1y) {
+				slope_21_x = (p2x - p1x << 8) / (p2y - p1y);
+				slope_21_b = (p2b - p1b << 8) / (p2y - p1y);
+				if (p1y < p2y) {
+					min_p21y_x = p1x << 8;
+					min_p21y_b = p1b << 8;
+					min_p21y = p1y;
+					max_p21y = p2y;
+				} else {
+					min_p21y_x = p2x << 8;
+					min_p21y_b = p2b << 8;
+					min_p21y = p2y;
+					max_p21y = p1y;
+				}
+				if (min_p21y < 0) {
+					min_p21y_x -= slope_21_x * min_p21y;
+					min_p21y_b -= slope_21_b * min_p21y;
+					min_p21y = 0;
+				}
+				if (max_p21y > drawYMax)
+					max_p21y = drawYMax;
+			}
+			int min_p32y_x = 0;
+			int slope_32_x = 0;
+			int min_p32y_b = 0;
+			int slope_32_b = 0;
+			int min_p32y = 9999999;
+			int max_p32y = -9999999;
+			if (p3y != p2y) {
+				slope_32_x = (p3x - p2x << 8) / (p3y - p2y);
+				slope_32_b = (p3b - p2b << 8) / (p3y - p2y);
+				if (p2y < p3y) {
+					min_p32y_x = p2x << 8;
+					min_p32y_b = p2b << 8;
+					min_p32y = p2y;
+					max_p32y = p3y;
+				} else {
+					min_p32y_x = p3x << 8;
+					min_p32y_b = p3b << 8;
+					min_p32y = p3y;
+					max_p32y = p2y;
+				}
+				if (min_p32y < 0) {
+					min_p32y_x -= slope_32_x * min_p32y;
+					min_p32y_b -= slope_32_b * min_p32y;
+					min_p32y = 0;
+				}
+				if (max_p32y > drawYMax)
+					max_p32y = drawYMax;
+			}
+			modelYMin = min_p30y;
+			if (min_p10y < modelYMin)
+				modelYMin = min_p10y;
+			if (min_p21y < modelYMin)
+				modelYMin = min_p21y;
+			if (min_p32y < modelYMin)
+				modelYMin = min_p32y;
+			modelYMax = max_p30y;
+			if (max_p10y > modelYMax)
+				modelYMax = max_p10y;
+			if (max_p21y > modelYMax)
+				modelYMax = max_p21y;
+			if (max_p32y > modelYMax)
+				modelYMax = max_p32y;
+			int yMax = 0;
+			for (int i = modelYMin; i < modelYMax; i++) {
+				if (i >= min_p30y && i < max_p30y) {
+					xMin = xMax = min_p30y_x;
+					xMinBright = yMax = min_p30y_b;
+					min_p30y_x += slope_30_x;
+					min_p30y_b += slope_30_b;
+				} else {
+					xMin = 0xa0000;
+					xMax = 0xfff60000;
+				}
+				if (i >= min_p10y && i < max_p10y) {
+					if (min_p10y_x < xMin) {
+						xMin = min_p10y_x;
+						xMinBright = min_p10y_b;
+					}
+					if (min_p10y_x > xMax) {
+						xMax = min_p10y_x;
+						yMax = min_p10y_b;
+					}
+					min_p10y_x += slope_10_x;
+					min_p10y_b += slope_10_b;
+				}
+				if (i >= min_p21y && i < max_p21y) {
+					if (min_p21y_x < xMin) {
+						xMin = min_p21y_x;
+						xMinBright = min_p21y_b;
+					}
+					if (min_p21y_x > xMax) {
+						xMax = min_p21y_x;
+						yMax = min_p21y_b;
+					}
+					min_p21y_x += slope_21_x;
+					min_p21y_b += slope_21_b;
+				}
+				if (i >= min_p32y && i < max_p32y) {
+					if (min_p32y_x < xMin) {
+						xMin = min_p32y_x;
+						xMinBright = min_p32y_b;
+					}
+					if (min_p32y_x > xMax) {
+						xMax = min_p32y_x;
+						yMax = min_p32y_b;
+					}
+					min_p32y_x += slope_32_x;
+					min_p32y_b += slope_32_b;
+				}
+
+				CameraVariables cameraVariables_7 = cameraVariables[i];
+				cameraVariables_7.leftX = xMin;
+				cameraVariables_7.rightX = xMax;
+				cameraVariables_7.leftXBright = xMinBright;
+				cameraVariables_7.rightXBright = yMax;
+			}
+
+			if (modelYMin < halfHeight2 - halfHeight)
+				modelYMin = halfHeight2 - halfHeight;
+		}
+		else
+		{
+			modelYMax = modelYMin = triangleY[0] += halfHeight2;
+			for (int i = 1; i < pointsInSurface; i++) {
 				int i2;
-				if ((i2 = ai1[k] += halfHeight2) < modelUpperY)
-					modelUpperY = i2;
-				else if (i2 > modelLowerY)
-					modelLowerY = i2;
+				if ((i2 = triangleY[i] += halfHeight2) < modelYMin)
+					modelYMin = i2;
+				else if (i2 > modelYMax)
+					modelYMax = i2;
 			}
 
-			if (modelUpperY < halfHeight2 - halfHeight)
-				modelUpperY = halfHeight2 - halfHeight;
-			if (modelLowerY >= halfHeight2 + halfHeight)
-				modelLowerY = (halfHeight2 + halfHeight) - 1;
-			if (modelUpperY >= modelLowerY)
+			if (modelYMin < halfHeight2 - halfHeight)
+				modelYMin = halfHeight2 - halfHeight;
+			if (modelYMax >= halfHeight2 + halfHeight)
+				modelYMax = (halfHeight2 + halfHeight) - 1;
+			if (modelYMin >= modelYMax)
 				return;
-			for (k = modelUpperY; k < modelLowerY; k++) {
-				CameraVariables cameraVariables = this.cameraVariables[k];
+			for (int i = modelYMin; i < modelYMax; i++) {
+				CameraVariables cameraVariables = this.cameraVariables[i];
 				cameraVariables.leftX = 0xa0000;
 				cameraVariables.rightX = 0xfff60000;
 			}
 
-			int j2 = i1 - 1;
-			int i3 = ai1[0];
-			int i4 = ai1[j2];
+			int j2 = pointsInSurface - 1;
+			int i3 = triangleY[0];
+			int i4 = triangleY[j2];
 			if (i3 < i4) {
-				int i5 = ai[0] << 8;
-				int j6 = (ai[j2] - ai[0] << 8) / (i4 - i3);
-				int l7 = ai2[0] << 8;
-				int j9 = (ai2[j2] - ai2[0] << 8) / (i4 - i3);
+				int i5 = triangleX[0] << 8;
+				int j6 = (triangleX[j2] - triangleX[0] << 8) / (i4 - i3);
+				int l7 = brightness[0] << 8;
+				int j9 = (brightness[j2] - brightness[0] << 8) / (i4 - i3);
 				if (i3 < 0) {
 					i5 -= j6 * i3;
 					l7 -= j9 * i3;
 					i3 = 0;
 				}
-				if (i4 > modelLowerY)
-					i4 = modelLowerY;
-				for (k = i3; k <= i4; k++) {
-					CameraVariables cameraVariables_2 = cameraVariables[k];
+				if (i4 > modelYMax)
+					i4 = modelYMax;
+				for (int i = i3; i <= i4; i++) {
+					CameraVariables cameraVariables_2 = cameraVariables[i];
 					cameraVariables_2.leftX = cameraVariables_2.rightX = i5;
-					cameraVariables_2.gradientStart = cameraVariables_2.gradientEnd = l7;
+					cameraVariables_2.leftXBright = cameraVariables_2.rightXBright = l7;
 					i5 += j6;
 					l7 += j9;
 				}
 
 			} else if (i3 > i4) {
-				int j5 = ai[j2] << 8;
-				int k6 = (ai[0] - ai[j2] << 8) / (i3 - i4);
-				int i8 = ai2[j2] << 8;
-				int k9 = (ai2[0] - ai2[j2] << 8) / (i3 - i4);
+				int j5 = triangleX[j2] << 8;
+				int k6 = (triangleX[0] - triangleX[j2] << 8) / (i3 - i4);
+				int i8 = brightness[j2] << 8;
+				int k9 = (brightness[0] - brightness[j2] << 8) / (i3 - i4);
 				if (i4 < 0) {
 					j5 -= k6 * i4;
 					i8 -= k9 * i4;
 					i4 = 0;
 				}
-				if (i3 > modelLowerY)
-					i3 = modelLowerY;
-				for (k = i4; k <= i3; k++) {
-					CameraVariables cameraVariables_3 = cameraVariables[k];
+				if (i3 > modelYMax)
+					i3 = modelYMax;
+				for (int i = i4; i <= i3; i++) {
+					CameraVariables cameraVariables_3 = cameraVariables[i];
 					cameraVariables_3.leftX = cameraVariables_3.rightX = j5;
-					cameraVariables_3.gradientStart = cameraVariables_3.gradientEnd = i8;
+					cameraVariables_3.leftXBright = cameraVariables_3.rightXBright = i8;
 					j5 += k6;
 					i8 += k9;
 				}
 
 			}
-			for (k = 0; k < j2; k++) {
-				int k5 = k + 1;
-				int j3 = ai1[k];
-				int j4 = ai1[k5];
+			for (int i = 0; i < j2; i++) {
+				int k5 = i + 1;
+				int j3 = triangleY[i];
+				int j4 = triangleY[k5];
 				if (j3 < j4) {
-					int l6 = ai[k] << 8;
-					int j8 = (ai[k5] - ai[k] << 8) / (j4 - j3);
-					int l9 = ai2[k] << 8;
-					int l10 = (ai2[k5] - ai2[k] << 8) / (j4 - j3);
+					int l6 = triangleX[i] << 8;
+					int j8 = (triangleX[k5] - triangleX[i] << 8) / (j4 - j3);
+					int l9 = brightness[i] << 8;
+					int l10 = (brightness[k5] - brightness[i] << 8) / (j4 - j3);
 					if (j3 < 0) {
 						l6 -= j8 * j3;
 						l9 -= l10 * j3;
 						j3 = 0;
 					}
-					if (j4 > modelLowerY)
-						j4 = modelLowerY;
+					if (j4 > modelYMax)
+						j4 = modelYMax;
 					for (int l11 = j3; l11 <= j4; l11++) {
 						CameraVariables cameraVariables_4 = cameraVariables[l11];
 						if (l6 < cameraVariables_4.leftX) {
 							cameraVariables_4.leftX = l6;
-							cameraVariables_4.gradientStart = l9;
+							cameraVariables_4.leftXBright = l9;
 						}
 						if (l6 > cameraVariables_4.rightX) {
 							cameraVariables_4.rightX = l6;
-							cameraVariables_4.gradientEnd = l9;
+							cameraVariables_4.rightXBright = l9;
 						}
 						l6 += j8;
 						l9 += l10;
 					}
 
 				} else if (j3 > j4) {
-					int i7 = ai[k5] << 8;
-					int k8 = (ai[k] - ai[k5] << 8) / (j3 - j4);
-					int i10 = ai2[k5] << 8;
-					int i11 = (ai2[k] - ai2[k5] << 8) / (j3 - j4);
+					int i7 = triangleX[k5] << 8;
+					int k8 = (triangleX[i] - triangleX[k5] << 8) / (j3 - j4);
+					int i10 = brightness[k5] << 8;
+					int i11 = (brightness[i] - brightness[k5] << 8) / (j3 - j4);
 					if (j4 < 0) {
 						i7 -= k8 * j4;
 						i10 -= i11 * j4;
 						j4 = 0;
 					}
-					if (j3 > modelLowerY)
-						j3 = modelLowerY;
+					if (j3 > modelYMax)
+						j3 = modelYMax;
 					for (int i12 = j4; i12 <= j3; i12++) {
 						CameraVariables cameraVariables_5 = cameraVariables[i12];
 						if (i7 < cameraVariables_5.leftX) {
 							cameraVariables_5.leftX = i7;
-							cameraVariables_5.gradientStart = i10;
+							cameraVariables_5.leftXBright = i10;
 						}
 						if (i7 > cameraVariables_5.rightX) {
 							cameraVariables_5.rightX = i7;
-							cameraVariables_5.gradientEnd = i10;
+							cameraVariables_5.rightXBright = i10;
 						}
 						i7 += k8;
 						i10 += i11;
@@ -1051,12 +1169,16 @@ public class Camera {
 				}
 			}
 
-			if (modelUpperY < halfHeight2 - halfHeight)
-				modelUpperY = halfHeight2 - halfHeight;
+			if (modelYMin < halfHeight2 - halfHeight)
+				modelYMin = halfHeight2 - halfHeight;
 		}
-		if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount && mouseY >= modelUpperY && mouseY < modelLowerY) {
+		if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount && mouseY >= modelYMin && mouseY < modelYMax) {
 			CameraVariables cameraVariables_1 = cameraVariables[mouseY];
-			if (mouseX >= cameraVariables_1.leftX >> 8 && mouseX <= cameraVariables_1.rightX >> 8 && cameraVariables_1.leftX <= cameraVariables_1.rightX && !model.aBoolean263 && model.aByteArray259[j1] == 0) {
+			if (mouseX >= cameraVariables_1.leftX >> 8
+					&& mouseX <= cameraVariables_1.rightX >> 8
+					&& cameraVariables_1.leftX <= cameraVariables_1.rightX
+					&& !model.aBoolean263 && model.aByteArray259[j1] == 0)
+			{
 				visibleModelsArray[currentVisibleModelCount] = model;
 				visibleModelIntArray[currentVisibleModelCount] = j1;
 				currentVisibleModelCount++;
@@ -1105,18 +1227,18 @@ public class Camera {
 			int k14 = nk_x >> 4;
 			int i15 = n1_x >> 4;
 			int k15 = n_x >> 4;
-			int i16 = modelUpperY - halfHeight2;
+			int i16 = modelYMin - halfHeight2;
 			int imgPixSkip = width;
-			int imgPixRow = halfWidth2 + modelUpperY * imgPixSkip;
+			int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
 			byte rowStep = 1;
 			nk_y += nk_z * i16;
 			n1_y += n1_z * i16;
 			n_y += n_z * i16;
 			if (f1Toggle)
 			{
-				if ((modelUpperY & 1) == 1)
+				if ((modelYMin & 1) == 1)
 				{
-					modelUpperY++;
+					modelYMin++;
 					nk_y += nk_z;
 					n1_y += n1_z;
 					n_y += n_z;
@@ -1131,7 +1253,7 @@ public class Camera {
 			boolean trnspar = model.transparentTexture;
 			boolean seethu = seethrough[color];
 			int nSkip = 4;
-			for (int i = modelUpperY; i < modelLowerY; i += rowStep)
+			for (int i = modelYMin; i < modelYMax; i += rowStep)
 			{
 				CameraVariables camVar = cameraVariables[i];
 				imgPixXStart = camVar.leftX >> 8;
@@ -1146,8 +1268,8 @@ public class Camera {
 				}
 				else
 				{
-					int k22 = camVar.gradientStart;
-					int i24 = (camVar.gradientEnd - k22) / lineLength;
+					int k22 = camVar.leftXBright;
+					int i24 = (camVar.rightXBright - k22) / lineLength;
 					if (imgPixXStart < -halfWidth)
 					{
 						k22 += (-halfWidth - imgPixXStart) * i24;
@@ -1202,13 +1324,13 @@ public class Camera {
 		}
 
 		int imgPixSkip = width;
-		int imgPixRow = halfWidth2 + modelUpperY * imgPixSkip;
+		int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
 		byte yStep = 1;
 		if (f1Toggle)
 		{
-			if ((modelUpperY & 1) == 1)
+			if ((modelYMin & 1) == 1)
 			{
-				modelUpperY++;
+				modelYMin++;
 				imgPixRow += imgPixSkip;
 			}
 			imgPixSkip <<= 1;
@@ -1217,7 +1339,7 @@ public class Camera {
 
 		boolean transparent = model.transparent;
 		int nGradSteps = gradient2Step ? 2 : 4;
-		for (int i = modelUpperY; i < modelLowerY; i += yStep)
+		for (int i = modelYMin; i < modelYMax; i += yStep)
 		{
 			CameraVariables cameraVariables = this.cameraVariables[i];
 			imgPixXStart = cameraVariables.leftX >> 8;
@@ -1226,8 +1348,8 @@ public class Camera {
 			if (lineLength <= 0) {
 				imgPixRow += imgPixSkip;
 			} else {
-				int gradStart = cameraVariables.gradientStart;
-				int gradEnd = (cameraVariables.gradientEnd - gradStart) / lineLength;
+				int gradStart = cameraVariables.leftXBright;
+				int gradEnd = (cameraVariables.rightXBright - gradStart) / lineLength;
 				if (imgPixXStart < -halfWidth) {
 					gradStart += (-halfWidth - imgPixXStart) * gradEnd;
 					imgPixXStart = -halfWidth;
@@ -1799,9 +1921,9 @@ public class Camera {
 		int c = textureSize[i] == 0 ? 64 : 128;
 		int ai[] = texturePixels[i];
 		int j = 0;
-		for (int k = 0; k < c; k++) {
-			for (int l = 0; l < c; l++) {
-				int index = aByteArrayArray425[i][l + k * c] & 0xff;
+		for (int y = 0; y < c; y++) {
+			for (int x = 0; x < c; x++) {
+				int index = aByteArrayArray425[i][x + y * c] & 0xff;
 				int j1 = anIntArrayArray426[i][index];
 				j1 &= 0xf8f8ff;
 				if (j1 == 0)
@@ -2307,8 +2429,8 @@ public class Camera {
 	GameImage gameImage;
 	public int imagePixelArray[];
 	CameraVariables cameraVariables[];
-	int modelUpperY;
-	int modelLowerY;
+	int modelYMin;
+	int modelYMax;
 	int triangleScreenX[];
 	int triangleScreenY[];
 	int triangleBright[];

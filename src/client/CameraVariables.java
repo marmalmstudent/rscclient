@@ -8,6 +8,6 @@ public class CameraVariables {
 
     int leftX;
     int rightX;
-    int gradientStart;
-    int gradientEnd;
+    int leftXBright;
+    int rightXBright;
 }
