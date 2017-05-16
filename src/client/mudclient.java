@@ -3555,7 +3555,7 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				indices[l1] = (byte) l2;
 			}
-			gameCamera.method298(i, indices, dictionary, sprite.getTotalWidth() / 64 - 1);
+			gameCamera.method298(i, indices, dictionary, sprite.getTotalWidth());
 		}
 	}
 
@@ -5342,7 +5342,7 @@ public class mudclient extends GameWindowMiddleMan
 			actionPictureType--;
 		else if (actionPictureType < 0)
 			actionPictureType++;
-		gameCamera.method301(17);
+		gameCamera.animateTexture(17);
 		modelUpdatingTimer++;
 		if (modelUpdatingTimer > 5)
 		{
