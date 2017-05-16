@@ -562,8 +562,7 @@ public class Model
 
     public void setLightning(int i, int j)
     {
-        //globalLight = 256 - i * 4;
-        globalLight = 0; // makes the world much brighter
+        globalLight = 256 - i * 4;
         featuresLight = (64 - j) * 16 + 128;
     }
 
@@ -977,9 +976,11 @@ public class Model
 
     public Model method203()
     {
+    	/*
         Model models[] = new Model[1];
         models[0] = this;
-        Model model = new Model(models, 1);
+        Model model = new Model(models, 1);*/
+    	Model model = new Model(new Model[]{this}, 1);
         model.anInt245 = anInt245;
         model.transparent = transparent;
         return model;

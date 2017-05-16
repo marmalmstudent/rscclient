@@ -2552,7 +2552,7 @@ public class mudclient extends GameWindowMiddleMan
 				i3, j3, k3, l3
 		};
 		model.method181(4, ai, j2, k2);
-		model.setLightAndGradAndSource(false, 60, 24, -50, -10, -50);
+		model.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
 		if (x >= 0 && y >= 0 && x < 96 && y < 96) {
 			gameCamera.addModel(model);
 		}
@@ -2745,7 +2745,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (lastWildYSubtract == 3) {
 			int i5 = 40 + (int) (Math.random() * 3D);
 			int k7 = 40 + (int) (Math.random() * 7D);
-			gameCamera.method304(i5, k7, -50, -10, -50);
+			gameCamera.method304(i5, k7, Camera.light_x, Camera.light_z, Camera.light_y);
 		}
 		anInt699 = 0;
 		mobMessageCount = 0;
@@ -3409,7 +3409,7 @@ public class mudclient extends GameWindowMiddleMan
 		gameCamera.drawSpriteMaxDist = viewDistance;
 		gameCamera.zoom3 = 1;
 		gameCamera.fadeDist = (int) (viewDistance*2.3/2.4);
-		gameCamera.method303(-50, -10, -50);
+		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
 		engineHandle = new EngineHandle(gameCamera, gameGraphics);
 		loadTextures(); // 60%
 		if (lastLoadedNull)
@@ -5719,7 +5719,7 @@ public class mudclient extends GameWindowMiddleMan
 			try {
 				Model model = gameDataModels[j1].method203();
 				gameCamera.addModel(model);
-				model.setLightAndGradAndSource(true, 48, 48, -50, -10, -50);
+				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
 				model.method205(objectModelArray[i]);
 				model.anInt257 = i;
 				objectModelArray[i] = model;
@@ -6113,210 +6113,85 @@ public class mudclient extends GameWindowMiddleMan
 		return null;
 	}
 
-	protected final void handleIncomingPacket(int command, int length, byte data[]) {
-		try {
-			if (command == 110) {
-				int i = 1;
-				serverStartTime = DataOperations.getUnsigned8Bytes(data, i);
-				i += 8;
-				serverLocation = new String(data, i, length - i);
-				return;
-			}
-			if (command == 145) {
-				if (!hasWorldInfo) {
-					return;
+	protected final void handleIncomingPacket(
+			int packetID, int dataLength, byte data[])
+	{
+		try
+		{
+			switch(packetID)
+			{
+			case 4:
+				int currentMob = DataOperations.getUnsigned2Bytes(data, 1);
+				if (mobArray[currentMob] != null) // todo: check what that mobArray is
+					tradeOtherPlayerName = mobArray[currentMob].name;
+				showTradeWindow = true;
+				tradeOtherAccepted = false;
+				tradeWeAccepted = false;
+				tradeMyItemCount = 0;
+				tradeOtherItemCount = 0;
+				break;
+			case 11:
+				String[] combat = {
+						"combat1a", "combat1b", /* blunt weapons/unarmed*/
+						"combat2a", "combat2b", /* sharp weapons*/
+						"combat3a", "combat3b", /* spear? goblin sound*/
+				};
+				String s = new String(data, 1, dataLength - 1);
+				System.out.printf("Sounds from server: %s\n", s);
+				playSound(s);
+				break;
+			case 18:
+				tradeWeAccepted = data[1] == 1;
+				break;
+			case 23:
+				if (anInt892 < 50)
+				{
+					int j7 = data[1] & 0xff;
+					int k13 = data[2] + sectionX;
+					int k18 = data[3] + sectionY;
+					anIntArray782[anInt892] = j7;
+					anIntArray923[anInt892] = 0;
+					anIntArray944[anInt892] = k13;
+					anIntArray757[anInt892] = k18;
+					anInt892++;
 				}
-				lastPlayerCount = playerCount;
-				for (int k = 0; k < lastPlayerCount; k++)
-					lastPlayerArray[k] = playerArray[k];
-
-				int currentOffset = 8;
-				sectionX = DataOperations.getIntFromByteArray(data, currentOffset, 11);
-				currentOffset += 11;
-				sectionY = DataOperations.getIntFromByteArray(data, currentOffset, 13);
-				currentOffset += 13;
-				int mobSprite = DataOperations.getIntFromByteArray(data, currentOffset, 4);
-				currentOffset += 4;
-				boolean sectionLoaded = loadSection(sectionX, sectionY);
-				sectionX -= areaX;
-				sectionY -= areaY;
-				int mapEnterX = sectionX * magicLoc + 64;
-				int mapEnterY = sectionY * magicLoc + 64;
-				if (sectionLoaded) {
-					ourPlayer.waypointCurrent = 0;
-					ourPlayer.waypointEndSprite = 0;
-					ourPlayer.currentX = ourPlayer.waypointsX[0] = mapEnterX;
-					ourPlayer.currentY = ourPlayer.waypointsY[0] = mapEnterY;
-				}
-				playerCount = 0;
-				ourPlayer = makePlayer(serverIndex, mapEnterX, mapEnterY, mobSprite);
-				int newPlayerCount = DataOperations.getIntFromByteArray(data, currentOffset, 8);
-				currentOffset += 8;
-				for (int currentNewPlayer = 0; currentNewPlayer < newPlayerCount; currentNewPlayer++) {
-					Mob lastMob = getLastPlayer(DataOperations.getIntFromByteArray(data, currentOffset, 16));
-					currentOffset += 16;
-					int nextPlayer = DataOperations.getIntFromByteArray(data, currentOffset, 1); // 1
-					currentOffset++;
-					if (nextPlayer != 0) {
-						int waypointsLeft = DataOperations.getIntFromByteArray(data, currentOffset, 1); // 2
-						currentOffset++;
-						if (waypointsLeft == 0) {
-							int currentNextSprite = DataOperations.getIntFromByteArray(data, currentOffset, 3); // 3
-							currentOffset += 3;
-							int currentWaypoint = lastMob.waypointCurrent;
-							int newWaypointX = lastMob.waypointsX[currentWaypoint];
-							int newWaypointY = lastMob.waypointsY[currentWaypoint];
-							if (currentNextSprite == 2 || currentNextSprite == 1 || currentNextSprite == 3)
-								newWaypointX += magicLoc;
-							if (currentNextSprite == 6 || currentNextSprite == 5 || currentNextSprite == 7)
-								newWaypointX -= magicLoc;
-							if (currentNextSprite == 4 || currentNextSprite == 3 || currentNextSprite == 5)
-								newWaypointY += magicLoc;
-							if (currentNextSprite == 0 || currentNextSprite == 1 || currentNextSprite == 7)
-								newWaypointY -= magicLoc;
-							lastMob.nextSprite = currentNextSprite;
-							lastMob.waypointCurrent = currentWaypoint = (currentWaypoint + 1) % 10;
-							lastMob.waypointsX[currentWaypoint] = newWaypointX;
-							lastMob.waypointsY[currentWaypoint] = newWaypointY;
-						} else {
-							int needsNextSprite = DataOperations.getIntFromByteArray(data, currentOffset, 4);
-							currentOffset += 4;
-							if ((needsNextSprite & 0xc) == 12) {
-								continue;
-							}
-							lastMob.nextSprite = needsNextSprite;
-						}
-					}
-					playerArray[playerCount++] = lastMob;
-				}
-
-				int mobCount = 0;
-				while (currentOffset + 24 < length * 8) {
-					int mobIndex = DataOperations.getIntFromByteArray(data, currentOffset, 16);
-					currentOffset += 16;
-					int areaMobX = DataOperations.getIntFromByteArray(data, currentOffset, 5);
-					currentOffset += 5;
-					if (areaMobX > 15)
-						areaMobX -= 32;
-					int areaMobY = DataOperations.getIntFromByteArray(data, currentOffset, 5);
-					currentOffset += 5;
-					if (areaMobY > 15)
-						areaMobY -= 32;
-					int mobArrayMobID = DataOperations.getIntFromByteArray(data, currentOffset, 4);
-					currentOffset += 4;
-					int addIndex = DataOperations.getIntFromByteArray(data, currentOffset, 1);
-					currentOffset++;
-					int mobX = (sectionX + areaMobX) * magicLoc + 64;
-					int mobY = (sectionY + areaMobY) * magicLoc + 64;
-					makePlayer(mobIndex, mobX, mobY, mobArrayMobID);
-					if (addIndex == 0)
-						mobArrayIndexes[mobCount++] = mobIndex;
-				}
-				if (mobCount > 0) {
-					super.streamClass.createPacket(83);
-					super.streamClass.add2ByteInt(mobCount);
-					for (int currentMob = 0; currentMob < mobCount; currentMob++) {
-						Mob dummyMob = mobArray[mobArrayIndexes[currentMob]];
-						super.streamClass.add2ByteInt(dummyMob.serverIndex);
-						super.streamClass.add2ByteInt(dummyMob.mobIntUnknown);
-					}
-
-					super.streamClass.formatPacket();
-					mobCount = 0;
-				}
-				return;
-			}
-			if (command == 109) {
-				for (int l = 1; l < length;)
-					if (DataOperations.getUnsignedByte(data[l]) == 255) { // ???
-						int newCount = 0;
-						int newSectionX = sectionX + data[l + 1] >> 3;
-				int newSectionY = sectionY + data[l + 2] >> 3;
-		l += 3;
-		for (int groundItem = 0; groundItem < groundItemCount; groundItem++) {
-			int newX = (groundItemX[groundItem] >> 3) - newSectionX;
-			int newY = (groundItemY[groundItem] >> 3) - newSectionY;
-			if (newX != 0 || newY != 0) {
-				if (groundItem != newCount) {
-					groundItemX[newCount] = groundItemX[groundItem];
-					groundItemY[newCount] = groundItemY[groundItem];
-					groundItemType[newCount] = groundItemType[groundItem];
-					groundItemObjectVar[newCount] = groundItemObjectVar[groundItem];
-				}
-				newCount++;
-			}
-		}
-
-		groundItemCount = newCount;
-					} else {
-						int i8 = DataOperations.getUnsigned2Bytes(data, l);
-						l += 2;
-						int k14 = sectionX + data[l++];
-						int j19 = sectionY + data[l++];
-						if ((i8 & 0x8000) == 0) { // New Item
-							groundItemX[groundItemCount] = k14;
-							groundItemY[groundItemCount] = j19;
-							groundItemType[groundItemCount] = i8;
-							groundItemObjectVar[groundItemCount] = 0;
-							for (int k23 = 0; k23 < objectCount; k23++) {
-								if (objectX[k23] != k14 || objectY[k23] != j19)
-									continue;
-								groundItemObjectVar[groundItemCount] = EntityHandler.getObjectDef(objectType[k23]).getGroundItemVar();
-								break;
-							}
-
-							groundItemCount++;
-						} else { // Known Item
-							i8 &= 0x7fff;
-							int l23 = 0;
-							for (int k26 = 0; k26 < groundItemCount; k26++) {
-								if (groundItemX[k26] != k14 || groundItemY[k26] != j19 || groundItemType[k26] != i8) { // Keep how it is
-									if (k26 != l23) {
-										groundItemX[l23] = groundItemX[k26];
-										groundItemY[l23] = groundItemY[k26];
-										groundItemType[l23] = groundItemType[k26];
-										groundItemObjectVar[l23] = groundItemObjectVar[k26];
-									}
-									l23++;
-								} else { // Remove
-									i8 = -123;
-								}
-							}
-
-							groundItemCount = l23;
-						}
-					}
-
-				return;
-			}
-			if (command == 27) {
-				for (int i1 = 1; i1 < length;)
-					if (DataOperations.getUnsignedByte(data[i1]) == 255) {
+				break;
+			case 27:
+				for (int i1 = 1; i1 < dataLength;)
+					if (DataOperations.getUnsignedByte(data[i1]) == 255)
+					{
 						int j8 = 0;
 						int l14 = sectionX + data[i1 + 1] >> 3;
-				int k19 = sectionY + data[i1 + 2] >> 3;
-							i1 += 3;
-							for (int i24 = 0; i24 < objectCount; i24++) {
-								int l26 = (objectX[i24] >> 3) - l14;
-								int k29 = (objectY[i24] >> 3) - k19;
-								if (l26 != 0 || k29 != 0) {
-									if (i24 != j8) {
-										objectModelArray[j8] = objectModelArray[i24];
-										objectModelArray[j8].anInt257 = j8;
-										objectX[j8] = objectX[i24];
-										objectY[j8] = objectY[i24];
-										objectType[j8] = objectType[i24];
-										objectID[j8] = objectID[i24];
-									}
-									j8++;
-								} else {
-									gameCamera.removeModel(objectModelArray[i24]);
-									engineHandle.updateObject(objectX[i24], objectY[i24], objectType[i24], objectID[i24]);
+						int k19 = sectionY + data[i1 + 2] >> 3;
+						i1 += 3;
+						for (int i24 = 0; i24 < objectCount; i24++)
+						{
+							int l26 = (objectX[i24] >> 3) - l14;
+							int k29 = (objectY[i24] >> 3) - k19;
+							if (l26 != 0 || k29 != 0)
+							{
+								if (i24 != j8)
+								{
+									objectModelArray[j8] = objectModelArray[i24];
+									objectModelArray[j8].anInt257 = j8;
+									objectX[j8] = objectX[i24];
+									objectY[j8] = objectY[i24];
+									objectType[j8] = objectType[i24];
+									objectID[j8] = objectID[i24];
 								}
+								j8++;
 							}
+							else
+							{
+								gameCamera.removeModel(objectModelArray[i24]);
+								engineHandle.updateObject(objectX[i24], objectY[i24], objectType[i24], objectID[i24]);
+							}
+						}
 
-							objectCount = j8;
-					} else {
+						objectCount = j8;
+					}
+					else
+					{
 						int k8 = DataOperations.getUnsigned2Bytes(data, i1);
 						i1 += 2;
 						int i15 = sectionX + data[i1++];
@@ -6324,8 +6199,12 @@ public class mudclient extends GameWindowMiddleMan
 						int l29 = data[i1++];
 						int j24 = 0;
 						for (int i27 = 0; i27 < objectCount; i27++)
-							if (objectX[i27] != i15 || objectY[i27] != l19 || objectID[i27] != l29) {
-								if (i27 != j24) {
+							if (objectX[i27] != i15
+									|| objectY[i27] != l19
+									|| objectID[i27] != l29)
+							{
+								if (i27 != j24)
+								{
 									objectModelArray[j24] = objectModelArray[i27];
 									objectModelArray[j24].anInt257 = j24;
 									objectX[j24] = objectX[i27];
@@ -6334,20 +6213,26 @@ public class mudclient extends GameWindowMiddleMan
 									objectID[j24] = objectID[i27];
 								}
 								j24++;
-							} else {
+							}
+							else
+							{
 								gameCamera.removeModel(objectModelArray[i27]);
 								engineHandle.updateObject(objectX[i27], objectY[i27], objectType[i27], objectID[i27]);
 							}
 
 						objectCount = j24;
-						if (k8 != 60000) {
+						if (k8 != 60000)
+						{
 							engineHandle.registerObjectDir(i15, l19, l29);
 							int i34;
 							int j37;
-							if (l29 == 0 || l29 == 4) {
+							if (l29 == 0 || l29 == 4)
+							{
 								i34 = EntityHandler.getObjectDef(k8).getWidth();
 								j37 = EntityHandler.getObjectDef(k8).getHeight();
-							} else {
+							}
+							else
+							{
 								j37 = EntityHandler.getObjectDef(k8).getWidth();
 								i34 = EntityHandler.getObjectDef(k8).getHeight();
 							}
@@ -6361,7 +6246,7 @@ public class mudclient extends GameWindowMiddleMan
 							model_1.anInt257 = objectCount;
 							model_1.addRotation(0, l29 * 32, 0);
 							model_1.addTranslate(j40, -engineHandle.getAveragedElevation(j40, i42), i42);
-							model_1.setLightAndGradAndSource(true, 48, 48, -50, -10, -50);
+							model_1.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
 							engineHandle.method412(i15, l19, k8, l29);
 							if (k8 == 74)
 								model_1.addTranslate(0, -480, 0);
@@ -6372,58 +6257,44 @@ public class mudclient extends GameWindowMiddleMan
 							objectModelArray[objectCount++] = model_1;
 						}
 					}
-
-				return;
-			}
-			if (command == 114) {
-				int invOffset = 1;
-				inventoryCount = data[invOffset++] & 0xff;
-				for (int invItem = 0; invItem < inventoryCount; invItem++) {
-					int j15 = DataOperations.getUnsigned2Bytes(data, invOffset);
-					invOffset += 2;
-					inventory[invItem] = new Item(j15 & 0x7fff);
-					wearing[invItem] = j15 / 32768;
-					if (EntityHandler.getItemDef(j15 & 0x7fff).isStackable()) {
-						inventory[invItem].amount = DataOperations.readInt(data, invOffset);
-						invOffset += 4;
-					} else {
-						inventory[invItem].amount = 1;
-					}
-				}
-
-				return;
-			}
-			if (command == 53) {
+				break;
+			case 53:
 				int mobCount = DataOperations.getUnsigned2Bytes(data, 1);
 				int mobUpdateOffset = 3;
-				for (int currentMob = 0; currentMob < mobCount; currentMob++) {
+				for (currentMob = 0; currentMob < mobCount; currentMob++)
+				{
 					int mobArrayIndex = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 					mobUpdateOffset += 2;
-					if (mobArrayIndex < 0 || mobArrayIndex > mobArray.length) {
+					if (mobArrayIndex < 0 || mobArrayIndex > mobArray.length)
 						return;
-					}
 					Mob mob = mobArray[mobArrayIndex];
-					if (mob == null) {
+					if (mob == null)
 						return;
-					}
 					byte mobUpdateType = data[mobUpdateOffset++];
-					if (mobUpdateType == 0) {
+					if (mobUpdateType == 0)
+					{
 						int i30 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
-						if (mob != null) {
+						if (mob != null)
+						{
 							mob.anInt163 = 150;
 							mob.anInt162 = i30;
 						}
-					} else if (mobUpdateType == 1) { // Player talking
+					}
+					else if (mobUpdateType == 1)
+					{ // Player talking
 						byte byte7 = data[mobUpdateOffset++];
-						if (mob != null) {
+						if (mob != null)
+						{
 							String s2 = DataConversions.byteToString(data, mobUpdateOffset, byte7);
 							mob.lastMessageTimeout = 150;
 							mob.lastMessage = s2;
 							displayMessage(mob.name + ": " + mob.lastMessage, 2, mob.admin);
 						}
 						mobUpdateOffset += byte7;
-					} else if (mobUpdateType == 2) { // Someone getting hit.
+					}
+					else if (mobUpdateType == 2)
+					{ // Someone getting hit.
 						int j30 = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						int hits = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						int hitsBase = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
@@ -6439,18 +6310,23 @@ public class mudclient extends GameWindowMiddleMan
 								//                                showServerMessageBox = false;
 							}
 						}
-					} else if (mobUpdateType == 3) { // Projectile an npc..
+					}
+					else if (mobUpdateType == 3)
+					{ // Projectile an npc..
 						int k30 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
 						int k34 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
-						if (mob != null) {
+						if (mob != null)
+						{
 							mob.attackingCameraInt = k30;
 							mob.attackingNpcIndex = k34;
 							mob.attackingMobIndex = -1;
 							mob.anInt176 = attackingInt40;
 						}
-					} else if (mobUpdateType == 4) { // Projectile another player.
+					}
+					else if (mobUpdateType == 4)
+					{ // Projectile another player.
 						int l30 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
 						int l34 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
@@ -6461,8 +6337,11 @@ public class mudclient extends GameWindowMiddleMan
 							mob.attackingNpcIndex = -1;
 							mob.anInt176 = attackingInt40;
 						}
-					} else if (mobUpdateType == 5) { // Apperance update
-						if (mob != null) {
+					}
+					else if (mobUpdateType == 5)
+					{ // Apperance update
+						if (mob != null)
+						{
 							mob.mobIntUnknown = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 							mobUpdateOffset += 2;
 							mob.nameLong = DataOperations.getUnsigned8Bytes(data, mobUpdateOffset);
@@ -6470,7 +6349,8 @@ public class mudclient extends GameWindowMiddleMan
 							mob.name = DataOperations.longToString(mob.nameLong);
 							int i31 = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
 							mobUpdateOffset++;
-							for (int i35 = 0; i35 < i31; i35++) {
+							for (int i35 = 0; i35 < i31; i35++)
+							{
 								mob.animationCount[i35] = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
 								mobUpdateOffset++;
 							}
@@ -6485,15 +6365,20 @@ public class mudclient extends GameWindowMiddleMan
 							mob.level = data[mobUpdateOffset++] & 0xff;
 							mob.anInt179 = data[mobUpdateOffset++] & 0xff;
 							mob.admin = data[mobUpdateOffset++] & 0xff;
-						} else {
+						}
+						else
+						{
 							mobUpdateOffset += 14;
 							int j31 = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
 							mobUpdateOffset += j31 + 1;
 						}
-					} else if (mobUpdateType == 6) { // private player talking
+					}
+					else if (mobUpdateType == 6)
+					{ // private player talking
 						byte byte8 = data[mobUpdateOffset];
 						mobUpdateOffset++;
-						if (mob != null) {
+						if (mob != null)
+						{
 							String s3 = DataConversions.byteToString(data, mobUpdateOffset, byte8);
 							mob.lastMessageTimeout = 150;
 							mob.lastMessage = s3;
@@ -6503,78 +6388,30 @@ public class mudclient extends GameWindowMiddleMan
 						mobUpdateOffset += byte8;
 					}
 				}
+				break;
+			case 63:
+				duelOpponentItemCount = data[1] & 0xff;
+				int l5 = 2;
+				for (int i12 = 0; i12 < duelOpponentItemCount; i12++)
+				{
+					duelOpponentItemsI[i12] = new Item(DataOperations.getUnsigned2Bytes(data, l5));
+					l5 += 2;
+					duelOpponentItemsI[i12].amount = DataOperations.readInt(data, l5);
+					l5 += 4;
+				}
 
-				return;
-			}
-			if (command == 129) {
-				combatStyle = DataOperations.getUnsignedByte(data[1]);
-				return;
-			}
-			if (command == 95) {
-				for (int l1 = 1; l1 < length;)
-					if (DataOperations.getUnsignedByte(data[l1]) == 255) {
-						int j9 = 0;
-						int l15 = sectionX + data[l1 + 1] >> 3;
-				int j20 = sectionY + data[l1 + 2] >> 3;
-							l1 += 3;
-							for (int currentDoor = 0; currentDoor < doorCount; currentDoor++) {
-								int j27 = (doorX[currentDoor] >> 3) - l15;
-								int k31 = (doorY[currentDoor] >> 3) - j20;
-								if (j27 != 0 || k31 != 0) {
-									if (currentDoor != j9) {
-										doorModel[j9] = doorModel[currentDoor];
-										doorModel[j9].anInt257 = j9 + 10000;
-										doorX[j9] = doorX[currentDoor];
-										doorY[j9] = doorY[currentDoor];
-										doorDirection[j9] = doorDirection[currentDoor];
-										doorType[j9] = doorType[currentDoor];
-									}
-									j9++;
-								} else {
-									gameCamera.removeModel(doorModel[currentDoor]);
-									engineHandle.updateDoor(doorX[currentDoor], doorY[currentDoor], doorDirection[currentDoor], doorType[currentDoor]);
-								}
-							}
-
-							doorCount = j9;
-					} else {
-						int k9 = DataOperations.getUnsigned2Bytes(data, l1);
-						l1 += 2;
-						int i16 = sectionX + data[l1++];
-						int k20 = sectionY + data[l1++];
-						byte byte5 = data[l1++];
-						int k27 = 0;
-						for (int l31 = 0; l31 < doorCount; l31++)
-							if (doorX[l31] != i16 || doorY[l31] != k20 || doorDirection[l31] != byte5) {
-								if (l31 != k27) {
-									doorModel[k27] = doorModel[l31];
-									doorModel[k27].anInt257 = k27 + 10000;
-									doorX[k27] = doorX[l31];
-									doorY[k27] = doorY[l31];
-									doorDirection[k27] = doorDirection[l31];
-									doorType[k27] = doorType[l31];
-								}
-								k27++;
-							} else {
-								gameCamera.removeModel(doorModel[l31]);
-								engineHandle.updateDoor(doorX[l31], doorY[l31], doorDirection[l31], doorType[l31]);
-							}
-
-						doorCount = k27;
-						if (k9 != 60000) { // 65535) {
-							engineHandle.method408(i16, k20, byte5, k9);
-							Model model = makeModel(i16, k20, byte5, k9, doorCount);
-							doorModel[doorCount] = model;
-							doorX[doorCount] = i16;
-							doorY[doorCount] = k20;
-							doorType[doorCount] = k9;
-							doorDirection[doorCount++] = byte5;
-						}
-					}
-
-				return;
-			}
-			if (command == 77) {
+				duelOpponentAccepted = false;
+				duelMyAccepted = false;
+				break;
+			case 64:
+				serverMessage = new String(data, 1, dataLength - 1);
+				showServerMessageBox = true;
+				serverMessageBoxTop = true;
+				break;
+			case 65:
+				duelOpponentAccepted = data[1] == 1;
+				break;
+			case 77:
 				lastNpcCount = npcCount;
 				npcCount = 0;
 				for (int lastNpcIndex = 0; lastNpcIndex < lastNpcCount; lastNpcIndex++)
@@ -6583,15 +6420,18 @@ public class mudclient extends GameWindowMiddleMan
 				int newNpcOffset = 8;
 				int newNpcCount = DataOperations.getIntFromByteArray(data, newNpcOffset, 8);
 				newNpcOffset += 8;
-				for (int newNpcIndex = 0; newNpcIndex < newNpcCount; newNpcIndex++) {
+				for (int newNpcIndex = 0; newNpcIndex < newNpcCount; newNpcIndex++)
+				{
 					Mob newNPC = getLastNpc(DataOperations.getIntFromByteArray(data, newNpcOffset, 16));
 					newNpcOffset += 16;
 					int npcNeedsUpdate = DataOperations.getIntFromByteArray(data, newNpcOffset, 1);
 					newNpcOffset++;
-					if (npcNeedsUpdate != 0) {
+					if (npcNeedsUpdate != 0)
+					{
 						int i32 = DataOperations.getIntFromByteArray(data, newNpcOffset, 1);
 						newNpcOffset++;
-						if (i32 == 0) {
+						if (i32 == 0)
+						{
 							int nextSprite = DataOperations.getIntFromByteArray(data, newNpcOffset, 3);
 							newNpcOffset += 3;
 							int waypointCurrent = newNPC.waypointCurrent;
@@ -6609,20 +6449,21 @@ public class mudclient extends GameWindowMiddleMan
 							newNPC.waypointCurrent = waypointCurrent = (waypointCurrent + 1) % 10;
 							newNPC.waypointsX[waypointCurrent] = waypointX;
 							newNPC.waypointsY[waypointCurrent] = waypointY;
-						} else {
+						}
+						else
+						{
 							int nextSpriteOffset = DataOperations.getIntFromByteArray(data, newNpcOffset, 4);
 							newNpcOffset += 4;
-							if ((nextSpriteOffset & 0xc) == 12) {
+							if ((nextSpriteOffset & 0xc) == 12)
 								continue;
-							}
 							newNPC.nextSprite = nextSpriteOffset;
-
 						}
 					}
 					npcArray[npcCount++] = newNPC;
 				}
 
-				while (newNpcOffset + 34 < length * 8) {
+				while (newNpcOffset + 34 < dataLength * 8)
+				{
 					int serverIndex = DataOperations.getIntFromByteArray(data, newNpcOffset, 16);
 					newNpcOffset += 16;
 					int i28 = DataOperations.getIntFromByteArray(data, newNpcOffset, 5);
@@ -6643,67 +6484,292 @@ public class mudclient extends GameWindowMiddleMan
 						type = 24;
 					addNPC(serverIndex, x, y, nextSprite, type);
 				}
-				return;
-			}
-			if (command == 190) {
-				int j2 = DataOperations.getUnsigned2Bytes(data, 1);
-				int i10 = 3;
-				for (int k16 = 0; k16 < j2; k16++) {
-					int i21 = DataOperations.getUnsigned2Bytes(data, i10);
-					i10 += 2;
-					Mob mob_2 = npcRecordArray[i21];
-					int j28 = DataOperations.getUnsignedByte(data[i10]);
-					i10++;
-					if (j28 == 1) {
-						int k32 = DataOperations.getUnsigned2Bytes(data, i10);
-						i10 += 2;
-						byte byte9 = data[i10];
-						i10++;
-						if (mob_2 != null) {
-							String s4 = DataConversions.byteToString(data, i10, byte9);
-							mob_2.lastMessageTimeout = 150;
-							mob_2.lastMessage = s4;
-							if (k32 == ourPlayer.serverIndex)
-								displayMessage("@yel@" + EntityHandler.getNpcDef(mob_2.type).getName() + ": " + mob_2.lastMessage, 5, 0);
+				break;
+			case 92:
+				tradeOtherAccepted = data[1] == 1;
+				break;
+			case 93:
+				showBank = true;
+				int l4 = 1;
+				newBankItemCount = data[l4++] & 0xff;
+				bankItemsMax = data[l4++] & 0xff;
+				for (int k11 = 0; k11 < newBankItemCount; k11++)
+				{
+					newBankItemsI[k11] = new Item(DataOperations.getUnsigned2Bytes(data, l4));
+					l4 += 2;
+					newBankItemsI[k11].amount = DataOperations.getUnsigned4Bytes(data, l4);
+					l4 += 4;
+				}
+				updateBankItems();
+				break;
+			case 95:
+				for (int l1 = 1; l1 < dataLength;)
+					if (DataOperations.getUnsignedByte(data[l1]) == 255)
+					{
+						int j9 = 0;
+						int l15 = sectionX + data[l1 + 1] >> 3;
+						int j20 = sectionY + data[l1 + 2] >> 3;
+						l1 += 3;
+						for (int currentDoor = 0; currentDoor < doorCount; currentDoor++)
+						{
+							int j27 = (doorX[currentDoor] >> 3) - l15;
+							int k31 = (doorY[currentDoor] >> 3) - j20;
+							if (j27 != 0 || k31 != 0)
+							{
+								if (currentDoor != j9)
+								{
+									doorModel[j9] = doorModel[currentDoor];
+									doorModel[j9].anInt257 = j9 + 10000;
+									doorX[j9] = doorX[currentDoor];
+									doorY[j9] = doorY[currentDoor];
+									doorDirection[j9] = doorDirection[currentDoor];
+									doorType[j9] = doorType[currentDoor];
+								}
+								j9++;
+							}
+							else
+							{
+								gameCamera.removeModel(doorModel[currentDoor]);
+								engineHandle.updateDoor(doorX[currentDoor], doorY[currentDoor], doorDirection[currentDoor], doorType[currentDoor]);
+							}
 						}
-						i10 += byte9;
-					} else if (j28 == 2) {
-						int l32 = DataOperations.getUnsignedByte(data[i10]);
-						i10++;
-						int i36 = DataOperations.getUnsignedByte(data[i10]);
-						i10++;
-						int k38 = DataOperations.getUnsignedByte(data[i10]);
-						i10++;
-						if (mob_2 != null) {
-							mob_2.anInt164 = l32;
-							mob_2.hitPointsCurrent = i36;
-							mob_2.hitPointsBase = k38;
-							mob_2.combatTimer = 200;
+
+						doorCount = j9;
+					}
+					else
+					{
+						int k9 = DataOperations.getUnsigned2Bytes(data, l1);
+						l1 += 2;
+						int i16 = sectionX + data[l1++];
+						int k20 = sectionY + data[l1++];
+						byte byte5 = data[l1++];
+						int k27 = 0;
+						for (int l31 = 0; l31 < doorCount; l31++)
+							if (doorX[l31] != i16
+									|| doorY[l31] != k20
+									|| doorDirection[l31] != byte5)
+							{
+								if (l31 != k27)
+								{
+									doorModel[k27] = doorModel[l31];
+									doorModel[k27].anInt257 = k27 + 10000;
+									doorX[k27] = doorX[l31];
+									doorY[k27] = doorY[l31];
+									doorDirection[k27] = doorDirection[l31];
+									doorType[k27] = doorType[l31];
+								}
+								k27++;
+							}
+							else
+							{
+								gameCamera.removeModel(doorModel[l31]);
+								engineHandle.updateDoor(doorX[l31], doorY[l31], doorDirection[l31], doorType[l31]);
+							}
+
+						doorCount = k27;
+						if (k9 != 60000)
+						{ // 65535) {
+							engineHandle.method408(i16, k20, byte5, k9);
+							Model model = makeModel(i16, k20, byte5, k9, doorCount);
+							doorModel[doorCount] = model;
+							doorX[doorCount] = i16;
+							doorY[doorCount] = k20;
+							doorType[doorCount] = k9;
+							doorDirection[doorCount++] = byte5;
 						}
 					}
-				}
+				break;
+			case 109:
+				for (int l = 1; l < dataLength;)
+					if (DataOperations.getUnsignedByte(data[l]) == 255)
+					{ // ???
+						int newCount = 0;
+						int newSectionX = sectionX + data[l + 1] >> 3;
+						int newSectionY = sectionY + data[l + 2] >> 3;
+						l += 3;
+						for (int groundItem = 0; groundItem < groundItemCount; groundItem++)
+						{
+							int newX = (groundItemX[groundItem] >> 3) - newSectionX;
+							int newY = (groundItemY[groundItem] >> 3) - newSectionY;
+							if (newX != 0 || newY != 0)
+							{
+								if (groundItem != newCount)
+								{
+									groundItemX[newCount] = groundItemX[groundItem];
+									groundItemY[newCount] = groundItemY[groundItem];
+									groundItemType[newCount] = groundItemType[groundItem];
+									groundItemObjectVar[newCount] = groundItemObjectVar[groundItem];
+								}
+								newCount++;
+							}
+						}
 
-				return;
-			}
-			if (command == 223) {
-				showQuestionMenu = true;
-				int newQuestionMenuCount = DataOperations.getUnsignedByte(data[1]);
-				questionMenuCount = newQuestionMenuCount;
-				int newQuestionMenuOffset = 2;
-				for (int l16 = 0; l16 < newQuestionMenuCount; l16++) {
-					int newQuestionMenuQuestionLength = DataOperations.getUnsignedByte(data[newQuestionMenuOffset]);
-					newQuestionMenuOffset++;
-					questionMenuAnswer[l16] = new String(data, newQuestionMenuOffset, newQuestionMenuQuestionLength);
-					newQuestionMenuOffset += newQuestionMenuQuestionLength;
-				}
+						groundItemCount = newCount;
+					}
+					else
+					{
+						int i8 = DataOperations.getUnsigned2Bytes(data, l);
+						l += 2;
+						int k14 = sectionX + data[l++];
+						int j19 = sectionY + data[l++];
+						if ((i8 & 0x8000) == 0)
+						{ // New Item
+							groundItemX[groundItemCount] = k14;
+							groundItemY[groundItemCount] = j19;
+							groundItemType[groundItemCount] = i8;
+							groundItemObjectVar[groundItemCount] = 0;
+							for (int k23 = 0; k23 < objectCount; k23++)
+							{
+								if (objectX[k23] != k14 || objectY[k23] != j19)
+									continue;
+								groundItemObjectVar[groundItemCount] = EntityHandler.getObjectDef(objectType[k23]).getGroundItemVar();
+								break;
+							}
 
-				return;
-			}
-			if (command == 127) {
+							groundItemCount++;
+						}
+						else
+						{ // Known Item
+							i8 &= 0x7fff;
+							int l23 = 0;
+							for (int k26 = 0; k26 < groundItemCount; k26++)
+							{
+								if (groundItemX[k26] != k14
+										|| groundItemY[k26] != j19
+										|| groundItemType[k26] != i8)
+								{ // Keep how it is
+									if (k26 != l23)
+									{
+										groundItemX[l23] = groundItemX[k26];
+										groundItemY[l23] = groundItemY[k26];
+										groundItemType[l23] = groundItemType[k26];
+										groundItemObjectVar[l23] = groundItemObjectVar[k26];
+									}
+									l23++;
+								}
+								else
+								{ // Remove
+									i8 = -123;
+								}
+							}
+
+							groundItemCount = l23;
+						}
+					}
+				break;
+			case 110:
+				int i = 1;
+				serverStartTime = DataOperations.getUnsigned8Bytes(data, i);
+				i += 8;
+				serverLocation = new String(data, i, dataLength - i);
+				break;
+			case 114:
+				int invOffset = 1;
+				inventoryCount = data[invOffset++] & 0xff;
+				for (int invItem = 0; invItem < inventoryCount; invItem++)
+				{
+					int j15 = DataOperations.getUnsigned2Bytes(data, invOffset);
+					invOffset += 2;
+					inventory[invItem] = new Item(j15 & 0x7fff);
+					wearing[invItem] = j15 / 32768;
+					if (EntityHandler.getItemDef(j15 & 0x7fff).isStackable())
+					{
+						inventory[invItem].amount = DataOperations.readInt(data, invOffset);
+						invOffset += 4;
+					}
+					else
+						inventory[invItem].amount = 1;
+				}
+				break;
+			case 115:
+				int thingLength = (dataLength - 1) / 4;
+				for (int currentThing = 0; currentThing < thingLength; currentThing++)
+				{
+					int currentItemSectionX = sectionX + DataOperations.getSigned2Bytes(data, 1 + currentThing * 4) >> 3;
+					int currentItemSectionY = sectionY + DataOperations.getSigned2Bytes(data, 3 + currentThing * 4) >> 3;
+					int currentCount = 0;
+					for (int currentItem = 0; currentItem < groundItemCount; currentItem++)
+					{
+						int currentItemOffsetX = (groundItemX[currentItem] >> 3) - currentItemSectionX;
+						int currentItemOffsetY = (groundItemY[currentItem] >> 3) - currentItemSectionY;
+						if (currentItemOffsetX != 0 || currentItemOffsetY != 0)
+						{
+							if (currentItem != currentCount)
+							{
+								groundItemX[currentCount] = groundItemX[currentItem];
+								groundItemY[currentCount] = groundItemY[currentItem];
+								groundItemType[currentCount] = groundItemType[currentItem];
+								groundItemObjectVar[currentCount] = groundItemObjectVar[currentItem];
+							}
+							currentCount++;
+						}
+					}
+
+					groundItemCount = currentCount;
+					currentCount = 0;
+					for (int j33 = 0; j33 < objectCount; j33++)
+					{
+						int k36 = (objectX[j33] >> 3) - currentItemSectionX;
+						int l38 = (objectY[j33] >> 3) - currentItemSectionY;
+						if (k36 != 0 || l38 != 0)
+						{
+							if (j33 != currentCount)
+							{
+								objectModelArray[currentCount] = objectModelArray[j33];
+								objectModelArray[currentCount].anInt257 = currentCount;
+								objectX[currentCount] = objectX[j33];
+								objectY[currentCount] = objectY[j33];
+								objectType[currentCount] = objectType[j33];
+								objectID[currentCount] = objectID[j33];
+							}
+							currentCount++;
+						}
+						else
+						{
+							gameCamera.removeModel(objectModelArray[j33]);
+							engineHandle.updateObject(objectX[j33], objectY[j33], objectType[j33], objectID[j33]);
+						}
+					}
+
+					objectCount = currentCount;
+					currentCount = 0;
+					for (int l36 = 0; l36 < doorCount; l36++)
+					{
+						int i39 = (doorX[l36] >> 3) - currentItemSectionX;
+						int j41 = (doorY[l36] >> 3) - currentItemSectionY;
+						if (i39 != 0 || j41 != 0)
+						{
+							if (l36 != currentCount)
+							{
+								doorModel[currentCount] = doorModel[l36];
+								doorModel[currentCount].anInt257 = currentCount + 10000;
+								doorX[currentCount] = doorX[l36];
+								doorY[currentCount] = doorY[l36];
+								doorDirection[currentCount] = doorDirection[l36];
+								doorType[currentCount] = doorType[l36];
+							}
+							currentCount++;
+						}
+						else
+						{
+							gameCamera.removeModel(doorModel[l36]);
+							engineHandle.updateDoor(doorX[l36], doorY[l36], doorDirection[l36], doorType[l36]);
+						}
+					}
+
+					doorCount = currentCount;
+				}
+				break;
+			case 126:
+				fatigue = DataOperations.getUnsigned2Bytes(data, 1);
+				break;
+			case 127:
 				showQuestionMenu = false;
-				return;
-			}
-			if (command == 131) {
+				break;
+			case 129:
+				combatStyle = DataOperations.getUnsignedByte(data[1]);
+				break;
+			case 131:
 				notInWilderness = true;
 				hasWorldInfo = true;
 				serverIndex = DataOperations.getUnsigned2Bytes(data, 1);
@@ -6712,140 +6778,419 @@ public class mudclient extends GameWindowMiddleMan
 				wildYSubtract = DataOperations.getUnsigned2Bytes(data, 7);
 				wildYMultiplier = DataOperations.getUnsigned2Bytes(data, 9);
 				wildY -= wildYSubtract * wildYMultiplier;
-				return;
-			}
-			if (command == 180) {
-				int l2 = 1;
-				for (int k10 = 0; k10 < 18; k10++) {
-					playerStatCurrent[k10] = DataOperations.getUnsignedByte(data[l2++]);
+				break;
+			case 139:
+				int bankDataOffset = 1;
+				int bankSlot = data[bankDataOffset++] & 0xff;
+				int bankItemId = DataOperations.getUnsigned2Bytes(data, bankDataOffset);
+				bankDataOffset += 2;
+				int bankItemCount = DataOperations.getUnsigned4Bytes(data, bankDataOffset);
+				bankDataOffset += 4;
+				if (bankItemCount == 0)
+				{
+					newBankItemCount--;
+					for (int currentBankSlot = bankSlot; currentBankSlot < newBankItemCount; currentBankSlot++)
+						newBankItemsI[currentBankSlot] = newBankItemsI[currentBankSlot + 1];
 				}
-				for (int i17 = 0; i17 < 18; i17++) {
-					playerStatBase[i17] = DataOperations.getUnsignedByte(data[l2++]);
+				else
+				{
+					newBankItemsI[bankSlot] = new Item(bankItemId, bankItemCount);
+					if (bankSlot >= newBankItemCount)
+						newBankItemCount = bankSlot + 1;
 				}
-				for (int k21 = 0; k21 < 18; k21++) {
-					playerStatExperience[k21] = DataOperations.readInt(data, l2);
-					l2 += 4;
+				updateBankItems();
+				break;
+			case 145:
+				if (!hasWorldInfo)
+					return;
+				lastPlayerCount = playerCount;
+				for (int k = 0; k < lastPlayerCount; k++)
+					lastPlayerArray[k] = playerArray[k];
+
+				int currentOffset = 8;
+				sectionX = DataOperations.getIntFromByteArray(data, currentOffset, 11);
+				currentOffset += 11;
+				sectionY = DataOperations.getIntFromByteArray(data, currentOffset, 13);
+				currentOffset += 13;
+				int mobSprite = DataOperations.getIntFromByteArray(data, currentOffset, 4);
+				currentOffset += 4;
+				boolean sectionLoaded = loadSection(sectionX, sectionY);
+				sectionX -= areaX;
+				sectionY -= areaY;
+				int mapEnterX = sectionX * magicLoc + 64;
+				int mapEnterY = sectionY * magicLoc + 64;
+				if (sectionLoaded)
+				{
+					ourPlayer.waypointCurrent = 0;
+					ourPlayer.waypointEndSprite = 0;
+					ourPlayer.currentX = ourPlayer.waypointsX[0] = mapEnterX;
+					ourPlayer.currentY = ourPlayer.waypointsY[0] = mapEnterY;
 				}
-				expGained = 0;
-				return;
-			}
-			if (command == 177) {
-				int i3 = 1;
-				for (int x = 0; x < 6; x++) {
-					equipmentStatus[x] = DataOperations.getSigned2Bytes(data, i3);
-					i3 += 2;
+				playerCount = 0;
+				ourPlayer = makePlayer(serverIndex, mapEnterX, mapEnterY, mobSprite);
+				int newPlayerCount = DataOperations.getIntFromByteArray(data, currentOffset, 8);
+				currentOffset += 8;
+				for (int currentNewPlayer = 0; currentNewPlayer < newPlayerCount; currentNewPlayer++)
+				{
+					Mob lastMob = getLastPlayer(DataOperations.getIntFromByteArray(data, currentOffset, 16));
+					currentOffset += 16;
+					int nextPlayer = DataOperations.getIntFromByteArray(data, currentOffset, 1); // 1
+					currentOffset++;
+					if (nextPlayer != 0)
+					{
+						int waypointsLeft = DataOperations.getIntFromByteArray(data, currentOffset, 1); // 2
+						currentOffset++;
+						if (waypointsLeft == 0)
+						{
+							int currentNextSprite = DataOperations.getIntFromByteArray(data, currentOffset, 3); // 3
+							currentOffset += 3;
+							int currentWaypoint = lastMob.waypointCurrent;
+							int newWaypointX = lastMob.waypointsX[currentWaypoint];
+							int newWaypointY = lastMob.waypointsY[currentWaypoint];
+							if (currentNextSprite == 2
+									|| currentNextSprite == 1
+									|| currentNextSprite == 3)
+								newWaypointX += magicLoc;
+							if (currentNextSprite == 6
+									|| currentNextSprite == 5
+									|| currentNextSprite == 7)
+								newWaypointX -= magicLoc;
+							if (currentNextSprite == 4
+									|| currentNextSprite == 3
+									|| currentNextSprite == 5)
+								newWaypointY += magicLoc;
+							if (currentNextSprite == 0
+									|| currentNextSprite == 1
+									|| currentNextSprite == 7)
+								newWaypointY -= magicLoc;
+							lastMob.nextSprite = currentNextSprite;
+							lastMob.waypointCurrent = currentWaypoint = (currentWaypoint + 1) % 10;
+							lastMob.waypointsX[currentWaypoint] = newWaypointX;
+							lastMob.waypointsY[currentWaypoint] = newWaypointY;
+						}
+						else
+						{
+							int needsNextSprite = DataOperations.getIntFromByteArray(data, currentOffset, 4);
+							currentOffset += 4;
+							if ((needsNextSprite & 0xc) == 12)
+								continue;
+							lastMob.nextSprite = needsNextSprite;
+						}
+					}
+					playerArray[playerCount++] = lastMob;
 				}
-				return;
-			}
-			if (command == 165) {
+
+				mobCount = 0;
+				while (currentOffset + 24 < dataLength * 8)
+				{
+					int mobIndex = DataOperations.getIntFromByteArray(data, currentOffset, 16);
+					currentOffset += 16;
+					int areaMobX = DataOperations.getIntFromByteArray(data, currentOffset, 5);
+					currentOffset += 5;
+					if (areaMobX > 15)
+						areaMobX -= 32;
+					int areaMobY = DataOperations.getIntFromByteArray(data, currentOffset, 5);
+					currentOffset += 5;
+					if (areaMobY > 15)
+						areaMobY -= 32;
+					int mobArrayMobID = DataOperations.getIntFromByteArray(data, currentOffset, 4);
+					currentOffset += 4;
+					int addIndex = DataOperations.getIntFromByteArray(data, currentOffset, 1);
+					currentOffset++;
+					int mobX = (sectionX + areaMobX) * magicLoc + 64;
+					int mobY = (sectionY + areaMobY) * magicLoc + 64;
+					makePlayer(mobIndex, mobX, mobY, mobArrayMobID);
+					if (addIndex == 0)
+						mobArrayIndexes[mobCount++] = mobIndex;
+				}
+				if (mobCount > 0)
+				{
+					super.streamClass.createPacket(83);
+					super.streamClass.add2ByteInt(mobCount);
+					for (currentMob = 0; currentMob < mobCount; currentMob++)
+					{
+						Mob dummyMob = mobArray[mobArrayIndexes[currentMob]];
+						super.streamClass.add2ByteInt(dummyMob.serverIndex);
+						super.streamClass.add2ByteInt(dummyMob.mobIntUnknown);
+					}
+
+					super.streamClass.formatPacket();
+					mobCount = 0;
+				}
+				break;
+			case 147:
+				showDuelConfirmWindow = true;
+				duelWeAccept = false;
+				showDuelWindow = false;
+				int i7 = 1;
+				duelOpponentNameLong = DataOperations.getUnsigned8Bytes(data, i7);
+				i7 += 8;
+				duelConfirmOpponentItemCount = data[i7++] & 0xff;
+				for (int j13 = 0; j13 < duelConfirmOpponentItemCount; j13++)
+				{
+					duelConfirmOpponentItemsI[j13] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
+					i7 += 2;
+					duelConfirmOpponentItemsI[j13].amount = DataOperations.readInt(data, i7);
+					i7 += 4;
+				}
+
+				duelConfirmMyItemCount = data[i7++] & 0xff;
+				for (int j18 = 0; j18 < duelConfirmMyItemCount; j18++)
+				{
+					duelConfirmMyItemsI[j18] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
+					i7 += 2;
+					duelConfirmMyItemsI[j18].amount = DataOperations.readInt(data, i7);
+					i7 += 4;
+				}
+
+				duelCantRetreat = data[i7++] & 0xff;
+				duelUseMagic = data[i7++] & 0xff;
+				duelUsePrayer = data[i7++] & 0xff;
+				duelUseWeapons = data[i7++] & 0xff;
+				break;
+			case 148:
+				serverMessage = new String(data, 1, dataLength - 1);
+				showServerMessageBox = true;
+				serverMessageBoxTop = false;
+				break;
+			case 152:
+				configAutoCameraAngle = DataOperations.getUnsignedByte(data[1]) == 1;
+				configMouseButtons = DataOperations.getUnsignedByte(data[2]) == 1;
+				configSoundEffects = DataOperations.getUnsignedByte(data[3]) == 1;
+				showRoof = DataOperations.getUnsignedByte(data[4]) == 1;
+				autoScreenshot = DataOperations.getUnsignedByte(data[5]) == 1;
+				combatWindow = DataOperations.getUnsignedByte(data[6]) == 1;
+				//TODO: send and receive texture on/off info.
+				break;
+			case 161:
+				showDuelWindow = false;
+				showDuelConfirmWindow = false;
+				break;
+			case 165:
 				playerAliveTimeout = 250;
-				return;
-			}
-			if (command == 115) {
-				int thingLength = (length - 1) / 4;
-				for (int currentThing = 0; currentThing < thingLength; currentThing++) {
-					int currentItemSectionX = sectionX + DataOperations.getSigned2Bytes(data, 1 + currentThing * 4) >> 3;
-				int currentItemSectionY = sectionY + DataOperations.getSigned2Bytes(data, 3 + currentThing * 4) >> 3;
-				int currentCount = 0;
-				for (int currentItem = 0; currentItem < groundItemCount; currentItem++) {
-					int currentItemOffsetX = (groundItemX[currentItem] >> 3) - currentItemSectionX;
-					int currentItemOffsetY = (groundItemY[currentItem] >> 3) - currentItemSectionY;
-					if (currentItemOffsetX != 0 || currentItemOffsetY != 0) {
-						if (currentItem != currentCount) {
-							groundItemX[currentCount] = groundItemX[currentItem];
-							groundItemY[currentCount] = groundItemY[currentItem];
-							groundItemType[currentCount] = groundItemType[currentItem];
-							groundItemObjectVar[currentCount] = groundItemObjectVar[currentItem];
-						}
-						currentCount++;
-					}
-				}
-
-				groundItemCount = currentCount;
-				currentCount = 0;
-				for (int j33 = 0; j33 < objectCount; j33++) {
-					int k36 = (objectX[j33] >> 3) - currentItemSectionX;
-					int l38 = (objectY[j33] >> 3) - currentItemSectionY;
-					if (k36 != 0 || l38 != 0) {
-						if (j33 != currentCount) {
-							objectModelArray[currentCount] = objectModelArray[j33];
-							objectModelArray[currentCount].anInt257 = currentCount;
-							objectX[currentCount] = objectX[j33];
-							objectY[currentCount] = objectY[j33];
-							objectType[currentCount] = objectType[j33];
-							objectID[currentCount] = objectID[j33];
-						}
-						currentCount++;
-					} else {
-						gameCamera.removeModel(objectModelArray[j33]);
-						engineHandle.updateObject(objectX[j33], objectY[j33], objectType[j33], objectID[j33]);
-					}
-				}
-
-				objectCount = currentCount;
-				currentCount = 0;
-				for (int l36 = 0; l36 < doorCount; l36++) {
-					int i39 = (doorX[l36] >> 3) - currentItemSectionX;
-					int j41 = (doorY[l36] >> 3) - currentItemSectionY;
-					if (i39 != 0 || j41 != 0) {
-						if (l36 != currentCount) {
-							doorModel[currentCount] = doorModel[l36];
-							doorModel[currentCount].anInt257 = currentCount + 10000;
-							doorX[currentCount] = doorX[l36];
-							doorY[currentCount] = doorY[l36];
-							doorDirection[currentCount] = doorDirection[l36];
-							doorType[currentCount] = doorType[l36];
-						}
-						currentCount++;
-					} else {
-						gameCamera.removeModel(doorModel[l36]);
-						engineHandle.updateDoor(doorX[l36], doorY[l36], doorDirection[l36], doorType[l36]);
-					}
-				}
-
-				doorCount = currentCount;
-				}
-
-				return;
-			}
-			if (command == 207) {
-				showCharacterLookScreen = true;
-				return;
-			}
-			if (command == 4) {
-				int currentMob = DataOperations.getUnsigned2Bytes(data, 1);
-				if (mobArray[currentMob] != null) // todo: check what that mobArray is
-					tradeOtherPlayerName = mobArray[currentMob].name;
-				showTradeWindow = true;
-				tradeOtherAccepted = false;
-				tradeWeAccepted = false;
-				tradeMyItemCount = 0;
-				tradeOtherItemCount = 0;
-				return;
-			}
-			if (command == 187) {
+				break;
+			case 171:
+				showBank = false;
+				break;
+			case 172:
+				systemUpdate = DataOperations.getUnsigned2Bytes(data, 1) * 32;
+				break;
+			case 177:
+				int i3 = 1;
+				for (int x = 0; x < 6; i3 += 2)
+					equipmentStatus[x++] = DataOperations.getSigned2Bytes(data, i3);
+				break;
+			case 180:
+				int l2 = 1;
+				for (int k10 = 0; k10 < 18;
+						playerStatCurrent[k10++] = DataOperations.getUnsignedByte(data[l2++]));
+				for (int i17 = 0; i17 < 18;
+						playerStatBase[i17++] = DataOperations.getUnsignedByte(data[l2++]));
+				for (int k21 = 0; k21 < 18; l2 += 4)
+					playerStatExperience[k21++] = DataOperations.readInt(data, l2);
+				expGained = 0;
+				break;
+			case 181:
+				if (autoScreenshot)
+					takeScreenshot(false);
+				break;
+			case 187:
 				showTradeWindow = false;
 				showTradeConfirmWindow = false;
-				return;
-			}
-			if (command == 250) {
+				break;
+			case 190:
+				int j2 = DataOperations.getUnsigned2Bytes(data, 1);
+				int i10 = 3;
+				for (int k16 = 0; k16 < j2; k16++)
+				{
+					int i21 = DataOperations.getUnsigned2Bytes(data, i10);
+					i10 += 2;
+					Mob mob_2 = npcRecordArray[i21];
+					int j28 = DataOperations.getUnsignedByte(data[i10]);
+					i10++;
+					if (j28 == 1)
+					{
+						int k32 = DataOperations.getUnsigned2Bytes(data, i10);
+						i10 += 2;
+						byte byte9 = data[i10];
+						i10++;
+						if (mob_2 != null)
+						{
+							String s4 = DataConversions.byteToString(data, i10, byte9);
+							mob_2.lastMessageTimeout = 150;
+							mob_2.lastMessage = s4;
+							if (k32 == ourPlayer.serverIndex)
+								displayMessage("@yel@" + EntityHandler.getNpcDef(mob_2.type).getName() + ": " + mob_2.lastMessage, 5, 0);
+						}
+						i10 += byte9;
+					}
+					else if (j28 == 2)
+					{
+						int l32 = DataOperations.getUnsignedByte(data[i10]);
+						i10++;
+						int i36 = DataOperations.getUnsignedByte(data[i10]);
+						i10++;
+						int k38 = DataOperations.getUnsignedByte(data[i10]);
+						i10++;
+						if (mob_2 != null)
+						{
+							mob_2.anInt164 = l32;
+							mob_2.hitPointsCurrent = i36;
+							mob_2.hitPointsBase = k38;
+							mob_2.combatTimer = 200;
+						}
+					}
+				}
+				break;
+			case 191:
+				int k6 = data[1] & 0xff;
+				inventoryCount--;
+				for (int l12 = k6; l12 < inventoryCount; l12++)
+				{
+					inventory[l12] = inventory[l12 + 1];
+					wearing[l12] = wearing[l12 + 1];
+				}
+				break;
+			case 197:
+				duelMyAccepted = data[1] == 1;
+				break;
+			case 198:
+				duelNoRetreating = data[1] == 1;
+				duelNoMagic = data[2] == 1;
+				duelNoPrayer = data[3] == 1;
+				duelNoWeapons = data[4] == 1;
+				duelOpponentAccepted = false;
+				duelMyAccepted = false;
+				break;
+			case 207:
+				showCharacterLookScreen = true;
+				break;
+			case 208:
+				int pointer = 1;
+				int idx = data[pointer++] & 0xff;
+				int oldExp = playerStatExperience[idx];
+				playerStatCurrent[idx] = DataOperations.getUnsignedByte(data[pointer++]);
+				playerStatBase[idx] = DataOperations.getUnsignedByte(data[pointer++]);
+				playerStatExperience[idx] = DataOperations.readInt(data, pointer);
+				pointer += 4;
+
+				if (playerStatExperience[idx] > oldExp)
+					expGained += (playerStatExperience[idx] - oldExp);
+				break;
+			case 209:
+				for (int currentPrayer = 0; currentPrayer < dataLength - 1; currentPrayer++)
+				{
+					boolean prayerOff = data[currentPrayer + 1] == 1;
+					if (!prayerOn[currentPrayer] && prayerOff)
+						playSound("prayeron");
+					if (prayerOn[currentPrayer] && !prayerOff)
+						playSound("prayeroff");
+					prayerOn[currentPrayer] = prayerOff;
+				}
+				break;
+			case 211:
+				idx = data[1] & 0xFF;
+				oldExp = playerStatExperience[idx];
+				playerStatExperience[idx] = DataOperations.readInt(data, 2);
+				if (playerStatExperience[idx] > oldExp)
+					expGained += (playerStatExperience[idx] - oldExp);
+				break;
+			case 220:
+				showShop = false;
+				break;
+			case 223:
+				showQuestionMenu = true;
+				int newQuestionMenuCount = DataOperations.getUnsignedByte(data[1]);
+				questionMenuCount = newQuestionMenuCount;
+				int newQuestionMenuOffset = 2;
+				for (int l16 = 0; l16 < newQuestionMenuCount; l16++)
+				{
+					int newQuestionMenuQuestionLength = DataOperations.getUnsignedByte(data[newQuestionMenuOffset]);
+					newQuestionMenuOffset++;
+					questionMenuAnswer[l16] = new String(data, newQuestionMenuOffset, newQuestionMenuQuestionLength);
+					newQuestionMenuOffset += newQuestionMenuQuestionLength;
+				}
+				break;
+			case 228:
+				int j6 = 1;
+				int k12 = 1;
+				int i18 = data[j6++] & 0xff;
+				int k22 = DataOperations.getUnsigned2Bytes(data, j6);
+				j6 += 2;
+				if (EntityHandler.getItemDef(k22 & 0x7fff).isStackable())
+				{
+					k12 = DataOperations.readInt(data, j6);
+					j6 += 4;
+				}
+				inventory[i18] = new Item(k22 & 0x7fff);
+				wearing[i18] = k22 / 32768;
+				inventory[i18].amount = k12;
+				if (i18 >= inventoryCount)
+					inventoryCount = i18 + 1;
+				break;
+			case 229:
+				int j5 = DataOperations.getUnsigned2Bytes(data, 1);
+				if (mobArray[j5] != null)
+					duelOpponentName = mobArray[j5].name;
+				showDuelWindow = true;
+				duelMyItemCount = 0;
+				duelOpponentItemCount = 0;
+				duelOpponentAccepted = false;
+				duelMyAccepted = false;
+				duelNoRetreating = false;
+				duelNoMagic = false;
+				duelNoPrayer = false;
+				duelNoWeapons = false;
+				break;
+			case 248:
+				if (!hasReceivedWelcomeBoxDetails)
+				{
+					lastLoggedInDays = DataOperations.getUnsigned2Bytes(data, 1);
+					subscriptionLeftDays = DataOperations.getUnsigned2Bytes(data, 3);
+					lastLoggedInAddress = new String(data, 5, dataLength - 5);
+					showWelcomeBox = true;
+					hasReceivedWelcomeBoxDetails = true;
+				}
+				break;
+			case 250:
 				tradeOtherItemCount = data[1] & 0xff;
 				int l3 = 2;
-				for (int i11 = 0; i11 < tradeOtherItemCount; i11++) {
+				for (int i11 = 0; i11 < tradeOtherItemCount; i11++)
+				{
 					tradeOtherItemsI[i11] = new Item(DataOperations.getUnsigned2Bytes(data, l3));
 					l3 += 2;
 					tradeOtherItemsI[i11].amount = DataOperations.readInt(data, l3);
 					l3 += 4;
 				}
-
 				tradeOtherAccepted = false;
 				tradeWeAccepted = false;
-				return;
-			}
-			if (command == 92) {
-				tradeOtherAccepted = data[1] == 1;
-			}
-			if (command == 253) {
+				break;
+			case 251:
+				showTradeConfirmWindow = true;
+				tradeConfirmAccepted = false;
+				showTradeWindow = false;
+				int k5 = 1;
+				tradeConfirmOtherNameLong = DataOperations.getUnsigned8Bytes(data, k5);
+				k5 += 8;
+				tradeConfirmOtherItemCount = data[k5++] & 0xff;
+				for (int l11 = 0; l11 < tradeConfirmOtherItemCount; l11++)
+				{
+					tradeConfirmOtherItemsI[l11] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
+					k5 += 2;
+					tradeConfirmOtherItemsI[l11].amount = DataOperations.readInt(data, k5);
+					k5 += 4;
+				}
+
+				tradeConfirmItemCount = data[k5++] & 0xff;
+				for (int k17 = 0; k17 < tradeConfirmItemCount; k17++)
+				{
+					tradeConfirmItemsI[k17] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
+					k5 += 2;
+					tradeConfirmItemsI[k17].amount = DataOperations.readInt(data, k5);
+					k5 += 4;
+				}
+				break;
+			case 253:
 				showShop = true;
 				int i4 = 1;
 				int j11 = data[i4++] & 0xff;
@@ -6855,26 +7200,29 @@ public class mudclient extends GameWindowMiddleMan
 				for (int i22 = 0; i22 < 40; i22++)
 					shopItemsI[i22] = new Item(-1);
 
-				for (int j25 = 0; j25 < j11; j25++) {
+				for (int j25 = 0; j25 < j11; j25++)
+				{
 					shopItemsI[j25] = new Item(DataOperations.getUnsigned2Bytes(data, i4));
 					i4 += 2;
 					shopItemsI[j25].amount = DataOperations.getUnsigned2Bytes(data, i4);
 					i4 += 2;
 				}
 
-				if (byte4 == 1) {
+				if (byte4 == 1)
+				{
 					int l28 = 39;
-					for (int k33 = 0; k33 < inventoryCount; k33++) {
+					for (int k33 = 0; k33 < inventoryCount; k33++)
+					{
 						if (l28 < j11)
 							break;
 						boolean flag2 = false;
-						for (int j39 = 0; j39 < 40; j39++) {
+						for (int j39 = 0; j39 < 40; j39++)
+						{
 							if (shopItemsI[j39].id != inventory[k33].id)
 								continue;
 							flag2 = true;
 							break;
 						}
-
 						if (inventory[k33].id == 10)
 							flag2 = true;
 						if (!flag2) {
@@ -6886,298 +7234,22 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				if (selectedShopItemIndex >= 0
 						&& selectedShopItemIndex < 40
-						&& shopItemsI[selectedShopItemIndex].id != selectedShopItemType) {
+						&& shopItemsI[selectedShopItemIndex].id != selectedShopItemType)
+				{
 					selectedShopItemIndex = -1;
 					selectedShopItemType = -2;
 				}
-				return;
-			}
-			if (command == 220) {
-				showShop = false;
-				return;
-			}
-			if (command == 18) {
-				tradeWeAccepted = data[1] == 1;
-			}
-			if (command == 152) {
-				configAutoCameraAngle = DataOperations.getUnsignedByte(data[1]) == 1;
-				configMouseButtons = DataOperations.getUnsignedByte(data[2]) == 1;
-				configSoundEffects = DataOperations.getUnsignedByte(data[3]) == 1;
-				showRoof = DataOperations.getUnsignedByte(data[4]) == 1;
-				autoScreenshot = DataOperations.getUnsignedByte(data[5]) == 1;
-				combatWindow = DataOperations.getUnsignedByte(data[6]) == 1;
-				//TODO: send and receive texture on/off info.
-				return;
-			}
-			if (command == 209) {
-				for (int currentPrayer = 0; currentPrayer < length - 1; currentPrayer++) {
-					boolean prayerOff = data[currentPrayer + 1] == 1;
-					if (!prayerOn[currentPrayer] && prayerOff)
-						playSound("prayeron");
-					if (prayerOn[currentPrayer] && !prayerOff)
-						playSound("prayeroff");
-					prayerOn[currentPrayer] = prayerOff;
-				}
-
-				return;
-			}
-			if (command == 93) {
-				showBank = true;
-				int l4 = 1;
-				newBankItemCount = data[l4++] & 0xff;
-				bankItemsMax = data[l4++] & 0xff;
-				for (int k11 = 0; k11 < newBankItemCount; k11++) {
-					newBankItemsI[k11] = new Item(DataOperations.getUnsigned2Bytes(data, l4));
-					l4 += 2;
-					newBankItemsI[k11].amount = DataOperations.getUnsigned4Bytes(data, l4);
-					l4 += 4;
-				}
-
-				updateBankItems();
-				return;
-			}
-			if (command == 171) {
-				showBank = false;
-				return;
-			}
-			if (command == 211) {
-				int idx = data[1] & 0xFF;
-				int oldExp = playerStatExperience[idx];
-				playerStatExperience[idx] = DataOperations.readInt(data, 2);
-				if (playerStatExperience[idx] > oldExp) {
-					expGained += (playerStatExperience[idx] - oldExp);
-				}
-				return;
-			}
-			if (command == 229) {
-				int j5 = DataOperations.getUnsigned2Bytes(data, 1);
-				if (mobArray[j5] != null) {
-					duelOpponentName = mobArray[j5].name;
-				}
-				showDuelWindow = true;
-				duelMyItemCount = 0;
-				duelOpponentItemCount = 0;
-				duelOpponentAccepted = false;
-				duelMyAccepted = false;
-				duelNoRetreating = false;
-				duelNoMagic = false;
-				duelNoPrayer = false;
-				duelNoWeapons = false;
-				return;
-			}
-			if (command == 160) {
-				showDuelWindow = false;
-				showDuelConfirmWindow = false;
-				return;
-			}
-			if (command == 251) {
-				showTradeConfirmWindow = true;
-				tradeConfirmAccepted = false;
-				showTradeWindow = false;
-				int k5 = 1;
-				tradeConfirmOtherNameLong = DataOperations.getUnsigned8Bytes(data, k5);
-				k5 += 8;
-				tradeConfirmOtherItemCount = data[k5++] & 0xff;
-				for (int l11 = 0; l11 < tradeConfirmOtherItemCount; l11++) {
-					tradeConfirmOtherItemsI[l11] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
-					k5 += 2;
-					tradeConfirmOtherItemsI[l11].amount = DataOperations.readInt(data, k5);
-					k5 += 4;
-				}
-
-				tradeConfirmItemCount = data[k5++] & 0xff;
-				for (int k17 = 0; k17 < tradeConfirmItemCount; k17++) {
-					tradeConfirmItemsI[k17] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
-					k5 += 2;
-					tradeConfirmItemsI[k17].amount = DataOperations.readInt(data, k5);
-					k5 += 4;
-				}
-
-				return;
-			}
-			if (command == 63) {
-				duelOpponentItemCount = data[1] & 0xff;
-				int l5 = 2;
-				for (int i12 = 0; i12 < duelOpponentItemCount; i12++) {
-					duelOpponentItemsI[i12] = new Item(DataOperations.getUnsigned2Bytes(data, l5));
-					l5 += 2;
-					duelOpponentItemsI[i12].amount = DataOperations.readInt(data, l5);
-					l5 += 4;
-				}
-
-				duelOpponentAccepted = false;
-				duelMyAccepted = false;
-				return;
-			}
-			if (command == 198) {
-				duelNoRetreating = data[1] == 1;
-				duelNoMagic = data[2] == 1;
-				duelNoPrayer = data[3] == 1;
-				duelNoWeapons = data[4] == 1;
-				duelOpponentAccepted = false;
-				duelMyAccepted = false;
-				return;
-			}
-			if (command == 139) {
-				int bankDataOffset = 1;
-				int bankSlot = data[bankDataOffset++] & 0xff;
-				int bankItemId = DataOperations.getUnsigned2Bytes(data, bankDataOffset);
-				bankDataOffset += 2;
-				int bankItemCount = DataOperations.getUnsigned4Bytes(data, bankDataOffset);
-				bankDataOffset += 4;
-				if (bankItemCount == 0) {
-					newBankItemCount--;
-					for (int currentBankSlot = bankSlot; currentBankSlot < newBankItemCount; currentBankSlot++) {
-						newBankItemsI[currentBankSlot] = newBankItemsI[currentBankSlot + 1];
-					}
-
-				} else {
-					newBankItemsI[bankSlot] = new Item(bankItemId, bankItemCount);
-					if (bankSlot >= newBankItemCount)
-						newBankItemCount = bankSlot + 1;
-				}
-				updateBankItems();
-				return;
-			}
-			if (command == 228) {
-				int j6 = 1;
-				int k12 = 1;
-				int i18 = data[j6++] & 0xff;
-				int k22 = DataOperations.getUnsigned2Bytes(data, j6);
-				j6 += 2;
-				if (EntityHandler.getItemDef(k22 & 0x7fff).isStackable()) {
-					k12 = DataOperations.readInt(data, j6);
-					j6 += 4;
-				}
-				inventory[i18] = new Item(k22 & 0x7fff);
-				wearing[i18] = k22 / 32768;
-				inventory[i18].amount = k12;
-				if (i18 >= inventoryCount)
-					inventoryCount = i18 + 1;
-				return;
-			}
-			if (command == 191) {
-				int k6 = data[1] & 0xff;
-				inventoryCount--;
-				for (int l12 = k6; l12 < inventoryCount; l12++) {
-					inventory[l12] = inventory[l12 + 1];
-					wearing[l12] = wearing[l12 + 1];
-				}
-				return;
-			}
-			if (command == 208) {
-				int pointer = 1;
-				int idx = data[pointer++] & 0xff;
-				int oldExp = playerStatExperience[idx];
-				playerStatCurrent[idx] = DataOperations.getUnsignedByte(data[pointer++]);
-				playerStatBase[idx] = DataOperations.getUnsignedByte(data[pointer++]);
-				playerStatExperience[idx] = DataOperations.readInt(data, pointer);
-				pointer += 4;
-
-				if (playerStatExperience[idx] > oldExp) {
-					expGained += (playerStatExperience[idx] - oldExp);
-				}
-				return;
-			}
-			if (command == 65) {
-				duelOpponentAccepted = data[1] == 1;
-			}
-			if (command == 197) {
-				duelMyAccepted = data[1] == 1;
-			}
-			if (command == 147) {
-				showDuelConfirmWindow = true;
-				duelWeAccept = false;
-				showDuelWindow = false;
-				int i7 = 1;
-				duelOpponentNameLong = DataOperations.getUnsigned8Bytes(data, i7);
-				i7 += 8;
-				duelConfirmOpponentItemCount = data[i7++] & 0xff;
-				for (int j13 = 0; j13 < duelConfirmOpponentItemCount; j13++) {
-					duelConfirmOpponentItemsI[j13] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
-					i7 += 2;
-					duelConfirmOpponentItemsI[j13].amount = DataOperations.readInt(data, i7);
-					i7 += 4;
-				}
-
-				duelConfirmMyItemCount = data[i7++] & 0xff;
-				for (int j18 = 0; j18 < duelConfirmMyItemCount; j18++) {
-					duelConfirmMyItemsI[j18] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
-					i7 += 2;
-					duelConfirmMyItemsI[j18].amount = DataOperations.readInt(data, i7);
-					i7 += 4;
-				}
-
-				duelCantRetreat = data[i7++] & 0xff;
-				duelUseMagic = data[i7++] & 0xff;
-				duelUsePrayer = data[i7++] & 0xff;
-				duelUseWeapons = data[i7++] & 0xff;
-				return;
-			}
-			if (command == 11) {
-				String[] combat = {
-						"combat1a", "combat1b", /* blunt weapons/unarmed*/
-						"combat2a", "combat2b", /* sharp weapons*/
-						"combat3a", "combat3b", /* spear? goblin sound*/
-				};
-				String s = new String(data, 1, length - 1);
-				System.out.printf("Sounds from server: %s\n", s);
-				playSound(s);
-				return;
-			}
-			if (command == 23) {
-				if (anInt892 < 50) {
-					int j7 = data[1] & 0xff;
-					int k13 = data[2] + sectionX;
-					int k18 = data[3] + sectionY;
-					anIntArray782[anInt892] = j7;
-					anIntArray923[anInt892] = 0;
-					anIntArray944[anInt892] = k13;
-					anIntArray757[anInt892] = k18;
-					anInt892++;
-				}
-				return;
-			}
-			if (command == 248) {
-				if (!hasReceivedWelcomeBoxDetails) {
-					lastLoggedInDays = DataOperations.getUnsigned2Bytes(data, 1);
-					subscriptionLeftDays = DataOperations.getUnsigned2Bytes(data, 3);
-					lastLoggedInAddress = new String(data, 5, length - 5);
-					showWelcomeBox = true;
-					hasReceivedWelcomeBoxDetails = true;
-				}
-				return;
-			}
-			if (command == 148) {
-				serverMessage = new String(data, 1, length - 1);
-				showServerMessageBox = true;
-				serverMessageBoxTop = false;
-				return;
-			}
-			if (command == 64) {
-				serverMessage = new String(data, 1, length - 1);
-				showServerMessageBox = true;
-				serverMessageBoxTop = true;
-				return;
-			}
-			if (command == 126) {
-				fatigue = DataOperations.getUnsigned2Bytes(data, 1);
-				return;
-			}
-			if (command == 181) {
-				if (autoScreenshot) {
-					takeScreenshot(false);
-				}
-				return;
-			}
-			if (command == 172) {
-				systemUpdate = DataOperations.getUnsigned2Bytes(data, 1) * 32;
-				return;
+				break;
+			default:
+				System.out.printf("Unhandled packet: %d; length: %d", packetID, dataLength);
+				break;
 			}
 		}
-		catch (RuntimeException runtimeexception) {
+		catch (RuntimeException runtimeexception)
+		{
 			runtimeexception.printStackTrace();
-			if (handlePacketErrorCount < 3) {
+			if (handlePacketErrorCount < 3)
+			{
 				super.streamClass.createPacket(156);
 				super.streamClass.addString(runtimeexception.toString());
 				super.streamClass.formatPacket();

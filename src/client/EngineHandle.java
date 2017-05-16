@@ -744,7 +744,7 @@ public class EngineHandle {
                 }
             }
 
-            model.setLightAndGradAndSource(true, 40, 48, -50, -10, -50);
+            model.setLightAndGradAndSource(true, 40, 48, Camera.light_x, Camera.light_z, Camera.light_y);
             aModelArray596 = aModel.method182(0, 0, 1536, 1536, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 camera.addModel(aModelArray596[j6]); // floor tiles
@@ -818,7 +818,7 @@ public class EngineHandle {
             gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1, 0, 0, 285, 285);
         }
         // walls, fences etc.
-        aModel.setLightAndGradAndSource(false, 60, 24, -50, -10, -50);
+        aModel.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
         aModelArrayArray580[k] = aModel.method182(0, 0, 1536, 1536, 8, 64, 338, true);
         for (int l2 = 0; l2 < 64; l2++) {
             camera.addModel(aModelArrayArray580[k][l2]);
@@ -1065,7 +1065,7 @@ public class EngineHandle {
                 }
             }
         }
-        aModel.setLightAndGradAndSource(true, 50, 50, -50, -10, -50);
+        aModel.setLightAndGradAndSource(true, 50, 50, Camera.light_x, Camera.light_z, Camera.light_y);
         aModelArrayArray598[k] = aModel.method182(0, 0, 1536, 1536, 8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
             camera.addModel(aModelArrayArray598[k][l9]);
@@ -1419,7 +1419,7 @@ public class EngineHandle {
                     model.addTranslate(k1, -getAveragedElevation(k1, i2), i2);
                     model.setRotation(0, l * 32, 0);
                     camera.addModel(model);
-                    model.setLightAndSource(SECTOR_WIDTH, SECTOR_HEIGHT, -50, -10, -50);
+                    model.setLightAndSource(SECTOR_WIDTH, SECTOR_HEIGHT, Camera.light_x, Camera.light_z, Camera.light_y);
                     if (i1 > 1 || j1 > 1) {
                         for (int k2 = x; k2 < x + i1; k2++) {
                             for (int l2 = y; l2 < y + j1; l2++) {

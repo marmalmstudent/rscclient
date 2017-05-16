@@ -1,6 +1,7 @@
 package client;
 
 public class Camera {
+	public static int light_x = 0, light_z = -50, light_y = 50;
 	private mudclient mc;
 
 	public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int k) {
@@ -831,16 +832,18 @@ public class Camera {
 		int nGradSteps = gradient2Step ? 2 : 4;  // lower increases resolution
 		for (int i = modelYMin; i < modelYMax; i += yStep)
 		{
-			CameraVariables cameraVariables = this.cameraVariables[i];
-			imgPixXStart = cameraVariables.leftX >> 8;
-			int imgPixXEnd = cameraVariables.rightX >> 8;
+			CameraVariables camVar = cameraVariables[i];
+			imgPixXStart = camVar.leftX >> 8;
+			int imgPixXEnd = camVar.rightX >> 8;
 			int lineLength = imgPixXEnd - imgPixXStart;
-			if (lineLength <= 0) {
+			if (lineLength <= 0)
 				imgPixRow += imgPixSkip;
-			} else {
-				int gradStart = cameraVariables.leftXBright;
-				int gradEnd = (cameraVariables.rightXBright - gradStart) / lineLength;
-				if (imgPixXStart < -halfWidth) {
+			else
+			{
+				int gradStart = camVar.leftXBright;
+				int gradEnd = (camVar.rightXBright - gradStart) / lineLength;
+				if (imgPixXStart < -halfWidth)
+				{
 					gradStart += (-halfWidth - imgPixXStart) * gradEnd;
 					imgPixXStart = -halfWidth;
 					lineLength = imgPixXEnd - imgPixXStart;
@@ -876,7 +879,7 @@ public class Camera {
 		int i3 = 0;
 		int j3 = 0;
 		if (smthDivision != 0)
-		{ // if camera is not directed parallel to surface normal
+		{
 			xTexture = smthXTexture / smthDivision << size;
 			yTexture = smthYTexture / smthDivision << size;
 		}
@@ -1362,7 +1365,7 @@ public class Camera {
 	
 	private int getTextureSize(int size)
 	{
-		for (int i = 0; i < 32; ++i)
+		for (int i = 0; i < Integer.SIZE; ++i)
 			if (size >> (i+1) == 0)
 				return i;
 		return 0;
@@ -1372,7 +1375,7 @@ public class Camera {
 	{
 		if (color < 0 || texturePixels[color] != null)
 			return;
-		texturePixels[color] = new int[1 << 2*(textureSize[color]+1)];
+		texturePixels[color] = new int[1 << 2*textureSize[color]];
 		fillTexturePixels(color);
 	}
 
@@ -1397,16 +1400,7 @@ public class Camera {
 				}
 				txtrPixels[i++] = color;
 			}
-
 		}
-		for (int j = 0; j < i; j++)
-		{ // applies the shadow gradient.
-			int pixelVal = txtrPixels[j];
-			txtrPixels[i + j] = pixelVal - (pixelVal >>> 3) & 0xf8f8f8;
-			txtrPixels[i * 2 + j] = pixelVal - (pixelVal >>> 2) & 0xf8f8f8;
-			txtrPixels[i * 3 + j] = pixelVal - (pixelVal >>> 2) - (pixelVal >>> 3) & 0xf8f8f8;
-		}
-
 	}
 
 	public void animateTexture(int texture)
@@ -1425,18 +1419,7 @@ public class Camera {
 				txtrPixels[rowReverse] = txtrPixels[rowReverse - sideLen];
 				rowReverse -= sideLen;
 			}
-
 			texturePixels[texture][rowReverse] = l;
-		}
-
-		int k1;
-		int size = 1 << 2*textureSize[texture];
-		for (int i1 = 0; i1 < size; i1++)
-		{
-			k1 = txtrPixels[i1];
-			txtrPixels[size + i1] = k1 - (k1 >>> 3) & 0xf8f8ff;
-			txtrPixels[size * 2 + i1] = k1 - (k1 >>> 2) & 0xf8f8ff;
-			txtrPixels[size * 3 + i1] = k1 - (k1 >>> 2) - (k1 >>> 3) & 0xf8f8ff;
 		}
 	}
 
@@ -1457,19 +1440,28 @@ public class Camera {
 		}
 	}
 
-	public void method303(int i, int j, int k) {
-		if (i == 0 && j == 0 && k == 0)
-			i = 32;
+	public void setModelLightSources(int x, int z, int y)
+	{
+		if (x == 0 && z == 0 && y == 0)
+		{
+			x = light_x;
+			z = light_z;
+			y = light_y;
+		}
 		for (int l = 0; l < modelCount; l++)
-			modelArray[l].setLightsource(i, j, k);
+			modelArray[l].setLightsource(x, z, y);
 
 	}
 
-	public void method304(int i, int j, int k, int l, int i1) {
-		if (k == 0 && l == 0 && i1 == 0)
-			k = 32;
+	public void method304(int i, int j, int xSrc, int zSrc, int ySrc) {
+		if (xSrc == 0 && zSrc == 0 && ySrc == 0)
+		{
+			xSrc = Camera.light_x;
+			zSrc = Camera.light_z;
+			ySrc = Camera.light_y;
+		}
 		for (int j1 = 0; j1 < modelCount; j1++)
-			modelArray[j1].setLightAndSource(i, j, k, l, i1);
+			modelArray[j1].setLightAndSource(i, j, xSrc, zSrc, ySrc);
 
 	}
 
