@@ -3,9 +3,6 @@ package client;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import client.util.misc;
-import entityhandling.EntityHandler;
-
 public class Model
 {
 	public static final int INVISIBLE = 0xbc614e; // 12345678, probably
@@ -86,19 +83,13 @@ public class Model
 			entityType = new int[nbrSides];
 		}
 		if (aBoolean260) {
-			xCoordsDraw = new int[nbrCoordPoints];
-			zCoordsDraw = new int[nbrCoordPoints];
-			yCoordsDraw = new int[nbrCoordPoints];
-	        for (int i = 0; i < nbrCoordPoints; i++)
-	        {
-	        	xCoordsDraw[i] = (int)xCoords[i];
-	        	zCoordsDraw[i] = (int)zCoords[i];
-	        	yCoordsDraw[i] = (int)yCoords[i];
-	        }
+        	zCoordsDraw = zCoords;
+	        xCoordsDraw = xCoords;
+        	yCoordsDraw = yCoords;
 		} else {
-			xCoordsDraw = new int[nbrCoordPoints];
-			zCoordsDraw = new int[nbrCoordPoints];
-			yCoordsDraw = new int[nbrCoordPoints];
+			xCoordsDraw = new double[nbrCoordPoints];
+			zCoordsDraw = new double[nbrCoordPoints];
+			yCoordsDraw = new double[nbrCoordPoints];
 		}
 		if (!aBoolean262 || !aBoolean261) {
 			xNormals = new int[nbrSides];
@@ -106,12 +97,12 @@ public class Model
 			yNormals = new int[nbrSides];
 		}
 		if (!aBoolean261) {
-			xMinArray = new int[nbrSides];
-			xMaxArray = new int[nbrSides];
-			zMinArray = new int[nbrSides];
-			zMaxArray = new int[nbrSides];
-			yMinArray = new int[nbrSides];
-			yMaxArray = new int[nbrSides];
+			xMinArray = new double[nbrSides];
+			xMaxArray = new double[nbrSides];
+			zMinArray = new double[nbrSides];
+			zMaxArray = new double[nbrSides];
+			yMinArray = new double[nbrSides];
+			yMaxArray = new double[nbrSides];
 		}
 		this.nbrSurfaces = 0;
 		this.nbrCoordPoints = 0;
@@ -406,9 +397,9 @@ public class Model
                 int surface[] = model.surfaces[j];
                 for (int k = 0; k < model.pointsPerCell[j]; k++)
                     cellPoints[k] = insertCoordPointNoDuplicate(
-                    		(int)model.xCoords[surface[k]],
-                    		(int)model.zCoords[surface[k]],
-                    		(int)model.yCoords[surface[k]]);
+                    		model.xCoords[surface[k]],
+                    		model.zCoords[surface[k]],
+                    		model.yCoords[surface[k]]);
 
                 int l1 = addSurface(model.pointsPerCell[j],
                 		cellPoints, model.surfaceTexture1[j],
@@ -444,7 +435,7 @@ public class Model
      * @param y
      * @return
      */
-    public int insertCoordPointNoDuplicate(int x, int z, int y)
+    public int insertCoordPointNoDuplicate(double x, double z, double y)
     {
         for (int i = 0; i < nbrCoordPoints; i++)
             if (xCoords[i] == x && zCoords[i] == z && yCoords[i] == y)
@@ -458,7 +449,7 @@ public class Model
         return nbrCoordPoints++;
     }
 
-    public int insertCoordPoint(int x, int z, int y)
+    public int insertCoordPoint(double x, double z, double y)
     {
         if (nbrCoordPoints >= nPoints)
             return -1;
@@ -536,7 +527,7 @@ public class Model
         int ai1[] = new int[i];
         for (int k = 0; k < i; k++) {
             int l = ai1[k] = model.insertCoordPointNoDuplicate(
-            		(int)xCoords[ai[k]], (int)zCoords[ai[k]], (int)yCoords[ai[k]]);
+            		xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
             model.pointBrightness[l] = pointBrightness[ai[k]];
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }
@@ -675,24 +666,24 @@ public class Model
             {
                 int sin = sin256[y];
                 int cos = cos256[y];
-                int tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos >> 15;
-                zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin >> 15;
+                double tmp = (zCoordsDraw[i] * sin + xCoordsDraw[i] * cos) / 32768D;
+                zCoordsDraw[i] = (zCoordsDraw[i] * cos - xCoordsDraw[i] * sin) / 32768D;
                 xCoordsDraw[i] = tmp;
             }
             if (x != 0)
             {
                 int sin = sin256[x];
                 int cos = cos256[x];
-                int tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin >> 15;
-                yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos >> 15;
+                double tmp = (zCoordsDraw[i] * cos - yCoordsDraw[i] * sin) / 32768D;
+                yCoordsDraw[i] = (zCoordsDraw[i] * sin + yCoordsDraw[i] * cos) / 32768D;
                 zCoordsDraw[i] = tmp;
             }
             if (z != 0)
             {
                 int sin = sin256[z];
                 int cos = cos256[z];
-                int tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos >> 15;
-                yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin >> 15;
+                double tmp = (yCoordsDraw[i] * sin + xCoordsDraw[i] * cos) / 32768D;
+                yCoordsDraw[i] = (yCoordsDraw[i] * cos - xCoordsDraw[i] * sin) / 32768D;
                 xCoordsDraw[i] = tmp;
             }
         }
@@ -705,26 +696,26 @@ public class Model
         for (int k1 = 0; k1 < nbrCoordPoints; k1++)
         {
             if (x_skew_z != 0)
-                xCoordsDraw[k1] += zCoordsDraw[k1] * x_skew_z >> 8;
+                xCoordsDraw[k1] += (int)zCoordsDraw[k1] * x_skew_z >> 8;
             if (y_skew_z != 0)
-                yCoordsDraw[k1] += zCoordsDraw[k1] * y_skew_z >> 8;
+                yCoordsDraw[k1] += (int)zCoordsDraw[k1] * y_skew_z >> 8;
             if (x_skew_y != 0)
-                xCoordsDraw[k1] += yCoordsDraw[k1] * x_skew_y >> 8;
+                xCoordsDraw[k1] += (int)yCoordsDraw[k1] * x_skew_y >> 8;
             if (z_skew_y != 0)
-                zCoordsDraw[k1] += yCoordsDraw[k1] * z_skew_y >> 8;
+                zCoordsDraw[k1] += (int)yCoordsDraw[k1] * z_skew_y >> 8;
             if (y_skew_x != 0)
-                yCoordsDraw[k1] += xCoordsDraw[k1] * y_skew_x >> 8;
+                yCoordsDraw[k1] += (int)xCoordsDraw[k1] * y_skew_x >> 8;
             if (z_skew_x != 0)
-                zCoordsDraw[k1] += xCoordsDraw[k1] * z_skew_x >> 8;
+                zCoordsDraw[k1] += (int)xCoordsDraw[k1] * z_skew_x >> 8;
         }
 
     }
 
     private void scale(int i, int j, int k) {
         for (int l = 0; l < nbrCoordPoints; l++) {
-            xCoordsDraw[l] = xCoordsDraw[l] * i >> 8;
-            zCoordsDraw[l] = zCoordsDraw[l] * j >> 8;
-            yCoordsDraw[l] = yCoordsDraw[l] * k >> 8;
+            xCoordsDraw[l] = (int)xCoordsDraw[l] * i >> 8;
+            zCoordsDraw[l] = (int)zCoordsDraw[l] * j >> 8;
+            yCoordsDraw[l] = (int)yCoordsDraw[l] * k >> 8;
         }
 
     }
@@ -738,13 +729,14 @@ public class Model
             int surface[] = surfaces[i];
             int firstPointIdx = surface[0];
             int pointsInCell = pointsPerCell[i];
-            int xmin;
-            int xmax = xmin = xCoordsDraw[firstPointIdx];
-            int zmin;
-            int zmax = zmin = zCoordsDraw[firstPointIdx];
-            int ymin;
-            int ymax = ymin = yCoordsDraw[firstPointIdx];
-            for (int j = 0; j < pointsInCell; j++) {
+            double xmin;
+            double xmax = xmin = xCoordsDraw[firstPointIdx];
+            double zmin;
+            double zmax = zmin = zCoordsDraw[firstPointIdx];
+            double ymin;
+            double ymax = ymin = yCoordsDraw[firstPointIdx];
+            for (int j = 0; j < pointsInCell; j++)
+            {
                 int point = surface[j];
                 if (xCoordsDraw[point] < xmin)
                     xmin = xCoordsDraw[point];
@@ -833,15 +825,15 @@ public class Model
 		for (int i = 0; i < nbrSurfaces; i++)
 		{
 			int surface[] = surfaces[i];
-			int x0 = xCoordsDraw[surface[0]];
-			int z0 = zCoordsDraw[surface[0]];
-			int y0 = yCoordsDraw[surface[0]];
-			int u_x = xCoordsDraw[surface[1]] - x0;
-			int u_z = zCoordsDraw[surface[1]] - z0;
-			int u_y = yCoordsDraw[surface[1]] - y0;
-			int v_x = xCoordsDraw[surface[2]] - x0;
-			int v_z = zCoordsDraw[surface[2]] - z0;
-			int v_y = yCoordsDraw[surface[2]] - y0;
+			int x0 = (int)xCoordsDraw[surface[0]];
+			int z0 = (int)zCoordsDraw[surface[0]];
+			int y0 = (int)yCoordsDraw[surface[0]];
+			int u_x = (int)xCoordsDraw[surface[1]] - x0;
+			int u_z = (int)zCoordsDraw[surface[1]] - z0;
+			int u_y = (int)yCoordsDraw[surface[1]] - y0;
+			int v_x = (int)xCoordsDraw[surface[2]] - x0;
+			int v_z = (int)zCoordsDraw[surface[2]] - z0;
+			int v_y = (int)yCoordsDraw[surface[2]] - y0;
 			
 			int n_x = u_z * v_y - v_z * u_y;
 			int n_z = u_y * v_x - v_y * u_x;
@@ -872,9 +864,9 @@ public class Model
             modelType = 0;
             for (int i = 0; i < nbrCoordPoints; i++)
             {
-                xCoordsDraw[i] = (int)xCoords[i];
-                zCoordsDraw[i] = (int)zCoords[i];
-                yCoordsDraw[i] = (int)yCoords[i];
+                xCoordsDraw[i] = xCoords[i];
+                zCoordsDraw[i] = zCoords[i];
+                yCoordsDraw[i] = yCoords[i];
             }
 
             xMin = zMin = yMin = -BIG_NUMBER;
@@ -886,9 +878,9 @@ public class Model
             modelType = 0;
             for (int j = 0; j < nbrCoordPoints; j++)
             {
-                xCoordsDraw[j] = (int)xCoords[j];
-                zCoordsDraw[j] = (int)zCoords[j];
-                yCoordsDraw[j] = (int)yCoords[j];
+                xCoordsDraw[j] = xCoords[j];
+                zCoordsDraw[j] = zCoords[j];
+                yCoordsDraw[j] = yCoords[j];
             }
             if ((actions & ROTATE_MASK) == ROTATE_MASK)
                 rotate(rotateX, rotateZ, rotateY);
@@ -929,9 +921,9 @@ public class Model
         for (int i = 0; i < nbrCoordPoints; i++)
         {
         	/* rotate object */
-            int u_x = xCoordsDraw[i] - cameraXPos;
-            int u_z = zCoordsDraw[i] - cameraZPos;
-            int u_y = yCoordsDraw[i] - cameraYPos;
+            int u_x = (int)xCoordsDraw[i] - cameraXPos;
+            int u_z = (int)zCoordsDraw[i] - cameraZPos;
+            int u_y = (int)yCoordsDraw[i] - cameraYPos;
             if (cameraYRot != 0)
             {
                 int tmp = u_z * ySin + u_x * yCos >> 15;
@@ -1055,12 +1047,12 @@ public class Model
     public int extraDrawWeight;
     public int modelType;
     public boolean visible;
-    public int xMin;
-    public int xMax;
-    public int zMin;
-    public int zMax;
-    public int yMin;
-    public int yMax;
+    public double xMin;
+    public double xMax;
+    public double zMin;
+    public double zMax;
+    public double yMin;
+    public double yMax;
     public boolean aBoolean254;
     public boolean transparentTexture;
     public boolean transparent;
@@ -1083,17 +1075,17 @@ public class Model
     public double xCoords[];
     public double zCoords[];
     public double yCoords[];
-    public int xCoordsDraw[];
-    public int zCoordsDraw[];
-    public int yCoordsDraw[];
+    public double xCoordsDraw[];
+    public double zCoordsDraw[];
+    public double yCoordsDraw[];
     private int nSides;
     private int anIntArrayArray279[][];
-    private int xMinArray[];
-    private int xMaxArray[];
-    private int zMinArray[];
-    private int zMaxArray[];
-    private int yMinArray[];
-    private int yMaxArray[];
+    private double xMinArray[];
+    private double xMaxArray[];
+    private double zMinArray[];
+    private double zMaxArray[];
+    private double yMinArray[];
+    private double yMaxArray[];
     private int translateX;
     private int translateZ;
     private int translateY;
@@ -1110,7 +1102,7 @@ public class Model
     private int ySkew_x;
     private int zSkew_x;
     private int actions;
-    private int longestLength;
+    private double longestLength;
     private int lightSourceX;
     private int lightSourceZ;
     private int lightSourceY;
