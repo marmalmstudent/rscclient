@@ -32,10 +32,10 @@ public class Camera {
 		anInt402 = 4;
 		triangleScreenX = new double[40];
 		triangleScreenY = new double[40];
-		triangleBright = new int[40];
-		xDistToPointFromCamera = new int[40];
-		zDistToPointFromCamera = new int[40];
-		yDistToPointFromCamera = new int[40];
+		triangleBright = new double[40];
+		xDistToPointFromCamera = new double[40];
+		zDistToPointFromCamera = new double[40];
+		yDistToPointFromCamera = new double[40];
 		f1Toggle = false;
 		this.gameImage = gameImage;
 		halfWidth = gameImage.gameWindowWidth / 2;
@@ -523,25 +523,25 @@ public class Camera {
 			else
 			{
 				int pointsInSurfac = 0;
-				int brightness = 0;
+				double brightness = 0;
 				int ptsPerCell = model.pointsPerCell[l];
 				int surfaces[] = model.surfaces[l];
 				if (model.lightSourceProjectToSurfNormal[l] != Model.INVISIBLE)
 					if (cm.normalDirectionToCamera < 0)
-						brightness = model.globalLight - (int)model.lightSourceProjectToSurfNormal[l];
+						brightness = model.globalLight - model.lightSourceProjectToSurfNormal[l];
 					else
-						brightness = model.globalLight + (int)model.lightSourceProjectToSurfNormal[l];
+						brightness = model.globalLight + model.lightSourceProjectToSurfNormal[l];
 				for (int i = 0; i < ptsPerCell; i++)
 				{
 					int dataPoint = surfaces[i];
-					xDistToPointFromCamera[i] = (int)model.xDistToPointFromCameraView[dataPoint];
-					zDistToPointFromCamera[i] = (int)model.yDistToPointFromCameraView[dataPoint];
+					xDistToPointFromCamera[i] = model.xDistToPointFromCameraView[dataPoint];
+					zDistToPointFromCamera[i] = model.yDistToPointFromCameraView[dataPoint];
 					yDistToPointFromCamera[i] = (int)model.zDistToPointFromCameraView[dataPoint];
 					if (model.lightSourceProjectToSurfNormal[l] == Model.INVISIBLE)
 						if (cm.normalDirectionToCamera < 0)
-							brightness = (model.globalLight - (int)model.pointBrightness[dataPoint]) + model.aByteArray233[dataPoint];
+							brightness = model.globalLight - model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
 						else
-							brightness = model.globalLight + (int)model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
+							brightness = model.globalLight + model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
 					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
 						triangleScreenX[pointsInSurfac] = model.xScreen[dataPoint];
@@ -610,7 +610,7 @@ public class Camera {
 	}
 
 	private void makeTriangle(int xMin, int xMax, int xMinBright, int pointsInSurface,
-			double triangleX[], double triangleY[], int brightness[],
+			double triangleX[], double triangleY[], double brightness[],
 			Model model, int j1)
 	{
 		int i, j;
@@ -622,7 +622,7 @@ public class Camera {
 			p_x[i] = (int)triangleX[i];
 		int[] p_b = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_b[i] = brightness[i];
+			p_b[i] = (int)brightness[i];
 		int drawYMax = (halfHeight2 + halfHeight) - 1;
 		int[] min_x = new int[pointsInSurface];
 		int[] min_b = new int[pointsInSurface];
@@ -723,8 +723,8 @@ public class Camera {
 	}
 
 	private void applyColor(
-			int imgPixXStart, int k, int xDist[],
-			int zDist[], int yDist[], int color,
+			int imgPixXStart, int k, double xDist[],
+			double zDist[], double yDist[], int color,
 			Model model)
 	{
 		if (color == -2)
@@ -735,9 +735,9 @@ public class Camera {
 				color = 0;
 			setTexturePixels(color);
 			--k;
-			int[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
-			int[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
-			int[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
+			int[] p_x = {(int)xDist[0], (int)xDist[0] - (int)xDist[1], (int)xDist[k] - (int)xDist[0]};
+			int[] p_z = {(int)zDist[0], (int)zDist[0] - (int)zDist[1], (int)zDist[k] - (int)zDist[0]};
+			int[] p_y = {(int)yDist[0], (int)yDist[0] - (int)yDist[1], (int)yDist[k] - (int)yDist[0]};
 			int nk_y = p_x[2] * p_z[0] - p_z[2] * p_x[0] << 5 + textureSize[color];
 			int nk_x = p_z[2] * p_y[0] - p_y[2] * p_z[0] << (5 - cameraSizeInt) + 4 + textureSize[color];
 			int nk_z = p_y[2] * p_x[0] - p_x[2] * p_y[0] << (5 - cameraSizeInt) + textureSize[color];
@@ -1153,7 +1153,6 @@ public class Camera {
 		double u0_y = model.yDistToPointFromCameraView[surfaces[0]];
 		double u0_z = model.zDistToPointFromCameraView[surfaces[0]];
 		model.normalLength[surface] = 1D;
-		model.scaleFactor[surface] = 0;
 		camMdl.normalDirectionToCamera = u0_x * n_x + u0_y * n_z + u0_z * n_y;
 		camMdl.xNormal = n_x;
 		camMdl.zNormal = n_z;
@@ -1908,10 +1907,10 @@ public class Camera {
 	int modelYMax;
 	double triangleScreenX[];
 	double triangleScreenY[];
-	int triangleBright[];
-	int xDistToPointFromCamera[];
-	int zDistToPointFromCamera[];
-	int yDistToPointFromCamera[];
+	double triangleBright[];
+	double xDistToPointFromCamera[];
+	double zDistToPointFromCamera[];
+	double yDistToPointFromCamera[];
 	boolean f1Toggle;
 	static int xMinHide;
 	static int xMaxHide;

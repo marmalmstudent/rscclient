@@ -69,7 +69,6 @@ public class Model
 		surfaceTexture1 = new int[nbrSides];
 		surfaceTexture2 = new int[nbrSides];
 		lightSourceProjectToSurfNormal = new double[nbrSides];
-		scaleFactor = new int[nbrSides];
 		normalLength = new double[nbrSides];
 		if (!aBoolean264) {
 			xDistToPointFromCameraView = new double[nbrCoordPoints];
@@ -405,7 +404,6 @@ public class Model
                 		cellPoints, model.surfaceTexture1[j],
                 		model.surfaceTexture2[j]);
                 lightSourceProjectToSurfNormal[l1] = model.lightSourceProjectToSurfNormal[j];
-                scaleFactor[l1] = model.scaleFactor[j];
                 normalLength[l1] = model.normalLength[j];
                 if (flag)
                     if (nModels > 1) {
@@ -536,7 +534,6 @@ public class Model
         if (!model.aBoolean263 && !aBoolean263)
             model.entityType[i1] = entityType[j];
         model.lightSourceProjectToSurfNormal[i1] = lightSourceProjectToSurfNormal[j];
-        model.scaleFactor[i1] = scaleFactor[j];
         model.normalLength[i1] = normalLength[j];
     }
 
@@ -842,7 +839,6 @@ public class Model
 			xNormals[i] = n_x / n_length;
 			zNormals[i] = n_z / n_length;
 			yNormals[i] = n_y / n_length;
-			scaleFactor[i] = -1;
 		}
 		setLightining();
 	}
@@ -980,7 +976,6 @@ public class Model
     public Model newModel()
     {
     	Model model = new Model(new Model[]{this}, 1);
-        model.extraDrawWeight = extraDrawWeight;
         model.transparent = transparent;
         return model;
     }
@@ -988,7 +983,6 @@ public class Model
     public Model newModel(boolean flag, boolean flag1, boolean flag2, boolean flag3)
     {
         Model model = new Model(new Model[]{this}, 1, flag, flag1, flag2, flag3);
-        model.extraDrawWeight = extraDrawWeight;
         return model;
     }
 
@@ -1030,12 +1024,10 @@ public class Model
     public int surfaceTexture1[];
     public int surfaceTexture2[];
     public double normalLength[];
-    public int scaleFactor[];
     public double lightSourceProjectToSurfNormal[];
     public double xNormals[];
     public double zNormals[];
     private double yNormals[];
-    public int extraDrawWeight;
     public int modelType;
     public boolean visible;
     public double xMin;
@@ -1098,8 +1090,8 @@ public class Model
     private double lightSourceZ;
     private double lightSourceY;
     private double lightSourceDist;
-    protected int featuresLight;
-    protected int globalLight;
+    protected double featuresLight;
+    protected double globalLight;
     private int anInt309;
     private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
