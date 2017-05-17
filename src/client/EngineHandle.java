@@ -705,7 +705,7 @@ public class EngineHandle
             }
 
             model.setLightAndGradAndSource(true, 40, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-            aModelArray596 = aModel.method182(0, 0, 1536, 1536, 8, 64, 233, false);
+            aModelArray596 = aModel.method182(1536, 1536, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 camera.addModel(aModelArray596[j6]); // floor tiles
             }
@@ -779,7 +779,7 @@ public class EngineHandle
         }
         // walls, fences etc.
         aModel.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
-        aModelArrayArray580[hSector] = aModel.method182(0, 0, 1536, 1536, 8, 64, 338, true);
+        aModelArrayArray580[hSector] = aModel.method182(1536, 1536, 8, 64, 338, true);
         for (int l2 = 0; l2 < 64; l2++) {
             camera.addModel(aModelArrayArray580[hSector][l2]);
         }
@@ -1032,7 +1032,7 @@ public class EngineHandle
             }
         }
         aModel.setLightAndGradAndSource(true, 50, 50, Camera.light_x, Camera.light_z, Camera.light_y);
-        aModelArrayArray598[hSector] = aModel.method182(0, 0, 1536, 1536, 8, 64, 169, true);
+        aModelArrayArray598[hSector] = aModel.method182(1536, 1536, 8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
             camera.addModel(aModelArrayArray598[hSector][l9]);
         }

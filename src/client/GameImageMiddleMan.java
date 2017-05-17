@@ -12,7 +12,7 @@ public final class GameImageMiddleMan extends GameImage {
      * Has to do with drawing sprites for players, npcs etc. I think it decides
      * what type it is (player or npc etc.) and passes it to the correct function.
      */
-    public final void method245(int i, int j, int k, int l, int i1, int j1, int k1) {
+    public final void doSpriteClip1(int i, int j, int k, int l, int i1, int j1, int k1) {
         if (i1 >= 50000) {
             _mudclient.method71(i, j, k, l, i1 - 50000, j1, k1);
             return;

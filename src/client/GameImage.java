@@ -1294,8 +1294,10 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void method245(int i, int j, int k, int l, int i1, int j1, int k1) {
-        spriteClip1(i, j, k, l, i1);
+    public void doSpriteClip1(int startX, int startY, int newWidth,
+    		int newHeight, int spriteId, int i, int j)
+    {
+        spriteClip1(startX, startY, newWidth, newHeight, spriteId);
     }
 
     /**
@@ -1318,11 +1320,6 @@ public class GameImage implements ImageProducer, ImageObserver {
                 hairColor = 0xffffff;
             if (skinColor == 0)
                 skinColor = 0xffffff;
-            /*
-            if ((spriteId >= 297 && spriteId <= 314) || (spriteId >= 351 && spriteId <= 395))
-            { // large helmet, platebody and platelegs
-                hairColor = 0xce0000; // dragon items color
-            }*/
             int spriteWidth = sprites[spriteId].getWidth();
             int spriteHeight = sprites[spriteId].getHeight();
             int k2 = 0;
@@ -1333,22 +1330,22 @@ public class GameImage implements ImageProducer, ImageObserver {
             int l3 = -(l1 << 16) / newHeight;
             if (sprites[spriteId].requiresShift())
             {
-                int something1 = sprites[spriteId].getTotalWidth();
-                int something2 = sprites[spriteId].getTotalHeight();
-                j3 = (something1 << 16) / newWidth;
-                k3 = (something2 << 16) / newHeight;
+                int totalWidth = sprites[spriteId].getTotalWidth();
+                int totalHeight = sprites[spriteId].getTotalHeight();
+                j3 = (totalWidth << 16) / newWidth;
+                k3 = (totalHeight << 16) / newHeight;
                 int xShift = sprites[spriteId].getXShift();
                 int yShift = sprites[spriteId].getYShift();
                 if (flip)
-                    xShift = something1 - sprites[spriteId].getWidth() - xShift;
-                startX += ((xShift * newWidth + something1) - 1) / something1;
-                int l5 = ((yShift * newHeight + something2) - 1) / something2;
+                    xShift = totalWidth - sprites[spriteId].getWidth() - xShift;
+                startX += ((xShift * newWidth + totalWidth) - 1) / totalWidth;
+                int l5 = ((yShift * newHeight + totalHeight) - 1) / totalHeight;
                 startY += l5;
                 i3 += l5 * l3;
-                if ((xShift * newWidth) % something1 != 0)
-                    k2 = (something1 - (xShift * newWidth) % something1 << 16) / newWidth;
-                if ((yShift * newHeight) % something2 != 0)
-                    l2 = (something2 - (yShift * newHeight) % something2 << 16) / newHeight;
+                if ((xShift * newWidth) % totalWidth != 0)
+                    k2 = (totalWidth - (xShift * newWidth) % totalWidth << 16) / newWidth;
+                if ((yShift * newHeight) % totalHeight != 0)
+                    l2 = (totalHeight - (yShift * newHeight) % totalHeight << 16) / newHeight;
                 newWidth = ((((sprites[spriteId].getWidth() << 16) - k2) + j3) - 1) / j3;
                 newHeight = ((((sprites[spriteId].getHeight() << 16) - l2) + k3) - 1) / k3;
             }
