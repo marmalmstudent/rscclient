@@ -88,11 +88,14 @@ public class Camera {
 		}
 	}
 
-	public void removeModel(Model model) {
+	public void removeModel(Model model)
+	{
 		for (int i = 0; i < modelCount; i++)
-			if (modelArray[i] == model) {
+			if (modelArray[i] == model)
+			{
 				modelCount--;
-				for (int j = i; j < modelCount; j++) {
+				for (int j = i; j < modelCount; j++)
+				{
 					modelArray[j] = modelArray[j + 1];
 					modelIntArray[j] = modelIntArray[j + 1];
 				}
@@ -134,7 +137,7 @@ public class Camera {
 		int ai[] = {
 				l1, i2
 		};
-		aModel_423.method181(2, ai, 0, 0);
+		aModel_423.addSurface(2, ai, 0, 0);
 		aModel_423.entityType[anInt415] = k1;
 		aModel_423.aByteArray259[anInt415++] = 0;
 		return anInt415 - 1;
@@ -411,7 +414,7 @@ public class Camera {
 									modelTexture = model.surfaceTexture1[j];
 								else
 									modelTexture = model.surfaceTexture2[j];
-								if (modelTexture != 0xbc614e) {
+								if (modelTexture != Model.INVISIBLE) {
 									int j2 = 0;
 									for (int l9 = 0; l9 < l3; l9++)
 										j2 += model.yDistToPointFromCamera[ai1[l9]];
@@ -502,7 +505,7 @@ public class Camera {
 				int brightness = 0;
 				int ptsPerCell = model.pointsPerCell[l];
 				int surfaces[] = model.surfaces[l];
-				if (model.lightSourceProjectToSurfNormal[l] != 0xbc614e)
+				if (model.lightSourceProjectToSurfNormal[l] != Model.INVISIBLE)
 					if (cm.anInt365 < 0)
 						brightness = model.globalLight - model.lightSourceProjectToSurfNormal[l];
 					else
@@ -513,7 +516,7 @@ public class Camera {
 					xDistToPointFromCamera[k11] = model.xDistToPointFromCamera[dataPoint];
 					zDistToPointFromCamera[k11] = model.zDistToPointFromCamera[dataPoint];
 					yDistToPointFromCamera[k11] = model.yDistToPointFromCamera[dataPoint];
-					if (model.lightSourceProjectToSurfNormal[l] == 0xbc614e)
+					if (model.lightSourceProjectToSurfNormal[l] == Model.INVISIBLE)
 						if (cm.anInt365 < 0)
 							brightness = (model.globalLight - model.pointBrightness[dataPoint]) + model.aByteArray233[dataPoint];
 						else
@@ -1424,7 +1427,7 @@ public class Camera {
 	}
 
 	public int color16bitTo24bit(int color16bit) {
-		if (color16bit == 0xbc614e)
+		if (color16bit == Model.INVISIBLE)
 			return 0;
 		setTexturePixels(color16bit);
 		if (color16bit >= 0)
@@ -1453,7 +1456,7 @@ public class Camera {
 
 	}
 
-	public void method304(int i, int j, int xSrc, int zSrc, int ySrc) {
+	public void setLightAndSource(int globalLight, int featureLight, int xSrc, int zSrc, int ySrc) {
 		if (xSrc == 0 && zSrc == 0 && ySrc == 0)
 		{
 			xSrc = Camera.light_x;
@@ -1461,13 +1464,15 @@ public class Camera {
 			ySrc = Camera.light_y;
 		}
 		for (int j1 = 0; j1 < modelCount; j1++)
-			modelArray[j1].setLightAndSource(i, j, xSrc, zSrc, ySrc);
+			modelArray[j1].setLightAndSource(globalLight, featureLight,
+					xSrc, zSrc, ySrc);
 
 	}
 
+	/* Converts 24 bit rgb to negative 15 bit */
 	public static int getGroundColorVal(int red, int green, int blue)
 	{
-		return -1 - (red / 8) * 1024 - (green / 8) * 32 - blue / 8;
+		return -1 - ((red & 0xf8) << 7 ) - ((green & 0xf8) << 2 ) - (blue >> 3);
 	}
 
 	public int method306(int i, int j, int k, int l, int i1) {

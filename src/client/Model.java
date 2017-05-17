@@ -8,7 +8,8 @@ import entityhandling.EntityHandler;
 
 public class Model
 {
-
+	public static final int INVISIBLE = 0xbc614e; // 12345678, probably
+	public static final int BIG_NUMBER = 9999999;
 	public Model(int i, int j) {
 		anInt246 = 1;
 		visible = true;
@@ -21,8 +22,8 @@ public class Model
 		aBoolean262 = false;
 		aBoolean263 = false;
 		aBoolean264 = false;
-		anInt270 = 0xbc614e;
-		longestLength = 0xbc614e;
+		invisible = INVISIBLE;
+		longestLength = BIG_NUMBER;
 		lightSourceX = 180;
 		lightSourceZ = 155;
 		lightSourceY = 95;
@@ -36,15 +37,15 @@ public class Model
 		
 	}
 
-	public Model(int i, int j, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
+	public Model(int nbrCoordPoints, int nbrSides, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
 		anInt246 = 1;
 		visible = true;
 		aBoolean254 = true;
 		transparentTexture = false;
 		transparent = false;
 		anInt257 = -1;
-		anInt270 = 0xbc614e;
-		longestLength = 0xbc614e;
+		invisible = INVISIBLE;
+		longestLength = BIG_NUMBER;
 		lightSourceX = 180;
 		lightSourceZ = 155;
 		lightSourceY = 95;
@@ -56,7 +57,7 @@ public class Model
 		aBoolean262 = flag2;
 		aBoolean263 = flag3;
 		aBoolean264 = flag4;
-		initArrays(i, j);
+		initArrays(nbrCoordPoints, nbrSides);
 	}
 
 	private void initArrays(int nbrCoordPoints, int nbrSides)
@@ -151,8 +152,8 @@ public class Model
 		aBoolean262 = false;
 		aBoolean263 = false;
 		aBoolean264 = false;
-		anInt270 = 0xbc614e;
-		longestLength = 0xbc614e;
+		invisible = INVISIBLE;
+		longestLength = BIG_NUMBER;
 		lightSourceX = 180;
 		lightSourceZ = 155;
 		lightSourceY = 95;
@@ -206,14 +207,14 @@ public class Model
 			surfaceTexture1[i] = DataOperations.getSigned2Bytes(database, offset);
 			offset += 2;
 			if (surfaceTexture1[i] == 32767)
-				surfaceTexture1[i] = anInt270;
+				surfaceTexture1[i] = invisible;
 		}
 		for (int i = 0; i < nbrSurfaces; i++)
 		{ // top/outside/upper i think
 			surfaceTexture2[i] = DataOperations.getSigned2Bytes(database, offset);
 			offset += 2;
 			if (surfaceTexture2[i] == 32767)
-				surfaceTexture2[i] = anInt270;
+				surfaceTexture2[i] = invisible;
 		}
 		
 		/* Does not seem to affect anything. Most surfaces
@@ -226,7 +227,7 @@ public class Model
 			if (k2 == 0)
 				lightSourceProjectToSurfNormal[i] = 0;
 			else
-				lightSourceProjectToSurfNormal[i] = anInt270;
+				lightSourceProjectToSurfNormal[i] = invisible;
 		}
 		
 		/* store which data points are used to create a surface
@@ -259,8 +260,8 @@ public class Model
         aBoolean262 = false;
         aBoolean263 = false;
         aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        longestLength = 0xbc614e;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
         lightSourceX = 180;
         lightSourceZ = 155;
         lightSourceY = 95;
@@ -314,12 +315,12 @@ public class Model
             for (int i4 = 0; i4 < l2; i4++)
                 ai1[i4] = method206(abyte0);
 
-            int j4 = method181(i2, ai, j2, k2);
+            int j4 = addSurface(i2, ai, j2, k2);
             anIntArrayArray279[k3] = ai1;
             if (i3 == 0)
                 lightSourceProjectToSurfNormal[j4] = 0;
             else
-                lightSourceProjectToSurfNormal[j4] = anInt270;
+                lightSourceProjectToSurfNormal[j4] = invisible;
         }
 
         anInt246 = 1;
@@ -333,8 +334,8 @@ public class Model
         transparent = false;
         anInt257 = -1;
         aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        longestLength = 0xbc614e;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
         lightSourceX = 180;
         lightSourceZ = 155;
         lightSourceY = 95;
@@ -360,8 +361,8 @@ public class Model
         aBoolean262 = false;
         aBoolean263 = false;
         aBoolean264 = false;
-        anInt270 = 0xbc614e;
-        longestLength = 0xbc614e;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
         lightSourceX = 180;
         lightSourceZ = 155;
         lightSourceY = 95;
@@ -403,7 +404,7 @@ public class Model
                     		model.zCoords[surface[k]],
                     		model.yCoords[surface[k]]);
 
-                int l1 = method181(model.pointsPerCell[j],
+                int l1 = addSurface(model.pointsPerCell[j],
                 		cellPoints, model.surfaceTexture1[j],
                 		model.surfaceTexture2[j]);
                 lightSourceProjectToSurfNormal[l1] = model.lightSourceProjectToSurfNormal[j];
@@ -461,7 +462,7 @@ public class Model
         return nbrCoordPoints++;
     }
 
-    public int method181(int pointsInCell, int surfacePoints[], int texture1, int texture2) {
+    public int addSurface(int pointsInCell, int surfacePoints[], int texture1, int texture2) {
         if (nbrSurfaces >= nSides)
             return -1;
         pointsPerCell[nbrSurfaces] = pointsInCell;
@@ -535,7 +536,7 @@ public class Model
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }
 
-        int i1 = model.method181(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
+        int i1 = model.addSurface(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
         if (!model.aBoolean263 && !aBoolean263)
             model.entityType[i1] = entityType[j];
         model.lightSourceProjectToSurfNormal[i1] = lightSourceProjectToSurfNormal[j];
@@ -554,16 +555,17 @@ public class Model
         setLightsource(xSrc, zSrc, ySrc);
     }
 
-    public void setLightAndSource(int i, int j, int x, int z, int y)
+    public void setLightAndSource(int globalLight, int featureLight,
+    		int x, int z, int y)
     {
-    	setLightning(i, j);
+    	setLightning(globalLight, featureLight);
         setLightsource(x, z, y);
     }
 
-    public void setLightning(int i, int j)
+    public void setLightning(int global, int feature)
     {
-        globalLight = 256 - i * 4;
-        featuresLight = (64 - j) * 16 + 128;
+        globalLight = 256 - global * 4;
+        featuresLight = (64 - feature) * 16 + 128;
     }
 
     public void setShadowGradient(boolean shadeGradient)
@@ -572,7 +574,7 @@ public class Model
             return;
         if (shadeGradient)
         	for (int i = 0; i < nbrSurfaces;
-        			lightSourceProjectToSurfNormal[i++] = anInt270);
+        			lightSourceProjectToSurfNormal[i++] = invisible);
         else
         	for (int i = 0; i < nbrSurfaces;
         			lightSourceProjectToSurfNormal[i++] = 0);
@@ -724,8 +726,8 @@ public class Model
 
     private void findModelBounds()
     {
-        xMin = zMin = yMin = 999999;
-        longestLength = xMax = zMax = yMax = -999999;
+        xMin = zMin = yMin = BIG_NUMBER;
+        longestLength = xMax = zMax = yMax = -BIG_NUMBER;
         for (int i = 0; i < nbrSurfaces; i++)
         {
             int surface[] = surfaces[i];
@@ -789,7 +791,7 @@ public class Model
             return;
         int i = featuresLight * lightSourceDist >> 8;
         for (int j = 0; j < nbrSurfaces; j++)
-            if (lightSourceProjectToSurfNormal[j] != anInt270)
+            if (lightSourceProjectToSurfNormal[j] != invisible)
                 lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
                 		+ zNormals[j] * lightSourceZ
                 		+ yNormals[j] * lightSourceY) / i;
@@ -800,7 +802,7 @@ public class Model
         int occurence[] = new int[nbrCoordPoints];
 
         for (int surfaceIdx = 0; surfaceIdx < nbrSurfaces; surfaceIdx++)
-            if (lightSourceProjectToSurfNormal[surfaceIdx] == anInt270)
+            if (lightSourceProjectToSurfNormal[surfaceIdx] == invisible)
             {
                 for (int pointIdx = 0; pointIdx < pointsPerCell[surfaceIdx]; pointIdx++)
                 {
@@ -870,8 +872,8 @@ public class Model
                 yCoordsDraw[i] = yCoords[i];
             }
 
-            xMin = zMin = yMin = 0xff676981;
-            longestLength = xMax = zMax = yMax = 0x98967f;
+            xMin = zMin = yMin = -BIG_NUMBER;
+            longestLength = xMax = zMax = yMax = BIG_NUMBER;
             return;
         }
         if (anInt246 == 1)
@@ -974,23 +976,17 @@ public class Model
         actions = 0;
     }
 
-    public Model method203()
+    public Model newModel()
     {
-    	/*
-        Model models[] = new Model[1];
-        models[0] = this;
-        Model model = new Model(models, 1);*/
     	Model model = new Model(new Model[]{this}, 1);
         model.anInt245 = anInt245;
         model.transparent = transparent;
         return model;
     }
 
-    public Model method204(boolean flag, boolean flag1, boolean flag2, boolean flag3)
+    public Model newModel(boolean flag, boolean flag1, boolean flag2, boolean flag3)
     {
-        Model models[] = new Model[1];
-        models[0] = this;
-        Model model = new Model(models, 1, flag, flag1, flag2, flag3);
+        Model model = new Model(new Model[]{this}, 1, flag, flag1, flag2, flag3);
         model.anInt245 = anInt245;
         return model;
     }
@@ -1015,7 +1011,7 @@ public class Model
         int k = anIntArray268[abyte0[anInt309++] & 0xff];
         int l = (i * 4096 + j * 64 + k) - 0x20000;
         if (l == 0x1e240)
-            l = anInt270;
+            l = invisible;
         return l;
     }
 
@@ -1064,7 +1060,7 @@ public class Model
     private static int cos1024[];
     private static byte aByteArray267[];
     private static int anIntArray268[];
-    private int anInt270;
+    private int invisible;
     public int nPoints;
     public int xCoords[];
     public int zCoords[];

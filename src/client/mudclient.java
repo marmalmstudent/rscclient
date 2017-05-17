@@ -1,7 +1,6 @@
 package client;
 
 import client.UI.InGameButton;
-import client.UI.InGameFrame;
 import client.UI.InGameGrid;
 import client.UI.menus.MenuRightClick;
 import client.UI.panels.AbuseWindow;
@@ -1419,7 +1418,6 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawText("Logging out...", windowHalfWidth,
 				windowHalfHeight + 6, 5, 0xffffff);
 	}
-	//TODO: as
 
 	private void handleInventoryMouseover()
 	{
@@ -1721,14 +1719,6 @@ public class mudclient extends GameWindowMiddleMan
 		super.streamClass.createPacket(129);
 		super.streamClass.formatPacket();
 		logoutTimeout = 1000;
-	}
-
-	private void drawPlayerInfoMisc()
-	{
-		gameGraphics.drawPicture(plrPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
-				plrPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
-				- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
-				SPRITE_MEDIA_START + 3);
 	}
 
 	private void drawStatsTab()
@@ -2524,9 +2514,9 @@ public class mudclient extends GameWindowMiddleMan
 		int modelY = y;
 		int modelX1 = x;
 		int modelX2 = y;
-		int j2 = EntityHandler.getDoorDef(l).getModelVar2();
-		int k2 = EntityHandler.getDoorDef(l).getModelVar3();
-		int l2 = EntityHandler.getDoorDef(l).getModelVar1();
+		int j2 = EntityHandler.getDoorDef(l).getTexture1();
+		int k2 = EntityHandler.getDoorDef(l).getTexture2();
+		int l2 = EntityHandler.getDoorDef(l).getHeight();
 		Model model = new Model(4, 1);
 		if (k == 0)
 			modelX1 = x + 1;
@@ -2551,7 +2541,7 @@ public class mudclient extends GameWindowMiddleMan
 		int ai[] = {
 				i3, j3, k3, l3
 		};
-		model.method181(4, ai, j2, k2);
+		model.addSurface(4, ai, j2, k2);
 		model.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
 		if (x >= 0 && y >= 0 && x < 96 && y < 96) {
 			gameCamera.addModel(model);
@@ -2608,18 +2598,18 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		for (int i = 0; i < 64; i++) {
 
-			gameCamera.removeModel(engineHandle.aModelArrayArray598[lastWildYSubtract][i]);
-			if (lastWildYSubtract == 0) {
+			gameCamera.removeModel(engineHandle.aModelArrayArray598[sectorHeight][i]);
+			if (sectorHeight == 0) {
 				gameCamera.removeModel(engineHandle.aModelArrayArray580[1][i]);
 				gameCamera.removeModel(engineHandle.aModelArrayArray598[1][i]);
 				gameCamera.removeModel(engineHandle.aModelArrayArray580[2][i]);
 				gameCamera.removeModel(engineHandle.aModelArrayArray598[2][i]);
 			}
 			zoomCamera = true;
-			if (lastWildYSubtract == 0 && (engineHandle.walkableValue[ourPlayer.currentX / 128][ourPlayer.currentY / 128] & 0x80) == 0) {
+			if (sectorHeight == 0 && (engineHandle.walkableValue[ourPlayer.currentX / 128][ourPlayer.currentY / 128] & 0x80) == 0) {
 				if (showRoof) {
-					gameCamera.addModel(engineHandle.aModelArrayArray598[lastWildYSubtract][i]);
-					if (lastWildYSubtract == 0) {
+					gameCamera.addModel(engineHandle.aModelArrayArray598[sectorHeight][i]);
+					if (sectorHeight == 0) {
 						gameCamera.addModel(engineHandle.aModelArrayArray580[1][i]);
 						gameCamera.addModel(engineHandle.aModelArrayArray598[1][i]);
 						gameCamera.addModel(engineHandle.aModelArrayArray580[2][i]);
@@ -2742,10 +2732,11 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.f1Toggle = false;
 		gameGraphics.resetImagePixels();
 		gameGraphics.f1Toggle = super.keyF1Toggle;
-		if (lastWildYSubtract == 3) {
-			int i5 = 40 + (int) (Math.random() * 3D);
-			int k7 = 40 + (int) (Math.random() * 7D);
-			gameCamera.method304(i5, k7, Camera.light_x, Camera.light_z, Camera.light_y);
+		if (sectorHeight == 3)
+		{ // underground, flickering light
+			int globalLight = 40 + (int) (Math.random() * 3D);
+			int featureLight = 40 + (int) (Math.random() * 7D);
+			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
 		}
 		anInt699 = 0;
 		mobMessageCount = 0;
@@ -3653,14 +3644,6 @@ public class mudclient extends GameWindowMiddleMan
 		displayMessage("@cya@Sorry, you can't logout at the moment", 3, 0);
 	}
 
-	private void drawFriendsPanelMisc()
-	{
-		gameGraphics.drawPicture(friendPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getXShift(),
-				friendPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 5].getHeight()
-				- gameGraphics.sprites[SPRITE_MEDIA_START + 5].getYShift(),
-				SPRITE_MEDIA_START + 5);
-	}
-
 	private void drawFriendPanel()
 	{
 		int friendTabColor = (friendTabOn == 0) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
@@ -3898,7 +3881,7 @@ public class mudclient extends GameWindowMiddleMan
 		notInWilderness = false;
 		xPos += wildX;
 		yPos += wildY;
-		if (lastWildYSubtract == wildYSubtract && xPos > anInt789 && xPos < anInt791 && yPos > anInt790 && yPos < anInt792) {
+		if (sectorHeight == wildYSubtract && xPos > anInt789 && xPos < anInt791 && yPos > anInt790 && yPos < anInt792) {
 			engineHandle.playerIsAlive = true;
 			return false;
 		}
@@ -3909,14 +3892,14 @@ public class mudclient extends GameWindowMiddleMan
 		int oldAreaY = areaY;
 		int i1 = (xPos + EngineHandle.SECTOR_WIDTH/2) / EngineHandle.SECTOR_WIDTH; // tile x (or y)
 		int j1 = (yPos + EngineHandle.SECTOR_HEIGHT/2) / EngineHandle.SECTOR_HEIGHT; // tile y (or x)
-		lastWildYSubtract = wildYSubtract;
+		sectorHeight = wildYSubtract;
 		areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
 		areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
 		anInt789 = i1 * 48 - 32; // lowerAreaXTile
 		anInt790 = j1 * 48 - 32; // lowerAreaYTile
 		anInt791 = i1 * 48 + 32; // upperAreaXTile
 		anInt792 = j1 * 48 + 32; // upperAreaYTile
-		engineHandle.method401(xPos, yPos, lastWildYSubtract);
+		engineHandle.method401(xPos, yPos, sectorHeight);
 		areaX -= wildX;
 		areaY -= wildY;
 		int areaXDiff = areaX - oldAreaX;
@@ -4007,14 +3990,6 @@ public class mudclient extends GameWindowMiddleMan
 		return true;
 	}
 
-	private void drawMagicWindowMisc()
-	{
-		gameGraphics.drawPicture(magicPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getXShift(),
-				magicPan.getY() - gameGraphics.sprites[SPRITE_MEDIA_START + 4].getHeight()
-				- gameGraphics.sprites[SPRITE_MEDIA_START + 4].getYShift(),
-				SPRITE_MEDIA_START + 4);
-	}
-
 	private void drawMagicPanel()
 	{
 
@@ -4103,9 +4078,9 @@ public class mudclient extends GameWindowMiddleMan
 		for (int spellIndex = 0; spellIndex < EntityHandler.spellCount(); spellIndex++)
 		{
 			String s = "@yel@";
-			for (Entry e : EntityHandler.getSpellDef(spellIndex).getRunesRequired())
+			for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIndex).getRunesRequired())
 			{
-				if (hasRequiredRunes((Integer) e.getKey(), (Integer) e.getValue()))
+				if (hasRequiredRunes(e.getKey(), e.getValue()))
 					continue;
 				s = "@whi@";
 				break;
@@ -4586,20 +4561,8 @@ public class mudclient extends GameWindowMiddleMan
 		return super.load(Config.DATABASE_DIR + File.separator + filename);
 	}
 
-	private void drawOptionsPanelMisc()
-	{
-		gameGraphics.drawPicture(optPan.getX() - gameGraphics.sprites[SPRITE_MEDIA_START + 3].getXShift(),
-				optPan.getY() -gameGraphics.sprites[SPRITE_MEDIA_START + 3].getHeight()
-				- gameGraphics.sprites[SPRITE_MEDIA_START + 3].getYShift(),
-				SPRITE_MEDIA_START + 6);
-	}
-
 	private void drawOptionsPanel()
 	{
-		int box1H = 65;
-		int box2H = 65;
-		int box3H = 95;
-		int box4H = 40;
 		gameGraphics.drawBoxAlpha(optPan.getX(), optPan.getY(),
 				optPan.getWidth(), optPan.getHeight(),
 				optPan.getBGColor(), optPan.getBGAlpha());
@@ -5717,7 +5680,7 @@ public class mudclient extends GameWindowMiddleMan
 			gameCamera.removeModel(objectModelArray[i]);
 			int j1 = EntityHandler.storeModel(s);
 			try {
-				Model model = gameDataModels[j1].method203();
+				Model model = gameDataModels[j1].newModel();
 				gameCamera.addModel(model);
 				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
 				model.method205(objectModelArray[i]);
@@ -6157,13 +6120,13 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				break;
 			case 27:
-				for (int i1 = 1; i1 < dataLength;)
-					if (DataOperations.getUnsignedByte(data[i1]) == 255)
+				for (int offset = 1; offset < dataLength;)
+					if (DataOperations.getUnsignedByte(data[offset]) == 255)
 					{
 						int j8 = 0;
-						int l14 = sectionX + data[i1 + 1] >> 3;
-						int k19 = sectionY + data[i1 + 2] >> 3;
-						i1 += 3;
+						int l14 = sectionX + data[offset + 1] >> 3;
+						int k19 = sectionY + data[offset + 2] >> 3;
+						offset += 3;
 						for (int i24 = 0; i24 < objectCount; i24++)
 						{
 							int l26 = (objectX[i24] >> 3) - l14;
@@ -6192,68 +6155,68 @@ public class mudclient extends GameWindowMiddleMan
 					}
 					else
 					{
-						int k8 = DataOperations.getUnsigned2Bytes(data, i1);
-						i1 += 2;
-						int i15 = sectionX + data[i1++];
-						int l19 = sectionY + data[i1++];
-						int l29 = data[i1++];
-						int j24 = 0;
-						for (int i27 = 0; i27 < objectCount; i27++)
-							if (objectX[i27] != i15
-									|| objectY[i27] != l19
-									|| objectID[i27] != l29)
+						int model_id = DataOperations.getUnsigned2Bytes(data, offset);
+						offset += 2;
+						int obj_x = sectionX + data[offset++];
+						int obj_y = sectionY + data[offset++];
+						int obj_id = data[offset++];
+						int k = 0;
+						for (int j = 0; j < objectCount; j++)
+							if (objectX[j] != obj_x
+									|| objectY[j] != obj_y
+									|| objectID[j] != obj_id)
 							{
-								if (i27 != j24)
+								if (j != k)
 								{
-									objectModelArray[j24] = objectModelArray[i27];
-									objectModelArray[j24].anInt257 = j24;
-									objectX[j24] = objectX[i27];
-									objectY[j24] = objectY[i27];
-									objectType[j24] = objectType[i27];
-									objectID[j24] = objectID[i27];
+									objectModelArray[k] = objectModelArray[j];
+									objectModelArray[k].anInt257 = k;
+									objectX[k] = objectX[j];
+									objectY[k] = objectY[j];
+									objectType[k] = objectType[j];
+									objectID[k] = objectID[j];
 								}
-								j24++;
+								k++;
 							}
 							else
 							{
-								gameCamera.removeModel(objectModelArray[i27]);
-								engineHandle.updateObject(objectX[i27], objectY[i27], objectType[i27], objectID[i27]);
+								gameCamera.removeModel(objectModelArray[j]);
+								engineHandle.updateObject(objectX[j], objectY[j], objectType[j], objectID[j]);
 							}
 
-						objectCount = j24;
-						if (k8 != 60000)
+						objectCount = k;
+						if (model_id != 60000)
 						{
-							engineHandle.registerObjectDir(i15, l19, l29);
+							engineHandle.registerObjectDir(obj_x, obj_y, obj_id);
 							int i34;
 							int j37;
-							if (l29 == 0 || l29 == 4)
+							if (obj_id == 0 || obj_id == 4)
 							{
-								i34 = EntityHandler.getObjectDef(k8).getWidth();
-								j37 = EntityHandler.getObjectDef(k8).getHeight();
+								i34 = EntityHandler.getObjectDef(model_id).getWidth();
+								j37 = EntityHandler.getObjectDef(model_id).getHeight();
 							}
 							else
 							{
-								j37 = EntityHandler.getObjectDef(k8).getWidth();
-								i34 = EntityHandler.getObjectDef(k8).getHeight();
+								j37 = EntityHandler.getObjectDef(model_id).getWidth();
+								i34 = EntityHandler.getObjectDef(model_id).getHeight();
 							}
-							int j40 = ((i15 + i15 + i34) * magicLoc) / 2;
-							int i42 = ((l19 + l19 + j37) * magicLoc) / 2;
-							int k43 = EntityHandler.getObjectDef(k8).modelID;
-							System.out.printf("Loading requested model from server: %d, %d\n", k8, k43);
-							Model model_1 = gameDataModels[k43].method203();
+							int x_transl = ((obj_x + obj_x + i34) * magicLoc) / 2;
+							int y_transl = ((obj_y + obj_y + j37) * magicLoc) / 2;
+							int modelID = EntityHandler.getObjectDef(model_id).modelID;
+							System.out.printf("Loading requested model from server: %d, %d\n", model_id, modelID);
+							Model model_1 = gameDataModels[modelID].newModel();
 							// TODO: make the server send objects that are further away
 							gameCamera.addModel(model_1);
 							model_1.anInt257 = objectCount;
-							model_1.addRotation(0, l29 * 32, 0);
-							model_1.addTranslate(j40, -engineHandle.getAveragedElevation(j40, i42), i42);
+							model_1.addRotation(0, obj_id * 32, 0);
+							model_1.addTranslate(x_transl, -engineHandle.getAveragedElevation(x_transl, y_transl), y_transl);
 							model_1.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-							engineHandle.method412(i15, l19, k8, l29);
-							if (k8 == 74)
+							engineHandle.method412(obj_x, obj_y, model_id, obj_id);
+							if (model_id == 74)
 								model_1.addTranslate(0, -480, 0);
-							objectX[objectCount] = i15;
-							objectY[objectCount] = l19;
-							objectType[objectCount] = k8;
-							objectID[objectCount] = l29;
+							objectX[objectCount] = obj_x;
+							objectY[objectCount] = obj_y;
+							objectType[objectCount] = model_id;
+							objectID[objectCount] = obj_id;
 							objectModelArray[objectCount++] = model_1;
 						}
 					}
@@ -8417,7 +8380,7 @@ public class mudclient extends GameWindowMiddleMan
 		mobArray = new Mob[8000];
 		anIntArray705 = new int[50];
 		anIntArray706 = new int[50];
-		lastWildYSubtract = -1;
+		sectorHeight = -1;
 		memoryError = false;
 		bankItemsMax = 48;
 		showQuestionMenu = false;
@@ -8633,7 +8596,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int wildX;
 	private int wildY;
 	private int wildYMultiplier;
-	private int lastWildYSubtract;
+	private int sectorHeight;
 	private boolean memoryError;
 	private int bankItemsMax;
 	private int mouseOverMenu;
