@@ -62,9 +62,9 @@ public class Model
 
 	private void initArrays(int nbrCoordPoints, int nbrSides)
 	{
-		xCoords = new int[nbrCoordPoints];
-		zCoords = new int[nbrCoordPoints];
-		yCoords = new int[nbrCoordPoints];
+		xCoords = new double[nbrCoordPoints];
+		zCoords = new double[nbrCoordPoints];
+		yCoords = new double[nbrCoordPoints];
 		pointBrightness = new int[nbrCoordPoints];
 		aByteArray233 = new byte[nbrCoordPoints];
 		pointsPerCell = new int[nbrSides];
@@ -86,9 +86,15 @@ public class Model
 			entityType = new int[nbrSides];
 		}
 		if (aBoolean260) {
-			xCoordsDraw = xCoords;
-			zCoordsDraw = zCoords;
-			yCoordsDraw = yCoords;
+			xCoordsDraw = new int[nbrCoordPoints];
+			zCoordsDraw = new int[nbrCoordPoints];
+			yCoordsDraw = new int[nbrCoordPoints];
+	        for (int i = 0; i < nbrCoordPoints; i++)
+	        {
+	        	xCoordsDraw[i] = (int)xCoords[i];
+	        	zCoordsDraw[i] = (int)zCoords[i];
+	        	yCoordsDraw[i] = (int)yCoords[i];
+	        }
 		} else {
 			xCoordsDraw = new int[nbrCoordPoints];
 			zCoordsDraw = new int[nbrCoordPoints];
@@ -400,9 +406,9 @@ public class Model
                 int surface[] = model.surfaces[j];
                 for (int k = 0; k < model.pointsPerCell[j]; k++)
                     cellPoints[k] = insertCoordPointNoDuplicate(
-                    		model.xCoords[surface[k]],
-                    		model.zCoords[surface[k]],
-                    		model.yCoords[surface[k]]);
+                    		(int)model.xCoords[surface[k]],
+                    		(int)model.zCoords[surface[k]],
+                    		(int)model.yCoords[surface[k]]);
 
                 int l1 = addSurface(model.pointsPerCell[j],
                 		cellPoints, model.surfaceTexture1[j],
@@ -512,7 +518,7 @@ public class Model
             int surface[] = surfaces[i];
             for (int j = 0; j < pointsInCell; j++)
             {
-                xSum += xCoords[surface[j]];
+                xSum += (int)xCoords[surface[j]];
                 ySum += yCoords[surface[j]];
             }
 
@@ -530,7 +536,7 @@ public class Model
         int ai1[] = new int[i];
         for (int k = 0; k < i; k++) {
             int l = ai1[k] = model.insertCoordPointNoDuplicate(
-            		xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
+            		(int)xCoords[ai[k]], (int)zCoords[ai[k]], (int)yCoords[ai[k]]);
             model.pointBrightness[l] = pointBrightness[ai[k]];
             model.aByteArray233[l] = aByteArray233[ai[k]];
         }
@@ -866,9 +872,9 @@ public class Model
             modelType = 0;
             for (int i = 0; i < nbrCoordPoints; i++)
             {
-                xCoordsDraw[i] = xCoords[i];
-                zCoordsDraw[i] = zCoords[i];
-                yCoordsDraw[i] = yCoords[i];
+                xCoordsDraw[i] = (int)xCoords[i];
+                zCoordsDraw[i] = (int)zCoords[i];
+                yCoordsDraw[i] = (int)yCoords[i];
             }
 
             xMin = zMin = yMin = -BIG_NUMBER;
@@ -880,9 +886,9 @@ public class Model
             modelType = 0;
             for (int j = 0; j < nbrCoordPoints; j++)
             {
-                xCoordsDraw[j] = xCoords[j];
-                zCoordsDraw[j] = zCoords[j];
-                yCoordsDraw[j] = yCoords[j];
+                xCoordsDraw[j] = (int)xCoords[j];
+                zCoordsDraw[j] = (int)zCoords[j];
+                yCoordsDraw[j] = (int)yCoords[j];
             }
             if ((actions & ROTATE_MASK) == ROTATE_MASK)
                 rotate(rotateX, rotateZ, rotateY);
@@ -1074,9 +1080,9 @@ public class Model
     private static int anIntArray268[];
     private int invisible;
     public int nPoints;
-    public int xCoords[];
-    public int zCoords[];
-    public int yCoords[];
+    public double xCoords[];
+    public double zCoords[];
+    public double yCoords[];
     public int xCoordsDraw[];
     public int zCoordsDraw[];
     public int yCoordsDraw[];
