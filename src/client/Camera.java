@@ -193,7 +193,7 @@ public class Camera {
 			CameraModel camMdlMiddle = cameraModels[middle];
 			cameraModels[middle] = cameraModels[lower];
 			cameraModels[lower] = camMdlMiddle;
-			int drawOrderMiddle = camMdlMiddle.drawOrderVal;
+			double drawOrderMiddle = camMdlMiddle.drawOrderVal;
 			while (nextLower < nextUpper)
 			{
 				do nextUpper--;
@@ -383,7 +383,7 @@ public class Camera {
 					boolean draw = false;
 					for (int k = 0; k < pointsInCell; k++)
 					{
-						int zDist = model.zDistToPointFromCameraView[surface[k]];
+						int zDist = model.zDistToPointFromCameraView[surface[k]];//(int)model.getDistanceTo(surface[k]);
 						if (zDist <= planeOfViewOffsetFromCamera
 								|| zDist >= drawModelMaxDist)
 							continue;
@@ -433,13 +433,10 @@ public class Camera {
 								if (modelTexture != Model.INVISIBLE)
 								{
 									/* calculate average distance to object. */
-									int sum = 0;
+									double sum = 0;
 									for (int k = 0; k < pointsInCell; k++)
-										sum += model.zDistToPointFromCameraView[surface[k]];
-									int avgDist = sum / pointsInCell;
-									/* Looks like it is the order the models will be applied */
-									camMdl.drawOrderVal = avgDist + model.extraDrawWeight;
-									/* Looks like the texture */
+										sum += model.getDistanceTo(surface[k]);
+									camMdl.drawOrderVal = (int)(sum / (double)pointsInCell);
 									camMdl.color = modelTexture;
 									cameraModelCount++;
 								}
@@ -460,8 +457,9 @@ public class Camera {
 				int p0 = surface[0];
 				int x = model_1.xScreen[p0];
 				int y = model_1.yScreen[p0];
-				int distToCam = model_1.zDistToPointFromCameraView[p0];
-				if (distToCam > planeOfViewOffsetFromCamera && distToCam < drawSpriteMaxDist)
+				int distToCam = (int)model_1.getDistanceTo(p0);
+				if (distToCam > planeOfViewOffsetFromCamera
+						&& distToCam < drawSpriteMaxDist)
 				{
 					int modelWidth = (anIntArray420[k] << cameraSizeInt) / distToCam;
 					int modelHeight = (anIntArray421[k] << cameraSizeInt) / distToCam;
@@ -474,7 +472,7 @@ public class Camera {
 						camMdl.model = model_1;
 						camMdl.surface = k;
 						method294(cameraModelCount);
-						camMdl.drawOrderVal = (distToCam + model_1.zDistToPointFromCameraView[surface[1]]) / 2;
+						camMdl.drawOrderVal = (model_1.getDistanceTo(p0) + model_1.getDistanceTo(surface[1])) / 2;
 						cameraModelCount++;
 					}
 				}
@@ -524,7 +522,7 @@ public class Camera {
 			}
 			else
 			{
-				int k8 = 0;
+				int pointsInSurfac = 0;
 				int brightness = 0;
 				int ptsPerCell = model.pointsPerCell[l];
 				int surfaces[] = model.surfaces[l];
@@ -546,28 +544,32 @@ public class Camera {
 							brightness = model.globalLight + model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
 					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
-						triangleScreenX[k8] = model.xScreen[dataPoint];
-						triangleScreenY[k8] = model.yScreen[dataPoint];
-						triangleBright[k8] = brightness;
-						if (model.zDistToPointFromCameraView[dataPoint] > fadeDist)
-							triangleBright[k8] += (model.zDistToPointFromCameraView[dataPoint] - fadeDist) / zoom3;
-						k8++;
+						triangleScreenX[pointsInSurfac] = model.xScreen[dataPoint];
+						triangleScreenY[pointsInSurfac] = model.yScreen[dataPoint];
+						triangleBright[pointsInSurfac] = brightness;
+						/* should chage this to allow for other
+						 * background colors than black */
+						int dstnc = (int)model.getDistanceTo(dataPoint);
+						if (dstnc > fadeDist)
+							triangleBright[pointsInSurfac] += (dstnc - fadeDist) / zoom3;
+						pointsInSurfac++;
 					}
 					else
-					{ // object too close
+					{
 						int k9;
 						if (i == 0)
 							k9 = surfaces[ptsPerCell - 1];
 						else
 							k9 = surfaces[i - 1];
-						if (model.zDistToPointFromCameraView[k9] >= planeOfViewOffsetFromCamera) {
+						if (model.zDistToPointFromCameraView[k9] >= planeOfViewOffsetFromCamera)
+						{
 							int k7 = model.zDistToPointFromCameraView[dataPoint] - model.zDistToPointFromCameraView[k9];
 							int i5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
 							int j6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
-							triangleScreenX[k8] = (i5 << cameraSizeInt) / planeOfViewOffsetFromCamera;
-							triangleScreenY[k8] = (j6 << cameraSizeInt) / planeOfViewOffsetFromCamera;
-							triangleBright[k8] = brightness;
-							k8++;
+							triangleScreenX[pointsInSurfac] = (i5 << cameraSizeInt) / planeOfViewOffsetFromCamera;
+							triangleScreenY[pointsInSurfac] = (j6 << cameraSizeInt) / planeOfViewOffsetFromCamera;
+							triangleBright[pointsInSurfac] = brightness;
+							pointsInSurfac++;
 						}
 						if (i == ptsPerCell - 1)
 							k9 = surfaces[0];
@@ -577,10 +579,10 @@ public class Camera {
 							int l7 = model.zDistToPointFromCameraView[dataPoint] - model.zDistToPointFromCameraView[k9];
 							int j5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
 							int k6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
-							triangleScreenX[k8] = (j5 << cameraSizeInt) / planeOfViewOffsetFromCamera;
-							triangleScreenY[k8] = (k6 << cameraSizeInt) / planeOfViewOffsetFromCamera;
-							triangleBright[k8] = brightness;
-							k8++;
+							triangleScreenX[pointsInSurfac] = (j5 << cameraSizeInt) / planeOfViewOffsetFromCamera;
+							triangleScreenY[pointsInSurfac] = (k6 << cameraSizeInt) / planeOfViewOffsetFromCamera;
+							triangleBright[pointsInSurfac] = brightness;
+							pointsInSurfac++;
 						}
 					}
 				}
@@ -593,8 +595,9 @@ public class Camera {
 						triangleBright[i12] = 255;
 				}
 
-				/* Both of these are needed to draw models */
-				makeTriangle(0, 0, 0, k8, triangleScreenX, triangleScreenY, triangleBright, model, l);
+				if (pointsInSurfac == 0)
+					continue;
+				makeTriangle(0, 0, 0, pointsInSurfac, triangleScreenX, triangleScreenY, triangleBright, model, l);
 				if (modelYMax > modelYMin)
 					applyColor(0, ptsPerCell, xDistToPointFromCamera, zDistToPointFromCamera,
 							yDistToPointFromCamera, cm.color, model);

@@ -438,7 +438,7 @@ public class EngineHandle
             		4672*VISIBLE_SECTORS*VISIBLE_SECTORS, true, true, false, false, true);
         }
         if (flag) {
-            gameImage.resetImagePixels();
+            gameImage.resetImagePixels(0);
             /* Reset all tiles to non-walkable */
             for (int xTile = 0; xTile < VISIBLE_SECTORS*SECTOR_WIDTH; xTile++)
                 for (int yTile = 0; yTile < VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++)

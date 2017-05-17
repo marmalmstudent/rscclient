@@ -960,7 +960,15 @@ public class Model
             yDistToPointFromCameraView[i] = u_z;
             zDistToPointFromCameraView[i] = u_y;
         }
-
+    }
+    
+    public double getDistanceTo(int p)
+    {
+    	// seems more accurate sphere-like when using 1.25
+		double x = xDistToPointFromCameraView[p]*1.25;
+		double y = yDistToPointFromCameraView[p];
+		double z = zDistToPointFromCameraView[p];
+		return Math.sqrt(x*x + y*y + z*z);
     }
 
     public void method202()

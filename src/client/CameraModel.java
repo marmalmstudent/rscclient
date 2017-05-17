@@ -15,7 +15,7 @@ public class CameraModel {
     protected int zMax;
     protected Model model;
     protected int surface;
-    protected int drawOrderVal;
+    protected double drawOrderVal;
     protected int xNormal;
     protected int zNormal;
     protected int yNormal;

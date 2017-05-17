@@ -21,6 +21,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     private ZipFile entityArchive, mediaArchive, utilArchive,
     itemArchive, logoArchive, projectileArchive, textureArchive;
     public BufferedImage loginScreen;
+    public static final int BACKGROUND = 0;//0x349ed8;
 
     public GameImage(int width, int height, int k, Component component)
     {
@@ -31,9 +32,6 @@ public class GameImage implements ImageProducer, ImageObserver {
         gameWindowWidthUnused = gameWindowWidth = width;
         gameWindowHeightUnused = gameWindowHeight = height;
         imagePixelArray = new int[width * height];
-        for (int i1 = 0; i1 < imagePixelArray.length; i1++) {
-            imagePixelArray[i1] = 0;
-        }
         sprites = new Sprite[k];
         if (width > 1 && height > 1 && component != null) {
             colourModel = new DirectColorModel(32, 0xff0000, 0xff00, 0xff);
@@ -131,7 +129,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (imageConsumer == null) {
             return;
         }
-        imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight, colourModel, imagePixelArray, 0, gameWindowWidth);
+        imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight,
+        		colourModel, imagePixelArray, 0, gameWindowWidth);
         imageConsumer.imageComplete(2);
     }
 
@@ -162,56 +161,59 @@ public class GameImage implements ImageProducer, ImageObserver {
         g.drawImage(image, x, y, this);
     }
 
-    public void resetImagePixels() {
-        int i = gameWindowWidth * gameWindowHeight;
+    public void resetImagePixels(int color)
+    {
+        int size = gameWindowWidth * gameWindowHeight;
         if (!f1Toggle) {
-            for (int j = 0; j < i; ++j)
-                imagePixelArray[j] = 0;
+            for (int j = 0; j < size; ++j)
+                imagePixelArray[j] = color;
             return;
         }
         int k = 0;
         for (int l = -gameWindowHeight; l < 0; l += 2)
         {
             for (int i1 = -gameWindowWidth; i1 < 0; i1++)
-                imagePixelArray[k++] = 0;
+                imagePixelArray[k++] = color;
             k += gameWindowWidth;
         }
 
     }
 
-    public void method212(int i, int j, int k, int l, int i1) {
-        int j1 = 256 - i1;
-        int k1 = (l >> 16 & 0xff) * i1;
-        int l1 = (l >> 8 & 0xff) * i1;
-        int i2 = (l & 0xff) * i1;
+    public void method212(int i, int j, int k, int fgColor, int fg_alpha) {
+        int bg_alpha = 256 - fg_alpha;
+        int fg_red = (fgColor >> 16 & 0xff) * fg_alpha;
+        int fg_green = (fgColor >> 8 & 0xff) * fg_alpha;
+        int fg_blue = (fgColor & 0xff) * fg_alpha;
         int i3 = j - k;
         if (i3 < 0)
             i3 = 0;
         int j3 = j + k;
         if (j3 >= gameWindowHeight)
             j3 = gameWindowHeight - 1;
-        byte byte0 = 1;
-        if (f1Toggle) {
-            byte0 = 2;
+        byte yStep = 1;
+        if (f1Toggle)
+        {
+            yStep = 2;
             if ((i3 & 1) != 0)
                 i3++;
         }
-        for (int k3 = i3; k3 <= j3; k3 += byte0) {
-            int l3 = k3 - j;
+        for (int y = i3; y <= j3; y += yStep) {
+            int l3 = y - j;
             int i4 = (int) Math.sqrt(k * k - l3 * l3);
-            int j4 = i - i4;
-            if (j4 < 0)
-                j4 = 0;
+            int x = i - i4;
+            if (x < 0)
+                x = 0;
             int k4 = i + i4;
             if (k4 >= gameWindowWidth)
                 k4 = gameWindowWidth - 1;
-            int l4 = j4 + k3 * gameWindowWidth;
-            for (int i5 = j4; i5 <= k4; i5++) {
-                int j2 = (imagePixelArray[l4] >> 16 & 0xff) * j1;
-                int k2 = (imagePixelArray[l4] >> 8 & 0xff) * j1;
-                int l2 = (imagePixelArray[l4] & 0xff) * j1;
-                int j5 = ((k1 + j2 >> 8) << 16) + ((l1 + k2 >> 8) << 8) + (i2 + l2 >> 8);
-                imagePixelArray[l4++] = j5;
+            int offset = x + y * gameWindowWidth;
+            for (int i5 = x; i5 <= k4; i5++)
+            {
+                int bg_red = (imagePixelArray[offset] >> 16 & 0xff) * bg_alpha;
+                int bg_green = (imagePixelArray[offset] >> 8 & 0xff) * bg_alpha;
+                int bg_blue = (imagePixelArray[offset] & 0xff) * bg_alpha;
+                int pixelVal = ((fg_red + bg_red >> 8) << 16) + ((fg_green + bg_green >> 8) << 8) + (fg_blue + bg_blue >> 8);
+                imagePixelArray[offset++] = pixelVal;
             }
 
         }
@@ -231,31 +233,33 @@ public class GameImage implements ImageProducer, ImageObserver {
             width = imageWidth - x;
         if (y + height > imageHeight)
             height = imageHeight - y;
-        int k1 = 256 - alpha;
-        int l1 = (colour >> 16 & 0xff) * alpha;
-        int i2 = (colour >> 8 & 0xff) * alpha;
-        int j2 = (colour & 0xff) * alpha;
-        int j3 = gameWindowWidth - width;
-        byte byte0 = 1;
+        int bgAlpha = 256 - alpha;
+        int red_a_mult = (colour >> 16 & 0xff) * alpha;
+        int green_a_mult = (colour >> 8 & 0xff) * alpha;
+        int blue_a_mult = (colour & 0xff) * alpha;
+        int skip = gameWindowWidth - width;
+        byte yStep = 1;
         if (f1Toggle) {
-            byte0 = 2;
-            j3 += gameWindowWidth;
+            yStep = 2;
+            skip += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int k3 = x + y * gameWindowWidth;
-        for (int l3 = 0; l3 < height; l3 += byte0) {
-            for (int i4 = -width; i4 < 0; i4++) {
-                int k2 = (imagePixelArray[k3] >> 16 & 0xff) * k1;
-                int l2 = (imagePixelArray[k3] >> 8 & 0xff) * k1;
-                int i3 = (imagePixelArray[k3] & 0xff) * k1;
-                int j4 = ((l1 + k2 >> 8) << 16) + ((i2 + l2 >> 8) << 8) + (j2 + i3 >> 8);
-                imagePixelArray[k3++] = j4;
+        int offset = x + y * gameWindowWidth;
+        for (int j = 0; j < height; j += yStep)
+        {
+            for (int i = -width; i < 0; i++)
+            {
+                int red = (imagePixelArray[offset] >> 16 & 0xff) * bgAlpha;
+                int green = (imagePixelArray[offset] >> 8 & 0xff) * bgAlpha;
+                int blue = (imagePixelArray[offset] & 0xff) * bgAlpha;
+                int pixelVal = ((red_a_mult + red >> 8) << 16) + ((green_a_mult + green >> 8) << 8) + (blue_a_mult + blue >> 8);
+                imagePixelArray[offset++] = pixelVal;
             }
 
-            k3 += j3;
+            offset += skip;
         }
 
     }
@@ -274,35 +278,37 @@ public class GameImage implements ImageProducer, ImageObserver {
         int clrTopGre = colorTop >> 8 & 0xff;
         int clrTopBlu = colorTop & 0xff;
         int skipNLastPixels = gameWindowWidth - width;
-        byte byte0 = 1;
+        byte yStep = 1;
         if (f1Toggle)
         {
-            byte0 = 2;
+            yStep = 2;
             skipNLastPixels += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int xyCoord = x + y * gameWindowWidth;
-        for (int y_idx = 0; y_idx < height; y_idx += byte0)
-            if (y_idx + y >= imageY && y_idx + y < imageHeight) 
+        int offset = x + y * gameWindowWidth;
+        for (int j = 0; j < height; j += yStep)
+            if (j + y >= imageY && j + y < imageHeight) 
             {
-                int pixelClr = ((clrBtmRed * y_idx + clrTopRed * (height - y_idx)) / height << 16) + ((clrBtmGre * y_idx + clrTopGre * (height - y_idx)) / height << 8) + (clrBtmBlu * y_idx + clrTopBlu * (height - y_idx)) / height;
-                for (int i4 = -width; i4 < 0; i4++)
-                    imagePixelArray[xyCoord++] = pixelClr;
-                xyCoord += skipNLastPixels;
+                int pixelClr = ((clrBtmRed * j + clrTopRed * (height - j)) / height << 16) + ((clrBtmGre * j + clrTopGre * (height - j)) / height << 8) + (clrBtmBlu * j + clrTopBlu * (height - j)) / height;
+                for (int i = -width; i < 0; i++)
+                    imagePixelArray[offset++] = pixelClr;
+                offset += skipNLastPixels;
             } else {
-                xyCoord += gameWindowWidth;
+                offset += gameWindowWidth;
             }
     }
 
     public void drawBox(int x, int y, int width, int height, int colour) {
-        if (x < imageX) {
+        if (x < imageX)
+        {
             width -= imageX - x;
             x = imageX;
         }
-        if (y < imageY) {
+        if (y < imageY)
+        {
             height -= imageY - y;
             y = imageY;
         }
@@ -310,22 +316,23 @@ public class GameImage implements ImageProducer, ImageObserver {
             width = imageWidth - x;
         if (y + height > imageHeight)
             height = imageHeight - y;
-        int j1 = gameWindowWidth - width;
-        byte byte0 = 1;
+
+        int skip = gameWindowWidth - width;
+        byte yStep = 1;
         if (f1Toggle) {
-            byte0 = 2;
-            j1 += gameWindowWidth;
+            yStep = 2;
+            skip += gameWindowWidth;
             if ((y & 1) != 0) {
                 y++;
                 height--;
             }
         }
-        int k1 = x + y * gameWindowWidth;
-        for (int l1 = -height; l1 < 0; l1 += byte0) {
-            for (int i2 = -width; i2 < 0; i2++)
-                imagePixelArray[k1++] = colour;
-
-            k1 += j1;
+        int offset = x + y * gameWindowWidth;
+        for (int j = -height; j < 0; j += yStep)
+        {
+            for (int i = -width; i < 0; i++)
+                imagePixelArray[offset++] = colour;
+            offset += skip;
         }
 
     }
@@ -378,7 +385,10 @@ public class GameImage implements ImageProducer, ImageObserver {
         int k = gameWindowWidth * gameWindowHeight;
         for (int j = 0; j < k; j++) {
             int i = imagePixelArray[j] & 0xffffff;
-            imagePixelArray[j] = (i >>> 1 & 0x7f7f7f) + (i >>> 2 & 0x3f3f3f) + (i >>> 3 & 0x1f1f1f) + (i >>> 4 & 0xf0f0f);
+            imagePixelArray[j] = (i >>> 1 & 0x7f7f7f)
+            		+ (i >>> 2 & 0x3f3f3f)
+            		+ (i >>> 3 & 0x1f1f1f)
+            		+ (i >>> 4 & 0xf0f0f);
         }
     }
 

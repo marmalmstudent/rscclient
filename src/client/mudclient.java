@@ -22,12 +22,18 @@ import model.Item;
 import model.Sprite;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -213,7 +219,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(chrBottomClr);
 			super.streamClass.addByte(chrSkinClr);
 			super.streamClass.formatPacket();
-			gameGraphics.resetImagePixels();
+			gameGraphics.resetImagePixels(0);
 			showCharacterLookScreen = false;
 			break;
 		case 248:  // switch prayer off
@@ -743,7 +749,7 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		hasReceivedWelcomeBoxDetails = false;
 		gameGraphics.f1Toggle = false;
-		gameGraphics.resetImagePixels();
+		gameGraphics.resetImagePixels(0);
 		drawLoginScreenSprites();
 		if (loginScreenNumber == 0)
 			menuWelcome.drawMenu(true);
@@ -1585,7 +1591,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final void method62()
 	{
 		gameGraphics.f1Toggle = false;
-		gameGraphics.resetImagePixels();
+		gameGraphics.resetImagePixels(0);
 		chrDesignMenu.drawMenu(true);
 		int i = windowHalfWidth - 116;
 		int j = this.windowHalfHeight - 117;
@@ -2730,7 +2736,10 @@ public class mudclient extends GameWindowMiddleMan
 		}
 
 		gameGraphics.f1Toggle = false;
-		gameGraphics.resetImagePixels();
+		if (sectorHeight == 3)
+			gameGraphics.resetImagePixels(0);
+		else
+			gameGraphics.resetImagePixels(GameImage.BACKGROUND);
 		gameGraphics.f1Toggle = super.keyF1Toggle;
 		if (sectorHeight == 3)
 		{ // underground, flickering light
@@ -5700,7 +5709,7 @@ public class mudclient extends GameWindowMiddleMan
 		loginScreenNumber = 2;
 		loggedIn = true;
 		resetPrivateMessageStrings();
-		gameGraphics.resetImagePixels();
+		gameGraphics.resetImagePixels(0);
 		gameGraphics.drawImage(aGraphics936, 0, 0);
 		for (int i = 0; i < objectCount; i++) {
 			gameCamera.removeModel(objectModelArray[i]);
@@ -6931,6 +6940,7 @@ public class mudclient extends GameWindowMiddleMan
 				break;
 			case 165:
 				playerAliveTimeout = 250;
+				playSound("death");
 				break;
 			case 171:
 				showBank = false;
@@ -7926,8 +7936,8 @@ public class mudclient extends GameWindowMiddleMan
 		menuLogin.drawBox(menuX+menuWidth/2, menuY + (row+1)*rowHeight,
 				menuTextFieldWidth, menuTextFieldHeight, menuTextFieldColor,
 				menuTextFieldBorderColor, menuTextFieldAlpha);
-		loginUsernameTextBox = menuLogin.makeTextBox(menuX + 7,
-				menuY + row*rowHeight+6,
+		loginUsernameTextBox = menuLogin.makeTextBox(menuX + 7 + menuTextFieldWidth/2,
+				menuY + row*rowHeight + 6 + menuTextFieldHeight/2,
 				menuTextFieldWidth, menuTextFieldHeight, 5, 12, false, false);
 		row+=2;
 		menuLogin.drawText(menuX+menuWidth/2, menuY + row*rowHeight,
@@ -7935,8 +7945,8 @@ public class mudclient extends GameWindowMiddleMan
 		menuLogin.drawBox(menuX +menuWidth/2, menuY + (row+1)*rowHeight,
 				menuTextFieldWidth, menuTextFieldHeight, menuTextFieldColor,
 				menuTextFieldBorderColor, menuTextFieldAlpha);
-		loginPasswordTextBox = menuLogin.makeTextBox(menuX + 7,
-				menuY + row*rowHeight+6,
+		loginPasswordTextBox = menuLogin.makeTextBox(menuX + 7 + menuTextFieldWidth/2,
+				menuY + row*rowHeight+6 + menuTextFieldHeight/2,
 				menuTextFieldWidth, menuTextFieldHeight, 5, 20, true, false);
 		row +=3;
 		menuLogin.drawBox(menuX+menuWidth/2, menuY + row*rowHeight,
@@ -8486,11 +8496,11 @@ public class mudclient extends GameWindowMiddleMan
         windowWidth = 512;
         windowHeight = 334;
 		 */
-		windowWidth = 1200;
-		windowHeight = 650;
+		windowWidth = 1120;
+		windowHeight = 630;
 		windowHalfWidth = windowWidth/2;
 		windowHalfHeight = windowHeight/2;
-		cameraSizeInt = 9; //9
+		cameraSizeInt = 9;
 		tradeOtherPlayerName = "";
 		chatBoxVisRows = 7;
 		messagesArray = new String[chatBoxVisRows];

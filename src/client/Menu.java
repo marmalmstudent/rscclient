@@ -83,7 +83,12 @@ public class Menu {
         if (lastMouseDownButton == 1 || mouseClicksConsecutive > 20)
         {
             for (int j1 = 0; j1 < menuObjectCount; j1++)
-                if (menuObjectCanAcceptActions[j1] && menuObjectType[j1] == 15 && mouseX >= menuObjectX[j1] && mouseY >= menuObjectY[j1] && mouseX <= menuObjectX[j1] + menuObjectWidth[j1] && mouseY <= menuObjectY[j1] + menuObjectHeight[j1])
+                if (menuObjectCanAcceptActions[j1]
+                		&& menuObjectType[j1] == 15
+                		&& mouseX >= menuObjectX[j1]
+                		&& mouseY >= menuObjectY[j1]
+                		&& mouseX <= menuObjectX[j1] + menuObjectWidth[j1]
+                		&& mouseY <= menuObjectY[j1] + menuObjectHeight[j1])
                     menuObjectHasAction[j1] = true;
             mouseClicksConsecutive -= 5;
         }
@@ -146,7 +151,7 @@ public class Menu {
             				menuObjectText[menuObject],
             				menuObjectTextType[menuObject]);
             		break;
-            	case 1:
+            	case 1: // draw text
             		drawTextAddHeight(menuObject,
             				menuObjectX[menuObject]
             						- gameImage.textWidth(menuObjectText[menuObject],
@@ -154,7 +159,7 @@ public class Menu {
             						menuObjectY[menuObject], menuObjectText[menuObject],
             						menuObjectTextType[menuObject]);
             		break;
-            	case 2:
+            	case 2: // draw box
             		method146(menuObjectX[menuObject],
             				menuObjectY[menuObject],
             				menuObjectWidth[menuObject],
@@ -359,8 +364,8 @@ public class Menu {
                 currentFocusHandle = menuObject;
         } else if (menuObjectType[menuObject] == 6) {
             if (lastMouseButton == 1
-            		&& mouseX >= objectX - objectWidth / 2 && mouseY >= objectY - objectHeight / 2
-            		&& mouseX <= objectX + objectWidth / 2 && mouseY <= objectY + objectHeight / 2)
+            		&& mouseX >= objectX && mouseY >= objectY
+            		&& mouseX <= objectX + objectWidth && mouseY <= objectY + objectHeight)
                 currentFocusHandle = menuObject;
             //objectX -= gameImage.textWidth(text, type) / 2;
         }
@@ -759,7 +764,7 @@ public class Menu {
         return menuObjectCount++;
     }
 
-    public int makeTextBox(int i, int j, int k, int l, int i1, int j1, boolean flag,
+    public int makeTextBox(int x, int y, int width, int height, int i1, int j1, boolean flag,
                            boolean flag1) {
         menuObjectType[menuObjectCount] = 6;
         menuObjectCanAcceptActions[menuObjectCount] = true;
@@ -767,10 +772,10 @@ public class Menu {
         menuObjectHasAction[menuObjectCount] = false;
         menuObjectTextType[menuObjectCount] = i1;
         menuObjectColourMask[menuObjectCount] = flag1;
-        menuObjectX[menuObjectCount] = i;
-        menuObjectY[menuObjectCount] = j;
-        menuObjectWidth[menuObjectCount] = k;
-        menuObjectHeight[menuObjectCount] = l;
+        menuObjectX[menuObjectCount] = x - width / 2;
+        menuObjectY[menuObjectCount] = y - height / 2;
+        menuObjectWidth[menuObjectCount] = width;
+        menuObjectHeight[menuObjectCount] = height;
         handleMaxTextLength[menuObjectCount] = j1;
         menuObjectText[menuObjectCount] = "";
         return menuObjectCount++;
