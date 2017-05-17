@@ -62,19 +62,19 @@ public class Model
 		xCoords = new double[nbrCoordPoints];
 		zCoords = new double[nbrCoordPoints];
 		yCoords = new double[nbrCoordPoints];
-		pointBrightness = new int[nbrCoordPoints];
+		pointBrightness = new double[nbrCoordPoints];
 		aByteArray233 = new byte[nbrCoordPoints];
 		pointsPerCell = new int[nbrSides];
 		surfaces = new int[nbrSides][];
 		surfaceTexture1 = new int[nbrSides];
 		surfaceTexture2 = new int[nbrSides];
-		lightSourceProjectToSurfNormal = new int[nbrSides];
+		lightSourceProjectToSurfNormal = new double[nbrSides];
 		scaleFactor = new int[nbrSides];
 		normalLength = new int[nbrSides];
 		if (!aBoolean264) {
-			xDistToPointFromCameraView = new int[nbrCoordPoints];
-			yDistToPointFromCameraView = new int[nbrCoordPoints];
-			zDistToPointFromCameraView = new int[nbrCoordPoints];
+			xDistToPointFromCameraView = new double[nbrCoordPoints];
+			yDistToPointFromCameraView = new double[nbrCoordPoints];
+			zDistToPointFromCameraView = new double[nbrCoordPoints];
 			xScreen = new double[nbrCoordPoints];
 			yScreen = new double[nbrCoordPoints];
 		}
@@ -116,9 +116,9 @@ public class Model
 	}
 
 	public void resetProjection() {
-		xDistToPointFromCameraView = new int[nbrCoordPoints];
-		yDistToPointFromCameraView = new int[nbrCoordPoints];
-		zDistToPointFromCameraView = new int[nbrCoordPoints];
+		xDistToPointFromCameraView = new double[nbrCoordPoints];
+		yDistToPointFromCameraView = new double[nbrCoordPoints];
+		zDistToPointFromCameraView = new double[nbrCoordPoints];
 		xScreen = new double[nbrCoordPoints];
 		yScreen = new double[nbrCoordPoints];
 	}
@@ -789,13 +789,13 @@ public class Model
         int i = featuresLight * lightSourceDist >> 8;
         for (int j = 0; j < nbrSurfaces; j++)
             if (lightSourceProjectToSurfNormal[j] != invisible)
-                lightSourceProjectToSurfNormal[j] = ((int)xNormals[j] * lightSourceX
-                		+ (int)zNormals[j] * lightSourceZ
-                		+ (int)yNormals[j] * lightSourceY) / i;
+                lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
+                		+ zNormals[j] * lightSourceZ
+                		+ yNormals[j] * lightSourceY) / i;
 
-        int someXArray[] = new int[nbrCoordPoints];
-        int someZArray[] = new int[nbrCoordPoints];
-        int someYArray[] = new int[nbrCoordPoints];
+        double someXArray[] = new double[nbrCoordPoints];
+        double someZArray[] = new double[nbrCoordPoints];
+        double someYArray[] = new double[nbrCoordPoints];
         int occurence[] = new int[nbrCoordPoints];
 
         for (int surfaceIdx = 0; surfaceIdx < nbrSurfaces; surfaceIdx++)
@@ -945,9 +945,9 @@ public class Model
              * x grows left to right,
              * y grows top to bottom,
              * z grows into the monitor */
-            xDistToPointFromCameraView[i] = (int)u_x;
-            yDistToPointFromCameraView[i] = (int)u_z;
-            zDistToPointFromCameraView[i] = (int)u_y;
+            xDistToPointFromCameraView[i] = u_x;
+            yDistToPointFromCameraView[i] = u_z;
+            zDistToPointFromCameraView[i] = u_y;
         }
     }
     
@@ -1017,12 +1017,12 @@ public class Model
     }
 
     public int nbrCoordPoints;
-    public int xDistToPointFromCameraView[];
-    public int yDistToPointFromCameraView[];
-    public int zDistToPointFromCameraView[];
+    public double xDistToPointFromCameraView[];
+    public double yDistToPointFromCameraView[];
+    public double zDistToPointFromCameraView[];
     public double xScreen[];
     public double yScreen[];
-    public int pointBrightness[];
+    public double pointBrightness[];
     public byte aByteArray233[];
     public int nbrSurfaces;
     public int pointsPerCell[];
@@ -1031,7 +1031,7 @@ public class Model
     public int surfaceTexture2[];
     public int normalLength[];
     public int scaleFactor[];
-    public int lightSourceProjectToSurfNormal[];
+    public double lightSourceProjectToSurfNormal[];
     public double xNormals[];
     public double zNormals[];
     private double yNormals[];
