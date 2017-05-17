@@ -16,10 +16,10 @@ public class CameraModel {
     protected Model model;
     protected int surface;
     protected double drawOrderVal;
-    protected int xNormal;
-    protected int zNormal;
-    protected int yNormal;
-    protected int normalDirectionToCamera;
+    protected double xNormal;
+    protected double zNormal;
+    protected double yNormal;
+    protected double normalDirectionToCamera;
     protected int color;
     protected boolean aBoolean367;
     protected int anInt368;

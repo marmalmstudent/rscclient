@@ -70,7 +70,7 @@ public class Model
 		surfaceTexture2 = new int[nbrSides];
 		lightSourceProjectToSurfNormal = new double[nbrSides];
 		scaleFactor = new int[nbrSides];
-		normalLength = new int[nbrSides];
+		normalLength = new double[nbrSides];
 		if (!aBoolean264) {
 			xDistToPointFromCameraView = new double[nbrCoordPoints];
 			yDistToPointFromCameraView = new double[nbrCoordPoints];
@@ -1029,7 +1029,7 @@ public class Model
     public int surfaces[][];
     public int surfaceTexture1[];
     public int surfaceTexture2[];
-    public int normalLength[];
+    public double normalLength[];
     public int scaleFactor[];
     public double lightSourceProjectToSurfNormal[];
     public double xNormals[];
