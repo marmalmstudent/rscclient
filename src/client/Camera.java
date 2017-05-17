@@ -396,7 +396,7 @@ public class Camera {
 						int visibleXMask = 0;
 						for (int k = 0; k < pointsInCell; k++)
 						{
-							int x = model.xScreen[surface[k]];
+							int x = (int)model.xScreen[surface[k]];
 							if (x > -halfWidth)
 								visibleXMask |= 1;
 							if (x < halfWidth)
@@ -410,7 +410,7 @@ public class Camera {
 							int visibleYMask = 0;
 							for (int k = 0; k < pointsInCell; k++)
 							{
-								int k1 = model.yScreen[surface[k]];
+								int k1 = (int)model.yScreen[surface[k]];
 								if (k1 > -halfHeight)
 									visibleYMask |= 1;
 								if (k1 < halfHeight)
@@ -455,8 +455,8 @@ public class Camera {
 			{
 				int surface[] = model_1.surfaces[k];
 				int p0 = surface[0];
-				int x = model_1.xScreen[p0];
-				int y = model_1.yScreen[p0];
+				int x = (int)model_1.xScreen[p0];
+				int y = (int)model_1.yScreen[p0];
 				int distToCam = (int)model_1.getDistanceTo(p0);
 				if (distToCam > planeOfViewOffsetFromCamera
 						&& distToCam < drawSpriteMaxDist)
@@ -493,14 +493,14 @@ public class Camera {
 			{
 				int surface[] = model.surfaces[l];
 				int p0 = surface[0];
-				int x = model.xScreen[p0];
-				int y = model.yScreen[p0];
+				int x = (int)model.xScreen[p0];
+				int y = (int)model.yScreen[p0];
 				int modelDist = model.zDistToPointFromCameraView[p0];
 				int modelWidth = (anIntArray420[l] << cameraSizeInt) / modelDist;
 				int modelHeight = (anIntArray421[l] << cameraSizeInt) / modelDist;
 				int p1 = surface[1];
-				int length_y01 = y - model.yScreen[p1];
-				int length_x10 = model.xScreen[p1] - x;
+				int length_y01 = y - (int)model.yScreen[p1];
+				int length_x10 = (int)model.xScreen[p1] - x;
 				int j11 = length_x10 * length_y01 / modelHeight;
 				int modelX = x - modelWidth / 2;
 				int modelY = (halfHeight2 + y) - modelHeight;
@@ -544,8 +544,8 @@ public class Camera {
 							brightness = model.globalLight + model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
 					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
-						triangleScreenX[pointsInSurfac] = model.xScreen[dataPoint];
-						triangleScreenY[pointsInSurfac] = model.yScreen[dataPoint];
+						triangleScreenX[pointsInSurfac] = (int)model.xScreen[dataPoint];
+						triangleScreenY[pointsInSurfac] = (int)model.yScreen[dataPoint];
 						triangleBright[pointsInSurfac] = brightness;
 						/* should chage this to allow for other
 						 * background colors than black */
@@ -1125,9 +1125,9 @@ public class Camera {
 		cameraModel.yNormal = n_z;
 		int zmin = model.zDistToPointFromCameraView[surfaces[0]];
 		int zmax = zmin;
-		int xmin = model.xScreen[surfaces[0]];
+		int xmin = (int)model.xScreen[surfaces[0]];
 		int xmax = xmin;
-		int ymin = model.yScreen[surfaces[0]];
+		int ymin = (int)model.yScreen[surfaces[0]];
 		int ymax = ymin;
 		for (int i = 1; i < pointsInCell; i++)
 		{
@@ -1136,12 +1136,12 @@ public class Camera {
 				zmax = dist;
 			else if (dist < zmin)
 				zmin = dist;
-			dist = model.xScreen[surfaces[i]];
+			dist = (int)model.xScreen[surfaces[i]];
 			if (dist > xmax)
 				xmax = dist;
 			else if (dist < xmin)
 				xmin = dist;
-			dist = model.yScreen[surfaces[i]];
+			dist = (int)model.yScreen[surfaces[i]];
 			if (dist > ymax)
 				ymax = dist;
 			else if (dist < ymin)
@@ -1176,25 +1176,25 @@ public class Camera {
 		camMdl.yNormal = n_y;
 		int zmin = model.zDistToPointFromCameraView[surfaces[0]];
 		int zmax = zmin;
-		int xmin = model.xScreen[surfaces[0]];
+		int xmin = (int)model.xScreen[surfaces[0]];
 		int xmax = xmin;
 		if (model.xScreen[surfaces[1]] < xmin)
-			xmin = model.xScreen[surfaces[1]];
+			xmin = (int)model.xScreen[surfaces[1]];
 		else
-			xmax = model.xScreen[surfaces[1]];
-		int ymin = model.yScreen[surfaces[1]];
-		int ymax = model.yScreen[surfaces[0]];
+			xmax = (int)model.xScreen[surfaces[1]];
+		int ymin = (int)model.yScreen[surfaces[1]];
+		int ymax = (int)model.yScreen[surfaces[0]];
 		int dist = model.zDistToPointFromCameraView[surfaces[1]];
 		if (dist > zmax)
 			zmax = dist;
 		else if (dist < zmin)
 			zmin = dist;
-		dist = model.xScreen[surfaces[1]];
+		dist = (int)model.xScreen[surfaces[1]];
 		if (dist > xmax)
 			xmax = dist;
 		else if (dist < xmin)
 			xmin = dist;
-		dist = model.yScreen[surfaces[1]];
+		dist = (int)model.yScreen[surfaces[1]];
 		if (dist > ymax)
 			ymax = dist;
 		else if (dist < ymin)
@@ -1280,12 +1280,12 @@ public class Camera {
 			ai3 = new int[4];
 			int p0_0 = surfaces_0[0];
 			int p1_0 = surfaces_0[1];
-			ai2[0] = model_0.xScreen[p0_0] - 20;
-			ai2[1] = model_0.xScreen[p1_0] - 20;
-			ai2[2] = model_0.xScreen[p1_0] + 20;
-			ai2[3] = model_0.xScreen[p0_0] + 20;
-			ai3[0] = ai3[3] = model_0.yScreen[p0_0];
-			ai3[1] = ai3[2] = model_0.yScreen[p1_0];
+			ai2[0] = (int)model_0.xScreen[p0_0] - 20;
+			ai2[1] = (int)model_0.xScreen[p1_0] - 20;
+			ai2[2] = (int)model_0.xScreen[p1_0] + 20;
+			ai2[3] = (int)model_0.xScreen[p0_0] + 20;
+			ai3[0] = ai3[3] = (int)model_0.yScreen[p0_0];
+			ai3[1] = ai3[2] = (int)model_0.yScreen[p1_0];
 		}
 		else
 		{
@@ -1293,8 +1293,8 @@ public class Camera {
 			ai3 = new int[pointsInCell_0];
 			for (int j5 = 0; j5 < pointsInCell_0; j5++) {
 				int i6 = surfaces_0[j5];
-				ai2[j5] = model_0.xScreen[i6];
-				ai3[j5] = model_0.yScreen[i6];
+				ai2[j5] = (int)model_0.xScreen[i6];
+				ai3[j5] = (int)model_0.yScreen[i6];
 			}
 
 		}
@@ -1305,19 +1305,19 @@ public class Camera {
 			ai5 = new int[4];
 			int p0_1 = surfaces_1[0];
 			int p1_1 = surfaces_1[1];
-			ai4[0] = model_1.xScreen[p0_1] - 20;
-			ai4[1] = model_1.xScreen[p1_1] - 20;
-			ai4[2] = model_1.xScreen[p1_1] + 20;
-			ai4[3] = model_1.xScreen[p0_1] + 20;
-			ai5[0] = ai5[3] = model_1.yScreen[p0_1];
-			ai5[1] = ai5[2] = model_1.yScreen[p1_1];
+			ai4[0] = (int)model_1.xScreen[p0_1] - 20;
+			ai4[1] = (int)model_1.xScreen[p1_1] - 20;
+			ai4[2] = (int)model_1.xScreen[p1_1] + 20;
+			ai4[3] = (int)model_1.xScreen[p0_1] + 20;
+			ai5[0] = ai5[3] = (int)model_1.yScreen[p0_1];
+			ai5[1] = ai5[2] = (int)model_1.yScreen[p1_1];
 		} else {
 			ai4 = new int[pointsInCell_1];
 			ai5 = new int[pointsInCell_1];
 			for (int l5 = 0; l5 < pointsInCell_1; l5++) {
 				int j6 = surfaces_1[l5];
-				ai4[l5] = model_1.xScreen[j6];
-				ai5[l5] = model_1.yScreen[j6];
+				ai4[l5] = (int)model_1.xScreen[j6];
+				ai5[l5] = (int)model_1.yScreen[j6];
 			}
 
 		}

@@ -75,8 +75,8 @@ public class Model
 			xDistToPointFromCameraView = new int[nbrCoordPoints];
 			yDistToPointFromCameraView = new int[nbrCoordPoints];
 			zDistToPointFromCameraView = new int[nbrCoordPoints];
-			xScreen = new int[nbrCoordPoints];
-			yScreen = new int[nbrCoordPoints];
+			xScreen = new double[nbrCoordPoints];
+			yScreen = new double[nbrCoordPoints];
 		}
 		if (!aBoolean263) {
 			aByteArray259 = new byte[nbrSides];
@@ -92,9 +92,9 @@ public class Model
 			yCoordsDraw = new double[nbrCoordPoints];
 		}
 		if (!aBoolean262 || !aBoolean261) {
-			xNormals = new int[nbrSides];
-			zNormals = new int[nbrSides];
-			yNormals = new int[nbrSides];
+			xNormals = new double[nbrSides];
+			zNormals = new double[nbrSides];
+			yNormals = new double[nbrSides];
 		}
 		if (!aBoolean261) {
 			xMinArray = new double[nbrSides];
@@ -119,8 +119,8 @@ public class Model
 		xDistToPointFromCameraView = new int[nbrCoordPoints];
 		yDistToPointFromCameraView = new int[nbrCoordPoints];
 		zDistToPointFromCameraView = new int[nbrCoordPoints];
-		xScreen = new int[nbrCoordPoints];
-		yScreen = new int[nbrCoordPoints];
+		xScreen = new double[nbrCoordPoints];
+		yScreen = new double[nbrCoordPoints];
 	}
 
 	public void method176() {
@@ -647,7 +647,7 @@ public class Model
         return;
     }
 
-    private void translate(int x, int z, int y)
+    private void translate(double x, double z, double y)
     {
         for (int l = 0; l < nbrCoordPoints; l++)
         {
@@ -664,26 +664,26 @@ public class Model
         {
             if (y != 0)
             {
-                int sin = sin256[y];
-                int cos = cos256[y];
-                double tmp = (zCoordsDraw[i] * sin + xCoordsDraw[i] * cos) / 32768D;
-                zCoordsDraw[i] = (zCoordsDraw[i] * cos - xCoordsDraw[i] * sin) / 32768D;
+                double sin = sin256[y];
+                double cos = cos256[y];
+                double tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
+                zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
                 xCoordsDraw[i] = tmp;
             }
             if (x != 0)
             {
-                int sin = sin256[x];
-                int cos = cos256[x];
-                double tmp = (zCoordsDraw[i] * cos - yCoordsDraw[i] * sin) / 32768D;
-                yCoordsDraw[i] = (zCoordsDraw[i] * sin + yCoordsDraw[i] * cos) / 32768D;
+            	double sin = sin256[x];
+            	double cos = cos256[x];
+                double tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin;
+                yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos;
                 zCoordsDraw[i] = tmp;
             }
             if (z != 0)
             {
-                int sin = sin256[z];
-                int cos = cos256[z];
-                double tmp = (yCoordsDraw[i] * sin + xCoordsDraw[i] * cos) / 32768D;
-                yCoordsDraw[i] = (yCoordsDraw[i] * cos - xCoordsDraw[i] * sin) / 32768D;
+            	double sin = sin256[z];
+            	double cos = cos256[z];
+                double tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
+                yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
                 xCoordsDraw[i] = tmp;
             }
         }
@@ -696,26 +696,26 @@ public class Model
         for (int k1 = 0; k1 < nbrCoordPoints; k1++)
         {
             if (x_skew_z != 0)
-                xCoordsDraw[k1] += (int)zCoordsDraw[k1] * x_skew_z >> 8;
+                xCoordsDraw[k1] += zCoordsDraw[k1] * x_skew_z / 256D;
             if (y_skew_z != 0)
-                yCoordsDraw[k1] += (int)zCoordsDraw[k1] * y_skew_z >> 8;
+                yCoordsDraw[k1] += zCoordsDraw[k1] * y_skew_z / 256D;
             if (x_skew_y != 0)
-                xCoordsDraw[k1] += (int)yCoordsDraw[k1] * x_skew_y >> 8;
+                xCoordsDraw[k1] += yCoordsDraw[k1] * x_skew_y / 256D;
             if (z_skew_y != 0)
-                zCoordsDraw[k1] += (int)yCoordsDraw[k1] * z_skew_y >> 8;
+                zCoordsDraw[k1] += yCoordsDraw[k1] * z_skew_y / 256D;
             if (y_skew_x != 0)
-                yCoordsDraw[k1] += (int)xCoordsDraw[k1] * y_skew_x >> 8;
+                yCoordsDraw[k1] += xCoordsDraw[k1] * y_skew_x / 256D;
             if (z_skew_x != 0)
-                zCoordsDraw[k1] += (int)xCoordsDraw[k1] * z_skew_x >> 8;
+                zCoordsDraw[k1] += xCoordsDraw[k1] * z_skew_x / 256D;
         }
 
     }
 
     private void scale(int i, int j, int k) {
         for (int l = 0; l < nbrCoordPoints; l++) {
-            xCoordsDraw[l] = (int)xCoordsDraw[l] * i >> 8;
-            zCoordsDraw[l] = (int)zCoordsDraw[l] * j >> 8;
-            yCoordsDraw[l] = (int)yCoordsDraw[l] * k >> 8;
+            xCoordsDraw[l] = xCoordsDraw[l] * i / 256D;
+            zCoordsDraw[l] = zCoordsDraw[l] * j / 256D;
+            yCoordsDraw[l] = yCoordsDraw[l] * k / 256D;
         }
 
     }
@@ -789,9 +789,9 @@ public class Model
         int i = featuresLight * lightSourceDist >> 8;
         for (int j = 0; j < nbrSurfaces; j++)
             if (lightSourceProjectToSurfNormal[j] != invisible)
-                lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
-                		+ zNormals[j] * lightSourceZ
-                		+ yNormals[j] * lightSourceY) / i;
+                lightSourceProjectToSurfNormal[j] = ((int)xNormals[j] * lightSourceX
+                		+ (int)zNormals[j] * lightSourceZ
+                		+ (int)yNormals[j] * lightSourceY) / i;
 
         int someXArray[] = new int[nbrCoordPoints];
         int someZArray[] = new int[nbrCoordPoints];
@@ -825,33 +825,23 @@ public class Model
 		for (int i = 0; i < nbrSurfaces; i++)
 		{
 			int surface[] = surfaces[i];
-			int x0 = (int)xCoordsDraw[surface[0]];
-			int z0 = (int)zCoordsDraw[surface[0]];
-			int y0 = (int)yCoordsDraw[surface[0]];
-			int u_x = (int)xCoordsDraw[surface[1]] - x0;
-			int u_z = (int)zCoordsDraw[surface[1]] - z0;
-			int u_y = (int)yCoordsDraw[surface[1]] - y0;
-			int v_x = (int)xCoordsDraw[surface[2]] - x0;
-			int v_z = (int)zCoordsDraw[surface[2]] - z0;
-			int v_y = (int)yCoordsDraw[surface[2]] - y0;
+			double x0 = xCoordsDraw[surface[0]];
+			double z0 = zCoordsDraw[surface[0]];
+			double y0 = yCoordsDraw[surface[0]];
+			double u_x = xCoordsDraw[surface[1]] - x0;
+			double u_z = zCoordsDraw[surface[1]] - z0;
+			double u_y = yCoordsDraw[surface[1]] - y0;
+			double v_x = xCoordsDraw[surface[2]] - x0;
+			double v_z = zCoordsDraw[surface[2]] - z0;
+			double v_y = yCoordsDraw[surface[2]] - y0;
 			
-			int n_x = u_z * v_y - v_z * u_y;
-			int n_z = u_y * v_x - v_y * u_x;
-			int n_y = u_x * v_z - v_x * u_z;
-			while(n_x > 0x2000 || n_z > 0x2000 || n_y > 0x2000
-					|| n_x < -0x2000 || n_z < -0x2000 || n_y < -0x2000)
-			{
-				n_x >>= 1;
-				n_z >>= 1;
-				n_y >>= 1;
-			}
-
-			int n_length = (int) (256D * Math.sqrt(n_x * n_x + n_z * n_z + n_y * n_y));
-			if (n_length <= 0)
-				n_length = 1;
-			xNormals[i] = (n_x * 0x10000) / n_length;
-			zNormals[i] = (n_z * 0x10000) / n_length;
-			yNormals[i] = (n_y * (0x10000)) / n_length;
+			double n_x = u_z * v_y - v_z * u_y;
+			double n_z = u_y * v_x - v_y * u_x;
+			double n_y = u_x * v_z - v_x * u_z;
+			double n_length = Math.sqrt(n_x * n_x + n_z * n_z + n_y * n_y);
+			xNormals[i] = n_x / n_length;
+			zNormals[i] = n_z / n_length;
+			yNormals[i] = n_y / n_length;
 			scaleFactor[i] = -1;
 		}
 		setLightining();
@@ -909,54 +899,55 @@ public class Model
             return;
         }
         visible = true;
-        int ySin = cameraYRot != 0 ? sin1024[cameraYRot] : 0;
-        int yCos = cameraYRot != 0 ? cos1024[cameraYRot] : 0;
+        double ySin = cameraYRot != 0 ? sin1024[cameraYRot] : 0;
+        double yCos = cameraYRot != 0 ? cos1024[cameraYRot] : 0;
 
-        int zSin = cameraZRot != 0 ? sin1024[cameraZRot] : 0;
-        int zCos = cameraZRot != 0 ? cos1024[cameraZRot] : 0;
+        double zSin = cameraZRot != 0 ? sin1024[cameraZRot] : 0;
+        double zCos = cameraZRot != 0 ? cos1024[cameraZRot] : 0;
 
-        int xSin = cameraXRot != 0 ? sin1024[cameraXRot] : 0;
-        int xCos = cameraXRot != 0 ? cos1024[cameraXRot] : 0;
+        double xSin = cameraXRot != 0 ? sin1024[cameraXRot] : 0;
+        double xCos = cameraXRot != 0 ? cos1024[cameraXRot] : 0;
 
         for (int i = 0; i < nbrCoordPoints; i++)
         {
         	/* rotate object */
-            int u_x = (int)xCoordsDraw[i] - cameraXPos;
-            int u_z = (int)zCoordsDraw[i] - cameraZPos;
-            int u_y = (int)yCoordsDraw[i] - cameraYPos;
+            double u_x = xCoordsDraw[i] - cameraXPos;
+            double u_z = zCoordsDraw[i] - cameraZPos;
+            double u_y = yCoordsDraw[i] - cameraYPos;
             if (cameraYRot != 0)
             {
-                int tmp = u_z * ySin + u_x * yCos >> 15;
-                u_z = u_z * yCos - u_x * ySin >> 15;
+            	double tmp = u_z * ySin + u_x * yCos;
+                u_z = u_z * yCos - u_x * ySin;
                 u_x = tmp;
             }
             if (cameraZRot != 0)
             {
-                int tmp = u_y * zSin + u_x * zCos >> 15;
-                u_y = u_y * zCos - u_x * zSin >> 15;
+                double tmp = u_y * zSin + u_x * zCos;
+                u_y = u_y * zCos - u_x * zSin;
                 u_x = tmp;
             }
             if (cameraXRot != 0)
             {
-                int tmp = u_z * xCos - u_y * xSin >> 15;
-                u_y = u_z * xSin + u_y * xCos >> 15;
+                double tmp = u_z * xCos - u_y * xSin;
+                u_y = u_z * xSin + u_y * xCos;
                 u_z = tmp;
             }
+            int factr = 1 << cameraSizeInt;
             if (u_y >= drawMinDist)
-                xScreen[i] = (u_x << cameraSizeInt) / u_y;
+                xScreen[i] = u_x * factr / u_y;
             else
-                xScreen[i] = u_x << cameraSizeInt;
+                xScreen[i] = u_x * factr;
             if (u_y >= drawMinDist)
-                yScreen[i] = (u_z << cameraSizeInt) / u_y;
+                yScreen[i] = u_z * factr / u_y;
             else
-                yScreen[i] = u_z << cameraSizeInt;
+                yScreen[i] = u_z * factr;
             /* new coordinate system for camera;
              * x grows left to right,
              * y grows top to bottom,
              * z grows into the monitor */
-            xDistToPointFromCameraView[i] = u_x;
-            yDistToPointFromCameraView[i] = u_z;
-            zDistToPointFromCameraView[i] = u_y;
+            xDistToPointFromCameraView[i] = (int)u_x;
+            yDistToPointFromCameraView[i] = (int)u_z;
+            zDistToPointFromCameraView[i] = (int)u_y;
         }
     }
     
@@ -1029,8 +1020,8 @@ public class Model
     public int xDistToPointFromCameraView[];
     public int yDistToPointFromCameraView[];
     public int zDistToPointFromCameraView[];
-    public int xScreen[];
-    public int yScreen[];
+    public double xScreen[];
+    public double yScreen[];
     public int pointBrightness[];
     public byte aByteArray233[];
     public int nbrSurfaces;
@@ -1041,9 +1032,9 @@ public class Model
     public int normalLength[];
     public int scaleFactor[];
     public int lightSourceProjectToSurfNormal[];
-    public int xNormals[];
-    public int zNormals[];
-    private int yNormals[];
+    public double xNormals[];
+    public double zNormals[];
+    private double yNormals[];
     public int extraDrawWeight;
     public int modelType;
     public boolean visible;
@@ -1064,10 +1055,10 @@ public class Model
     public boolean aBoolean262;
     public boolean aBoolean263;
     public boolean aBoolean264;
-    private static int sin256[];
-    private static int cos256[];
-    private static int sin1024[];
-    private static int cos1024[];
+    private static double sin256[];
+    private static double cos256[];
+    private static double sin1024[];
+    private static double cos1024[];
     private static byte aByteArray267[];
     private static int anIntArray268[];
     private int invisible;
@@ -1113,21 +1104,21 @@ public class Model
     private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
     static {
-        sin256 = new int[0x100];
-        cos256 = new int[0x100];
-        sin1024 = new int[0x400];
-        cos1024 = new int[0x400];
+        sin256 = new double[0x100];
+        cos256 = new double[0x100];
+        sin1024 = new double[0x400];
+        cos1024 = new double[0x400];
         aByteArray267 = new byte[64];
         anIntArray268 = new int[256];
         for (int i = 0; i < 0x100;
-        		sin256[i++] = (int) (Math.sin((double) i * 0.02454369D) * 32768D));
+        		sin256[i++] = Math.sin((double) i * 0.02454369D));
         for (int i = 0; i < 0x100;
-        		cos256[i++] = (int) (Math.cos((double) i * 0.02454369D) * 32768D));
+        		cos256[i++] = Math.cos((double) i * 0.02454369D));
 
         for (int i = 0; i < 0x400;
-        		sin1024[i++] = (int) (Math.sin((double) i * 0.00613592315D) * 32768D));
+        		sin1024[i++] = Math.sin((double) i * 0.00613592315D));
         for (int i = 0; i < 0x400;
-        		cos1024[i++] = (int) (Math.cos((double) i * 0.00613592315D) * 32768D));
+        		cos1024[i++] = Math.cos((double) i * 0.00613592315D));
 
         for (int k = 0; k < 10; k++)
             aByteArray267[k] = (byte) (48 + k);
