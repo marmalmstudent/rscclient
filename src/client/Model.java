@@ -576,13 +576,13 @@ public class Model
         			lightSourceProjectToSurfNormal[i++] = 0);
     }
 
-    public void setLightsource(int x, int z, int y) {
+    public void setLightsource(double x, double z, double y) {
         if (aBoolean262)
             return;
         lightSourceX = x;
         lightSourceZ = z;
         lightSourceY = y;
-        lightSourceDist = (int) Math.sqrt(x * x + z * z + y * y);
+        lightSourceDist = Math.sqrt(x * x + z * z + y * y);
         setLightining();
     }
 
@@ -786,7 +786,7 @@ public class Model
     {
         if (aBoolean262)
             return;
-        int i = featuresLight * lightSourceDist >> 8;
+        double i = featuresLight * lightSourceDist / 256;
         for (int j = 0; j < nbrSurfaces; j++)
             if (lightSourceProjectToSurfNormal[j] != invisible)
                 lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
@@ -1094,10 +1094,10 @@ public class Model
     private int zSkew_x;
     private int actions;
     private double longestLength;
-    private int lightSourceX;
-    private int lightSourceZ;
-    private int lightSourceY;
-    private int lightSourceDist;
+    private double lightSourceX;
+    private double lightSourceZ;
+    private double lightSourceY;
+    private double lightSourceDist;
     protected int featuresLight;
     protected int globalLight;
     private int anInt309;

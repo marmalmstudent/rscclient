@@ -30,8 +30,8 @@ public class Camera {
         cameraSizeInt = 8;
 		 */
 		anInt402 = 4;
-		triangleScreenX = new int[40];
-		triangleScreenY = new int[40];
+		triangleScreenX = new double[40];
+		triangleScreenY = new double[40];
 		triangleBright = new int[40];
 		xDistToPointFromCamera = new int[40];
 		zDistToPointFromCamera = new int[40];
@@ -396,7 +396,7 @@ public class Camera {
 						int visibleXMask = 0;
 						for (int k = 0; k < pointsInCell; k++)
 						{
-							int x = (int)model.xScreen[surface[k]];
+							double x = model.xScreen[surface[k]];
 							if (x > -halfWidth)
 								visibleXMask |= 1;
 							if (x < halfWidth)
@@ -455,14 +455,14 @@ public class Camera {
 			{
 				int surface[] = model_1.surfaces[k];
 				int p0 = surface[0];
-				int x = (int)model_1.xScreen[p0];
-				int y = (int)model_1.yScreen[p0];
-				int distToCam = (int)model_1.getDistanceTo(p0);
+				double x = model_1.xScreen[p0];
+				double y = model_1.yScreen[p0];
+				double distToCam = model_1.getDistanceTo(p0);
 				if (distToCam > planeOfViewOffsetFromCamera
 						&& distToCam < drawSpriteMaxDist)
 				{
-					int modelWidth = (anIntArray420[k] << cameraSizeInt) / distToCam;
-					int modelHeight = (anIntArray421[k] << cameraSizeInt) / distToCam;
+					double modelWidth = (anIntArray420[k] << cameraSizeInt) / distToCam;
+					double modelHeight = (anIntArray421[k] << cameraSizeInt) / distToCam;
 					if (x - modelWidth / 2 <= halfWidth
 							&& x + modelWidth / 2 >= -halfWidth
 							&& y - modelHeight <= halfHeight
@@ -544,8 +544,8 @@ public class Camera {
 							brightness = model.globalLight + (int)model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint];
 					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
-						triangleScreenX[pointsInSurfac] = (int)model.xScreen[dataPoint];
-						triangleScreenY[pointsInSurfac] = (int)model.yScreen[dataPoint];
+						triangleScreenX[pointsInSurfac] = model.xScreen[dataPoint];
+						triangleScreenY[pointsInSurfac] = model.yScreen[dataPoint];
 						triangleBright[pointsInSurfac] = brightness;
 						/* should chage this to allow for other
 						 * background colors than black */
@@ -567,8 +567,8 @@ public class Camera {
 							double i5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
 							double j6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
 							int factr = 1 << cameraSizeInt;
-							triangleScreenX[pointsInSurfac] = (int)(i5 * factr / planeOfViewOffsetFromCamera);
-							triangleScreenY[pointsInSurfac] = (int)(j6 * factr / planeOfViewOffsetFromCamera);
+							triangleScreenX[pointsInSurfac] = i5 * factr / planeOfViewOffsetFromCamera;
+							triangleScreenY[pointsInSurfac] = j6 * factr / planeOfViewOffsetFromCamera;
 							triangleBright[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
@@ -581,8 +581,8 @@ public class Camera {
 							double j5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
 							double k6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
 							int factr = 1 << cameraSizeInt;
-							triangleScreenX[pointsInSurfac] = (int)(j5 * factr / planeOfViewOffsetFromCamera);
-							triangleScreenY[pointsInSurfac] = (int)(k6 * factr / planeOfViewOffsetFromCamera);
+							triangleScreenX[pointsInSurfac] = j5 * factr / planeOfViewOffsetFromCamera;
+							triangleScreenY[pointsInSurfac] = k6 * factr / planeOfViewOffsetFromCamera;
 							triangleBright[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
@@ -610,16 +610,16 @@ public class Camera {
 	}
 
 	private void makeTriangle(int xMin, int xMax, int xMinBright, int pointsInSurface,
-			int triangleX[], int triangleY[], int brightness[],
+			double triangleX[], double triangleY[], int brightness[],
 			Model model, int j1)
 	{
 		int i, j;
 		int[] p_y = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_y[i] = triangleY[i] + halfHeight2;
+			p_y[i] = (int)triangleY[i] + halfHeight2;
 		int[] p_x = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_x[i] = triangleX[i];
+			p_x[i] = (int)triangleX[i];
 		int[] p_b = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
 			p_b[i] = brightness[i];
@@ -1906,8 +1906,8 @@ public class Camera {
 	CameraVariables cameraVariables[];
 	int modelYMin;
 	int modelYMax;
-	int triangleScreenX[];
-	int triangleScreenY[];
+	double triangleScreenX[];
+	double triangleScreenY[];
 	int triangleBright[];
 	int xDistToPointFromCamera[];
 	int zDistToPointFromCamera[];
