@@ -15,163 +15,180 @@ public class EngineHandle
 {
 
     public int getStepCount(int walkSectionX, int walkSectionY, int x1, int y1,
-    		int x2, int y2, int[] walkSectionXArray, int[] walkSectionYArray, boolean flag)
+    		int x2, int y2, int[] walkSectionXArray, int[] walkSectionYArray,
+    		boolean checkForObjects)
     {
         int[][] tmpTiles = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
         for (int k1 = 0; k1 < VISIBLE_SECTORS*SECTOR_WIDTH; k1++)
             for (int l1 = 0; l1 < VISIBLE_SECTORS*SECTOR_HEIGHT; l1++)
                 tmpTiles[k1][l1] = 0;
 
-        int i2 = 0;
+        int requiredSteps = 0;
         int stepCount = 0;
-        int x_smth = walkSectionX;
-        int y_smth = walkSectionY;
+        int x = walkSectionX;
+        int y = walkSectionY;
         tmpTiles[walkSectionX][walkSectionY] = 99;
-        walkSectionXArray[i2] = walkSectionX;
-        walkSectionYArray[i2++] = walkSectionY;
+        walkSectionXArray[requiredSteps] = walkSectionX;
+        walkSectionYArray[requiredSteps++] = walkSectionY;
         int i3 = walkSectionXArray.length;
         boolean pathAvailable = false;
-        while (stepCount != i2)
+        while (stepCount != requiredSteps)
         {
-            x_smth = walkSectionXArray[stepCount];
-            y_smth = walkSectionYArray[stepCount];
+            x = walkSectionXArray[stepCount];
+            y = walkSectionYArray[stepCount];
             stepCount = (stepCount + 1) % i3;
-            if (x_smth >= x1 && x_smth <= x2 && y_smth >= y1 && y_smth <= y2)
+            if (x >= x1 && x <= x2 && y >= y1 && y <= y2)
             {
                 pathAvailable = true;
                 break;
             }
-            if (flag)
+            if (checkForObjects)
             {
-                if (x_smth > 0 && x_smth - 1 >= x1 && x_smth - 1 <= x2
-                		&& y_smth >= y1 && y_smth <= y2
-                		&& (walkableValue[x_smth - 1][y_smth] & 8) == 0)
+                if (x > 0 && x - 1 >= x1 && x - 1 <= x2
+                		&& y >= y1 && y <= y2
+                		&& (walkableValue[x - 1][y] & WALKABLE_3) == 0)
                 {
                     pathAvailable = true;
                     break;
                 }
-                if (x_smth < 95 && x_smth + 1 >= x1 && x_smth + 1 <= x2
-                		&& y_smth >= y1 && y_smth <= y2
-                		&& (walkableValue[x_smth + 1][y_smth] & 2) == 0)
+                if (x < 95 && x + 1 >= x1 && x + 1 <= x2
+                		&& y >= y1 && y <= y2
+                		&& (walkableValue[x + 1][y] & WALKABLE_1) == 0)
                 {
                     pathAvailable = true;
                     break;
                 }
-                if (y_smth > 0 && x_smth >= x1 && x_smth <= x2
-                		&& y_smth - 1 >= y1 && y_smth - 1 <= y2
-                		&& (walkableValue[x_smth][y_smth - 1] & 4) == 0)
+                if (y > 0 && x >= x1 && x <= x2
+                		&& y - 1 >= y1 && y - 1 <= y2
+                		&& (walkableValue[x][y - 1] & WALKABLE_2) == 0)
                 {
                     pathAvailable = true;
                     break;
                 }
-                if (y_smth < 95 && x_smth >= x1 && x_smth <= x2
-                		&& y_smth + 1 >= y1 && y_smth + 1 <= y2
-                		&& (walkableValue[x_smth][y_smth + 1] & 1) == 0)
+                if (y < 95 && x >= x1 && x <= x2
+                		&& y + 1 >= y1 && y + 1 <= y2
+                		&& (walkableValue[x][y + 1] & WALKABLE_0) == 0)
                 {
                     pathAvailable = true;
                     break;
                 }
             }
-            if (x_smth > 0 && tmpTiles[x_smth - 1][y_smth] == 0
-            		&& (walkableValue[x_smth - 1][y_smth] & 0x78) == 0)
+            if (x > 0 && tmpTiles[x - 1][y] == 0
+            		&& (walkableValue[x - 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3)) == 0)
             {
-                walkSectionXArray[i2] = x_smth - 1;
-                walkSectionYArray[i2] = y_smth;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth - 1][y_smth] = 2;
+                walkSectionXArray[requiredSteps] = x - 1;
+                walkSectionYArray[requiredSteps] = y;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x - 1][y] = 2;
             }
-            if (x_smth < VISIBLE_SECTORS*SECTOR_WIDTH-1 && tmpTiles[x_smth + 1][y_smth] == 0
-            		&& (walkableValue[x_smth + 1][y_smth] & 0x72) == 0)
+            if (x < VISIBLE_SECTORS*SECTOR_WIDTH-1 && tmpTiles[x + 1][y] == 0
+            		&& (walkableValue[x + 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1)) == 0)
             {
-                walkSectionXArray[i2] = x_smth + 1;
-                walkSectionYArray[i2] = y_smth;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth + 1][y_smth] = 8;
+                walkSectionXArray[requiredSteps] = x + 1;
+                walkSectionYArray[requiredSteps] = y;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x + 1][y] = 8;
             }
-            if (y_smth > 0 && tmpTiles[x_smth][y_smth - 1] == 0
-            		&& (walkableValue[x_smth][y_smth - 1] & 0x74) == 0)
+            if (y > 0 && tmpTiles[x][y - 1] == 0
+            		&& (walkableValue[x][y - 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_2)) == 0)
             {
-                walkSectionXArray[i2] = x_smth;
-                walkSectionYArray[i2] = y_smth - 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth][y_smth - 1] = 1;
+                walkSectionXArray[requiredSteps] = x;
+                walkSectionYArray[requiredSteps] = y - 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x][y - 1] = 1;
             }
-            if (y_smth < VISIBLE_SECTORS*SECTOR_HEIGHT-1 && tmpTiles[x_smth][y_smth + 1] == 0
-            		&& (walkableValue[x_smth][y_smth + 1] & 0x71) == 0)
+            if (y < VISIBLE_SECTORS*SECTOR_HEIGHT-1 && tmpTiles[x][y + 1] == 0
+            		&& (walkableValue[x][y + 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_0)) == 0)
             {
-                walkSectionXArray[i2] = x_smth;
-                walkSectionYArray[i2] = y_smth + 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth][y_smth + 1] = 4;
+                walkSectionXArray[requiredSteps] = x;
+                walkSectionYArray[requiredSteps] = y + 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x][y + 1] = 4;
             }
-            if (x_smth > 0 && y_smth > 0 && (walkableValue[x_smth][y_smth - 1] & 0x74) == 0
-            		&& (walkableValue[x_smth - 1][y_smth] & 0x78) == 0
-            		&& (walkableValue[x_smth - 1][y_smth - 1] & 0x7c) == 0
-            		&& tmpTiles[x_smth - 1][y_smth - 1] == 0)
+            if (x > 0 && y > 0 && (walkableValue[x][y - 1]
+            		& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_2)) == 0
+            		&& (walkableValue[x - 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3)) == 0
+            		&& (walkableValue[x - 1][y - 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3 | WALKABLE_2)) == 0
+            		&& tmpTiles[x - 1][y - 1] == 0)
             {
-                walkSectionXArray[i2] = x_smth - 1;
-                walkSectionYArray[i2] = y_smth - 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth - 1][y_smth - 1] = 3;
+                walkSectionXArray[requiredSteps] = x - 1;
+                walkSectionYArray[requiredSteps] = y - 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x - 1][y - 1] = 3;
             }
-            if (x_smth < VISIBLE_SECTORS*SECTOR_WIDTH-1 && y_smth > 0
-            		&& (walkableValue[x_smth][y_smth - 1] & 0x74) == 0
-            		&& (walkableValue[x_smth + 1][y_smth] & 0x72) == 0
-            		&& (walkableValue[x_smth + 1][y_smth - 1] & 0x76) == 0
-            		&& tmpTiles[x_smth + 1][y_smth - 1] == 0)
+            if (x < VISIBLE_SECTORS*SECTOR_WIDTH-1 && y > 0
+            		&& (walkableValue[x][y - 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_2)) == 0
+            		&& (walkableValue[x + 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1)) == 0
+            		&& (walkableValue[x + 1][y - 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_2 | WALKABLE_1)) == 0
+            		&& tmpTiles[x + 1][y - 1] == 0)
             {
-                walkSectionXArray[i2] = x_smth + 1;
-                walkSectionYArray[i2] = y_smth - 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth + 1][y_smth - 1] = 9;
+                walkSectionXArray[requiredSteps] = x + 1;
+                walkSectionYArray[requiredSteps] = y - 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x + 1][y - 1] = 9;
             }
-            if (x_smth > 0 && y_smth < VISIBLE_SECTORS*SECTOR_HEIGHT-1
-            		&& (walkableValue[x_smth][y_smth + 1] & 0x71) == 0
-            		&& (walkableValue[x_smth - 1][y_smth] & 0x78) == 0
-            		&& (walkableValue[x_smth - 1][y_smth + 1] & 0x79) == 0
-            		&& tmpTiles[x_smth - 1][y_smth + 1] == 0)
+            if (x > 0 && y < VISIBLE_SECTORS*SECTOR_HEIGHT-1
+            		&& (walkableValue[x][y + 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_0)) == 0
+            		&& (walkableValue[x - 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3)) == 0
+            		&& (walkableValue[x - 1][y + 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3 | WALKABLE_0)) == 0
+            		&& tmpTiles[x - 1][y + 1] == 0)
             {
-                walkSectionXArray[i2] = x_smth - 1;
-                walkSectionYArray[i2] = y_smth + 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth - 1][y_smth + 1] = 6;
+                walkSectionXArray[requiredSteps] = x - 1;
+                walkSectionYArray[requiredSteps] = y + 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x - 1][y + 1] = 6;
             }
-            if (x_smth < VISIBLE_SECTORS*SECTOR_WIDTH-1
-            		&& y_smth < VISIBLE_SECTORS*SECTOR_HEIGHT-1
-            		&& (walkableValue[x_smth][y_smth + 1] & 0x71) == 0
-            		&& (walkableValue[x_smth + 1][y_smth] & 0x72) == 0
-            		&& (walkableValue[x_smth + 1][y_smth + 1] & 0x73) == 0
-            		&& tmpTiles[x_smth + 1][y_smth + 1] == 0)
+            if (x < VISIBLE_SECTORS*SECTOR_WIDTH-1
+            		&& y < VISIBLE_SECTORS*SECTOR_HEIGHT-1
+            		&& (walkableValue[x][y + 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_0)) == 0
+            		&& (walkableValue[x + 1][y]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1)) == 0
+            		&& (walkableValue[x + 1][y + 1]
+            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1 | WALKABLE_0)) == 0
+            		&& tmpTiles[x + 1][y + 1] == 0)
             {
-                walkSectionXArray[i2] = x_smth + 1;
-                walkSectionYArray[i2] = y_smth + 1;
-                i2 = (i2 + 1) % i3;
-                tmpTiles[x_smth + 1][y_smth + 1] = 12;
+                walkSectionXArray[requiredSteps] = x + 1;
+                walkSectionYArray[requiredSteps] = y + 1;
+                requiredSteps = (requiredSteps + 1) % i3;
+                tmpTiles[x + 1][y + 1] = 12;
             }
         }
         if (!pathAvailable)
             return -1;
         stepCount = 0;
-        walkSectionXArray[stepCount] = x_smth;
-        walkSectionYArray[stepCount++] = y_smth;
+        walkSectionXArray[stepCount] = x;
+        walkSectionYArray[stepCount++] = y;
         int k3;
-        for (int j3 = k3 = tmpTiles[x_smth][y_smth]; x_smth != walkSectionX
-        		|| y_smth != walkSectionY; j3 = tmpTiles[x_smth][y_smth])
+        for (int j3 = k3 = tmpTiles[x][y]; x != walkSectionX
+        		|| y != walkSectionY; j3 = tmpTiles[x][y])
         {
             if (j3 != k3) {
                 k3 = j3;
-                walkSectionXArray[stepCount] = x_smth;
-                walkSectionYArray[stepCount++] = y_smth;
+                walkSectionXArray[stepCount] = x;
+                walkSectionYArray[stepCount++] = y;
             }
             if ((j3 & 2) != 0) {
-                x_smth++;
+                x++;
             } else if ((j3 & 8) != 0) {
-                x_smth--;
+                x--;
             }
             if ((j3 & 1) != 0) {
-                y_smth++;
+                y++;
             } else if ((j3 & 4) != 0) {
-                y_smth--;
+                y--;
             }
         }
         return stepCount;
@@ -196,47 +213,47 @@ public class EngineHandle
         return (sectors[section].getTile(x, y).groundElevation & 0xff) * 3;
     }
 
-    public void updateObject(int x, int y, int k, int l)
+    public void updateObject(int x, int y, int id, int l)
     {
         if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH-1
         		|| y < 0 || y >= VISIBLE_SECTORS*SECTOR_HEIGHT-1) {
             return;
         }
-        if (EntityHandler.getObjectDef(k).getType() == 1
-        		|| EntityHandler.getObjectDef(k).getType() == 2)
+        if (EntityHandler.getObjectDef(id).getType() == 1
+        		|| EntityHandler.getObjectDef(id).getType() == 2)
         {
             int i1;
             int j1;
             if (l == 0 || l == 4) {
-                i1 = EntityHandler.getObjectDef(k).getWidth();
-                j1 = EntityHandler.getObjectDef(k).getHeight();
+                i1 = EntityHandler.getObjectDef(id).getWidth();
+                j1 = EntityHandler.getObjectDef(id).getHeight();
             } else {
-                j1 = EntityHandler.getObjectDef(k).getWidth();
-                i1 = EntityHandler.getObjectDef(k).getHeight();
+                j1 = EntityHandler.getObjectDef(id).getWidth();
+                i1 = EntityHandler.getObjectDef(id).getHeight();
             }
-            for (int k1 = x; k1 < x + i1; k1++) {
-                for (int l1 = y; l1 < y + j1; l1++) {
-                    if (EntityHandler.getObjectDef(k).getType() == 1)
-                        walkableValue[k1][l1] &= 0xffbf;
+            for (int i = x; i < x + i1; i++) {
+                for (int j = y; j < y + j1; j++) {
+                    if (EntityHandler.getObjectDef(id).getType() == 1)
+                        walkableValue[i][j] &= 0xffff ^ WALKABLE_6; //0xffbf;
                     else if (l == 0) {
-                        walkableValue[k1][l1] &= 0xfffd;
-                        if (k1 > 0) {
-                            andMinusWalkable(k1 - 1, l1, 8);
+                        walkableValue[i][j] &= 0xffff ^ WALKABLE_1; //0xfffd;
+                        if (i > 0) {
+                            andMinusWalkable(i - 1, j, WALKABLE_3);
                         }
                     } else if (l == 2) {
-                        walkableValue[k1][l1] &= 0xfffb;
-                        if (l1 < 95) {
-                            andMinusWalkable(k1, l1 + 1, 1);
+                        walkableValue[i][j] &= 0xffff ^ WALKABLE_2; //0xfffb;
+                        if (j < 95) {
+                            andMinusWalkable(i, j + 1, WALKABLE_0);
                         }
                     } else if (l == 4) {
-                        walkableValue[k1][l1] &= 0xfff7;
-                        if (k1 < 95) {
-                            andMinusWalkable(k1 + 1, l1, 2);
+                        walkableValue[i][j] &= 0xffff ^ WALKABLE_3; //0xfff7;
+                        if (i < 95) {
+                            andMinusWalkable(i + 1, j, WALKABLE_1);
                         }
                     } else if (l == 6) {
-                        walkableValue[k1][l1] &= 0xfffe;
-                        if (l1 > 0) {
-                            andMinusWalkable(k1, l1 - 1, 4);
+                        walkableValue[i][j] &= 0xffff ^ WALKABLE_0; //0xfffe;
+                        if (j > 0) {
+                            andMinusWalkable(i, j - 1, WALKABLE_2);
                         }
                     }
                 }
@@ -326,13 +343,13 @@ public class EngineHandle
         }
     }
 
-    public void method403(int i, int j, int k, int l, int i1) {
-        int j1 = EntityHandler.getDoorDef(i).getHeight();
-        if (elevation[j][k] < 0x13880) {
-            elevation[j][k] += 0x13880 + j1;
+    public void method403(int wallHeight, int x0, int y0, int x1, int y1) {
+        int height = EntityHandler.getDoorDef(wallHeight).getHeight();
+        if (elevation[x0][y0] < 0x13880) {
+            elevation[x0][y0] += 0x13880 + height;
         }
-        if (elevation[l][i1] < 0x13880) {
-            elevation[l][i1] += 0x13880 + j1;
+        if (elevation[x1][y1] < 0x13880) {
+            elevation[x1][y1] += 0x13880 + height;
         }
     }
 
@@ -356,8 +373,8 @@ public class EngineHandle
         sectors[section].getTile(x, y).groundOverlay = (byte) k;
     }
 
-    public void orWalkable(int i, int j, int k) {
-        walkableValue[i][j] |= k;
+    public void orWalkable(int x, int y, int val) {
+        walkableValue[x][y] |= val;
     }
 
     public void garbageCollect() {
@@ -367,10 +384,10 @@ public class EngineHandle
         for (int i = 0; i < 64; i++) {
             aModelArray596[i] = null;
             for (int j = 0; j < 4; j++) {
-                aModelArrayArray580[j][i] = null;
+                walls[j][i] = null;
             }
             for (int k = 0; k < 4; k++) {
-                aModelArrayArray598[k][i] = null;
+                roofs[k][i] = null;
             }
         }
         System.gc();
@@ -406,19 +423,19 @@ public class EngineHandle
             return;
         if (EntityHandler.getDoorDef(l).getDoorType() == 1) {
             if (k == 0) {
-                walkableValue[x][y] |= 1;
+                walkableValue[x][y] |= WALKABLE_0;
                 if (y > 0) {
-                    orWalkable(x, y - 1, 4);
+                    orWalkable(x, y - 1, WALKABLE_2);
                 }
             } else if (k == 1) {
-                walkableValue[x][y] |= 2;
+                walkableValue[x][y] |= WALKABLE_1;
                 if (x > 0) {
-                    orWalkable(x - 1, y, 8);
+                    orWalkable(x - 1, y, WALKABLE_3);
                 }
             } else if (k == 2) {
-                walkableValue[x][y] |= 0x10;
+                walkableValue[x][y] |= WALKABLE_4;
             } else if (k == 3) {
-                walkableValue[x][y] |= 0x20;
+                walkableValue[x][y] |= WALKABLE_5;
             }
             method407(x, y, 1, 1);
         }
@@ -453,16 +470,16 @@ public class EngineHandle
                 {
                     int z = -getGroundElevation(x, y);
                     if (getGroundTexturesOverlay(x, y) > 0
-                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() == 4)
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                         z = 0;
                     if (getGroundTexturesOverlay(x - 1, y) > 0
-                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getUnknown() == 4)
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getTexture() == 4)
                         z = 0;
                     if (getGroundTexturesOverlay(x, y - 1) > 0
-                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getUnknown() == 4)
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getTexture() == 4)
                         z = 0;
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
-                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getUnknown() == 4)
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
                     int j5 = model.insertCoordPointNoDuplicate(x * 128, z, y * 128);
                     int j7 = (int) (Math.random() * 10D) - 5;
@@ -495,7 +512,7 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(tile_x, tile_y) > 0)
                     {  // Draws roads, water etc.
                         int tileOverlay = getGroundTexturesOverlay(tile_x, tile_y);
-                        int unknown = EntityHandler.getTileDef(tileOverlay - 1).getUnknown();
+                        int unknown = EntityHandler.getTileDef(tileOverlay - 1).getTexture();
                         int i19 = method427(tile_x, tile_y);
                         if (textures)
                         {
@@ -574,16 +591,15 @@ public class EngineHandle
                             }
                         }
                         if (EntityHandler.getTileDef(tileOverlay - 1).getObjectType() != 0)
-                            walkableValue[tile_x][tile_y] |= 0x40;
-                        if (EntityHandler.getTileDef(tileOverlay - 1).getUnknown() == 2)
-                            walkableValue[tile_x][tile_y] |= 0x80;
+                            walkableValue[tile_x][tile_y] |= WALKABLE_6;
+                        if (EntityHandler.getTileDef(tileOverlay - 1).getTexture() == 2)
+                            walkableValue[tile_x][tile_y] |= WALKABLE_INDOORS;
                     }
                     drawOnMinimap(tile_x, tile_y, l14, texture1, texture2);
                     int i17 = ((getGroundElevation(tile_x + 1, tile_y + 1)
                     		- getGroundElevation(tile_x + 1, tile_y))
                     		+ getGroundElevation(tile_x, tile_y + 1))
                     		- getGroundElevation(tile_x, tile_y);
-                    // TODO: figure out if the 96 has to do with width or height
                     if (texture1 != texture2 || i17 != 0)
                     {
                         int surfacePoints1[] = new int[3];
@@ -592,21 +608,19 @@ public class EngineHandle
                         {
                             if (texture1 != Model.INVISIBLE)
                             {
-                                surfacePoints1[0] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT;
+                                surfacePoints1[0] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                surfacePoints1[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
+                                surfacePoints1[2] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 int i = model.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
                                 model.entityType[i] = 0x30d40 + i;
                             }
-                            if (texture2 != Model.INVISIBLE) {
-                                surfacePoints2[0] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
-                                surfacePoints2[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
-                                surfacePoints2[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT;
+                            if (texture2 != Model.INVISIBLE)
+                            {
+                                surfacePoints2[0] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                                surfacePoints2[1] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                                surfacePoints2[2] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 int i = model.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
@@ -617,9 +631,8 @@ public class EngineHandle
                         {
                             if (texture1 != Model.INVISIBLE)
                             {
-                                surfacePoints1[0] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
-                                surfacePoints1[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
+                                surfacePoints1[0] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                                surfacePoints1[1] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 int i = model.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
                                 selectedX[i] = tile_x;
@@ -628,11 +641,9 @@ public class EngineHandle
                             }
                             if (texture2 != Model.INVISIBLE)
                             {
-                                surfacePoints2[0] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT;
+                                surfacePoints2[0] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints2[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                surfacePoints2[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                                		+ VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
+                                surfacePoints2[2] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 int i = model.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
@@ -642,14 +653,12 @@ public class EngineHandle
                     }
                     else if (texture1 != Model.INVISIBLE)
                     {
-                        int ai1[] = new int[4];
-                        ai1[0] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                        		+ VISIBLE_SECTORS*SECTOR_HEIGHT;
-                        ai1[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                        ai1[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
-                        ai1[3] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT
-                        		+ VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
-                        int l19 = model.addSurface(4, ai1, Model.INVISIBLE, texture1);
+                        int surfacePoints[] = new int[4];
+                        surfacePoints[0] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                        surfacePoints[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                        surfacePoints[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
+                        surfacePoints[3] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
+                        int l19 = model.addSurface(4, surfacePoints, Model.INVISIBLE, texture1);
                         selectedX[l19] = tile_x;
                         selectedY[l19] = tile_y;
                         model.entityType[l19] = 0x30d40 + l19;
@@ -663,7 +672,7 @@ public class EngineHandle
                 for (int y = 1; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++)
                 {
                     if (getGroundTexturesOverlay(x, y) > 0
-                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() == 4)
+                    		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                     {
                         int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
                         int p00 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y), y * 128);
@@ -678,14 +687,14 @@ public class EngineHandle
                         drawOnMinimap(x, y, 0, color, color);
                     }
                     else if (getGroundTexturesOverlay(x, y) == 0
-                    		|| EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() != 3)
+                    		|| EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() != 3)
                     {
                     	int[] x_arr = {0, 0, 1, -1};
                     	int[] y_arr = {1, -1, 0, 0};
                     	for (int i = 0; i < 4; ++i)
                     	{
                     		if (getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) > 0
-                            		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getUnknown() == 4)
+                            		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getTexture() == 4)
                             {
                                 int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getColour();
                                 int p00 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y), y * 128);
@@ -720,16 +729,16 @@ public class EngineHandle
         }
         aModel.method176();
         int k1 = 0xc0c0c0;
-        // walls, fences
+        // minimap walls, fences
         for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++) {
             for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++) {
                 int k3 = getVerticalWall(x, y);
                 if (k3 > 0 && EntityHandler.getDoorDef(k3 - 1).getUnknown() == 0) {
                     method421(aModel, k3 - 1, x, y, x + 1, y);
                     if (flag && EntityHandler.getDoorDef(k3 - 1).getDoorType() != 0) {
-                        walkableValue[x][y] |= 1;
+                        walkableValue[x][y] |= WALKABLE_0;
                         if (y > 0) {
-                            orWalkable(x, y - 1, 4);
+                            orWalkable(x, y - 1, WALKABLE_2);
                         }
                     }
                     if (flag) {
@@ -740,9 +749,9 @@ public class EngineHandle
                 if (k3 > 0 && EntityHandler.getDoorDef(k3 - 1).getUnknown() == 0) {
                     method421(aModel, k3 - 1, x, y, x, y + 1);
                     if (flag && EntityHandler.getDoorDef(k3 - 1).getDoorType() != 0) {
-                        walkableValue[x][y] |= 2;
+                        walkableValue[x][y] |= WALKABLE_1;
                         if (x > 0) {
-                            orWalkable(x - 1, y, 8);
+                            orWalkable(x - 1, y, WALKABLE_3);
                         }
                     }
                     if (flag) {
@@ -753,18 +762,18 @@ public class EngineHandle
                 if (k3 > 0 && k3 < 12000 && EntityHandler.getDoorDef(k3 - 1).getUnknown() == 0) {
                     method421(aModel, k3 - 1, x, y, x + 1, y + 1);
                     if (flag && EntityHandler.getDoorDef(k3 - 1).getDoorType() != 0) {
-                        walkableValue[x][y] |= 0x20;
+                        walkableValue[x][y] |= WALKABLE_5;
                     }
                     if (flag) {
                         gameImage.setMinimapPixel(x * 3, y * 3, k1);
-                        gameImage.setMinimapPixel(x * 3*2 + 1, y * 3 + 1, k1);
-                        gameImage.setMinimapPixel(x * 3*2 + 2, y * 3 + 2, k1);
+                        gameImage.setMinimapPixel(x * 3 + 1, y * 3 + 1, k1);
+                        gameImage.setMinimapPixel(x * 3 + 2, y * 3 + 2, k1);
                     }
                 }
                 if (k3 > 12000 && k3 < 24000 && EntityHandler.getDoorDef(k3 - 12001).getUnknown() == 0) {
                     method421(aModel, k3 - 12001, x + 1, y, x, y + 1);
                     if (flag && EntityHandler.getDoorDef(k3 - 12001).getDoorType() != 0) {
-                        walkableValue[x][y] |= 0x10;
+                        walkableValue[x][y] |= WALKABLE_4;
                     }
                     if (flag) {
                         gameImage.setMinimapPixel(x * 3 + 2, y * 3, k1);
@@ -777,27 +786,27 @@ public class EngineHandle
         if (flag) {
             gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1, 0, 0, 285, 285);
         }
-        // walls, fences etc.
+        // viewport walls, fences etc.
         aModel.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
-        aModelArrayArray580[hSector] = aModel.method182(1536, 1536, 8, 64, 338, true);
-        for (int l2 = 0; l2 < 64; l2++) {
-            camera.addModel(aModelArrayArray580[hSector][l2]);
+        walls[hSector] = aModel.method182(1536, 1536, 8, 64, 338, true);
+        for (int building = 0; building < 64; building++) {
+            camera.addModel(walls[hSector][building]);
         }
         for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
         {
             for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++)
             {
-                int k6 = getVerticalWall(x, y);
-                if (k6 > 0)
-                    method403(k6 - 1, x, y, x + 1, y);
-                k6 = getHorizontalWall(x, y);
-                if (k6 > 0)
-                    method403(k6 - 1, x, y, x, y + 1);
-                k6 = getDiagonalWalls(x, y);
-                if (k6 > 0 && k6 < 12000)
-                    method403(k6 - 1, x, y, x + 1, y + 1);
-                if (k6 > 12000 && k6 < 24000)
-                    method403(k6 - 12001, x + 1, y, x, y + 1);
+                int wallID = getVerticalWall(x, y);
+                if (wallID > 0)
+                    method403(wallID - 1, x, y, x + 1, y);
+                wallID = getHorizontalWall(x, y);
+                if (wallID > 0)
+                    method403(wallID - 1, x, y, x, y + 1);
+                wallID = getDiagonalWalls(x, y);
+                if (wallID > 0 && wallID < 12000)
+                    method403(wallID - 1, x, y, x + 1, y + 1);
+                if (wallID > 12000 && wallID < 24000)
+                    method403(wallID - 12001, x + 1, y, x, y + 1);
             }
         }
         for (int x = 1; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
@@ -814,43 +823,43 @@ public class EngineHandle
                     int y11 = y + 1;
                     int x01 = x;
                     int y01 = y + 1;
-                    int l23 = 0;
-                    int j24 = elevation[x00][y00];
-                    int l24 = elevation[x10][y10];
-                    int j25 = elevation[x11][y11];
-                    int l25 = elevation[x01][y01];
-                    if (j24 > 0x13880)
-                        j24 -= 0x13880;
-                    if (l24 > 0x13880)
-                        l24 -= 0x13880;
-                    if (j25 > 0x13880)
-                        j25 -= 0x13880;
-                    if (l25 > 0x13880)
-                        l25 -= 0x13880;
-                    if (j24 > l23)
-                        l23 = j24;
-                    if (l24 > l23)
-                        l23 = l24;
-                    if (j25 > l23)
-                        l23 = j25;
-                    if (l25 > l23)
-                        l23 = l25;
-                    if (l23 >= 0x13880)
-                        l23 -= 0x13880;
-                    if (j24 < 0x13880)
-                        elevation[x00][y00] = l23;
+                    int zMax = 0;
+                    int z00 = elevation[x00][y00];
+                    int z10 = elevation[x10][y10];
+                    int z11 = elevation[x11][y11];
+                    int z01 = elevation[x01][y01];
+                    if (z00 > 0x13880)
+                        z00 -= 0x13880;
+                    if (z10 > 0x13880)
+                        z10 -= 0x13880;
+                    if (z11 > 0x13880)
+                        z11 -= 0x13880;
+                    if (z01 > 0x13880)
+                        z01 -= 0x13880;
+                    if (z00 > zMax)
+                        zMax = z00;
+                    if (z10 > zMax)
+                        zMax = z10;
+                    if (z11 > zMax)
+                        zMax = z11;
+                    if (z01 > zMax)
+                        zMax = z01;
+                    if (zMax >= 0x13880)
+                        zMax -= 0x13880;
+                    if (z00 < 0x13880)
+                        elevation[x00][y00] = zMax;
                     else
                         elevation[x00][y00] -= 0x13880;
-                    if (l24 < 0x13880)
-                        elevation[x10][y10] = l23;
+                    if (z10 < 0x13880)
+                        elevation[x10][y10] = zMax;
                     else
                         elevation[x10][y10] -= 0x13880;
-                    if (j25 < 0x13880)
-                        elevation[x11][y11] = l23;
+                    if (z11 < 0x13880)
+                        elevation[x11][y11] = zMax;
                     else
                         elevation[x11][y11] -= 0x13880;
-                    if (l25 < 0x13880)
-                        elevation[x01][y01] = l23;
+                    if (z01 < 0x13880)
+                        elevation[x01][y01] = zMax;
                     else
                         elevation[x01][y01] -= 0x13880;
                 }
@@ -909,45 +918,46 @@ public class EngineHandle
                         z11 -= 0x13880;
                     if (z01 >= 0x13880)
                         z01 -= 0x13880;
-                    byte byte0 = 16;
+                    byte roofStickOut = 16; // how much the roof should stick out
                     if (!method416(x00 - 1, y00))
-                        x0_hres -= byte0;
+                        x0_hres -= roofStickOut;
                     if (!method416(x00 + 1, y00))
-                        x0_hres += byte0;
+                        x0_hres += roofStickOut;
                     if (!method416(x00, y00 - 1))
-                        y0_hres -= byte0;
+                        y0_hres -= roofStickOut;
                     if (!method416(x00, y00 + 1))
-                        y0_hres += byte0;
+                        y0_hres += roofStickOut;
                     if (!method416(x10 - 1, y10))
-                        x1_hres -= byte0;
+                        x1_hres -= roofStickOut;
                     if (!method416(x10 + 1, y10))
-                        x1_hres += byte0;
+                        x1_hres += roofStickOut;
                     if (!method416(x10, y10 - 1))
-                        y0_hres2 -= byte0;
+                        y0_hres2 -= roofStickOut;
                     if (!method416(x10, y10 + 1))
-                        y0_hres2 += byte0;
+                        y0_hres2 += roofStickOut;
                     if (!method416(x11 - 1, y11))
-                        x1_hres2 -= byte0;
+                        x1_hres2 -= roofStickOut;
                     if (!method416(x11 + 1, y11))
-                        x1_hres2 += byte0;
+                        x1_hres2 += roofStickOut;
                     if (!method416(x11, y11 - 1))
-                        y1_hres -= byte0;
+                        y1_hres -= roofStickOut;
                     if (!method416(x11, y11 + 1))
-                        y1_hres += byte0;
+                        y1_hres += roofStickOut;
                     if (!method416(x01 - 1, y01))
-                        x0_hres2 -= byte0;
+                        x0_hres2 -= roofStickOut;
                     if (!method416(x01 + 1, y01))
-                        x0_hres2 += byte0;
+                        x0_hres2 += roofStickOut;
                     if (!method416(x01, y01 - 1))
-                        y1_hres2 -= byte0;
+                        y1_hres2 -= roofStickOut;
                     if (!method416(x01, y01 + 1))
-                        y1_hres2 += byte0;
+                        y1_hres2 += roofStickOut;
                     color = EntityHandler.getElevationDef(color - 1).getUnknown2();
                     z00 = -z00;
                     z10 = -z10;
                     z11 = -z11;
                     z01 = -z01;
-                    if (getDiagonalWalls(x, y) > 12000 && getDiagonalWalls(x, y) < 24000
+                    if (getDiagonalWalls(x, y) > 12000
+                    		&& getDiagonalWalls(x, y) < 24000
                     		&& getRoofTexture(x - 1, y - 1) == 0)
                     {
                         int rect[] = new int[3];
@@ -955,8 +965,9 @@ public class EngineHandle
                         rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
-                    } else
-                    if (getDiagonalWalls(x, y) > 12000 && getDiagonalWalls(x, y) < 24000
+                    }
+                    else if (getDiagonalWalls(x, y) > 12000
+                    		&& getDiagonalWalls(x, y) < 24000
                     		&& getRoofTexture(x + 1, y + 1) == 0)
                     {
                         int rect[] = new int[3];
@@ -964,8 +975,9 @@ public class EngineHandle
                         rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
-                    } else
-                    if (getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 12000
+                    }
+                    else if (getDiagonalWalls(x, y) > 0
+                    		&& getDiagonalWalls(x, y) < 12000
                     		&& getRoofTexture(x + 1, y - 1) == 0)
                     {
                         int rect[] = new int[3];
@@ -973,8 +985,9 @@ public class EngineHandle
                         rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
-                    } else
-                    if (getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 12000
+                    }
+                    else if (getDiagonalWalls(x, y) > 0
+                    		&& getDiagonalWalls(x, y) < 12000
                     		&& getRoofTexture(x - 1, y + 1) == 0)
                     {
                         int rect[] = new int[3];
@@ -982,29 +995,32 @@ public class EngineHandle
                         rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
-                    } else if (z00 == z10 && z11 == z01) {
+                    }
+                    else if (z00 == z10 && z11 == z01) {
                         int rect[] = new int[4];
                         rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                         rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
                         rect[3] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
-                    } else if (z00 == z01 && z10 == z11) {
+                    }
+                    else if (z00 == z01 && z10 == z11) {
                         int rect[] = new int[4];
                         rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
                         rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                         rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
                         rect[3] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
-                    } else {
+                    }
+                    else
+                    {
                         boolean flag1 = true;
-                        if (getRoofTexture(x - 1, y - 1) > 0) {
+                        if (getRoofTexture(x - 1, y - 1) > 0)
                             flag1 = false;
-                        }
-                        if (getRoofTexture(x + 1, y + 1) > 0) {
+                        if (getRoofTexture(x + 1, y + 1) > 0)
                             flag1 = false;
-                        }
-                        if (!flag1) {
+                        if (!flag1)
+                        {
                             int rect1[] = new int[3];
                             rect1[0] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
                             rect1[1] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
@@ -1015,7 +1031,9 @@ public class EngineHandle
                             rec2[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                             rec2[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
                             aModel.addSurface(3, rec2, color, Model.INVISIBLE);
-                        } else {
+                        }
+                        else
+                        {
                             int rect1[] = new int[3];
                             rect1[0] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
                             rect1[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
@@ -1032,11 +1050,11 @@ public class EngineHandle
             }
         }
         aModel.setLightAndGradAndSource(true, 50, 50, Camera.light_x, Camera.light_z, Camera.light_y);
-        aModelArrayArray598[hSector] = aModel.method182(1536, 1536, 8, 64, 169, true);
+        roofs[hSector] = aModel.method182(1536, 1536, 8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
-            camera.addModel(aModelArrayArray598[hSector][l9]);
+            camera.addModel(roofs[hSector][l9]);
         }
-        if (aModelArrayArray598[hSector][0] == null) {
+        if (roofs[hSector][0] == null) {
             throw new RuntimeException("null roof!");
         }
         for (int j12 = 0; j12 < VISIBLE_SECTORS*SECTOR_WIDTH; j12++) {
@@ -1068,8 +1086,9 @@ public class EngineHandle
         return sectors[section].getTile(x, y).roofTexture;
     }
 
-    public void andMinusWalkable(int i, int j, int k) {
-        walkableValue[i][j] &= 65535 - k;
+    public void andMinusWalkable(int x, int y, int val)
+    {
+        walkableValue[x][y] &= 0xffff ^ val;
     }
 
     public void method412(int x, int y, int k, int l)
@@ -1091,26 +1110,26 @@ public class EngineHandle
             for (int k1 = x; k1 < x + i1; k1++) {
                 for (int l1 = y; l1 < y + j1; l1++)
                     if (EntityHandler.getObjectDef(k).getType() == 1)
-                        walkableValue[k1][l1] |= 0x40;
+                        walkableValue[k1][l1] |= WALKABLE_6;
                     else if (l == 0) {
-                        walkableValue[k1][l1] |= 2;
+                        walkableValue[k1][l1] |= WALKABLE_1;
                         if (k1 > 0) {
-                            orWalkable(k1 - 1, l1, 8);
+                            orWalkable(k1 - 1, l1, WALKABLE_3);
                         }
                     } else if (l == 2) {
-                        walkableValue[k1][l1] |= 4;
+                        walkableValue[k1][l1] |= WALKABLE_2;
                         if (l1 < VISIBLE_SECTORS*SECTOR_HEIGHT-1) {
-                            orWalkable(k1, l1 + 1, 1);
+                            orWalkable(k1, l1 + 1, WALKABLE_0);
                         }
                     } else if (l == 4) {
-                        walkableValue[k1][l1] |= 8;
+                        walkableValue[k1][l1] |= WALKABLE_3;
                         if (k1 < VISIBLE_SECTORS*SECTOR_WIDTH-1) {
-                            orWalkable(k1 + 1, l1, 2);
+                            orWalkable(k1 + 1, l1, WALKABLE_1);
                         }
                     } else if (l == 6) {
-                        walkableValue[k1][l1] |= 1;
+                        walkableValue[k1][l1] |= WALKABLE_0;
                         if (l1 > 0) {
-                            orWalkable(k1, l1 - 1, 4);
+                            orWalkable(k1, l1 - 1, WALKABLE_2);
                         }
                     }
             }
@@ -1155,20 +1174,20 @@ public class EngineHandle
         {
             if (dir == 0)
             {
-                walkableValue[x][y] &= 0xfffe;
+                walkableValue[x][y] &= 0xffff ^ WALKABLE_0; //0xfffe;
                 if (y > 0)
-                    andMinusWalkable(x, y - 1, 4);
+                    andMinusWalkable(x, y - 1, WALKABLE_2);
             }
             else if (dir == 1)
             {
-                walkableValue[x][y] &= 0xfffd;
+                walkableValue[x][y] &= 0xffff ^ WALKABLE_1; //0xfffd;
                 if (x > 0)
-                    andMinusWalkable(x - 1, y, 8);
+                    andMinusWalkable(x - 1, y, WALKABLE_3);
             }
             else if (dir == 2)
-                walkableValue[x][y] &= 0xffef;
+                walkableValue[x][y] &= 0xffff ^ WALKABLE_4; //0xffef;
             else if (dir == 3)
-                walkableValue[x][y] &= 0xffdf;
+                walkableValue[x][y] &= 0xffff ^ WALKABLE_5; //0xffdf;
             method407(x, y, 1, 1);
         }
     }
@@ -1356,7 +1375,7 @@ public class EngineHandle
         int texture = getGroundTexturesOverlay(x, y);
         if (texture == 0)
             return -1;
-        return EntityHandler.getTileDef(texture - 1).getUnknown() != 2 ? 0 : 1;
+        return EntityHandler.getTileDef(texture - 1).getTexture() != 2 ? 0 : 1;
     }
 
     public void method428(Model[] models)
@@ -1429,8 +1448,8 @@ public class EngineHandle
         objectDirs = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
         selectedX = new int[SECTOR_WIDTH*SECTOR_HEIGHT*2*VISIBLE_SECTORS*VISIBLE_SECTORS];
         selectedY = new int[SECTOR_WIDTH*SECTOR_HEIGHT*2*VISIBLE_SECTORS*VISIBLE_SECTORS];
-        aModelArrayArray580 = new Model[4][64];
-        aModelArrayArray598 = new Model[4][64];
+        walls = new Model[4][64];
+        roofs = new Model[4][64];
         elevation = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
         requiresClean = true;
         aModelArray596 = new Model[64];
@@ -1496,6 +1515,14 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
+    public static final int WALKABLE_0 = 0x1;
+    public static final int WALKABLE_1 = 0x2;
+    public static final int WALKABLE_2 = 0x4;
+    public static final int WALKABLE_3 = 0x8;
+    public static final int WALKABLE_4 = 0x10;
+    public static final int WALKABLE_5 = 0x20;
+    public static final int WALKABLE_6 = 0x40;
+    public static final int WALKABLE_INDOORS = 0x80;
     public boolean playerIsAlive;
     public Model aModel;
     private GameImage gameImage;
@@ -1508,9 +1535,9 @@ public class EngineHandle
 
     private Sector[] sectors;
 
-    Model[][] aModelArrayArray580;
+    Model[][] walls;
     int[][] elevation;
     Model[] aModelArray596;
     private int[] groundTextureArray;
-    Model[][] aModelArrayArray598;
+    Model[][] roofs;
 }

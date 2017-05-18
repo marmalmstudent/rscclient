@@ -12,7 +12,7 @@ public class Camera {
 		planeOfViewOffsetFromCamera = 5;
 		drawModelMaxDist = 1000;
 		drawSpriteMaxDist = 1000;
-		zoom3 = 20;
+		fadeFactor = 20;
 		fadeDist = 10;
 		gradient2Step = false;
 		aDouble387 = 1.1000000000000001D;
@@ -551,7 +551,7 @@ public class Camera {
 						 * background colors than black */
 						double dstnc = model.getDistanceTo(dataPoint);
 						if (dstnc > fadeDist)
-							pointBrightness[pointsInSurfac] += (dstnc - fadeDist) / zoom3;
+							pointBrightness[pointsInSurfac] += (dstnc - fadeDist) / fadeFactor;
 						pointsInSurfac++;
 					}
 					else
@@ -1849,7 +1849,7 @@ public class Camera {
 	public int planeOfViewOffsetFromCamera;
 	public int drawModelMaxDist;
 	public int drawSpriteMaxDist;
-	public int zoom3;
+	public int fadeFactor;
 	public int fadeDist;
 	public static int sin1024[] = new int[0x400];
 	public static int cos1024[] = new int[0x400];

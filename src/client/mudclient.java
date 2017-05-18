@@ -2602,24 +2602,25 @@ public class mudclient extends GameWindowMiddleMan
 		if (!engineHandle.playerIsAlive) {
 			return;
 		}
-		for (int i = 0; i < 64; i++) {
-
-			gameCamera.removeModel(engineHandle.aModelArrayArray598[sectorHeight][i]);
+		for (int i = 0; i < 64; i++)
+		{ // draw other height sectors
+			gameCamera.removeModel(engineHandle.roofs[sectorHeight][i]);
 			if (sectorHeight == 0) {
-				gameCamera.removeModel(engineHandle.aModelArrayArray580[1][i]);
-				gameCamera.removeModel(engineHandle.aModelArrayArray598[1][i]);
-				gameCamera.removeModel(engineHandle.aModelArrayArray580[2][i]);
-				gameCamera.removeModel(engineHandle.aModelArrayArray598[2][i]);
+				gameCamera.removeModel(engineHandle.walls[1][i]);
+				gameCamera.removeModel(engineHandle.roofs[1][i]);
+				gameCamera.removeModel(engineHandle.walls[2][i]);
+				gameCamera.removeModel(engineHandle.roofs[2][i]);
 			}
 			zoomCamera = true;
-			if (sectorHeight == 0 && (engineHandle.walkableValue[ourPlayer.currentX / 128][ourPlayer.currentY / 128] & 0x80) == 0) {
+			if (sectorHeight == 0 && (engineHandle.walkableValue[ourPlayer.currentX / 128][ourPlayer.currentY / 128] & EngineHandle.WALKABLE_INDOORS) == 0)
+			{
 				if (showRoof) {
-					gameCamera.addModel(engineHandle.aModelArrayArray598[sectorHeight][i]);
+					gameCamera.addModel(engineHandle.roofs[sectorHeight][i]);
 					if (sectorHeight == 0) {
-						gameCamera.addModel(engineHandle.aModelArrayArray580[1][i]);
-						gameCamera.addModel(engineHandle.aModelArrayArray598[1][i]);
-						gameCamera.addModel(engineHandle.aModelArrayArray580[2][i]);
-						gameCamera.addModel(engineHandle.aModelArrayArray598[2][i]);
+						gameCamera.addModel(engineHandle.walls[1][i]);
+						gameCamera.addModel(engineHandle.roofs[1][i]);
+						gameCamera.addModel(engineHandle.walls[2][i]);
+						gameCamera.addModel(engineHandle.roofs[2][i]);
 					}
 				}
 				zoomCamera = false;
@@ -2630,34 +2631,31 @@ public class mudclient extends GameWindowMiddleMan
 			anInt742 = modelFireLightningSpellNumber;
 			for (int j = 0; j < objectCount; j++) {
 				if (objectType[j] == 97)
-					method98(j, "firea" + (modelFireLightningSpellNumber + 1));
+					animateObject(j, "firea" + (modelFireLightningSpellNumber + 1));
 				if (objectType[j] == 274)
-					method98(j, "fireplacea" + (modelFireLightningSpellNumber + 1));
+					animateObject(j, "fireplacea" + (modelFireLightningSpellNumber + 1));
 				if (objectType[j] == 1031)
-					method98(j, "lightning" + (modelFireLightningSpellNumber + 1));
+					animateObject(j, "lightning" + (modelFireLightningSpellNumber + 1));
 				if (objectType[j] == 1036)
-					method98(j, "firespell" + (modelFireLightningSpellNumber + 1));
+					animateObject(j, "firespell" + (modelFireLightningSpellNumber + 1));
 				if (objectType[j] == 1147)
-					method98(j, "spellcharge" + (modelFireLightningSpellNumber + 1));
+					animateObject(j, "spellcharge" + (modelFireLightningSpellNumber + 1));
 			}
-
 		}
 		if (modelTorchNumber != anInt743) {
 			anInt743 = modelTorchNumber;
 			for (int k = 0; k < objectCount; k++) {
 				if (objectType[k] == 51)
-					method98(k, "torcha" + (modelTorchNumber + 1));
+					animateObject(k, "torcha" + (modelTorchNumber + 1));
 				if (objectType[k] == 143)
-					method98(k, "skulltorcha" + (modelTorchNumber + 1));
+					animateObject(k, "skulltorcha" + (modelTorchNumber + 1));
 			}
-
 		}
 		if (modelClawSpellNumber != anInt744) {
 			anInt744 = modelClawSpellNumber;
 			for (int l = 0; l < objectCount; l++)
 				if (objectType[l] == 1142)
-					method98(l, "clawspell" + (modelClawSpellNumber + 1));
-
+					animateObject(l, "clawspell" + (modelClawSpellNumber + 1));
 		}
 		gameCamera.updateFightCount(fightCount);
 		fightCount = 0;
@@ -2689,12 +2687,12 @@ public class mudclient extends GameWindowMiddleMan
 				if (npc != null) {
 					int px = player.currentX;
 					int py = player.currentY;
-					int pi = -engineHandle.getAveragedElevation(px, py) - 110;
+					int pz = -engineHandle.getAveragedElevation(px, py) - 110;
 					int nx = npc.currentX;
 					int ny = npc.currentY;
-					int ni = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getCamera2() / 2;
+					int nz = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getCamera2() / 2;
 					int i10 = (px * player.anInt176 + nx * (attackingInt40 - player.anInt176)) / attackingInt40;
-					int j10 = (pi * player.anInt176 + ni * (attackingInt40 - player.anInt176)) / attackingInt40;
+					int j10 = (pz * player.anInt176 + nz * (attackingInt40 - player.anInt176)) / attackingInt40;
 					int k10 = (py * player.anInt176 + ny * (attackingInt40 - player.anInt176)) / attackingInt40;
 					gameCamera.method268(SPRITE_PROJECTILE_START + player.attackingCameraInt, i10, j10, k10, 32, 32, 0);
 					fightCount++;
@@ -2706,8 +2704,8 @@ public class mudclient extends GameWindowMiddleMan
 			Mob npc = npcArray[l1];
 			int mobx = npc.currentX;
 			int moby = npc.currentY;
-			int i7 = -engineHandle.getAveragedElevation(mobx, moby);
-			int i9 = gameCamera.method268(20000 + l1, mobx, i7, moby, EntityHandler.getNpcDef(npc.type).getCamera1(), EntityHandler.getNpcDef(npc.type).getCamera2(), l1 + 30000);
+			int mobz = -engineHandle.getAveragedElevation(mobx, moby);
+			int i9 = gameCamera.method268(20000 + l1, mobx, mobz, moby, EntityHandler.getNpcDef(npc.type).getCamera1(), EntityHandler.getNpcDef(npc.type).getCamera2(), l1 + 30000);
 			fightCount++;
 			if (npc.currentSprite == 8)
 				gameCamera.setCombat(i9, -30);
@@ -2765,7 +2763,7 @@ public class mudclient extends GameWindowMiddleMan
 			}
 			gameCamera.drawModelMaxDist = 3000;
 			gameCamera.drawSpriteMaxDist = 3000;
-			gameCamera.zoom3 = 1;
+			gameCamera.fadeFactor = 1;
 			gameCamera.fadeDist = 2800;
 			cameraZRot = cameraAutoAngle * 32;
 			int plrX = lastAutoCameraRotatePlayerX + screenRotationX;
@@ -2778,12 +2776,12 @@ public class mudclient extends GameWindowMiddleMan
 				//TODO: clean this up. these values are changed when the mouse wheel moves
 				//gameCamera.drawModelMaxDist = 2400;
 				//gameCamera.drawSpriteMaxDist = 2400;
-				gameCamera.zoom3 = 1;
+				gameCamera.fadeFactor = 1;
 				//gameCamera.fadeDist = 2300;
 			} else {
 				gameCamera.drawModelMaxDist = 2200;
 				gameCamera.drawSpriteMaxDist = 2200;
-				gameCamera.zoom3 = 1;
+				gameCamera.fadeFactor = 1;
 				gameCamera.fadeDist = 2100;
 			}
 			int l5 = lastAutoCameraRotatePlayerX + screenRotationX;
@@ -2811,9 +2809,11 @@ public class mudclient extends GameWindowMiddleMan
 				j6 = -50;
 			if (j6 > 0) {
 				int k8 = 1 + j6 / 6;
-				gameGraphics.drawPicture(453, windowHeight - 56, SPRITE_MEDIA_START + 13);
-				gameGraphics.drawText("Wilderness", 465, windowHeight - 20, 1, 0xffff00);
-				gameGraphics.drawText("Level: " + k8, 465, windowHeight - 7, 1, 0xffff00);
+				int wildysignX = windowWidth - 50;
+				int wildysignY = miniMapY + miniMapHeight + 3;
+				gameGraphics.drawPicture(wildysignX, wildysignY, SPRITE_MEDIA_START + 13);
+				gameGraphics.drawText("Wilderness", wildysignX + 12, wildysignY + 36, 1, 0xffff00);
+				gameGraphics.drawText("Level: " + k8, wildysignX + 12, wildysignY + 49, 1, 0xffff00);
 				if (wildernessType == 0)
 					wildernessType = 2;
 			}
@@ -2963,8 +2963,8 @@ public class mudclient extends GameWindowMiddleMan
 			ourPlayer = null;
 			if (engineHandle != null) {
 				engineHandle.aModelArray596 = null;
-				engineHandle.aModelArrayArray580 = null;
-				engineHandle.aModelArrayArray598 = null;
+				engineHandle.walls = null;
+				engineHandle.roofs = null;
 				engineHandle.aModel = null;
 				engineHandle = null;
 			}
@@ -3407,7 +3407,7 @@ public class mudclient extends GameWindowMiddleMan
 				windowHeight / 2, windowWidth, cameraSizeInt);
 		gameCamera.drawModelMaxDist = viewDistance;
 		gameCamera.drawSpriteMaxDist = viewDistance;
-		gameCamera.zoom3 = 1;
+		gameCamera.fadeFactor = 1;
 		gameCamera.fadeDist = (int) (viewDistance*2.3/2.4);
 		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
 		engineHandle = new EngineHandle(gameCamera, gameGraphics);
@@ -5679,20 +5679,24 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void method98(int i, String s) {
-		int j = objectX[i];
-		int k = objectY[i];
-		int l = j - ourPlayer.currentX / 128;
-		int i1 = k - ourPlayer.currentY / 128;
-		byte byte0 = 7;
-		if (j >= 0 && k >= 0 && j < 96 && k < 96 && l > -byte0 && l < byte0 && i1 > -byte0 && i1 < byte0) {
+	private final void animateObject(int i, String s) {
+		int x = objectX[i];
+		int y = objectY[i];
+		double tileXDist = x - ourPlayer.currentX / 128.0;
+		double tileYDist = y - ourPlayer.currentY / 128.0;
+		double maxAnimateDist = gameCamera.drawModelMaxDist / 128.0;
+		boolean animate = Math.sqrt(tileXDist*tileXDist + tileYDist*tileYDist) < maxAnimateDist;
+		if (animate && x >= 0 && y >= 0
+				&& x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+				&& y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+		{
 			gameCamera.removeModel(objectModelArray[i]);
-			int j1 = EntityHandler.storeModel(s);
+			int newMdlIdx = EntityHandler.storeModel(s);
 			try {
-				Model model = gameDataModels[j1].newModel();
+				Model model = gameDataModels[newMdlIdx].newModel();
 				gameCamera.addModel(model);
 				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-				model.method205(objectModelArray[i]);
+				model.copyRotTrans(objectModelArray[i]);
 				model.anInt257 = i;
 				objectModelArray[i] = model;
 			}
@@ -6043,24 +6047,32 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final boolean enginePlayerVisible(int i) {
-		int j = ourPlayer.currentX / 128;
-		int k = ourPlayer.currentY / 128;
+		int x = ourPlayer.currentX / 128;
+		int y = ourPlayer.currentY / 128;
 		for (int l = 2; l >= 1; l--) {
-			if (i == 1 && ((engineHandle.walkableValue[j][k - l] & 0x80) == 128 || (engineHandle.walkableValue[j - l][k] & 0x80) == 128 || (engineHandle.walkableValue[j - l][k - l] & 0x80) == 128))
+			if (i == 1 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
 				return false;
-			if (i == 3 && ((engineHandle.walkableValue[j][k + l] & 0x80) == 128 || (engineHandle.walkableValue[j - l][k] & 0x80) == 128 || (engineHandle.walkableValue[j - l][k + l] & 0x80) == 128))
+			if (i == 3 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
 				return false;
-			if (i == 5 && ((engineHandle.walkableValue[j][k + l] & 0x80) == 128 || (engineHandle.walkableValue[j + l][k] & 0x80) == 128 || (engineHandle.walkableValue[j + l][k + l] & 0x80) == 128))
+			if (i == 5 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
 				return false;
-			if (i == 7 && ((engineHandle.walkableValue[j][k - l] & 0x80) == 128 || (engineHandle.walkableValue[j + l][k] & 0x80) == 128 || (engineHandle.walkableValue[j + l][k - l] & 0x80) == 128))
+			if (i == 7 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
 				return false;
-			if (i == 0 && (engineHandle.walkableValue[j][k - l] & 0x80) == 128)
+			if (i == 0 && (engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
 				return false;
-			if (i == 2 && (engineHandle.walkableValue[j - l][k] & 0x80) == 128)
+			if (i == 2 && (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
 				return false;
-			if (i == 4 && (engineHandle.walkableValue[j][k + l] & 0x80) == 128)
+			if (i == 4 && (engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
 				return false;
-			if (i == 6 && (engineHandle.walkableValue[j + l][k] & 0x80) == 128)
+			if (i == 6 && (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
 				return false;
 		}
 

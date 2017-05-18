@@ -177,7 +177,7 @@ public class Model
 		}
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			yCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			yCoords[i] = DataOperations.getSigned2Bytes(database, offset)*1.234;
 			offset += 2;
 		}
 		
@@ -191,7 +191,7 @@ public class Model
 		}
 		
 		/* 16-bit colors without alpha mask.
-		 * Positive numbers (>= 0x0, <= 0xffff) seems to mean the texture index
+		 * Positive numbers (>= 0x0, < 0x7fff) seems to mean the texture index
 		 * (e.g. 0 is sprite 3220)
 		 * - red bit mask is   0b0111110000000000 (0x7c00)
 		 * - green bit mask is 0b0000001111100000 (0x3e0)
@@ -244,7 +244,8 @@ public class Model
 		modelType = 1;
 	}
 
-    public Model(String path) {
+    public Model(String path)
+    {
         modelType = 1;
         visible = true;
         aBoolean254 = true;
@@ -264,19 +265,19 @@ public class Model
         lightSourceDist = 256;
         featuresLight = 512;
         globalLight = 32;
-        byte abyte0[] = null;
+        byte data[] = null;
         try {
             java.io.InputStream inputstream = DataOperations.streamFromPath(path);
             DataInputStream datainputstream = new DataInputStream(inputstream);
-            abyte0 = new byte[3];
-            anInt309 = 0;
-            for (int i = 0; i < 3; i += datainputstream.read(abyte0, i, 3 - i))
-                ;
-            int k = method206(abyte0);
-            abyte0 = new byte[k];
-            anInt309 = 0;
-            for (int j = 0; j < k; j += datainputstream.read(abyte0, j, k - j))
-                ;
+            data = new byte[3];
+            offset = 0;
+            for (int i = 0; i < 3;
+            		i += datainputstream.read(data, i, 3 - i));
+            int k = getNextData(data);
+            data = new byte[k];
+            offset = 0;
+            for (int j = 0; j < k;
+            		j += datainputstream.read(data, j, k - j));
             datainputstream.close();
         }
         catch (IOException _ex) {
@@ -284,39 +285,41 @@ public class Model
             nbrSurfaces = 0;
             return;
         }
-        int l = method206(abyte0);
-        int i1 = method206(abyte0);
-        initArrays(l, i1);
-        anIntArrayArray279 = new int[i1][];
-        for (int j3 = 0; j3 < l; j3++) {
-            int j1 = method206(abyte0);
-            int k1 = method206(abyte0);
-            int l1 = method206(abyte0);
-            insertCoordPointNoDuplicate(j1, k1, l1);
+        int nPoints = getNextData(data);
+        int nSurfaces = getNextData(data);
+        initArrays(nPoints, nSurfaces);
+        anIntArrayArray279 = new int[nSurfaces][];
+        for (int i = 0; i < nPoints; i++)
+        {
+            int x = getNextData(data);
+            int z = getNextData(data);
+            int y = getNextData(data);
+            insertCoordPointNoDuplicate(x, z, y);
         }
 
-        for (int k3 = 0; k3 < i1; k3++) {
-            int i2 = method206(abyte0);
-            int j2 = method206(abyte0);
-            int k2 = method206(abyte0);
-            int l2 = method206(abyte0);
-            featuresLight = method206(abyte0);
-            globalLight = method206(abyte0);
-            int i3 = method206(abyte0);
-            int ai[] = new int[i2];
-            for (int l3 = 0; l3 < i2; l3++)
-                ai[l3] = method206(abyte0);
+        for (int i = 0; i < nSurfaces; i++)
+        {
+            int pointsInCell = getNextData(data);
+            int texture1 = getNextData(data);
+            int texture2 = getNextData(data);
+            int l2 = getNextData(data);
+            featuresLight = getNextData(data);
+            globalLight = getNextData(data);
+            int i3 = getNextData(data);
+            int surfacePoints[] = new int[pointsInCell];
+            for (int j = 0; j < pointsInCell; j++)
+                surfacePoints[j] = getNextData(data);
 
             int ai1[] = new int[l2];
-            for (int i4 = 0; i4 < l2; i4++)
-                ai1[i4] = method206(abyte0);
+            for (int j = 0; j < l2; j++)
+                ai1[j] = getNextData(data);
 
-            int j4 = addSurface(i2, ai, j2, k2);
-            anIntArrayArray279[k3] = ai1;
+            int lastSurface = addSurface(pointsInCell, surfacePoints, texture1, texture2);
+            anIntArrayArray279[i] = ai1;
             if (i3 == 0)
-                lightSourceProjectToSurfNormal[j4] = 0;
+                lightSourceProjectToSurfNormal[lastSurface] = 0;
             else
-                lightSourceProjectToSurfNormal[j4] = invisible;
+                lightSourceProjectToSurfNormal[lastSurface] = invisible;
         }
 
         modelType = 1;
@@ -558,7 +561,7 @@ public class Model
     public void setLightning(int global, int feature)
     {
         globalLight = 256 - global * 4;
-        featuresLight = (64 - feature) * 16 + 128;
+        featuresLight = (64 - feature) * 32 + 256;
     }
 
     public void setShadowGradient(boolean shadeGradient)
@@ -573,7 +576,8 @@ public class Model
         			lightSourceProjectToSurfNormal[i++] = 0);
     }
 
-    public void setLightsource(double x, double z, double y) {
+    public void setLightsource(double x, double z, double y)
+    {
         if (aBoolean262)
             return;
         lightSourceX = x;
@@ -988,7 +992,7 @@ public class Model
         return model;
     }
 
-    public void method205(Model model)
+    public void copyRotTrans(Model model)
     {
         rotateX = model.rotateX;
         rotateZ = model.rotateZ;
@@ -1000,12 +1004,12 @@ public class Model
         modelType = 1;
     }
 
-    public int method206(byte abyte0[])
+    public int getNextData(byte abyte0[])
     {
-        for (; abyte0[anInt309] == 10 || abyte0[anInt309] == 13; anInt309++);
-        int i = anIntArray268[abyte0[anInt309++] & 0xff];
-        int j = anIntArray268[abyte0[anInt309++] & 0xff];
-        int k = anIntArray268[abyte0[anInt309++] & 0xff];
+        for (; abyte0[offset] == 10 || abyte0[offset] == 13; offset++);
+        int i = anIntArray268[abyte0[offset++] & 0xff];
+        int j = anIntArray268[abyte0[offset++] & 0xff];
+        int k = anIntArray268[abyte0[offset++] & 0xff];
         int l = (i * 4096 + j * 64 + k) - 0x20000;
         if (l == 0x1e240)
             l = invisible;
@@ -1094,7 +1098,7 @@ public class Model
     private double lightSourceDist;
     protected double featuresLight;
     protected double globalLight;
-    private int anInt309;
+    private int offset;
     private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
     static {
