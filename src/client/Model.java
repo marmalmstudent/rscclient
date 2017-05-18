@@ -460,7 +460,9 @@ public class Model
         return nbrCoordPoints++;
     }
 
-    public int addSurface(int pointsInCell, int surfacePoints[], int texture1, int texture2) {
+    public int addSurface(int pointsInCell, int surfacePoints[],
+    		int texture1, int texture2)
+    {
         if (nbrSurfaces >= nSides)
             return -1;
         pointsPerCell[nbrSurfaces] = pointsInCell;

@@ -22,9 +22,9 @@ public class DoorDef extends EntityDef {
      */
     public int unknown;
 
-    public int modelVar1;
-    public int modelVar2;
-    public int modelVar3;
+    public double doorheight;
+    public int texture1;
+    public int texture2;
 
     public String getCommand1() {
         return command1.toLowerCase();
@@ -42,15 +42,15 @@ public class DoorDef extends EntityDef {
         return unknown;
     }
 
-    public int getHeight() {
-        return modelVar1;
+    public double getHeight() {
+        return doorheight;
     }
 
     public int getTexture1() {
-        return modelVar2;
+        return texture1;
     }
 
     public int getTexture2() {
-        return modelVar3;
+        return texture2;
     }
 }

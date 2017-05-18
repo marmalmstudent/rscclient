@@ -28,7 +28,7 @@ public class GameObjectDef extends EntityDef {
     /**
      * Can't figure out what this one is for, either.
      */
-    public int groundItemVar;
+    public double groundItemZ;
 
     public String objectModel;
 
@@ -58,7 +58,7 @@ public class GameObjectDef extends EntityDef {
         return height;
     }
 
-    public int getGroundItemVar() {
-        return groundItemVar;
+    public double getGroundItemZ() {
+        return groundItemZ;
     }
 }

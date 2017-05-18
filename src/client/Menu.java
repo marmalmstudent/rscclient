@@ -387,7 +387,7 @@ public class Menu {
     			for (int i1 = x - (y & 0x3f); i1 < x + width; i1 += 128)
     			{
     				for (int j1 = y - (y & 0x1f); j1 < y + height; j1 += 128)
-    					gameImage.drawSpriteAplha(i1, j1, 6 + mudclient.SPRITE_UTIL_START, 128);
+    					gameImage.method232(i1, j1, 6 + mudclient.SPRITE_UTIL_START, 128);
     			}
     		}
     		gameImage.drawLineX(x, y, width, COLOUR_BOX_GRADIENT_TOP);

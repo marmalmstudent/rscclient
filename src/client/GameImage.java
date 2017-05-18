@@ -1016,265 +1016,276 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void method242(int i, int j, int k, int l, int i1) {
-        int j1 = gameWindowWidth;
-        int k1 = gameWindowHeight;
-        if (anIntArray339 == null) {
-            anIntArray339 = new int[512];
-            for (int l1 = 0; l1 < 256; l1++) {
-                anIntArray339[l1] = (int) (Math.sin((double) l1 * 0.02454369D) * 32768D);
-                anIntArray339[l1 + 256] = (int) (Math.cos((double) l1 * 0.02454369D) * 32768D);
-            }
-
+    public void drawMinimapTiles(int xCorner, int yCorner,
+    		int sprite, int rot1, int rot2)
+    {
+        int windowWidth = gameWindowWidth;
+        int windowHeight = gameWindowHeight;
+        if (sin256 == null)
+        {
+            sin256 = new double[256];
+            for (int l1 = 0; l1 < 256; l1++)
+            	sin256[l1] = Math.sin((double) l1 * 0.02454369D);
         }
-        int i2 = -sprites[k].getTotalWidth() / 2;
-        int j2 = -sprites[k].getTotalHeight() / 2;
-        if (sprites[k].requiresShift()) {
-            i2 += sprites[k].getXShift();
-            j2 += sprites[k].getYShift();
+        if (cos256 == null)
+        {
+            cos256 = new double[256];
+            for (int l1 = 0; l1 < 256; l1++)
+            	cos256[l1] = Math.cos((double) l1 * 0.02454369D);
         }
-        int k2 = i2 + sprites[k].getWidth();
-        int l2 = j2 + sprites[k].getHeight();
-        int i3 = k2;
-        int j3 = j2;
-        int k3 = i2;
-        int l3 = l2;
-        l &= 0xff;
-        int i4 = anIntArray339[l] * i1;
-        int j4 = anIntArray339[l + 256] * i1;
-        int k4 = i + (j2 * i4 + i2 * j4 >> 22);
-        int l4 = j + (j2 * j4 - i2 * i4 >> 22);
-        int i5 = i + (j3 * i4 + i3 * j4 >> 22);
-        int j5 = j + (j3 * j4 - i3 * i4 >> 22);
-        int k5 = i + (l2 * i4 + k2 * j4 >> 22);
-        int l5 = j + (l2 * j4 - k2 * i4 >> 22);
-        int i6 = i + (l3 * i4 + k3 * j4 >> 22);
-        int j6 = j + (l3 * j4 - k3 * i4 >> 22);
-        if (i1 == 192 && (l & 0x3f) == (anInt348 & 0x3f))
+        int p0_x = -sprites[sprite].getTotalWidth() / 2;
+        int p0_y = -sprites[sprite].getTotalHeight() / 2;
+        if (sprites[sprite].requiresShift()) {
+            p0_x += sprites[sprite].getXShift();
+            p0_y += sprites[sprite].getYShift();
+        }
+        int p2_x = p0_x + sprites[sprite].getWidth();
+        int p2_y = p0_y + sprites[sprite].getHeight();
+        int p3_x = p2_x;
+        int p3_y = p0_y;
+        int p1_x = p0_x;
+        int p1_y = p2_y;
+        rot1 &= 0xff;
+        double sin = sin256[rot1] * rot2;
+        double cos = cos256[rot1] * rot2;
+        int p0_x_rot = (int) (xCorner + (p0_y * sin + p0_x * cos) / 128);
+        int p0_y_rot = (int) (yCorner + (p0_y * cos - p0_x * sin) / 128);
+        int p3_x_rot = (int) (xCorner + (p3_y * sin + p3_x * cos) / 128);
+        int p3_y_rot = (int) (yCorner + (p3_y * cos - p3_x * sin) / 128);
+        int p2_x_rot = (int) (xCorner + (p2_y * sin + p2_x * cos) / 128);
+        int p2_y_rot = (int) (yCorner + (p2_y * cos - p2_x * sin) / 128);
+        int p1_x_rot = (int) (xCorner + (p1_y * sin + p1_x * cos) / 128);
+        int p1_y_rot = (int) (yCorner + (p1_y * cos - p1_x * sin) / 128);
+        if (rot2 == 192 && (rot1 & 0x3f) == (anInt348 & 0x3f))
             anInt346++;
-        else if (i1 == 128)
-            anInt348 = l;
+        else if (rot2 == 128)
+            anInt348 = rot1;
         else
             anInt347++;
-        int k6 = l4;
-        int l6 = l4;
-        if (j5 < k6)
-            k6 = j5;
-        else if (j5 > l6)
-            l6 = j5;
-        if (l5 < k6)
-            k6 = l5;
-        else if (l5 > l6)
-            l6 = l5;
-        if (j6 < k6)
-            k6 = j6;
-        else if (j6 > l6)
-            l6 = j6;
-        if (k6 < imageY)
-            k6 = imageY;
-        if (l6 > imageHeight)
-            l6 = imageHeight;
-        if (anIntArray340 == null || anIntArray340.length != k1 + 1) {
-            anIntArray340 = new int[k1 + 1];
-            anIntArray341 = new int[k1 + 1];
-            anIntArray342 = new int[k1 + 1];
-            anIntArray343 = new int[k1 + 1];
-            anIntArray344 = new int[k1 + 1];
-            anIntArray345 = new int[k1 + 1];
+        int ymin = p0_y_rot;
+        int ymax = p0_y_rot;
+        if (p3_y_rot < ymin)
+            ymin = p3_y_rot;
+        else if (p3_y_rot > ymax)
+            ymax = p3_y_rot;
+        if (p2_y_rot < ymin)
+            ymin = p2_y_rot;
+        else if (p2_y_rot > ymax)
+            ymax = p2_y_rot;
+        if (p1_y_rot < ymin)
+            ymin = p1_y_rot;
+        else if (p1_y_rot > ymax)
+            ymax = p1_y_rot;
+        if (ymin < imageY)
+            ymin = imageY;
+        if (ymax > imageHeight)
+            ymax = imageHeight;
+        if (anIntArray340 == null
+        		|| anIntArray340.length != windowHeight + 1)
+        {
+            anIntArray340 = new int[windowHeight + 1];
+            anIntArray341 = new int[windowHeight + 1];
+            anIntArray342 = new int[windowHeight + 1];
+            anIntArray343 = new int[windowHeight + 1];
+            anIntArray344 = new int[windowHeight + 1];
+            anIntArray345 = new int[windowHeight + 1];
         }
-        for (int i7 = k6; i7 <= l6; i7++) {
+        for (int i7 = ymin; i7 <= ymax; i7++) {
             anIntArray340[i7] = 0x5f5e0ff;
             anIntArray341[i7] = 0xfa0a1f01;
         }
 
-        int i8 = 0;
-        int k8 = 0;
-        int i9 = 0;
-        int j9 = sprites[k].getWidth();
-        int k9 = sprites[k].getHeight();
-        i2 = 0;
-        j2 = 0;
-        i3 = j9 - 1;
-        j3 = 0;
-        k2 = j9 - 1;
-        l2 = k9 - 1;
-        k3 = 0;
-        l3 = k9 - 1;
-        if (j6 != l4) {
-            i8 = (i6 - k4 << 8) / (j6 - l4);
-            i9 = (l3 - j2 << 8) / (j6 - l4);
+        int slope_1 = 0;
+        int slope_3 = 0;
+        int slope_2 = 0;
+        int spriteWidth = sprites[sprite].getWidth();
+        int spriteHeight = sprites[sprite].getHeight();
+        p0_x = 0;
+        p0_y = 0;
+        p3_x = spriteWidth - 1;
+        p3_y = 0;
+        p2_x = spriteWidth - 1;
+        p2_y = spriteHeight - 1;
+        p1_x = 0;
+        p1_y = spriteHeight - 1;
+        if (p1_y_rot != p0_y_rot)
+        {
+            slope_1 = (p1_x_rot - p0_x_rot << 8) / (p1_y_rot - p0_y_rot);
+            slope_2 = (p1_y - p0_y << 8) / (p1_y_rot - p0_y_rot);
         }
-        int j7;
-        int k7;
-        int l7;
-        int l8;
-        if (l4 > j6) {
-            l7 = i6 << 8;
-            l8 = l3 << 8;
-            j7 = j6;
-            k7 = l4;
+        int min_y_rot;
+        int max_y_rot;
+        int min_x_rot;
+        int min_y;
+        if (p0_y_rot > p1_y_rot) {
+            min_x_rot = p1_x_rot << 8;
+            min_y = p1_y << 8;
+            min_y_rot = p1_y_rot;
+            max_y_rot = p0_y_rot;
         } else {
-            l7 = k4 << 8;
-            l8 = j2 << 8;
-            j7 = l4;
-            k7 = j6;
+            min_x_rot = p0_x_rot << 8;
+            min_y = p0_y << 8;
+            min_y_rot = p0_y_rot;
+            max_y_rot = p1_y_rot;
         }
-        if (j7 < 0) {
-            l7 -= i8 * j7;
-            l8 -= i9 * j7;
-            j7 = 0;
+        if (min_y_rot < 0) {
+            min_x_rot -= slope_1 * min_y_rot;
+            min_y -= slope_2 * min_y_rot;
+            min_y_rot = 0;
         }
-        if (k7 > k1 - 1)
-            k7 = k1 - 1;
-        for (int l9 = j7; l9 <= k7; l9++) {
-            anIntArray340[l9] = anIntArray341[l9] = l7;
-            l7 += i8;
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int l9 = min_y_rot; l9 <= max_y_rot; l9++) {
+            anIntArray340[l9] = anIntArray341[l9] = min_x_rot;
+            min_x_rot += slope_1;
             anIntArray342[l9] = anIntArray343[l9] = 0;
-            anIntArray344[l9] = anIntArray345[l9] = l8;
-            l8 += i9;
+            anIntArray344[l9] = anIntArray345[l9] = min_y;
+            min_y += slope_2;
         }
 
-        if (j5 != l4) {
-            i8 = (i5 - k4 << 8) / (j5 - l4);
-            k8 = (i3 - i2 << 8) / (j5 - l4);
+        if (p3_y_rot != p0_y_rot) {
+            slope_1 = (p3_x_rot - p0_x_rot << 8) / (p3_y_rot - p0_y_rot);
+            slope_3 = (p3_x - p0_x << 8) / (p3_y_rot - p0_y_rot);
         }
-        int j8;
-        if (l4 > j5) {
-            l7 = i5 << 8;
-            j8 = i3 << 8;
-            j7 = j5;
-            k7 = l4;
+        int min_x;
+        if (p0_y_rot > p3_y_rot) {
+            min_x_rot = p3_x_rot << 8;
+            min_x = p3_x << 8;
+            min_y_rot = p3_y_rot;
+            max_y_rot = p0_y_rot;
         } else {
-            l7 = k4 << 8;
-            j8 = i2 << 8;
-            j7 = l4;
-            k7 = j5;
+            min_x_rot = p0_x_rot << 8;
+            min_x = p0_x << 8;
+            min_y_rot = p0_y_rot;
+            max_y_rot = p3_y_rot;
         }
-        if (j7 < 0) {
-            l7 -= i8 * j7;
-            j8 -= k8 * j7;
-            j7 = 0;
+        if (min_y_rot < 0) {
+            min_x_rot -= slope_1 * min_y_rot;
+            min_x -= slope_3 * min_y_rot;
+            min_y_rot = 0;
         }
-        if (k7 > k1 - 1)
-            k7 = k1 - 1;
-        for (int i10 = j7; i10 <= k7; i10++) {
-            if (l7 < anIntArray340[i10]) {
-                anIntArray340[i10] = l7;
-                anIntArray342[i10] = j8;
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int i10 = min_y_rot; i10 <= max_y_rot; i10++)
+        {
+            if (min_x_rot < anIntArray340[i10]) {
+                anIntArray340[i10] = min_x_rot;
+                anIntArray342[i10] = min_x;
                 anIntArray344[i10] = 0;
             }
-            if (l7 > anIntArray341[i10]) {
-                anIntArray341[i10] = l7;
-                anIntArray343[i10] = j8;
+            if (min_x_rot > anIntArray341[i10]) {
+                anIntArray341[i10] = min_x_rot;
+                anIntArray343[i10] = min_x;
                 anIntArray345[i10] = 0;
             }
-            l7 += i8;
-            j8 += k8;
+            min_x_rot += slope_1;
+            min_x += slope_3;
         }
 
-        if (l5 != j5) {
-            i8 = (k5 - i5 << 8) / (l5 - j5);
-            i9 = (l2 - j3 << 8) / (l5 - j5);
+        if (p2_y_rot != p3_y_rot) {
+            slope_1 = (p2_x_rot - p3_x_rot << 8) / (p2_y_rot - p3_y_rot);
+            slope_2 = (p2_y - p3_y << 8) / (p2_y_rot - p3_y_rot);
         }
-        if (j5 > l5) {
-            l7 = k5 << 8;
-            j8 = k2 << 8;
-            l8 = l2 << 8;
-            j7 = l5;
-            k7 = j5;
+        if (p3_y_rot > p2_y_rot) {
+            min_x_rot = p2_x_rot << 8;
+            min_x = p2_x << 8;
+            min_y = p2_y << 8;
+            min_y_rot = p2_y_rot;
+            max_y_rot = p3_y_rot;
         } else {
-            l7 = i5 << 8;
-            j8 = i3 << 8;
-            l8 = j3 << 8;
-            j7 = j5;
-            k7 = l5;
+            min_x_rot = p3_x_rot << 8;
+            min_x = p3_x << 8;
+            min_y = p3_y << 8;
+            min_y_rot = p3_y_rot;
+            max_y_rot = p2_y_rot;
         }
-        if (j7 < 0) {
-            l7 -= i8 * j7;
-            l8 -= i9 * j7;
-            j7 = 0;
+        if (min_y_rot < 0) {
+            min_x_rot -= slope_1 * min_y_rot;
+            min_y -= slope_2 * min_y_rot;
+            min_y_rot = 0;
         }
-        if (k7 > k1 - 1)
-            k7 = k1 - 1;
-        for (int j10 = j7; j10 <= k7; j10++) {
-            if (l7 < anIntArray340[j10]) {
-                anIntArray340[j10] = l7;
-                anIntArray342[j10] = j8;
-                anIntArray344[j10] = l8;
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int j10 = min_y_rot; j10 <= max_y_rot; j10++) {
+            if (min_x_rot < anIntArray340[j10]) {
+                anIntArray340[j10] = min_x_rot;
+                anIntArray342[j10] = min_x;
+                anIntArray344[j10] = min_y;
             }
-            if (l7 > anIntArray341[j10]) {
-                anIntArray341[j10] = l7;
-                anIntArray343[j10] = j8;
-                anIntArray345[j10] = l8;
+            if (min_x_rot > anIntArray341[j10]) {
+                anIntArray341[j10] = min_x_rot;
+                anIntArray343[j10] = min_x;
+                anIntArray345[j10] = min_y;
             }
-            l7 += i8;
-            l8 += i9;
+            min_x_rot += slope_1;
+            min_y += slope_2;
         }
 
-        if (j6 != l5) {
-            i8 = (i6 - k5 << 8) / (j6 - l5);
-            k8 = (k3 - k2 << 8) / (j6 - l5);
+        if (p1_y_rot != p2_y_rot) {
+            slope_1 = (p1_x_rot - p2_x_rot << 8) / (p1_y_rot - p2_y_rot);
+            slope_3 = (p1_x - p2_x << 8) / (p1_y_rot - p2_y_rot);
         }
-        if (l5 > j6) {
-            l7 = i6 << 8;
-            j8 = k3 << 8;
-            l8 = l3 << 8;
-            j7 = j6;
-            k7 = l5;
+        if (p2_y_rot > p1_y_rot) {
+            min_x_rot = p1_x_rot << 8;
+            min_x = p1_x << 8;
+            min_y = p1_y << 8;
+            min_y_rot = p1_y_rot;
+            max_y_rot = p2_y_rot;
         } else {
-            l7 = k5 << 8;
-            j8 = k2 << 8;
-            l8 = l2 << 8;
-            j7 = l5;
-            k7 = j6;
+            min_x_rot = p2_x_rot << 8;
+            min_x = p2_x << 8;
+            min_y = p2_y << 8;
+            min_y_rot = p2_y_rot;
+            max_y_rot = p1_y_rot;
         }
-        if (j7 < 0) {
-            l7 -= i8 * j7;
-            j8 -= k8 * j7;
-            j7 = 0;
+        if (min_y_rot < 0) {
+            min_x_rot -= slope_1 * min_y_rot;
+            min_x -= slope_3 * min_y_rot;
+            min_y_rot = 0;
         }
-        if (k7 > k1 - 1)
-            k7 = k1 - 1;
-        for (int k10 = j7; k10 <= k7; k10++) {
-            if (l7 < anIntArray340[k10]) {
-                anIntArray340[k10] = l7;
-                anIntArray342[k10] = j8;
-                anIntArray344[k10] = l8;
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int k10 = min_y_rot; k10 <= max_y_rot; k10++) {
+            if (min_x_rot < anIntArray340[k10]) {
+                anIntArray340[k10] = min_x_rot;
+                anIntArray342[k10] = min_x;
+                anIntArray344[k10] = min_y;
             }
-            if (l7 > anIntArray341[k10]) {
-                anIntArray341[k10] = l7;
-                anIntArray343[k10] = j8;
-                anIntArray345[k10] = l8;
+            if (min_x_rot > anIntArray341[k10]) {
+                anIntArray341[k10] = min_x_rot;
+                anIntArray343[k10] = min_x;
+                anIntArray345[k10] = min_y;
             }
-            l7 += i8;
-            j8 += k8;
+            min_x_rot += slope_1;
+            min_x += slope_3;
         }
 
-        int l10 = k6 * j1;
-        int ai[] = sprites[k].getPixels();
-        for (int i11 = k6; i11 < l6; i11++) {
-            int j11 = anIntArray340[i11] >> 8;
-            int k11 = anIntArray341[i11] >> 8;
-            if (k11 - j11 <= 0) {
-                l10 += j1;
+        int offset = ymin * windowWidth;
+        int mapPixels[] = sprites[sprite].getPixels();
+        for (int y = ymin; y < ymax; y++)
+        {
+            int xStart = anIntArray340[y] >> 8;
+            int xEnd = anIntArray341[y] >> 8;
+            if (xEnd - xStart <= 0) {
+                offset += windowWidth;
             } else {
-                int l11 = anIntArray342[i11] << 9;
-                int i12 = ((anIntArray343[i11] << 9) - l11) / (k11 - j11);
-                int j12 = anIntArray344[i11] << 9;
-                int k12 = ((anIntArray345[i11] << 9) - j12) / (k11 - j11);
-                if (j11 < imageX) {
-                    l11 += (imageX - j11) * i12;
-                    j12 += (imageX - j11) * k12;
-                    j11 = imageX;
+                int l11 = anIntArray342[y] << 9;
+                int i12 = ((anIntArray343[y] << 9) - l11) / (xEnd - xStart);
+                int j12 = anIntArray344[y] << 9;
+                int k12 = ((anIntArray345[y] << 9) - j12) / (xEnd - xStart);
+                if (xStart < imageX) {
+                    l11 += (imageX - xStart) * i12;
+                    j12 += (imageX - xStart) * k12;
+                    xStart = imageX;
                 }
-                if (k11 > imageWidth)
-                    k11 = imageWidth;
-                if (!f1Toggle || (i11 & 1) == 0)
-                    if (!sprites[k].requiresShift())
-                        method243(imagePixelArray, ai, 0, l10 + j11, l11, j12, i12, k12, j11 - k11, j9);
+                if (xEnd > imageWidth)
+                    xEnd = imageWidth;
+                if (!f1Toggle || (y & 1) == 0)
+                    if (!sprites[sprite].requiresShift())
+                        method243(imagePixelArray, mapPixels, 0, offset + xStart, l11, j12, i12, k12, xStart - xEnd, spriteWidth);
                     else
-                        method244(imagePixelArray, ai, 0, l10 + j11, l11, j12, i12, k12, j11 - k11, j9);
-                l10 += j1;
+                        method244(imagePixelArray, mapPixels, 0, offset + xStart, l11, j12, i12, k12, xStart - xEnd, spriteWidth);
+                offset += windowWidth;
             }
         }
 
@@ -2089,7 +2100,8 @@ public class GameImage implements ImageProducer, ImageObserver {
     static byte aByteArrayArray336[][] = new byte[50][];
     static int charIndexes[];
     public boolean drawStringShadows;
-    int anIntArray339[];
+    double sin256[];
+    double cos256[];
     int anIntArray340[];
     int anIntArray341[];
     int anIntArray342[];

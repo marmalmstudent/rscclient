@@ -18,7 +18,7 @@ public final class GameImageMiddleMan extends GameImage {
             return;
         }
         if (i1 >= 40000) {
-            _mudclient.method68(i, j, k, l, i1 - 40000, j1, k1);
+            _mudclient.drawItems(i, j, k, l, i1 - 40000, j1, k1);
             return;
         }
         if (i1 >= 20000) {

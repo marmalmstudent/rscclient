@@ -12,6 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import client.EngineHandle;
 import entityhandling.defs.DoorDef;
 import entityhandling.defs.ElevationDef;
 import entityhandling.defs.GameObjectDef;
@@ -277,9 +278,9 @@ public class ParseXML
 		dd.description = getTextValue(el, "description");
 		dd.command1 = getTextValue(el, "command1");
 		dd.command2 = getTextValue(el, "command2");
-		dd.modelVar1 = getIntValue(el, "modelVar1");
-		dd.modelVar2 = getIntValue(el, "modelVar2");
-		dd.modelVar3 = getIntValue(el, "modelVar3");
+		dd.doorheight = getIntValue(el, "modelVar1") * EngineHandle.SCALE_FACTOR;
+		dd.texture1 = getIntValue(el, "modelVar2");
+		dd.texture2 = getIntValue(el, "modelVar3");
 		dd.doorType = getIntValue(el, "doorType");
 		dd.unknown = getIntValue(el, "unknown");
 		return dd;
@@ -346,7 +347,7 @@ public class ParseXML
 		gd.type = getIntValue(el, "type");
 		gd.width = getIntValue(el, "width");
 		gd.height = getIntValue(el, "height");
-		gd.groundItemVar = getIntValue(el, "groundItemVar");
+		gd.groundItemZ = getIntValue(el, "groundItemVar") * EngineHandle.SCALE_FACTOR;
 		gd.objectModel = getTextValue(el, "objectModel");
 		return gd;
 	}

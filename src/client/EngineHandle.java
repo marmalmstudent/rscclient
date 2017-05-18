@@ -344,7 +344,7 @@ public class EngineHandle
     }
 
     public void method403(int wallHeight, int x0, int y0, int x1, int y1) {
-        int height = EntityHandler.getDoorDef(wallHeight).getHeight();
+        double height = EntityHandler.getDoorDef(wallHeight).getHeight();
         if (elevation[x0][y0] < 0x13880) {
             elevation[x0][y0] += 0x13880 + height;
         }
@@ -1283,7 +1283,7 @@ public class EngineHandle
     {
         method419(xSector_1, ySector_1, 40);
         method419(xSector_2, ySector_2, 40);
-        int height = EntityHandler.getDoorDef(i).getHeight();
+        double height = EntityHandler.getDoorDef(i).getHeight();
         int texture1 = EntityHandler.getDoorDef(i).getTexture1();
         int texture2 = EntityHandler.getDoorDef(i).getTexture2();
         double x_1 = xSector_1 * GAME_SIZE;
@@ -1525,7 +1525,7 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
-    public static final double GAME_SIZE = 128;
+    public static final double GAME_SIZE = 32;
     public static final double SCALE_FACTOR = GAME_SIZE/128;
     public static final int WALKABLE_0 = 0x1;
     public static final int WALKABLE_1 = 0x2;

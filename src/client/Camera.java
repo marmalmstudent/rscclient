@@ -53,8 +53,8 @@ public class Camera {
 		mobIndex = 0;
 		aModel = new Model(nSurfaces * 2, nSurfaces);
 		anIntArray416 = new int[nSurfaces];
-		mobWidth = new int[nSurfaces];
-		mobHeight = new int[nSurfaces];
+		mobWidth = new double[nSurfaces];
+		mobHeight = new double[nSurfaces];
 		mobX = new double[nSurfaces];
 		mobZ = new double[nSurfaces];
 		mobY = new double[nSurfaces];
@@ -124,7 +124,7 @@ public class Camera {
 			mobIndex = 0;
 	}
 
-	public int method268(int i, double x, double z, double y, int width, int height, int type) {
+	public int method268(int i, double x, double z, double y, double width, double height, int type) {
 		anIntArray416[mobIndex] = i;
 		mobX[mobIndex] = x;
 		mobZ[mobIndex] = z;
@@ -462,8 +462,8 @@ public class Camera {
 				if (distToCam > planeOfViewOffsetFromCamera
 						&& distToCam < drawSpriteMaxDist)
 				{
-					double modelWidth = (mobWidth[k] << cameraSizeInt) / distToCam;
-					double modelHeight = (mobHeight[k] << cameraSizeInt) / distToCam;
+					double modelWidth = mobWidth[k] * fctr / distToCam;
+					double modelHeight = mobHeight[k] * fctr / distToCam;
 					if (x - modelWidth / 2 <= halfWidth
 							&& x + modelWidth / 2 >= -halfWidth
 							&& y - modelHeight <= halfHeight
@@ -497,16 +497,16 @@ public class Camera {
 				double x = model.xScreen[p0];
 				double y = model.yScreen[p0];
 				double modelDist = model.zDistToPointFromCameraView[p0];
-				int modelWidth = (int) ((mobWidth[l] << cameraSizeInt) / modelDist * EngineHandle.SCALE_FACTOR);
-				int modelHeight = (int) ((mobHeight[l] << cameraSizeInt) / modelDist * EngineHandle.SCALE_FACTOR);
+				double modelWidth = mobWidth[l] * fctr / modelDist;
+				double modelHeight = mobHeight[l] * fctr / modelDist;
 				int p1 = surface[1];
 				double length_y01 = y - model.yScreen[p1];
 				double length_x10 = model.xScreen[p1] - x;
-				double j11 = length_x10 * length_y01 / modelHeight  * EngineHandle.SCALE_FACTOR;
+				double j11 = length_x10 * length_y01 / modelHeight;
 				double modelX = x - modelWidth / 2;
 				double modelY = (halfHeight2 + y) - modelHeight;
 				gameImage.doSpriteClip1((int)modelX + halfWidth2, (int)modelY,
-						modelWidth, modelHeight, anIntArray416[l],
+						(int)modelWidth, (int)modelHeight, anIntArray416[l],
 						(int)j11, (int) ((256 << cameraSizeInt) / modelDist));
 				if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount)
 				{
@@ -1889,8 +1889,8 @@ public class Camera {
 	private double mobX[];
 	private double mobZ[];
 	private double mobY[];
-	private int mobWidth[];
-	private int mobHeight[];
+	private double mobWidth[];
+	private double mobHeight[];
 	private int anIntArray422[];
 	public Model aModel;
 	int nbrTextures;
