@@ -114,7 +114,7 @@ public class EngineHandle
             		&& (walkableValue[x - 1][y]
             				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3)) == 0
             		&& (walkableValue[x - 1][y - 1]
-            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3 | WALKABLE_2)) == 0
+            				& (0x7f ^ (WALKABLE_1 | WALKABLE_0))) == 0
             		&& tmpTiles[x - 1][y - 1] == 0)
             {
                 walkSectionXArray[requiredSteps] = x - 1;
@@ -128,7 +128,7 @@ public class EngineHandle
             		&& (walkableValue[x + 1][y]
             				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1)) == 0
             		&& (walkableValue[x + 1][y - 1]
-            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_2 | WALKABLE_1)) == 0
+            				& (0x7f ^ (WALKABLE_3 | WALKABLE_0))) == 0
             		&& tmpTiles[x + 1][y - 1] == 0)
             {
                 walkSectionXArray[requiredSteps] = x + 1;
@@ -142,7 +142,7 @@ public class EngineHandle
             		&& (walkableValue[x - 1][y]
             				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3)) == 0
             		&& (walkableValue[x - 1][y + 1]
-            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_3 | WALKABLE_0)) == 0
+            				& (0x7f ^ (WALKABLE_2 | WALKABLE_1))) == 0
             		&& tmpTiles[x - 1][y + 1] == 0)
             {
                 walkSectionXArray[requiredSteps] = x - 1;
@@ -157,7 +157,7 @@ public class EngineHandle
             		&& (walkableValue[x + 1][y]
             				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1)) == 0
             		&& (walkableValue[x + 1][y + 1]
-            				& (WALKABLE_6 | WALKABLE_5 | WALKABLE_4 | WALKABLE_1 | WALKABLE_0)) == 0
+            				& (0x7f ^ (WALKABLE_3 | WALKABLE_2))) == 0
             		&& tmpTiles[x + 1][y + 1] == 0)
             {
                 walkSectionXArray[requiredSteps] = x + 1;
