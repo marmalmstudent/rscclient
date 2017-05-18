@@ -7,7 +7,7 @@ public class Model
 {
 	public static final int INVISIBLE = 0xbc614e; // 12345678, probably
 	public static final int BIG_NUMBER = 9999999;
-	public Model(int i, int j) {
+	public Model(int nPoints, int nSurfaces) {
 		modelType = 1;
 		visible = true;
 		aBoolean254 = true;
@@ -27,9 +27,9 @@ public class Model
 		lightSourceDist = 256;
 		featuresLight = 512;
 		globalLight = 32;
-		initArrays(i, j);
-		anIntArrayArray279 = new int[j][1];
-		for (int k = 0; k < j; k++)
+		initArrays(nPoints, nSurfaces);
+		anIntArrayArray279 = new int[nSurfaces][1];
+		for (int k = 0; k < nSurfaces; k++)
 			anIntArrayArray279[k][0] = k;
 		
 	}
@@ -167,17 +167,17 @@ public class Model
 		// The spatial coordinate points.
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			xCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			xCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
 			offset += 2;
 		}
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			zCoords[i] = DataOperations.getSigned2Bytes(database, offset);
+			zCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
 			offset += 2;
 		}
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			yCoords[i] = DataOperations.getSigned2Bytes(database, offset)*1.234;
+			yCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
 			offset += 2;
 		}
 		
@@ -515,7 +515,7 @@ public class Model
             }
 
             int j5 = xSum / (pointsInCell * k) + (ySum / (pointsInCell * l)) * i1;
-            method183(models[j5], surface, pointsInCell, i);
+            //method183(models[j5], surface, pointsInCell, i);
         }
 
         for (int i = 0; i < j1; i++)
@@ -606,12 +606,12 @@ public class Model
         modelType = 1; // 1 for 3d model
     }
 
-    public void addTranslate(int x, int z, int y)
+    public void addTranslate(double x, double z, double y)
     {
     	setTranslate(translateX + x, translateZ + z, translateY + y);
     }
 
-    public void setTranslate(int x, int z, int y)
+    public void setTranslate(double x, double z, double y)
     {
         translateX = x;
         translateZ = z;
@@ -888,9 +888,9 @@ public class Model
     }
 
     public void makePerspectiveVectors(
-    		int cameraXPos, int cameraZPos, int cameraYPos,
+    		double cameraXPos, double cameraZPos, double cameraYPos,
     		int cameraXRot, int cameraZRot, int cameraYRot,
-    		int cameraSizeInt, int drawMinDist)
+    		int cameraSizeInt, double drawMinDist)
     {
         method200();
         if (yMin > Camera.yMaxHide || yMax < Camera.yMinHide
@@ -1075,9 +1075,9 @@ public class Model
     private double zMaxArray[];
     private double yMinArray[];
     private double yMaxArray[];
-    private int translateX;
-    private int translateZ;
-    private int translateY;
+    private double translateX;
+    private double translateZ;
+    private double translateY;
     private int rotateX;
     private int rotateZ;
     private int rotateY;
