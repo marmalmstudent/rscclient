@@ -4,16 +4,16 @@ public class Camera {
 	public static int light_x = 0, light_z = -50, light_y = 50;
 	private mudclient mc;
 
-	public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int k) {
+	public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int nSurfaces) {
 		this.mc = mc;
 		nbrColors = 50;
 		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
 		planeOfViewOffsetFromCamera = 5;
-		drawModelMaxDist = 1000;
-		drawSpriteMaxDist = 1000;
-		fadeFactor = 20;
-		fadeDist = 10;
+		drawModelMaxDist = 1000 * EngineHandle.SCALE_FACTOR;
+		drawSpriteMaxDist = 1000 * EngineHandle.SCALE_FACTOR;
+		fadeFactor = 20 * EngineHandle.SCALE_FACTOR;
+		fadeDist = 10 * EngineHandle.SCALE_FACTOR;
 		gradient2Step = false;
 		aDouble387 = 1.1000000000000001D;
 		anInt388 = 1;
@@ -50,15 +50,15 @@ public class Camera {
 		for (int l = 0; l < maxCameraModels; l++)
 			cameraModels[l] = new CameraModel();
 
-		anInt415 = 0;
-		aModel = new Model(k * 2, k);
-		anIntArray416 = new int[k];
-		anIntArray420 = new int[k];
-		anIntArray421 = new int[k];
-		anIntArray417 = new int[k];
-		anIntArray418 = new int[k];
-		anIntArray419 = new int[k];
-		anIntArray422 = new int[k];
+		mobIndex = 0;
+		aModel = new Model(nSurfaces * 2, nSurfaces);
+		anIntArray416 = new int[nSurfaces];
+		mobWidth = new int[nSurfaces];
+		mobHeight = new int[nSurfaces];
+		mobX = new double[nSurfaces];
+		mobZ = new double[nSurfaces];
+		mobY = new double[nSurfaces];
+		anIntArray422 = new int[nSurfaces];
 		if (aByteArray434 == null)
 			aByteArray434 = new byte[17691];
 		cameraXPos = 0;
@@ -67,15 +67,15 @@ public class Camera {
 		cameraXRot = 0;
 		cameraZRot = 0;
 		cameraYRot = 0;
-		for (int i1 = 0; i1 < 256;
-				sin256[i1++] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D));
-		for (int i1 = 0; i1 < 256;
-				cos256[i1++] = (int) (Math.cos((double) i1 * 0.02454369D) * 32768D));
+		for (int i1 = 0; i1 < 256; i1++)
+				sin256[i1] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D);
+		for (int i1 = 0; i1 < 256; i1++)
+				cos256[i1] = (int) (Math.cos((double) i1 * 0.02454369D) * 32768D);
 
-		for (int j1 = 0; j1 < 1024;
-				sin1024[j1++] = (int) (Math.sin((double) j1 * 0.00613592315D) * 32768D));
-		for (int j1 = 0; j1 < 1024;
-				cos1024[j1++] = (int) (Math.cos((double) j1 * 0.00613592315D) * 32768D));
+		for (int j1 = 0; j1 < 1024; j1++)
+				sin1024[j1] = Math.sin((double) j1 * 0.00613592315D);
+		for (int j1 = 0; j1 < 1024; j1++)
+				cos1024[j1] = Math.cos((double) j1 * 0.00613592315D);
 
 	}
 
@@ -113,34 +113,34 @@ public class Camera {
 	}
 
 	public void method266() {
-		anInt415 = 0;
+		mobIndex = 0;
 		aModel.method176();
 	}
 
 	public void updateFightCount(int i) {
-		anInt415 -= i;
+		mobIndex -= i;
 		aModel.method177(i, i * 2);
-		if (anInt415 < 0)
-			anInt415 = 0;
+		if (mobIndex < 0)
+			mobIndex = 0;
 	}
 
-	public int method268(int i, int j, int k, int l, int i1, int j1, int k1) {
-		anIntArray416[anInt415] = i;
-		anIntArray417[anInt415] = j;
-		anIntArray418[anInt415] = k;
-		anIntArray419[anInt415] = l;
-		anIntArray420[anInt415] = i1;
-		anIntArray421[anInt415] = j1;
-		anIntArray422[anInt415] = 0;
-		int l1 = aModel.insertCoordPoint(j, k, l);
-		int i2 = aModel.insertCoordPoint(j, k - j1, l);
-		int ai[] = {
-				l1, i2
+	public int method268(int i, double x, double z, double y, int width, int height, int type) {
+		anIntArray416[mobIndex] = i;
+		mobX[mobIndex] = x;
+		mobZ[mobIndex] = z;
+		mobY[mobIndex] = y;
+		mobWidth[mobIndex] = width;
+		mobHeight[mobIndex] = height;
+		anIntArray422[mobIndex] = 0;
+		int p0 = aModel.insertCoordPoint(x, z, y);
+		int p1 = aModel.insertCoordPoint(x, z - height, y);
+		int surface[] = {
+				p0, p1
 		};
-		aModel.addSurface(2, ai, 0, 0);
-		aModel.entityType[anInt415] = k1;
-		aModel.aByteArray259[anInt415++] = 0;
-		return anInt415 - 1;
+		aModel.addSurface(2, surface, 0, 0);
+		aModel.entityType[mobIndex] = type;
+		aModel.aByteArray259[mobIndex++] = 0;
+		return mobIndex - 1;
 	}
 
 	public void setOurPlayer(int i) {
@@ -297,29 +297,29 @@ public class Camera {
 		} while (true);
 	}
 
-	public void method279(int i, int j, int k) {
-		int l = -cameraXRot + 1024 & 0x3ff;
-		int i1 = -cameraZRot + 1024 & 0x3ff;
-		int j1 = -cameraYRot + 1024 & 0x3ff;
-		if (j1 != 0) {
-			int sin = sin1024[j1];
-			int cos = cos1024[j1];
-			int tmp = j * sin + i * cos >> 15;
-				j = j * cos - i * sin >> 15;
+	public void method279(double i, double j, double k) {
+		int xRot = -cameraXRot + 1024 & 0x3ff;
+		int zRot = -cameraZRot + 1024 & 0x3ff;
+		int yRot = -cameraYRot + 1024 & 0x3ff;
+		if (yRot != 0) {
+			double sin = sin1024[yRot];
+			double cos = cos1024[yRot];
+			double tmp = j * sin + i * cos;
+				j = j * cos - i * sin;
 				i = tmp;
 		}
-		if (l != 0) {
-			int sin = sin1024[l];
-			int cos = cos1024[l];
-			int tmp = j * cos - k * sin >> 15;
-			k = j * sin + k * cos >> 15;
+		if (xRot != 0) {
+			double sin = sin1024[xRot];
+			double cos = cos1024[xRot];
+			double tmp = j * cos - k * sin;
+			k = j * sin + k * cos;
 			j = tmp;
 		}
-		if (i1 != 0) {
-			int sin = sin1024[i1];
-			int cos = cos1024[i1];
-			int tmp = k * sin + i * cos >> 15;
-			k = k * cos - i * sin >> 15;
+		if (zRot != 0) {
+			double sin = sin1024[zRot];
+			double cos = cos1024[zRot];
+			double tmp = k * sin + i * cos;
+			k = k * cos - i * sin;
 			i = tmp;
 		}
 		if (i < xMinHide)
@@ -338,8 +338,9 @@ public class Camera {
 
 	public void finishCamera() {
 		f1Toggle = gameImage.f1Toggle;
-		int i3 = halfWidth * drawModelMaxDist >> cameraSizeInt;
-		int j3 = halfHeight * drawModelMaxDist >> cameraSizeInt;
+		int fctr = 1 << cameraSizeInt;
+		double i3 = halfWidth * drawModelMaxDist / fctr;
+		double j3 = halfHeight * drawModelMaxDist / fctr;
 		xMinHide = 0;
 		xMaxHide = 0;
 		zMinHide = 0;
@@ -461,8 +462,8 @@ public class Camera {
 				if (distToCam > planeOfViewOffsetFromCamera
 						&& distToCam < drawSpriteMaxDist)
 				{
-					double modelWidth = (anIntArray420[k] << cameraSizeInt) / distToCam;
-					double modelHeight = (anIntArray421[k] << cameraSizeInt) / distToCam;
+					double modelWidth = (mobWidth[k] << cameraSizeInt) / distToCam;
+					double modelHeight = (mobHeight[k] << cameraSizeInt) / distToCam;
 					if (x - modelWidth / 2 <= halfWidth
 							&& x + modelWidth / 2 >= -halfWidth
 							&& y - modelHeight <= halfHeight
@@ -495,18 +496,18 @@ public class Camera {
 				int p0 = surface[0];
 				double x = model.xScreen[p0];
 				double y = model.yScreen[p0];
-				int modelDist = (int)model.zDistToPointFromCameraView[p0];
-				int modelWidth = (anIntArray420[l] << cameraSizeInt) / modelDist;
-				int modelHeight = (anIntArray421[l] << cameraSizeInt) / modelDist;
+				double modelDist = model.zDistToPointFromCameraView[p0];
+				int modelWidth = (int) ((mobWidth[l] << cameraSizeInt) / modelDist * EngineHandle.SCALE_FACTOR);
+				int modelHeight = (int) ((mobHeight[l] << cameraSizeInt) / modelDist * EngineHandle.SCALE_FACTOR);
 				int p1 = surface[1];
 				double length_y01 = y - model.yScreen[p1];
 				double length_x10 = model.xScreen[p1] - x;
-				double j11 = length_x10 * length_y01 / modelHeight;
+				double j11 = length_x10 * length_y01 / modelHeight  * EngineHandle.SCALE_FACTOR;
 				double modelX = x - modelWidth / 2;
 				double modelY = (halfHeight2 + y) - modelHeight;
 				gameImage.doSpriteClip1((int)modelX + halfWidth2, (int)modelY,
 						modelWidth, modelHeight, anIntArray416[l],
-						(int)j11, (256 << cameraSizeInt) / modelDist);
+						(int)j11, (int) ((256 << cameraSizeInt) / modelDist));
 				if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount)
 				{
 					modelX += (anIntArray422[l] << cameraSizeInt) / modelDist;
@@ -1036,8 +1037,9 @@ public class Camera {
 		}
 	}
 
-	public void setCamera(int playerX, int playerZ, int playerY,
-			int xRot, int zRot, int yRot, int camYStart, double cameraZoom) {
+	public void setCamera(double playerX, double playerZ, double playerY,
+			int xRot, int zRot, int yRot, double camYStart, double cameraZoom)
+	{
 		xRot &= 0x3ff;
 		zRot &= 0x3ff;
 		yRot &= 0x3ff;
@@ -1047,40 +1049,40 @@ public class Camera {
 			cameraZRot = 1024 - zRot & 0x3ff;
 			cameraYRot = 1024 - yRot & 0x3ff;
 		}
-		int cameraXOffset = 0;
-		int cameraZOffset = 0;
-		int cameraYOffset = camYStart;
+		double cameraXOffset = 0;
+		double cameraZOffset = 0;
+		double cameraYOffset = camYStart;
 		
 		if (xRot != 0)
 		{
-			int sin = sin1024[xRot];
-			int cos = cos1024[xRot];
-			int tmp = cameraZOffset * cos - cameraYOffset * sin >> 15;
-			cameraYOffset = cameraYOffset * cos + cameraZOffset * sin >> 15;
+			double sin = sin1024[xRot];
+			double cos = cos1024[xRot];
+			double tmp = cameraZOffset * cos - cameraYOffset * sin;
+			cameraYOffset = cameraYOffset * cos + cameraZOffset * sin;
 			cameraZOffset = tmp;
 		}
 		if (zRot != 0)
 		{
-			int sin = sin1024[zRot];
-			int cos = cos1024[zRot];
-			int camXOffsTmp = cameraYOffset * sin + cameraXOffset * cos >> 15;
-			cameraYOffset = cameraYOffset * cos - cameraXOffset * sin >> 15;
+			double sin = sin1024[zRot];
+			double cos = cos1024[zRot];
+			double camXOffsTmp = cameraYOffset * sin + cameraXOffset * cos;
+			cameraYOffset = cameraYOffset * cos - cameraXOffset * sin;
 			cameraXOffset = camXOffsTmp;
 		}
 		
 		if (yRot != 0)
 		{
-			int sin = sin1024[yRot];
-			int cos = cos1024[yRot];
-			int tmp = cameraZOffset * sin + cameraXOffset * cos >> 15;
-			cameraZOffset = cameraZOffset * cos - cameraXOffset * sin >> 15;
+			double sin = sin1024[yRot];
+			double cos = cos1024[yRot];
+			double tmp = cameraZOffset * sin + cameraXOffset * cos;
+			cameraZOffset = cameraZOffset * cos - cameraXOffset * sin;
 			cameraXOffset = tmp;
 		}
 		if (!mc.getFreeCamera())
 		{
-			cameraXPos = playerX - (int)(cameraXOffset*cameraZoom);
-			cameraZPos = playerZ - (int)(cameraZOffset*cameraZoom)-200; // -200 makes it so we don't zoom in on out feet
-			cameraYPos = playerY - (int)(cameraYOffset*cameraZoom);
+			cameraXPos = playerX - cameraXOffset*cameraZoom;
+			cameraZPos = playerZ - cameraZOffset*cameraZoom;
+			cameraYPos = playerY - cameraYOffset*cameraZoom;
 		}
 	}
 
@@ -1814,19 +1816,17 @@ public class Camera {
 		cameraYPos += yMove;
 	}
 
-	public int getCameraY()
+	public double getCameraY()
 	{
-		//return (cameraXPos - 6208)/64;
-		return cameraYPos/128;
+		return cameraYPos/EngineHandle.GAME_SIZE;
 	}
 
-	public int getCameraX()
+	public double getCameraX()
 	{
-		//return (cameraYPos - 6208)/64;
-		return cameraXPos/128;
+		return cameraXPos/EngineHandle.GAME_SIZE;
 	}
 
-	public int getCameraZ()
+	public double getCameraZ()
 	{
 		return cameraZPos;
 	}
@@ -1846,13 +1846,13 @@ public class Camera {
 	int colorGradientArray[][];
 	int colorGradient[];
 	public int lastCameraModelCount;
-	public int planeOfViewOffsetFromCamera;
-	public int drawModelMaxDist;
-	public int drawSpriteMaxDist;
-	public int fadeFactor;
-	public int fadeDist;
-	public static int sin1024[] = new int[0x400];
-	public static int cos1024[] = new int[0x400];
+	public double planeOfViewOffsetFromCamera;
+	public double drawModelMaxDist;
+	public double drawSpriteMaxDist;
+	public double fadeFactor;
+	public double fadeDist;
+	public static double sin1024[] = new double[0x400];
+	public static double cos1024[] = new double[0x400];
 	private static int sin256[] = new int[0x100];
 	private static int cos256[] = new int[0x100];
 	public boolean gradient2Step;
@@ -1872,9 +1872,9 @@ public class Camera {
 	private int halfHeight2;
 	private int cameraSizeInt;
 	private int anInt402;
-	private int cameraXPos;
-	private int cameraZPos;
-	private int cameraYPos;
+	private double cameraXPos;
+	private double cameraZPos;
+	private double cameraYPos;
 	private int cameraXRot;
 	private int cameraZRot;
 	private int cameraYRot;
@@ -1884,13 +1884,13 @@ public class Camera {
 	private int modelIntArray[];
 	private int cameraModelCount;
 	private CameraModel cameraModels[];
-	private int anInt415;
+	private int mobIndex;
 	private int anIntArray416[];
-	private int anIntArray417[];
-	private int anIntArray418[];
-	private int anIntArray419[];
-	private int anIntArray420[];
-	private int anIntArray421[];
+	private double mobX[];
+	private double mobZ[];
+	private double mobY[];
+	private int mobWidth[];
+	private int mobHeight[];
 	private int anIntArray422[];
 	public Model aModel;
 	int nbrTextures;
@@ -1912,12 +1912,12 @@ public class Camera {
 	double zDistToPointFromCamera[];
 	double yDistToPointFromCamera[];
 	boolean f1Toggle;
-	static int xMinHide;
-	static int xMaxHide;
-	static int zMinHide;
-	static int zMaxHide;
-	static int yMinHide;
-	static int yMaxHide;
+	static double xMinHide;
+	static double xMaxHide;
+	static double zMinHide;
+	static double zMaxHide;
+	static double yMinHide;
+	static double yMaxHide;
 	int anInt454;
 	int anInt455;
 

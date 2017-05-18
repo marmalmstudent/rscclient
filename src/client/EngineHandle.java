@@ -14,8 +14,8 @@ import java.util.zip.ZipFile;
 public class EngineHandle
 {
 
-    public int getStepCount(int walkSectionX, int walkSectionY, int x1, int y1,
-    		int x2, int y2, int[] walkSectionXArray, int[] walkSectionYArray,
+    public int getStepCount(int walkSectionX, int walkSectionY, double x1, double y1,
+    		double x2, double y2, int[] walkSectionXArray, int[] walkSectionYArray,
     		boolean checkForObjects)
     {
         int[][] tmpTiles = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
@@ -194,7 +194,7 @@ public class EngineHandle
         return stepCount;
     }
 
-    public int getGroundElevation(int x, int y)
+    public double getGroundElevation(double x, double y)
     {
         if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH
         		|| y < 0 || y >= VISIBLE_SECTORS*SECTOR_HEIGHT)
@@ -210,7 +210,7 @@ public class EngineHandle
                     y -= j*SECTOR_HEIGHT;
                     break;
             	}
-        return (sectors[section].getTile(x, y).groundElevation & 0xff) * 3;
+        return (sectors[section].getTile((int)x, (int)y).groundElevation) * 3;
     }
 
     public void updateObject(int x, int y, int id, int l)
@@ -262,34 +262,34 @@ public class EngineHandle
         }
     }
 
-    public int getAveragedElevation(int xHighRes, int yHighRes)
+    public double getAveragedElevation(double xHighRes, double yHighRes)
     {
-        int x = xHighRes >> 7;
-        int y = yHighRes >> 7;
-        int x_1 = xHighRes & 0x7f;
-        int y_1 = yHighRes & 0x7f;
-        if (x < 0 || y < 0
-        		|| x >= VISIBLE_SECTORS*SECTOR_WIDTH-1
-        		|| y >= VISIBLE_SECTORS*SECTOR_HEIGHT-1)
+        int xTile = (int) (xHighRes / GAME_SIZE);
+        int yTile = (int) (yHighRes / GAME_SIZE);
+        double x_1 = xHighRes % GAME_SIZE;
+        double y_1 = yHighRes % GAME_SIZE;
+        if (xTile < 0 || yTile < 0
+        		|| xTile >= VISIBLE_SECTORS*SECTOR_WIDTH-1
+        		|| yTile >= VISIBLE_SECTORS*SECTOR_HEIGHT-1)
             return 0;
-        int h00;
-        int h10;
-        int h01;
-        if (x_1 <= 128 - y_1)
+        double h00;
+        double h10;
+        double h01;
+        if (x_1 <= GAME_SIZE - y_1)
         { // y >= x
-            h00 = getGroundElevation(x, y);
-            h10 = getGroundElevation(x + 1, y) - h00;
-            h01 = getGroundElevation(x, y + 1) - h00;
+            h00 = getGroundElevation(xTile, yTile);
+            h10 = getGroundElevation(xTile + 1, yTile) - h00;
+            h01 = getGroundElevation(xTile, yTile + 1) - h00;
         }
         else
         {
-            h00 = getGroundElevation(x + 1, y + 1);
-            h10 = getGroundElevation(x, y + 1) - h00;
-            h01 = getGroundElevation(x + 1, y) - h00;
-            x_1 = 128 - x_1;
-            y_1 = 128 - y_1;
+            h00 = getGroundElevation(xTile + 1, yTile + 1);
+            h10 = getGroundElevation(xTile, yTile + 1) - h00;
+            h01 = getGroundElevation(xTile + 1, yTile) - h00;
+            x_1 = GAME_SIZE - x_1;
+            y_1 = GAME_SIZE - y_1;
         }
-        return h00 + (h10 * x_1) / 128 + (h01 * y_1) / 128;
+        return h00 + (h10 * x_1) / GAME_SIZE + (h01 * y_1) / GAME_SIZE;
     }
 
     public void method400()
@@ -336,7 +336,7 @@ public class EngineHandle
     public void method402(int i, int j, int k, int l, int i1) {
         Model model = aModelArray596[i + j * 8];
         for (int j1 = 0; j1 < model.nbrCoordPoints; j1++) {
-            if (model.xCoords[j1] == k * 128 && model.yCoords[j1] == l * 128) {
+            if (model.xCoords[j1] == k * GAME_SIZE && model.yCoords[j1] == l * GAME_SIZE) {
                 model.method187(j1, i1);
                 return;
             }
@@ -468,7 +468,7 @@ public class EngineHandle
             {
                 for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
                 {
-                    int z = -getGroundElevation(x, y);
+                    double z = -getGroundElevation(x, y);
                     if (getGroundTexturesOverlay(x, y) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                         z = 0;
@@ -481,7 +481,7 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
-                    int j5 = model.insertCoordPointNoDuplicate(x * 128, z, y * 128);
+                    int j5 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, z, y * GAME_SIZE);
                     int j7 = (int) (Math.random() * 10D) - 5;
                     model.method187(j5, j7);
                 }
@@ -596,7 +596,7 @@ public class EngineHandle
                             walkableValue[tile_x][tile_y] |= WALKABLE_INDOORS;
                     }
                     drawOnMinimap(tile_x, tile_y, l14, texture1, texture2);
-                    int i17 = ((getGroundElevation(tile_x + 1, tile_y + 1)
+                    double i17 = ((getGroundElevation(tile_x + 1, tile_y + 1)
                     		- getGroundElevation(tile_x + 1, tile_y))
                     		+ getGroundElevation(tile_x, tile_y + 1))
                     		- getGroundElevation(tile_x, tile_y);
@@ -675,10 +675,10 @@ public class EngineHandle
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                     {
                         int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
-                        int p00 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y), y * 128);
-                        int p10 = model.insertCoordPointNoDuplicate((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
-                        int p11 = model.insertCoordPointNoDuplicate((x + 1) * 128, -getGroundElevation(x + 1, y + 1), (y + 1) * 128);
-                        int p01 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
+                        int p00 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
+                        int p10 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
+                        int p11 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
+                        int p01 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
                         int rect[] = {p00, p10, p11, p01};
                         int i = model.addSurface(4, rect, color, Model.INVISIBLE);
                         selectedX[i] = x;
@@ -697,10 +697,10 @@ public class EngineHandle
                             		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getTexture() == 4)
                             {
                                 int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getColour();
-                                int p00 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y), y * 128);
-                                int p10 = model.insertCoordPointNoDuplicate((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
-                                int p11 = model.insertCoordPointNoDuplicate((x + 1) * 128, -getGroundElevation(x + 1, y + 1), (y + 1) * 128);
-                                int p01 = model.insertCoordPointNoDuplicate(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
+                                int p00 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
+                                int p10 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
+                                int p11 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
+                                int p01 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
                                 int rect[] = {p00, p10, p11, p01};
                                 int j = model.addSurface(4, rect, color, Model.INVISIBLE);
                                 selectedX[j] = x;
@@ -723,7 +723,7 @@ public class EngineHandle
                 for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
                 {
                 	// objects; roofs, fences, walls etc but not trees and and stuff.
-                    elevation[x][y] = getGroundElevation(x, y);
+                    elevation[x][y] = (int)getGroundElevation(x, y);
                 }
             }
         }
@@ -881,14 +881,14 @@ public class EngineHandle
                     int y11 = y + 1;
                     int x01 = x;
                     int y01 = y + 1;
-                    int x0_hres = x * 128;
-                    int y0_hres = y * 128;
-                    int x1_hres = x0_hres + 128;
-                    int y1_hres = y0_hres + 128;
-                    int x0_hres2 = x0_hres;
-                    int y0_hres2 = y0_hres;
-                    int x1_hres2 = x1_hres;
-                    int y1_hres2 = y1_hres;
+                    double x0_hres = x * GAME_SIZE;
+                    double y0_hres = y * GAME_SIZE;
+                    double x1_hres = x0_hres + GAME_SIZE;
+                    double y1_hres = y0_hres + GAME_SIZE;
+                    double x0_hres2 = x0_hres;
+                    double y0_hres2 = y0_hres;
+                    double x1_hres2 = x1_hres;
+                    double y1_hres2 = y1_hres;
                     int z00 = elevation[x00][y00];
                     int z10 = elevation[x10][y10];
                     int z11 = elevation[x11][y11];
@@ -918,7 +918,7 @@ public class EngineHandle
                         z11 -= 0x13880;
                     if (z01 >= 0x13880)
                         z01 -= 0x13880;
-                    byte roofStickOut = 16; // how much the roof should stick out
+                    double roofStickOut = 16; // how much the roof should stick out
                     if (!method416(x00 - 1, y00))
                         x0_hres -= roofStickOut;
                     if (!method416(x00 + 1, y00))
@@ -1286,10 +1286,10 @@ public class EngineHandle
         int height = EntityHandler.getDoorDef(i).getHeight();
         int texture1 = EntityHandler.getDoorDef(i).getTexture1();
         int texture2 = EntityHandler.getDoorDef(i).getTexture2();
-        int x_1 = xSector_1 * 128;
-        int y_1 = ySector_1 * 128;
-        int x_2 = xSector_2 * 128;
-        int y_2 = ySector_2 * 128;
+        double x_1 = xSector_1 * GAME_SIZE;
+        double y_1 = ySector_1 * GAME_SIZE;
+        double x_2 = xSector_2 * GAME_SIZE;
+        double y_2 = ySector_2 * GAME_SIZE;
         int p0 = model.insertCoordPointNoDuplicate(x_1, -elevation[xSector_1][ySector_1], y_1);
         int p1 = model.insertCoordPointNoDuplicate(x_1, -elevation[xSector_1][ySector_1] - height, y_1);
         int p2 = model.insertCoordPointNoDuplicate(x_2, -elevation[xSector_2][ySector_2] - height, y_2);
@@ -1398,8 +1398,8 @@ public class EngineHandle
                     }
                     method412(x, y, k, l);
                     Model model = models[EntityHandler.getObjectDef(k).modelID].newModel(false, true, false, false);
-                    int k1 = ((x + x + i1) * 128) / 2;
-                    int i2 = ((y + y + j1) * 128) / 2;
+                    double k1 = ((x + x + i1) * GAME_SIZE) / 2;
+                    double i2 = ((y + y + j1) * GAME_SIZE) / 2;
                     model.addTranslate(k1, -getAveragedElevation(k1, i2), i2);
                     model.setRotation(0, l * 32, 0);
                     camera.addModel(model);
@@ -1508,6 +1508,16 @@ public class EngineHandle
     {
     	textures = useTxtr;
     }
+    
+    public static int getTileXFromX(double x)
+    {
+    	return (int) (x / GAME_SIZE);
+    }
+    
+    public static int getTileYFromY(double y)
+    {
+    	return (int) (y / GAME_SIZE);
+    }
 
     private ZipFile tileArchive;
 
@@ -1515,6 +1525,8 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
+    public static final double GAME_SIZE = 128;
+    public static final double SCALE_FACTOR = GAME_SIZE/128;
     public static final int WALKABLE_0 = 0x1;
     public static final int WALKABLE_1 = 0x2;
     public static final int WALKABLE_2 = 0x4;
