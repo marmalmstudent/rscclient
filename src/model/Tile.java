@@ -3,6 +3,8 @@ package model;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import client.EngineHandle;
+
 /**
  * A representation of one tile within our world map
  */
@@ -10,7 +12,7 @@ public class Tile {
     /**
      * The elevation of this tile
      */
-    public byte groundElevation = 0;
+    public double groundElevation = 0;
 
     /**
      * The texture ID of this tile
@@ -48,7 +50,7 @@ public class Tile {
     public ByteBuffer pack() throws IOException {
         ByteBuffer out = ByteBuffer.allocate(10);
 
-        out.put(groundElevation);
+        out.put((byte)groundElevation);
         out.put(groundTexture);
         out.put(groundOverlay);
         out.put(roofTexture);
@@ -70,7 +72,7 @@ public class Tile {
         }
         Tile tile = new Tile();
 
-        tile.groundElevation = in.get();
+        tile.groundElevation = (in.get() & 0xff) * EngineHandle.SCALE_FACTOR;
         tile.groundTexture = in.get(); // color of the tile
         tile.groundOverlay = in.get(); // (sprite) overlay
         tile.roofTexture = in.get();

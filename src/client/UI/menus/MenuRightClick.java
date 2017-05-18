@@ -10,8 +10,8 @@ public class MenuRightClick
 	public String text1;
 	public String text2;
 	public int id;
-	public int actionX;
-	public int actionY;
+	public double actionX;
+	public double actionY;
 	public int actionType;
 	public int actionVariable;
 	public int actionVariable2;

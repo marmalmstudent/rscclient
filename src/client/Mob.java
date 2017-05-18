@@ -4,8 +4,8 @@ package client;
 final class Mob {
 
 	Mob() {
-		waypointsX = new int[10];
-		waypointsY = new int[10];
+		waypointsX = new double[10];
+		waypointsY = new double[10];
 		animationCount = new int[12];
 		level = -1;
 		unusedBool = false;
@@ -17,16 +17,16 @@ final class Mob {
 	public String name;
 	public int serverIndex;
 	public int mobIntUnknown;
-	public int currentX;
-	public int currentY;
+	public double currentX;
+	public double currentY;
 	public int type;
 	public int stepCount;
 	public int currentSprite;
 	public int nextSprite;
 	public int waypointEndSprite;
 	public int waypointCurrent;
-	public int waypointsX[];
-	public int waypointsY[];
+	public double waypointsX[];
+	public double waypointsY[];
 	public int animationCount[];
 	public String lastMessage;
 	public int lastMessageTimeout;

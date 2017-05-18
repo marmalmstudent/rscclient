@@ -9,7 +9,7 @@ public class TileDef {
         return colour;
     }
 
-    public int getUnknown() {
+    public int getTexture() {
         return unknown;
     }
 
