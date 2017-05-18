@@ -783,36 +783,38 @@ public class Model
     {
         if (aBoolean262)
             return;
-        double i = featuresLight * lightSourceDist / 256;
+        double lightMod = featuresLight * lightSourceDist / 256;
         for (int j = 0; j < nbrSurfaces; j++)
             if (lightSourceProjectToSurfNormal[j] != invisible)
                 lightSourceProjectToSurfNormal[j] = (xNormals[j] * lightSourceX
                 		+ zNormals[j] * lightSourceZ
-                		+ yNormals[j] * lightSourceY) / i;
+                		+ yNormals[j] * lightSourceY) / lightMod;
 
         double someXArray[] = new double[nbrCoordPoints];
         double someZArray[] = new double[nbrCoordPoints];
         double someYArray[] = new double[nbrCoordPoints];
         int occurence[] = new int[nbrCoordPoints];
 
-        for (int surfaceIdx = 0; surfaceIdx < nbrSurfaces; surfaceIdx++)
-            if (lightSourceProjectToSurfNormal[surfaceIdx] == invisible)
+        for (int j = 0; j < nbrSurfaces; j++)
+            if (lightSourceProjectToSurfNormal[j] == invisible)
             {
-                for (int pointIdx = 0; pointIdx < pointsPerCell[surfaceIdx]; pointIdx++)
+                for (int pointIdx = 0; pointIdx < pointsPerCell[j]; pointIdx++)
                 {
-                    int point = surfaces[surfaceIdx][pointIdx];
-                    someXArray[point] += xNormals[surfaceIdx];
-                    someZArray[point] += zNormals[surfaceIdx];
-                    someYArray[point] += yNormals[surfaceIdx];
+                    int point = surfaces[j][pointIdx];
+                    someXArray[point] += xNormals[j];
+                    someZArray[point] += zNormals[j];
+                    someYArray[point] += yNormals[j];
                     occurence[point]++;
                 }
             }
 
         for (int j1 = 0; j1 < nbrCoordPoints; j1++)
             if (occurence[j1] > 0)
+            {
                 pointBrightness[j1] = (someXArray[j1] * lightSourceX
                 		+ someZArray[j1] * lightSourceZ
-                		+ someYArray[j1] * lightSourceY) / (i * occurence[j1]);
+                		+ someYArray[j1] * lightSourceY) / (lightMod * occurence[j1]);
+            }
     }
 
 	public void findNormals()
@@ -836,9 +838,9 @@ public class Model
 			double n_z = u_y * v_x - v_y * u_x;
 			double n_y = u_x * v_z - v_x * u_z;
 			double n_length = Math.sqrt(n_x * n_x + n_z * n_z + n_y * n_y);
-			xNormals[i] = n_x / n_length;
-			zNormals[i] = n_z / n_length;
-			yNormals[i] = n_y / n_length;
+			xNormals[i] = 256 * n_x / n_length;
+			zNormals[i] = 256 * n_z / n_length;
+			yNormals[i] = 256 * n_y / n_length;
 		}
 		setLightining();
 	}
