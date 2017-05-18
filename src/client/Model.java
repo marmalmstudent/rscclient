@@ -473,7 +473,7 @@ public class Model
         return nbrSurfaces++;
     }
 
-    public Model[] method182(int k, int l, int i1, int j1, int k1, boolean flag) {
+    public Model[] method182(double k, double l, int i1, int j1, int k1, boolean flag) {
         method202();
         int nPoints[] = new int[j1];
         int nSides[] = new int[j1];
@@ -490,7 +490,8 @@ public class Model
                 ySum += yCoords[surface[j]];
             }
 
-            int k4 = xSum / (pointsInCell * k) + (ySum / (pointsInCell * l)) * i1;
+            int k4 = ((int)(xSum / (pointsInCell * k)))
+            		+ ((int)(ySum / (pointsInCell * l))) * i1;
             nPoints[k4] += pointsInCell;
             nSides[k4]++;
         }
@@ -506,18 +507,18 @@ public class Model
         }
 
         for (int i = 0; i < nbrSurfaces; i++) {
-            int xSum = 0;
-            int ySum = 0;
+            double xSum = 0;
+            double ySum = 0;
             int pointsInCell = pointsPerCell[i];
             int surface[] = surfaces[i];
             for (int j = 0; j < pointsInCell; j++)
             {
-                xSum += (int)xCoords[surface[j]];
+                xSum += xCoords[surface[j]];
                 ySum += yCoords[surface[j]];
             }
 
-            int j5 = xSum / (pointsInCell * k) + (ySum / (pointsInCell * l)) * i1;
-            //method183(models[j5], surface, pointsInCell, i);
+            int j5 = ((int)(xSum / (pointsInCell * k)) + ((int)(ySum / (pointsInCell * l))) * i1);
+            method183(models[j5], surface, pointsInCell, i);
         }
 
         for (int i = 0; i < j1; i++)

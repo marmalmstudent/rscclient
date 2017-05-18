@@ -2781,10 +2781,6 @@ public class mudclient extends GameWindowMiddleMan
 					lastAutoCameraRotatePlayerY = ourPlayer.currentY;
 				}
 			}
-			gameCamera.drawModelMaxDist = 3000 * EngineHandle.SCALE_FACTOR;
-			gameCamera.drawSpriteMaxDist = 3000 * EngineHandle.SCALE_FACTOR;
-			gameCamera.fadeFactor = 1 * EngineHandle.SCALE_FACTOR;
-			gameCamera.fadeDist = 2800 * EngineHandle.SCALE_FACTOR;
 			cameraZRot = cameraAutoAngle * 32;
 			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
 			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
@@ -2792,18 +2788,6 @@ public class mudclient extends GameWindowMiddleMan
 		} else {
 			if (configAutoCameraAngle && !zoomCamera)
 				autoRotateCamera();
-			if (!super.keyF1Toggle) {
-				//TODO: clean this up. these values are changed when the mouse wheel moves
-				//gameCamera.drawModelMaxDist = 2400;
-				//gameCamera.drawSpriteMaxDist = 2400;
-				gameCamera.fadeFactor = 1;
-				//gameCamera.fadeDist = 2300;
-			} else {
-				gameCamera.drawModelMaxDist = 2200 * EngineHandle.SCALE_FACTOR;
-				gameCamera.drawSpriteMaxDist = 2200 * EngineHandle.SCALE_FACTOR;
-				gameCamera.fadeFactor = 1;
-				gameCamera.fadeDist = 2100 * EngineHandle.SCALE_FACTOR;
-			}
 			double l5 = lastAutoCameraRotatePlayerX + screenRotationX;
 			double i8 = lastAutoCameraRotatePlayerY + screenRotationY;
 			gameCamera.setCamera(l5, -engineHandle.getAveragedElevation(l5, i8), i8, cameraXRot, cameraZRot * 4, 0, 2*cameraHeight * EngineHandle.SCALE_FACTOR, cameraZoom);
@@ -3428,7 +3412,7 @@ public class mudclient extends GameWindowMiddleMan
 		gameCamera.drawModelMaxDist = viewDistance;
 		gameCamera.drawSpriteMaxDist = viewDistance;
 		gameCamera.fadeFactor = 1;
-		gameCamera.fadeDist = (int) (viewDistance*2.3/2.4);
+		gameCamera.fadeDist = viewDistance*2.3/2.4;
 		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
 		engineHandle = new EngineHandle(gameCamera, gameGraphics);
 		loadTextures(); // 60%
@@ -8456,7 +8440,7 @@ public class mudclient extends GameWindowMiddleMan
 		memoryError = false;
 		bankItemsMax = 48;
 		showQuestionMenu = false;
-		viewDistance = 2400*2;
+		viewDistance = 2400*2 * EngineHandle.SCALE_FACTOR;
 		cameraAutoAngle = 1;
 		anInt727 = 2;
 		showServerMessageBox = false;
@@ -8674,7 +8658,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int walkModel[] = {0, 1, 2, 1};
 	private boolean showQuestionMenu;
 	private int anInt718;
-	private int viewDistance;
+	private double viewDistance;
 	private double cameraZoom;
 	public boolean loggedIn;
 	private int cameraAutoAngle;

@@ -289,7 +289,7 @@ public class ParseXML
 	private ElevationDef getElevationDef(Element el)
 	{
 		ElevationDef ed = new ElevationDef();
-		ed.unknown1 = getIntValue(el, "unknown1");
+		ed.roofHeight = getIntValue(el, "unknown1")*EngineHandle.SCALE_FACTOR;
 		ed.unknown2 = getIntValue(el, "unknown2");
 		return ed;
 	}

@@ -714,7 +714,9 @@ public class EngineHandle
             }
 
             model.setLightAndGradAndSource(true, 40, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-            aModelArray596 = aModel.method182(1536, 1536, 8, 64, 233, false);
+            aModelArray596 = aModel.method182(
+            		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
+            		8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 camera.addModel(aModelArray596[j6]); // floor tiles
             }
@@ -723,7 +725,7 @@ public class EngineHandle
                 for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
                 {
                 	// objects; roofs, fences, walls etc but not trees and and stuff.
-                    elevation[x][y] = (int)getGroundElevation(x, y);
+                    elevation[x][y] = getGroundElevation(x, y);
                 }
             }
         }
@@ -788,8 +790,11 @@ public class EngineHandle
         }
         // viewport walls, fences etc.
         aModel.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
-        walls[hSector] = aModel.method182(1536, 1536, 8, 64, 338, true);
-        for (int building = 0; building < 64; building++) {
+        walls[hSector] = aModel.method182(
+        		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
+        		8, 64, 338, true);
+        for (int building = 0; building < 64; building++)
+        {
             camera.addModel(walls[hSector][building]);
         }
         for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
@@ -823,11 +828,11 @@ public class EngineHandle
                     int y11 = y + 1;
                     int x01 = x;
                     int y01 = y + 1;
-                    int zMax = 0;
-                    int z00 = elevation[x00][y00];
-                    int z10 = elevation[x10][y10];
-                    int z11 = elevation[x11][y11];
-                    int z01 = elevation[x01][y01];
+                    double zMax = 0;
+                    double z00 = elevation[x00][y00];
+                    double z10 = elevation[x10][y10];
+                    double z11 = elevation[x11][y11];
+                    double z01 = elevation[x01][y01];
                     if (z00 > 0x13880)
                         z00 -= 0x13880;
                     if (z10 > 0x13880)
@@ -889,25 +894,25 @@ public class EngineHandle
                     double y0_hres2 = y0_hres;
                     double x1_hres2 = x1_hres;
                     double y1_hres2 = y1_hres;
-                    int z00 = elevation[x00][y00];
-                    int z10 = elevation[x10][y10];
-                    int z11 = elevation[x11][y11];
-                    int z01 = elevation[x01][y01];
-                    int unknown1 = EntityHandler.getElevationDef(color - 1).getUnknown1();
+                    double z00 = elevation[x00][y00];
+                    double z10 = elevation[x10][y10];
+                    double z11 = elevation[x11][y11];
+                    double z01 = elevation[x01][y01];
+                    double roofHeight = EntityHandler.getElevationDef(color - 1).getRoofHeight();
                     if (method424(x00, y00) && z00 < 0x13880) {
-                        z00 += unknown1 + 0x13880;
+                        z00 += roofHeight + 0x13880;
                         elevation[x00][y00] = z00;
                     }
                     if (method424(x10, y10) && z10 < 0x13880) {
-                        z10 += unknown1 + 0x13880;
+                        z10 += roofHeight + 0x13880;
                         elevation[x10][y10] = z10;
                     }
                     if (method424(x11, y11) && z11 < 0x13880) {
-                        z11 += unknown1 + 0x13880;
+                        z11 += roofHeight + 0x13880;
                         elevation[x11][y11] = z11;
                     }
                     if (method424(x01, y01) && z01 < 0x13880) {
-                        z01 += unknown1 + 0x13880;
+                        z01 += roofHeight + 0x13880;
                         elevation[x01][y01] = z01;
                     }
                     if (z00 >= 0x13880)
@@ -918,7 +923,7 @@ public class EngineHandle
                         z11 -= 0x13880;
                     if (z01 >= 0x13880)
                         z01 -= 0x13880;
-                    double roofStickOut = 16; // how much the roof should stick out
+                    double roofStickOut = 16*SCALE_FACTOR; // how much the roof should stick out
                     if (!method416(x00 - 1, y00))
                         x0_hres -= roofStickOut;
                     if (!method416(x00 + 1, y00))
@@ -1050,7 +1055,9 @@ public class EngineHandle
             }
         }
         aModel.setLightAndGradAndSource(true, 50, 50, Camera.light_x, Camera.light_z, Camera.light_y);
-        roofs[hSector] = aModel.method182(1536, 1536, 8, 64, 169, true);
+        roofs[hSector] = aModel.method182(
+        		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
+        		8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
             camera.addModel(roofs[hSector][l9]);
         }
@@ -1450,7 +1457,7 @@ public class EngineHandle
         selectedY = new int[SECTOR_WIDTH*SECTOR_HEIGHT*2*VISIBLE_SECTORS*VISIBLE_SECTORS];
         walls = new Model[4][64];
         roofs = new Model[4][64];
-        elevation = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
+        elevation = new double[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
         requiresClean = true;
         aModelArray596 = new Model[64];
         groundTextureArray = new int[256];
@@ -1525,7 +1532,7 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
-    public static final double GAME_SIZE = 32;
+    public static final double GAME_SIZE = 128;
     public static final double SCALE_FACTOR = GAME_SIZE/128;
     public static final int WALKABLE_0 = 0x1;
     public static final int WALKABLE_1 = 0x2;
@@ -1548,7 +1555,7 @@ public class EngineHandle
     private Sector[] sectors;
 
     Model[][] walls;
-    int[][] elevation;
+    double[][] elevation;
     Model[] aModelArray596;
     private int[] groundTextureArray;
     Model[][] roofs;

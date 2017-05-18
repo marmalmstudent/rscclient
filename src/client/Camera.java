@@ -9,11 +9,7 @@ public class Camera {
 		nbrColors = 50;
 		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
-		planeOfViewOffsetFromCamera = 5;
-		drawModelMaxDist = 1000 * EngineHandle.SCALE_FACTOR;
-		drawSpriteMaxDist = 1000 * EngineHandle.SCALE_FACTOR;
-		fadeFactor = 20 * EngineHandle.SCALE_FACTOR;
-		fadeDist = 10 * EngineHandle.SCALE_FACTOR;
+		planeOfViewOffsetFromCamera = 5*EngineHandle.SCALE_FACTOR;
 		gradient2Step = false;
 		aDouble387 = 1.1000000000000001D;
 		anInt388 = 1;
@@ -21,14 +17,6 @@ public class Camera {
 		maxVisibleModelCount = 100;
 		visibleModelsArray = new Model[maxVisibleModelCount];
 		visibleModelIntArray = new int[maxVisibleModelCount];
-		/*
-        width = 512;
-        halfWidth = 256;
-        halfHeight = 192;
-        halfWidth2 = 256;
-        halfHeight2 = 256;
-        cameraSizeInt = 8;
-		 */
 		anInt402 = 4;
 		xScreen = new double[40];
 		yScreen = new double[40];
@@ -1081,7 +1069,7 @@ public class Camera {
 		if (!mc.getFreeCamera())
 		{
 			cameraXPos = playerX - cameraXOffset*cameraZoom;
-			cameraZPos = playerZ - cameraZOffset*cameraZoom;
+			cameraZPos = playerZ - cameraZOffset*cameraZoom - 200*EngineHandle.SCALE_FACTOR;
 			cameraYPos = playerY - cameraYOffset*cameraZoom;
 		}
 	}

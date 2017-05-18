@@ -1,11 +1,11 @@
 package entityhandling.defs;
 
 public class ElevationDef {
-    public int unknown1;
+    public double roofHeight;
     public int unknown2;
 
-    public int getUnknown1() {
-        return unknown1;
+    public double getRoofHeight() {
+        return roofHeight;
     }
 
     public int getUnknown2() {
