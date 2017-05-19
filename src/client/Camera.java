@@ -724,23 +724,30 @@ public class Camera {
 				color = 0;
 			setTexturePixels(color);
 			--k;
-			int[] p_x = {(int)xDist[0], (int)xDist[0] - (int)xDist[1], (int)xDist[k] - (int)xDist[0]};
-			int[] p_z = {(int)zDist[0], (int)zDist[0] - (int)zDist[1], (int)zDist[k] - (int)zDist[0]};
-			int[] p_y = {(int)yDist[0], (int)yDist[0] - (int)yDist[1], (int)yDist[k] - (int)yDist[0]};
-			int nk_y = p_x[2] * p_z[0] - p_z[2] * p_x[0] << 5 + textureSize[color];
-			int nk_x = p_z[2] * p_y[0] - p_y[2] * p_z[0] << (5 - cameraSizeInt) + 4 + textureSize[color];
-			int nk_z = p_y[2] * p_x[0] - p_x[2] * p_y[0] << (5 - cameraSizeInt) + textureSize[color];
-			int n1_y = p_x[1] * p_z[0] - p_z[1] * p_x[0] << 5 + textureSize[color];
-			int n1_x = p_z[1] * p_y[0] - p_y[1] * p_z[0] << (5 - cameraSizeInt) + 4 + textureSize[color];
-			int n1_z = p_y[1] * p_x[0] - p_x[1] * p_y[0] << (5 - cameraSizeInt) + textureSize[color];
-			// normal pointing up from the surface
-			int n_y = p_z[1] * p_x[2] - p_x[1] * p_z[2] << 5;
-			int n_x = p_y[1] * p_z[2] - p_z[1] * p_y[2] << (5 - cameraSizeInt) + 4;
-			int n_z = p_x[1] * p_y[2] - p_y[1] * p_x[2] >> cameraSizeInt - 5;
+			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
+			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
+			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
+			double factr1 = 1 << 5 + textureSize[color];
+			double factr2 = 1 << (5 - cameraSizeInt) + 4 + textureSize[color];
+			double factr3 = 1 << (5 - cameraSizeInt) + textureSize[color];
+			double nk_y = (p_x[2] * p_z[0] - p_z[2] * p_x[0]) * factr1;
+			double nk_x = (p_z[2] * p_y[0] - p_y[2] * p_z[0]) * factr2;
+			double nk_z = (p_y[2] * p_x[0] - p_x[2] * p_y[0]) * factr3;
+			double n1_y = (p_x[1] * p_z[0] - p_z[1] * p_x[0]) * factr1;
+			double n1_x = (p_z[1] * p_y[0] - p_y[1] * p_z[0]) * factr2;
+			double n1_z = (p_y[1] * p_x[0] - p_x[1] * p_y[0]) * factr3;
+
+			double factr4 = 1 << 5;
+			double factr5 = 1 << (5 - cameraSizeInt) + 4;
+			// this will be divided rather than multiplied
+			double factr6 = 1.0 / (double)(1 << cameraSizeInt - 5);
+			double n_y = (p_z[1] * p_x[2] - p_x[1] * p_z[2]) * factr4;
+			double n_x = (p_y[1] * p_z[2] - p_z[1] * p_y[2]) * factr5;
+			double n_z = (p_x[1] * p_y[2] - p_y[1] * p_x[2]) * factr6;
 			
-			int k14 = nk_x >> 4;
-			int i15 = n1_x >> 4;
-			int k15 = n_x >> 4;
+			double k14 = nk_x / 16;
+			double i15 = n1_x / 16;
+			double k15 = n_x / 16;
 			int i16 = modelYMin - halfHeight2;
 			int imgPixSkip = width;
 			int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
@@ -758,9 +765,9 @@ public class Camera {
 					n_y += n_z;
 					imgPixRow += imgPixSkip;
 				}
-				nk_z <<= 1;
-				n1_z <<= 1;
-				n_z <<= 1;
+				nk_z *= 2;
+				n1_z *= 2;
+				n_z *= 2;
 				imgPixSkip <<= 1;
 				rowStep = 2;
 			}
@@ -884,10 +891,10 @@ public class Camera {
 
 	private static void drawTexture(
 			int pixelArray[], int texturePixels[],
-			int xTexture, int yTexture, int smthXTexture,
-			int smthYTexture, int smthDivision,
-			int smthXTextureStep, int smthYTextureStep,
-			int smthDivisionStep, int length, int offset,
+			int xTexture, int yTexture, double smthXTexture,
+			double smthYTexture, double smthDivision,
+			double smthXTextureStep, double smthYTextureStep,
+			double smthDivisionStep, int length, int offset,
 			int shadeOffset, int shadeStep,
 			int nSteps, boolean transparent, boolean seethrough, int size)
 	{
@@ -900,10 +907,11 @@ public class Camera {
 
 		int i3 = 0;
 		int j3 = 0;
+		int fctr = 1 << size;
 		if (smthDivision != 0)
 		{
-			xTexture = smthXTexture / smthDivision << size;
-			yTexture = smthYTexture / smthDivision << size;
+			xTexture = (int) (smthXTexture / smthDivision) * fctr;
+			yTexture = (int) (smthYTexture / smthDivision) * fctr;
 		}
 		if (xTexture < 0)
 			xTexture = 0;
@@ -915,8 +923,8 @@ public class Camera {
 
 		if (smthDivision != 0)
 		{
-			i3 = smthXTexture / smthDivision << size;
-			j3 = smthYTexture / smthDivision << size;
+			i3 = (int) (smthXTexture / smthDivision) * fctr;
+			j3 = (int) (smthYTexture / smthDivision) * fctr;
 		}
 		if (i3 < 0)
 			i3 = 0;
@@ -953,8 +961,8 @@ public class Camera {
 			smthDivision += smthDivisionStep;
 			if (smthDivision != 0)
 			{
-				i3 = smthXTexture / smthDivision << size;
-				j3 = smthYTexture / smthDivision << size;
+				i3 = (int) (smthXTexture / smthDivision) * fctr;
+				j3 = (int) (smthYTexture / smthDivision) * fctr;
 			}
 			if (i3 < 0)
 				i3 = 0;
@@ -1751,7 +1759,7 @@ public class Camera {
 		return method308(j6, k10, k15, flag);
 	}
 
-	public void moveCamera(int factor, int keyMask)
+	public void moveCamera(double factor, int keyMask)
 	{
 		if (!mc.getFreeCamera())
 			return;

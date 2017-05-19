@@ -2486,23 +2486,6 @@ public class mudclient extends GameWindowMiddleMan
 			}
 			super.lastMouseDownButton = 0;
 			super.keyDown2 = 0;
-			screenRotationTimer++;
-			if (screenRotationTimer > 500) {
-				screenRotationTimer = 0;
-				int i = (int) (Math.random() * 4D);
-				if ((i & 1) == 1)
-					screenRotationX += anInt727;
-				if ((i & 2) == 2)
-					screenRotationY += anInt911;
-			}
-			if (screenRotationX < -50)
-				anInt727 = 2;
-			if (screenRotationX > 50)
-				anInt727 = -2;
-			if (screenRotationY < -50)
-				anInt911 = 2;
-			if (screenRotationY > 50)
-				anInt911 = -2;
 			if (anInt952 > 0)
 				anInt952--;
 			if (anInt953 > 0)
@@ -2784,7 +2767,10 @@ public class mudclient extends GameWindowMiddleMan
 			cameraZRot = cameraAutoAngle * 32;
 			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
 			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(plrX, -engineHandle.getAveragedElevation(plrX, plrY), plrY, cameraXRot, cameraZRot * 4, 0, 2000 * EngineHandle.SCALE_FACTOR, cameraZoom);
+			gameCamera.setCamera(plrX,
+					-engineHandle.getAveragedElevation(plrX, plrY),
+					plrY, cameraXRot, cameraZRot * 4, 0,
+					2000 * EngineHandle.SCALE_FACTOR, cameraZoom);
 		} else {
 			if (configAutoCameraAngle && !zoomCamera)
 				autoRotateCamera();
@@ -4438,7 +4424,7 @@ public class mudclient extends GameWindowMiddleMan
 		else if (super.keyDownCode[83]) // S
 			arrowKeyMask |= 8;
 		if (arrowKeyMask != 0)
-			gameCamera.moveCamera(100, arrowKeyMask);
+			gameCamera.moveCamera(100*EngineHandle.SCALE_FACTOR, arrowKeyMask);
 	}
 
 	private final void drawShopBox() {
@@ -4851,43 +4837,43 @@ public class mudclient extends GameWindowMiddleMan
 			if (mob.waypointEndSprite != k)
 			{
 				int currentSprite = -1;
-				int l2 = mob.waypointEndSprite;
+				int endSprite = mob.waypointEndSprite;
 				double j4;
-				if (l2 < k)
-					j4 = k - l2;
+				if (endSprite < k)
+					j4 = k - endSprite;
 				else
-					j4 = (10 + k) - l2;
+					j4 = (10 + k) - endSprite;
 				double step = 4;
 				if (j4 > 2)
 					step = (j4 - 1) * 4;
 				step *= EngineHandle.SCALE_FACTOR;
-				if (mob.waypointsX[l2] - mob.currentX > EngineHandle.GAME_SIZE * 3
-						|| mob.waypointsY[l2] - mob.currentY > EngineHandle.GAME_SIZE * 3
-						|| mob.waypointsX[l2] - mob.currentX < -EngineHandle.GAME_SIZE * 3
-						|| mob.waypointsY[l2] - mob.currentY < -EngineHandle.GAME_SIZE * 3
+				if (mob.waypointsX[endSprite] - mob.currentX > EngineHandle.GAME_SIZE * 3
+						|| mob.waypointsY[endSprite] - mob.currentY > EngineHandle.GAME_SIZE * 3
+						|| mob.waypointsX[endSprite] - mob.currentX < -EngineHandle.GAME_SIZE * 3
+						|| mob.waypointsY[endSprite] - mob.currentY < -EngineHandle.GAME_SIZE * 3
 						|| j4 > 8)
 				{ // too far away
-					mob.currentX = mob.waypointsX[l2];
-					mob.currentY = mob.waypointsY[l2];
+					mob.currentX = mob.waypointsX[endSprite];
+					mob.currentY = mob.waypointsY[endSprite];
 				}
 				else
 				{
-					if (mob.currentX < mob.waypointsX[l2])
+					if (mob.currentX < mob.waypointsX[endSprite])
 					{
 						mob.currentX += step;
 						mob.stepCount++;
 						currentSprite = 2;
 					}
-					else if (mob.currentX > mob.waypointsX[l2])
+					else if (mob.currentX > mob.waypointsX[endSprite])
 					{
 						mob.currentX -= step;
 						mob.stepCount++;
 						currentSprite = 6;
 					}
-					if (mob.currentX - mob.waypointsX[l2] < step
-							&& mob.currentX - mob.waypointsX[l2] > -step)
-						mob.currentX = mob.waypointsX[l2];
-					if (mob.currentY < mob.waypointsY[l2])
+					if (mob.currentX - mob.waypointsX[endSprite] < step
+							&& mob.currentX - mob.waypointsX[endSprite] > -step)
+						mob.currentX = mob.waypointsX[endSprite];
+					if (mob.currentY < mob.waypointsY[endSprite])
 					{
 						mob.currentY += step;
 						mob.stepCount++;
@@ -4898,7 +4884,7 @@ public class mudclient extends GameWindowMiddleMan
 						else
 							currentSprite = 5;
 					}
-					else if (mob.currentY > mob.waypointsY[l2])
+					else if (mob.currentY > mob.waypointsY[endSprite])
 					{
 						mob.currentY -= step;
 						mob.stepCount++;
@@ -4909,15 +4895,15 @@ public class mudclient extends GameWindowMiddleMan
 						else
 							currentSprite = 7;
 					}
-					if (mob.currentY - mob.waypointsY[l2] < step
-							&& mob.currentY - mob.waypointsY[l2] > -step)
-						mob.currentY = mob.waypointsY[l2];
+					if (mob.currentY - mob.waypointsY[endSprite] < step
+							&& mob.currentY - mob.waypointsY[endSprite] > -step)
+						mob.currentY = mob.waypointsY[endSprite];
 				}
 				if (currentSprite != -1)
 					mob.currentSprite = currentSprite;
-				if (mob.currentX == mob.waypointsX[l2]
-						&& mob.currentY == mob.waypointsY[l2])
-					mob.waypointEndSprite = (l2 + 1) % 10;
+				if (mob.currentX == mob.waypointsX[endSprite]
+						&& mob.currentY == mob.waypointsY[endSprite])
+					mob.waypointEndSprite = (endSprite + 1) % 10;
 			}
 			else
 				mob.currentSprite = mob.nextSprite;
@@ -4953,7 +4939,7 @@ public class mudclient extends GameWindowMiddleMan
 					k5 = j1 - k4;
 				else
 					k5 = (10 + j1) - k4;
-				int step = 4;
+				double step = 4;
 				if (k5 > 2)
 					step = (k5 - 1) * 4;
 				step *= EngineHandle.SCALE_FACTOR;
@@ -8442,7 +8428,6 @@ public class mudclient extends GameWindowMiddleMan
 		showQuestionMenu = false;
 		viewDistance = 2400*2 * EngineHandle.SCALE_FACTOR;
 		cameraAutoAngle = 1;
-		anInt727 = 2;
 		showServerMessageBox = false;
 		hasReceivedWelcomeBoxDetails = false;
 		playerStatCurrent = new int[18];
@@ -8505,7 +8490,6 @@ public class mudclient extends GameWindowMiddleMan
 		bankItemsI = new Item[256];
 		notInWilderness = false;
 		selectedSpell = -1;
-		anInt911 = 2;
 		tradeOtherItemsI = new Item[14];
 		zoomCamera = false;
 		playerStatExperience = new int[18];
@@ -8670,7 +8654,7 @@ public class mudclient extends GameWindowMiddleMan
 	int menuMagicPrayersSelected;
 	private double screenRotationX;
 	private double screenRotationY;
-	private int anInt727;
+	private int randomYRot;
 	private int showAbuseWindow;
 	private int duelCantRetreat;
 	private int duelUseMagic;
@@ -8814,7 +8798,6 @@ public class mudclient extends GameWindowMiddleMan
 	private double cameraHeight;
 	private boolean notInWilderness;
 	private int selectedSpell;
-	private int anInt911;
 	private boolean zoomCamera;
 	private AudioReader audioReader;
 	private int playerStatExperience[];
@@ -8839,7 +8822,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int wildernessType;
 	private boolean configSoundEffects;
 	private boolean showRightClickMenu;
-	private int screenRotationTimer;
 	private int attackingInt40;
 	private int anIntArray944[];
 	private Menu chrDesignMenu;

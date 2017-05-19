@@ -345,11 +345,11 @@ public class EngineHandle
 
     public void method403(int wallHeight, int x0, int y0, int x1, int y1) {
         double height = EntityHandler.getDoorDef(wallHeight).getHeight();
-        if (elevation[x0][y0] < 0x13880) {
-            elevation[x0][y0] += 0x13880 + height;
+        if (elevation[x0][y0] < ROOF_LIM) {
+            elevation[x0][y0] += ROOF_LIM + height;
         }
-        if (elevation[x1][y1] < 0x13880) {
-            elevation[x1][y1] += 0x13880 + height;
+        if (elevation[x1][y1] < ROOF_LIM) {
+            elevation[x1][y1] += ROOF_LIM + height;
         }
     }
 
@@ -814,240 +814,225 @@ public class EngineHandle
                     method403(wallID - 12001, x + 1, y, x, y + 1);
             }
         }
-        for (int x = 1; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
+        for (int i = 1; i < VISIBLE_SECTORS*SECTOR_WIDTH-1; i++)
         {
-            for (int y = 1; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++)
+            for (int j = 1; j < VISIBLE_SECTORS*SECTOR_HEIGHT-1; j++)
             {
-                int roofTxtr = getRoofTexture(x, y);
-                if (roofTxtr > 0) {
-                    int x00 = x;
-                    int y00 = y;
-                    int x10 = x + 1;
-                    int y10 = y;
-                    int x11 = x + 1;
-                    int y11 = y + 1;
-                    int x01 = x;
-                    int y01 = y + 1;
-                    double zMax = 0;
-                    double z00 = elevation[x00][y00];
-                    double z10 = elevation[x10][y10];
-                    double z11 = elevation[x11][y11];
-                    double z01 = elevation[x01][y01];
-                    if (z00 > 0x13880)
-                        z00 -= 0x13880;
-                    if (z10 > 0x13880)
-                        z10 -= 0x13880;
-                    if (z11 > 0x13880)
-                        z11 -= 0x13880;
-                    if (z01 > 0x13880)
-                        z01 -= 0x13880;
-                    if (z00 > zMax)
-                        zMax = z00;
-                    if (z10 > zMax)
-                        zMax = z10;
-                    if (z11 > zMax)
-                        zMax = z11;
-                    if (z01 > zMax)
-                        zMax = z01;
-                    if (zMax >= 0x13880)
-                        zMax -= 0x13880;
-                    if (z00 < 0x13880)
-                        elevation[x00][y00] = zMax;
+                if (getRoofTexture(i, j) > 0)
+                {
+                	int[] x = {i, i+1, i+1, i};
+                	int[] y = {j, j, j+1, j+1};
+                    double[] z = {
+                    		elevation[x[0]][y[0]],
+                    		elevation[x[1]][y[1]],
+                    		elevation[x[2]][y[2]],
+                    		elevation[x[3]][y[3]]};
+                    if (z[0] > ROOF_LIM)
+                    	z[0] -= ROOF_LIM;
+                    if (z[1] > ROOF_LIM)
+                    	z[1] -= ROOF_LIM;
+                    if (z[2] > ROOF_LIM)
+                    	z[2] -= ROOF_LIM;
+                    if (z[3] > ROOF_LIM)
+                    	z[3] -= ROOF_LIM;
+                    double zMax = z[0];
+                    if (z[1] > zMax)
+                        zMax = z[1];
+                    if (z[2] > zMax)
+                        zMax = z[2];
+                    if (z[3] > zMax)
+                        zMax = z[3];
+                    if (zMax >= ROOF_LIM)
+                        zMax -= ROOF_LIM; 
+                    if (z[0] < ROOF_LIM)
+                        elevation[x[0]][y[0]] = zMax;
                     else
-                        elevation[x00][y00] -= 0x13880;
-                    if (z10 < 0x13880)
-                        elevation[x10][y10] = zMax;
+                        elevation[x[0]][y[0]] -= ROOF_LIM;
+                    if (z[1] < ROOF_LIM)
+                    	elevation[x[1]][y[1]] = zMax;
                     else
-                        elevation[x10][y10] -= 0x13880;
-                    if (z11 < 0x13880)
-                        elevation[x11][y11] = zMax;
+                        elevation[x[1]][y[1]] -= ROOF_LIM;
+                    if (z[2] < ROOF_LIM)
+                    	elevation[x[2]][y[2]] = zMax;
                     else
-                        elevation[x11][y11] -= 0x13880;
-                    if (z01 < 0x13880)
-                        elevation[x01][y01] = zMax;
+                        elevation[x[2]][y[2]] -= ROOF_LIM;
+                    if (z[3] < ROOF_LIM)
+                    	elevation[x[3]][y[3]] = zMax;
                     else
-                        elevation[x01][y01] -= 0x13880;
+                        elevation[x[3]][y[3]] -= ROOF_LIM;
                 }
             }
         }
 
         aModel.method176();
-        for (int x = 1; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
+        for (int i = 1; i < VISIBLE_SECTORS*SECTOR_WIDTH-1; i++)
         {
-            for (int y = 1; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++)
+            for (int j = 1; j < VISIBLE_SECTORS*SECTOR_HEIGHT-1; j++)
             {
-                int color = getRoofTexture(x, y);
-                if (color > 0) {
-                    int x00 = x;
-                    int y00 = y;
-                    int x10 = x + 1;
-                    int y10 = y;
-                    int x11 = x + 1;
-                    int y11 = y + 1;
-                    int x01 = x;
-                    int y01 = y + 1;
-                    double x0_hres = x * GAME_SIZE;
-                    double y0_hres = y * GAME_SIZE;
-                    double x1_hres = x0_hres + GAME_SIZE;
-                    double y1_hres = y0_hres + GAME_SIZE;
-                    double x0_hres2 = x0_hres;
-                    double y0_hres2 = y0_hres;
-                    double x1_hres2 = x1_hres;
-                    double y1_hres2 = y1_hres;
-                    double z00 = elevation[x00][y00];
-                    double z10 = elevation[x10][y10];
-                    double z11 = elevation[x11][y11];
-                    double z01 = elevation[x01][y01];
+                int color;
+                if ((color = getRoofTexture(i, j)) > 0)
+                {
+                	int[] x = {i, i+1, i+1, i};
+                	int[] y = {j, j, j+1, j+1};
+                	double[] x_big = {i * GAME_SIZE, i * GAME_SIZE,
+                			(i+1) * GAME_SIZE, (i+1) * GAME_SIZE};
+                	double[] y_big = {j * GAME_SIZE, j * GAME_SIZE,
+                			(j+1) * GAME_SIZE, (j+1) * GAME_SIZE};
+                    double[] z = {
+                    		elevation[x[0]][y[0]],
+                    		elevation[x[1]][y[1]],
+                    		elevation[x[2]][y[2]],
+                    		elevation[x[3]][y[3]]};
                     double roofHeight = EntityHandler.getElevationDef(color - 1).getRoofHeight();
-                    if (method424(x00, y00) && z00 < 0x13880) {
-                        z00 += roofHeight + 0x13880;
-                        elevation[x00][y00] = z00;
+                    if (isNotEdge(x[0], y[0]) && z[0] < ROOF_LIM) {
+                        z[0] += roofHeight + ROOF_LIM;
+                        elevation[x[0]][y[0]] = z[0];
                     }
-                    if (method424(x10, y10) && z10 < 0x13880) {
-                        z10 += roofHeight + 0x13880;
-                        elevation[x10][y10] = z10;
+                    if (isNotEdge(x[1], y[1]) && z[1] < ROOF_LIM) {
+                        z[1] += roofHeight + ROOF_LIM;
+                        elevation[x[1]][y[1]] = z[1];
                     }
-                    if (method424(x11, y11) && z11 < 0x13880) {
-                        z11 += roofHeight + 0x13880;
-                        elevation[x11][y11] = z11;
+                    if (isNotEdge(x[2], y[2]) && z[2] < ROOF_LIM) {
+                        z[2] += roofHeight + ROOF_LIM;
+                        elevation[x[2]][y[2]] = z[2];
                     }
-                    if (method424(x01, y01) && z01 < 0x13880) {
-                        z01 += roofHeight + 0x13880;
-                        elevation[x01][y01] = z01;
+                    if (isNotEdge(x[3], y[3]) && z[3] < ROOF_LIM) {
+                        z[3] += roofHeight + ROOF_LIM;
+                        elevation[x[3]][y[3]] = z[3];
                     }
-                    if (z00 >= 0x13880)
-                        z00 -= 0x13880;
-                    if (z10 >= 0x13880)
-                        z10 -= 0x13880;
-                    if (z11 >= 0x13880)
-                        z11 -= 0x13880;
-                    if (z01 >= 0x13880)
-                        z01 -= 0x13880;
+                    if (z[0] >= ROOF_LIM)
+                        z[0] -= ROOF_LIM;
+                    if (z[1] >= ROOF_LIM)
+                        z[1] -= ROOF_LIM;
+                    if (z[2] >= ROOF_LIM)
+                        z[2] -= ROOF_LIM;
+                    if (z[3] >= ROOF_LIM)
+                        z[3] -= ROOF_LIM;
                     double roofStickOut = 16*SCALE_FACTOR; // how much the roof should stick out
-                    if (!method416(x00 - 1, y00))
-                        x0_hres -= roofStickOut;
-                    if (!method416(x00 + 1, y00))
-                        x0_hres += roofStickOut;
-                    if (!method416(x00, y00 - 1))
-                        y0_hres -= roofStickOut;
-                    if (!method416(x00, y00 + 1))
-                        y0_hres += roofStickOut;
-                    if (!method416(x10 - 1, y10))
-                        x1_hres -= roofStickOut;
-                    if (!method416(x10 + 1, y10))
-                        x1_hres += roofStickOut;
-                    if (!method416(x10, y10 - 1))
-                        y0_hres2 -= roofStickOut;
-                    if (!method416(x10, y10 + 1))
-                        y0_hres2 += roofStickOut;
-                    if (!method416(x11 - 1, y11))
-                        x1_hres2 -= roofStickOut;
-                    if (!method416(x11 + 1, y11))
-                        x1_hres2 += roofStickOut;
-                    if (!method416(x11, y11 - 1))
-                        y1_hres -= roofStickOut;
-                    if (!method416(x11, y11 + 1))
-                        y1_hres += roofStickOut;
-                    if (!method416(x01 - 1, y01))
-                        x0_hres2 -= roofStickOut;
-                    if (!method416(x01 + 1, y01))
-                        x0_hres2 += roofStickOut;
-                    if (!method416(x01, y01 - 1))
-                        y1_hres2 -= roofStickOut;
-                    if (!method416(x01, y01 + 1))
-                        y1_hres2 += roofStickOut;
+                    if (!nearbyRoof(x[0] - 1, y[0]))
+                    	x_big[0] -= roofStickOut;
+                    if (!nearbyRoof(x[0] + 1, y[0]))
+                        x_big[0] += roofStickOut;
+                    if (!nearbyRoof(x[0], y[0] - 1))
+                        y_big[0] -= roofStickOut;
+                    if (!nearbyRoof(x[0], y[0] + 1))
+                        y_big[0] += roofStickOut;
+                    if (!nearbyRoof(x[1] - 1, y[1]))
+                        x_big[2] -= roofStickOut;
+                    if (!nearbyRoof(x[1] + 1, y[1]))
+                        x_big[2] += roofStickOut;
+                    if (!nearbyRoof(x[1], y[1] - 1))
+                        y_big[1] -= roofStickOut;
+                    if (!nearbyRoof(x[1], y[1] + 1))
+                        y_big[1] += roofStickOut;
+                    if (!nearbyRoof(x[2] - 1, y[2]))
+                        x_big[3] -= roofStickOut;
+                    if (!nearbyRoof(x[2] + 1, y[2]))
+                        x_big[3] += roofStickOut;
+                    if (!nearbyRoof(x[2], y[2] - 1))
+                        y_big[2] -= roofStickOut;
+                    if (!nearbyRoof(x[2], y[2] + 1))
+                        y_big[2] += roofStickOut;
+                    if (!nearbyRoof(x[3] - 1, y[3]))
+                        x_big[1] -= roofStickOut;
+                    if (!nearbyRoof(x[3] + 1, y[3]))
+                        x_big[1] += roofStickOut;
+                    if (!nearbyRoof(x[3], y[3] - 1))
+                        y_big[3] -= roofStickOut;
+                    if (!nearbyRoof(x[3], y[3] + 1))
+                        y_big[3] += roofStickOut;
                     color = EntityHandler.getElevationDef(color - 1).getUnknown2();
-                    z00 = -z00;
-                    z10 = -z10;
-                    z11 = -z11;
-                    z01 = -z01;
-                    if (getDiagonalWalls(x, y) > 12000
-                    		&& getDiagonalWalls(x, y) < 24000
-                    		&& getRoofTexture(x - 1, y - 1) == 0)
+                    z[0] = -z[0];
+                    z[1] = -z[1];
+                    z[2] = -z[2];
+                    z[3] = -z[3];
+                    if (getDiagonalWalls(i, j) > 12000
+                    		&& getDiagonalWalls(i, j) < 24000
+                    		&& getRoofTexture(i - 1, j - 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
-                    else if (getDiagonalWalls(x, y) > 12000
-                    		&& getDiagonalWalls(x, y) < 24000
-                    		&& getRoofTexture(x + 1, y + 1) == 0)
+                    else if (getDiagonalWalls(i, j) > 12000
+                    		&& getDiagonalWalls(i, j) < 24000
+                    		&& getRoofTexture(i + 1, j + 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
-                    else if (getDiagonalWalls(x, y) > 0
-                    		&& getDiagonalWalls(x, y) < 12000
-                    		&& getRoofTexture(x + 1, y - 1) == 0)
+                    else if (getDiagonalWalls(i, j) > 0
+                    		&& getDiagonalWalls(i, j) < 12000
+                    		&& getRoofTexture(i + 1, j - 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
-                    else if (getDiagonalWalls(x, y) > 0
-                    		&& getDiagonalWalls(x, y) < 12000
-                    		&& getRoofTexture(x - 1, y + 1) == 0)
+                    else if (getDiagonalWalls(i, j) > 0
+                    		&& getDiagonalWalls(i, j) < 12000
+                    		&& getRoofTexture(i - 1, j + 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
-                    else if (z00 == z10 && z11 == z01) {
+                    else if (z[0] == z[1] && z[2] == z[3]) {
                         int rect[] = new int[4];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
-                        rect[3] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                        rect[3] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
                     }
-                    else if (z00 == z01 && z10 == z11) {
+                    else if (z[0] == z[3] && z[1] == z[2]) {
                         int rect[] = new int[4];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                        rect[3] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
+                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                        rect[3] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
                     }
                     else
                     {
                         boolean flag1 = true;
-                        if (getRoofTexture(x - 1, y - 1) > 0)
+                        if (getRoofTexture(i - 1, j - 1) > 0)
                             flag1 = false;
-                        if (getRoofTexture(x + 1, y + 1) > 0)
+                        if (getRoofTexture(i + 1, j + 1) > 0)
                             flag1 = false;
                         if (!flag1)
                         {
                             int rect1[] = new int[3];
-                            rect1[0] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                            rect1[1] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
-                            rect1[2] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
+                            rect1[0] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                            rect1[1] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                            rect1[2] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
                             aModel.addSurface(3, rect1, color, Model.INVISIBLE);
                             int rec2[] = new int[3];
-                            rec2[0] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
-                            rec2[1] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                            rec2[2] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
+                            rec2[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                            rec2[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                            rec2[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
                             aModel.addSurface(3, rec2, color, Model.INVISIBLE);
                         }
                         else
                         {
                             int rect1[] = new int[3];
-                            rect1[0] = aModel.insertCoordPointNoDuplicate(x0_hres, z00, y0_hres);
-                            rect1[1] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
-                            rect1[2] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
+                            rect1[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                            rect1[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                            rect1[2] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
                             aModel.addSurface(3, rect1, color, Model.INVISIBLE);
                             int rect2[] = new int[3];
-                            rect2[0] = aModel.insertCoordPointNoDuplicate(x1_hres2, z11, y1_hres);
-                            rect2[1] = aModel.insertCoordPointNoDuplicate(x0_hres2, z01, y1_hres2);
-                            rect2[2] = aModel.insertCoordPointNoDuplicate(x1_hres, z10, y0_hres2);
+                            rect2[0] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                            rect2[1] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                            rect2[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
                             aModel.addSurface(3, rect2, color, Model.INVISIBLE);
                         }
                     }
@@ -1066,8 +1051,8 @@ public class EngineHandle
         }
         for (int j12 = 0; j12 < VISIBLE_SECTORS*SECTOR_WIDTH; j12++) {
             for (int k14 = 0; k14 < VISIBLE_SECTORS*SECTOR_HEIGHT; k14++) {
-                if (elevation[j12][k14] >= 0x13880) {
-                    elevation[j12][k14] -= 0x13880;
+                if (elevation[j12][k14] >= ROOF_LIM) {
+                    elevation[j12][k14] -= ROOF_LIM;
                 }
             }
         }
@@ -1220,7 +1205,7 @@ public class EngineHandle
         return sectors[section].getTile(x, y).verticalWall & 0xff;
     }
 
-    public boolean method416(int x, int y)
+    public boolean nearbyRoof(int x, int y)
     {
         return getRoofTexture(x, y) > 0
         		|| getRoofTexture(x - 1, y) > 0
@@ -1337,7 +1322,7 @@ public class EngineHandle
         return sectors[section].getTile(x, y).groundTexture & 0xFF;
     }
 
-    public boolean method424(int i, int j)
+    public boolean isNotEdge(int i, int j)
     {
         return getRoofTexture(i, j) > 0
         		&& getRoofTexture(i - 1, j) > 0
@@ -1532,8 +1517,9 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
-    public static final double GAME_SIZE = 128;
+    public static final double GAME_SIZE = 32;
     public static final double SCALE_FACTOR = GAME_SIZE/128;
+    public static final double ROOF_LIM = 0x13880;
     public static final int WALKABLE_0 = 0x1;
     public static final int WALKABLE_1 = 0x2;
     public static final int WALKABLE_2 = 0x4;
