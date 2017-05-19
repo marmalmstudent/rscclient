@@ -258,7 +258,6 @@ public class EngineHandle
                     }
                 }
             }
-            method407(x, y, i1, j1);
         }
     }
 
@@ -333,16 +332,6 @@ public class EngineHandle
         }
     }
 
-    public void method402(int i, int j, int k, int l, int i1) {
-        Model model = aModelArray596[i + j * 8];
-        for (int j1 = 0; j1 < model.nbrCoordPoints; j1++) {
-            if (model.xCoords[j1] == k * GAME_SIZE && model.yCoords[j1] == l * GAME_SIZE) {
-                model.method187(j1, i1);
-                return;
-            }
-        }
-    }
-
     public void method403(int wallHeight, int x0, int y0, int x1, int y1) {
         double height = EntityHandler.getDoorDef(wallHeight).getHeight();
         if (elevation[x0][y0] < ROOF_LIM) {
@@ -393,29 +382,6 @@ public class EngineHandle
         System.gc();
     }
 
-    public void method407(int x, int y, int k, int l)
-    {
-        if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH
-        		|| y < 0 || y >= VISIBLE_SECTORS*SECTOR_HEIGHT) {
-            return;
-        }
-        for (int i1 = x; i1 <= x + k; i1++)
-        {
-            for (int j1 = y; j1 <= y + l; j1++)
-            {
-                if ((getWalkableValue(i1, j1) & 0x63) != 0
-                		|| (getWalkableValue(i1 - 1, j1) & 0x59) != 0
-                		|| (getWalkableValue(i1, j1 - 1) & 0x56) != 0 
-                		|| (getWalkableValue(i1 - 1, j1 - 1) & 0x6c) != 0)
-                {
-                    method419(i1, j1, 35);
-                } else {
-                    method419(i1, j1, 0);
-                }
-            }
-        }
-    }
-
     public void method408(int x, int y, int k, int l)
     {
         if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH-1
@@ -437,7 +403,6 @@ public class EngineHandle
             } else if (k == 3) {
                 walkableValue[x][y] |= WALKABLE_5;
             }
-            method407(x, y, 1, 1);
         }
     }
 
@@ -481,9 +446,7 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
-                    int j5 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, z, y * GAME_SIZE);
-                    int j7 = (int) (Math.random() * 10D) - 5;
-                    model.method187(j5, j7);
+                    model.insertCoordPointNoDuplicate(x * GAME_SIZE, z, y * GAME_SIZE);
                 }
             }
 
@@ -1125,7 +1088,6 @@ public class EngineHandle
                         }
                     }
             }
-            method407(x, y, i1, j1);
         }
     }
 
@@ -1180,7 +1142,6 @@ public class EngineHandle
                 walkableValue[x][y] &= 0xffff ^ WALKABLE_4; //0xffef;
             else if (dir == 3)
                 walkableValue[x][y] &= 0xffff ^ WALKABLE_5; //0xffdf;
-            method407(x, y, 1, 1);
         }
     }
 
@@ -1233,23 +1194,6 @@ public class EngineHandle
         return sectors[section].getTile(x, y).groundOverlay & 0xff;
     }
 
-    public void method419(int i, int j, int k) {
-        int l = i / 12;
-        int i1 = j / 12;
-        int j1 = (i - 1) / 12;
-        int k1 = (j - 1) / 12;
-        method402(l, i1, i, j, k);
-        if (l != j1) {
-            method402(j1, i1, i, j, k);
-        }
-        if (i1 != k1) {
-            method402(l, k1, i, j, k);
-        }
-        if (l != j1 && i1 != k1) {
-            method402(j1, k1, i, j, k);
-        }
-    }
-
     public int getDiagonalWalls(int x, int y)
     {
         if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH
@@ -1273,8 +1217,6 @@ public class EngineHandle
     public void method421(Model model, int i, int xSector_1,
     		int ySector_1, int xSector_2, int ySector_2)
     {
-        method419(xSector_1, ySector_1, 40);
-        method419(xSector_2, ySector_2, 40);
         double height = EntityHandler.getDoorDef(i).getHeight();
         int texture1 = EntityHandler.getDoorDef(i).getTexture1();
         int texture2 = EntityHandler.getDoorDef(i).getTexture2();
@@ -1517,7 +1459,7 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
-    public static final double GAME_SIZE = 32;
+    public static final double GAME_SIZE = 16;
     public static final double SCALE_FACTOR = GAME_SIZE/128;
     public static final double ROOF_LIM = 0x13880;
     public static final int WALKABLE_0 = 0x1;

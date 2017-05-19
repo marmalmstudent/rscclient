@@ -63,7 +63,6 @@ public class Model
 		zCoords = new double[nbrCoordPoints];
 		yCoords = new double[nbrCoordPoints];
 		pointBrightness = new double[nbrCoordPoints];
-		aByteArray233 = new byte[nbrCoordPoints];
 		pointsPerCell = new int[nbrSides];
 		surfaces = new int[nbrSides][];
 		surfaceTexture1 = new int[nbrSides];
@@ -533,7 +532,6 @@ public class Model
             int l = ai1[k] = model.insertCoordPointNoDuplicate(
             		xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
             model.pointBrightness[l] = pointBrightness[ai[k]];
-            model.aByteArray233[l] = aByteArray233[ai[k]];
         }
 
         int i1 = model.addSurface(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
@@ -588,11 +586,6 @@ public class Model
         lightSourceY = y;
         lightSourceDist = Math.sqrt(x * x + z * z + y * y);
         setLightining();
-    }
-
-    public void method187(int i, int j)
-    {
-        aByteArray233[i] = (byte) j;
     }
 
     public void addRotation(int x, int z, int y)
@@ -1026,7 +1019,6 @@ public class Model
     public double xScreen[];
     public double yScreen[];
     public double pointBrightness[];
-    public byte aByteArray233[];
     public int nbrSurfaces;
     public int pointsPerCell[];
     public int surfaces[][];

@@ -3397,7 +3397,7 @@ public class mudclient extends GameWindowMiddleMan
 				windowHeight / 2, windowWidth, cameraSizeInt);
 		gameCamera.drawModelMaxDist = viewDistance;
 		gameCamera.drawSpriteMaxDist = viewDistance;
-		gameCamera.fadeFactor = 1;
+		gameCamera.fadeFactor = 1 * EngineHandle.SCALE_FACTOR;
 		gameCamera.fadeDist = viewDistance*2.3/2.4;
 		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
 		engineHandle = new EngineHandle(gameCamera, gameGraphics);
@@ -3880,7 +3880,7 @@ public class mudclient extends GameWindowMiddleMan
 		notInWilderness = false;
 		xPos += wildX;
 		yPos += wildY;
-		if (sectorHeight == wildYSubtract && xPos > anInt789 && xPos < anInt791 && yPos > anInt790 && yPos < anInt792) {
+		if (sectorHeight == wildYSubtract && xPos > xMinReloadNextSect && xPos < xMaxReloadNextSect && yPos > yMinReloadNextSect && yPos < yMaxReloadNextSect) {
 			engineHandle.playerIsAlive = true;
 			return false;
 		}
@@ -3894,10 +3894,11 @@ public class mudclient extends GameWindowMiddleMan
 		sectorHeight = wildYSubtract;
 		areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
 		areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
-		anInt789 = i1 * 48 - 32; // lowerAreaXTile
-		anInt790 = j1 * 48 - 32; // lowerAreaYTile
-		anInt791 = i1 * 48 + 32; // upperAreaXTile
-		anInt792 = j1 * 48 + 32; // upperAreaYTile
+		// sets
+		xMinReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH - 2*EngineHandle.SECTOR_WIDTH/3; // lowerAreaXTile
+		yMinReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT - 2*EngineHandle.SECTOR_HEIGHT/3; // lowerAreaYTile
+		xMaxReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH + 2*EngineHandle.SECTOR_WIDTH/3; // upperAreaXTile
+		yMaxReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT + 2*EngineHandle.SECTOR_HEIGHT/3; // upperAreaYTile
 		engineHandle.method401(xPos, yPos, sectorHeight);
 		areaX -= wildX;
 		areaY -= wildY;
@@ -3966,6 +3967,10 @@ public class mudclient extends GameWindowMiddleMan
 			groundItemY[j3] -= areaYDiff;
 		}
 
+		if (mapClickX >= 0)
+			mapClickX -= areaXDiff * EngineHandle.GAME_SIZE;
+		if (mapClickY >= 0)
+			mapClickY -= areaYDiff * EngineHandle.GAME_SIZE;
 		for (int i4 = 0; i4 < playerCount; i4++) {
 			Mob mob = playerArray[i4];
 			mob.currentX -= areaXDiff * EngineHandle.GAME_SIZE;
@@ -3974,8 +3979,10 @@ public class mudclient extends GameWindowMiddleMan
 				mob.waypointsX[j5] -= areaXDiff * EngineHandle.GAME_SIZE;
 				mob.waypointsY[j5] -= areaYDiff * EngineHandle.GAME_SIZE;
 			}
-
 		}
+		gameCamera.translateCamera(
+				areaXDiff * EngineHandle.GAME_SIZE,
+				areaYDiff * EngineHandle.GAME_SIZE);
 
 		for (int k4 = 0; k4 < npcCount; k4++) {
 			Mob mob_1 = npcArray[k4];
@@ -3985,7 +3992,6 @@ public class mudclient extends GameWindowMiddleMan
 				mob_1.waypointsX[l5] -= areaXDiff * EngineHandle.GAME_SIZE;
 				mob_1.waypointsY[l5] -= areaYDiff * EngineHandle.GAME_SIZE;
 			}
-
 		}
 
 		engineHandle.playerIsAlive = true;
@@ -8313,6 +8319,33 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
 				cameraZRot + 128 & 0xff, 128);
 		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
+		if (Math.abs(mapClickX - ourPlayer.currentX) > gameSize
+				|| Math.abs(mapClickY - ourPlayer.currentY) > gameSize)
+		{
+			if (mapClickX >= 0 && mapClickY >= 0)
+			{
+				double j2 = ((mapClickX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
+				double l3 = ((mapClickY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
+				tmp = (l3 * sin + j2 * cos) / 8;
+				l3 = (l3 * cos - j2 * sin) / 8;
+				j2 = tmp;
+
+				Sprite sprite;
+				sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 18];
+				gameGraphics.drawPicture(
+						miniMapX + miniMapWidth / 2 + (int)j2 - sprite.getWidth(),
+						miniMapY + miniMapHeight / 2 - (int)l3 - sprite.getHeight(),
+						SPRITE_MEDIA_START + 18);
+				/*
+				setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)j2,
+						(miniMapY + miniMapHeight / 2) - (int)l3, 0xff00ff);*/
+			}
+		}
+		else
+		{
+			mapClickX = -1;
+			mapClickY = -1;
+		}
 		if (!canClick)
 			return;
 		if (super.mouseX >= miniMapX
@@ -8322,18 +8355,24 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			int l = 192 + anInt986;
 			int j1 = cameraZRot + anInt985 & 0xff;
-			double l2 = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 0x4000) / (3 * l);
-			double j4 = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 0x4000) / (3 * l);
+			double xCoord = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 0x4000*scaleFactor) / (3 * l);
+			double yCoord = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 0x4000*scaleFactor) / (3 * l);
 			double sin1 = Camera.sin1024[0x400 - j1 * 4 & 0x3ff];
 			double cos1 = Camera.cos1024[0x400 - j1 * 4 & 0x3ff];
-			tmp = j4 * sin1 + l2 * cos1;
-			j4 = j4 * cos1 - l2 * sin1;
-			l2 = tmp;
-			l2 += ourPlayer.currentX;
-			j4 = ourPlayer.currentY - j4;
+			tmp = yCoord * sin1 + xCoord * cos1;
+			yCoord = yCoord * cos1 - xCoord * sin1;
+			xCoord = tmp;
+			xCoord += ourPlayer.currentX;
+			yCoord = ourPlayer.currentY - yCoord;
 			if (mouseButtonClick == 1)
-				method112(sectionX, sectionY, EngineHandle.getTileXFromX(l2),
-						EngineHandle.getTileYFromY(j4), false);
+			{
+				method112(sectionX, sectionY,
+						EngineHandle.getTileXFromX(xCoord),
+						EngineHandle.getTileYFromY(yCoord),
+						false);
+				mapClickX = xCoord;
+				mapClickY = yCoord;
+			}
 			mouseButtonClick = 0;
 		}
 	}
@@ -8692,10 +8731,10 @@ public class mudclient extends GameWindowMiddleMan
 	private int anIntArray786[];
 	private int anIntArray787[];
 	private int anIntArray788[];
-	private int anInt789;
-	private int anInt790;
-	private int anInt791;
-	private int anInt792;
+	private int xMinReloadNextSect;
+	private int yMinReloadNextSect;
+	private int xMaxReloadNextSect;
+	private int yMaxReloadNextSect;
 	private Menu menuLogin;
 	private final int chrHairClrs[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
 	private Model objectModelArray[];
@@ -8856,6 +8895,7 @@ public class mudclient extends GameWindowMiddleMan
 	public int windowHalfWidth;
 	public int windowHalfHeight;
 	private int cameraSizeInt;
+	private double mapClickX, mapClickY;
 	private Menu friendsMenu;
 	int friendsMenuHandle;
 	int friendTabOn;

@@ -240,48 +240,48 @@ public class Camera {
 		} while (true);
 	}
 
-	public boolean method278(CameraModel cameraModels[], int i, int j) {
+	public boolean method278(CameraModel cameraModels[], int idx1, int idx2) {
 		do {
-			CameraModel cameraModel = cameraModels[i];
-			for (int k = i + 1; k <= j; k++) {
+			CameraModel cameraModel = cameraModels[idx1];
+			for (int k = idx1 + 1; k <= idx2; k++) {
 				CameraModel cameraModel_1 = cameraModels[k];
 				if (!method295(cameraModel_1, cameraModel))
 					break;
-				cameraModels[i] = cameraModel_1;
+				cameraModels[idx1] = cameraModel_1;
 				cameraModels[k] = cameraModel;
-				i = k;
-				if (i == j) {
-					anInt454 = i;
-					anInt455 = i - 1;
+				idx1 = k;
+				if (idx1 == idx2) {
+					anInt454 = idx1;
+					anInt455 = idx1 - 1;
 					return true;
 				}
 			}
 
-			CameraModel cameraModel_2 = cameraModels[j];
-			for (int l = j - 1; l >= i; l--) {
+			CameraModel cameraModel_2 = cameraModels[idx2];
+			for (int l = idx2 - 1; l >= idx1; l--) {
 				CameraModel cameraModel_3 = cameraModels[l];
 				if (!method295(cameraModel_2, cameraModel_3))
 					break;
-				cameraModels[j] = cameraModel_3;
+				cameraModels[idx2] = cameraModel_3;
 				cameraModels[l] = cameraModel_2;
-				j = l;
-				if (i == j) {
-					anInt454 = j + 1;
-					anInt455 = j;
+				idx2 = l;
+				if (idx1 == idx2) {
+					anInt454 = idx2 + 1;
+					anInt455 = idx2;
 					return true;
 				}
 			}
 
-			if (i + 1 >= j) {
-				anInt454 = i;
-				anInt455 = j;
+			if (idx1 + 1 >= idx2) {
+				anInt454 = idx1;
+				anInt455 = idx2;
 				return false;
 			}
-			if (!method278(cameraModels, i + 1, j)) {
-				anInt454 = i;
+			if (!method278(cameraModels, idx1 + 1, idx2)) {
+				anInt454 = idx1;
 				return false;
 			}
-			j = anInt455;
+			idx2 = anInt455;
 		} while (true);
 	}
 
@@ -349,13 +349,13 @@ public class Camera {
 		zMaxHide += cameraZPos;
 		yMinHide += cameraYPos;
 		yMaxHide += cameraYPos;
-		modelArray[modelCount] = aModel;
-		aModel.modelType = 2;
 		for (int i = 0; i < modelCount; i++)
 			modelArray[i].makePerspectiveVectors(
 					cameraXPos, cameraZPos, cameraYPos, cameraXRot,
 					cameraZRot, cameraYRot, cameraSizeInt, planeOfViewOffsetFromCamera);
 
+		modelArray[modelCount] = aModel;
+		aModel.modelType = 2;
 		modelArray[modelCount].makePerspectiveVectors(
 				cameraXPos, cameraZPos, cameraYPos, cameraXRot,
 				cameraZRot, cameraYRot, cameraSizeInt, planeOfViewOffsetFromCamera);
@@ -528,9 +528,9 @@ public class Camera {
 					yDistToPointFromCamera[i] = (int)model.zDistToPointFromCameraView[dataPoint];
 					if (model.lightSourceProjectToSurfNormal[l] == Model.INVISIBLE)
 						if (cm.normalDirectionToCamera < 0)
-							brightness = (int) (model.globalLight - model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint]);
+							brightness = (int) (model.globalLight - model.pointBrightness[dataPoint]);
 						else
-							brightness = (int) (model.globalLight + model.pointBrightness[dataPoint] + model.aByteArray233[dataPoint]);
+							brightness = (int) (model.globalLight + model.pointBrightness[dataPoint]);
 					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
 						xScreen[pointsInSurfac] = model.xScreen[dataPoint];
@@ -725,8 +725,14 @@ public class Camera {
 			setTexturePixels(color);
 			--k;
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
+			for (int i = 0; i < p_x.length; ++i)
+				p_x[i] *= EngineHandle.SCALE_FACTOR;
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
+			for (int i = 0; i < p_z.length; ++i)
+				p_z[i] *= EngineHandle.SCALE_FACTOR;
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
+			for (int i = 0; i < p_y.length; ++i)
+				p_y[i] *= EngineHandle.SCALE_FACTOR;
 			double factr1 = 1 << 5 + textureSize[color];
 			double factr2 = 1 << (5 - cameraSizeInt) + 4 + textureSize[color];
 			double factr3 = 1 << (5 - cameraSizeInt) + textureSize[color];
@@ -903,7 +909,7 @@ public class Camera {
 		int mask = transparent ? 0x7f7f7f : 0x0;
 		shadeStep <<= (nSteps >> 1);
 		int lastRow = (1 << 2*size) - (1 << size);
-		int txtrStep1 = (1 << 2*size) - 1;
+		int maxSpriteIdx = (1 << 2*size) - 1;
 
 		int i3 = 0;
 		int j3 = 0;
@@ -937,7 +943,7 @@ public class Camera {
 		{
 			for (int i = 0; i < 4; ++i)
 			{
-				xTexture = (xTexture & txtrStep1);
+				xTexture = (xTexture & maxSpriteIdx);
 				shadeOffset += shadeStep;
 				for (int j = 0; j < 4; ++j)
 				{
@@ -976,7 +982,7 @@ public class Camera {
 		{
 			if ((k4 & 3) == 0)
 			{
-				xTexture = (xTexture & txtrStep1);
+				xTexture = (xTexture & maxSpriteIdx);
 				shadeOffset += shadeStep;
 			}
 			color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
@@ -1810,6 +1816,12 @@ public class Camera {
 		double yMove = factor*dy;
 		cameraXPos += xMove;
 		cameraYPos += yMove;
+	}
+	
+	public void translateCamera(double x, double y)
+	{
+		cameraXPos += x;
+		cameraZPos += y;
 	}
 
 	public double getCameraY()
