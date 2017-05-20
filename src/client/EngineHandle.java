@@ -51,7 +51,7 @@ public class EngineHandle
                     pathAvailable = true;
                     break;
                 }
-                if (x < 95 && x + 1 >= x1 && x + 1 <= x2
+                if (x < VISIBLE_SECTORS*SECTOR_WIDTH && x + 1 >= x1 && x + 1 <= x2
                 		&& y >= y1 && y <= y2
                 		&& (walkableValue[x + 1][y] & WALKABLE_1) == 0)
                 {
@@ -65,7 +65,7 @@ public class EngineHandle
                     pathAvailable = true;
                     break;
                 }
-                if (y < 95 && x >= x1 && x <= x2
+                if (y < VISIBLE_SECTORS*SECTOR_WIDTH && x >= x1 && x <= x2
                 		&& y + 1 >= y1 && y + 1 <= y2
                 		&& (walkableValue[x][y + 1] & WALKABLE_0) == 0)
                 {
@@ -242,12 +242,12 @@ public class EngineHandle
                         }
                     } else if (l == 2) {
                         walkableValue[i][j] &= 0xffff ^ WALKABLE_2; //0xfffb;
-                        if (j < 95) {
+                        if (j < VISIBLE_SECTORS*SECTOR_HEIGHT-1) {
                             andMinusWalkable(i, j + 1, WALKABLE_0);
                         }
                     } else if (l == 4) {
                         walkableValue[i][j] &= 0xffff ^ WALKABLE_3; //0xfff7;
-                        if (i < 95) {
+                        if (i < VISIBLE_SECTORS*SECTOR_WIDTH-1) {
                             andMinusWalkable(i + 1, j, WALKABLE_1);
                         }
                     } else if (l == 6) {
