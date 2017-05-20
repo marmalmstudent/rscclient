@@ -687,8 +687,8 @@ public class Model
 
     }
 
-    private void skew(int x_skew_z, int y_skew_z, int x_skew_y,
-    		int z_skew_y, int y_skew_x, int z_skew_x)
+    private void skew(double x_skew_z, double y_skew_z, double x_skew_y,
+    		double z_skew_y, double y_skew_x, double z_skew_x)
     {
         for (int k1 = 0; k1 < nbrCoordPoints; k1++)
         {

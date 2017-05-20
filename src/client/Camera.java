@@ -11,7 +11,7 @@ public class Camera {
 		colorGradientArray = new int[nbrColors][256];
 		planeOfViewOffsetFromCamera = 5*EngineHandle.SCALE_FACTOR;
 		gradient2Step = false;
-		aDouble387 = 1.1000000000000001D;
+		aDouble387 = 1.1D;
 		anInt388 = 1;
 		aBoolean389 = false;
 		maxVisibleModelCount = 100;
@@ -724,15 +724,16 @@ public class Camera {
 				color = 0;
 			setTexturePixels(color);
 			--k;
+			double vecScale = 1/EngineHandle.SCALE_FACTOR;
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
 			for (int i = 0; i < p_x.length; ++i)
-				p_x[i] *= EngineHandle.SCALE_FACTOR;
+				p_x[i] *= vecScale;
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
 			for (int i = 0; i < p_z.length; ++i)
-				p_z[i] *= EngineHandle.SCALE_FACTOR;
+				p_z[i] *= vecScale;
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
 			for (int i = 0; i < p_y.length; ++i)
-				p_y[i] *= EngineHandle.SCALE_FACTOR;
+				p_y[i] *= vecScale;
 			double factr1 = 1 << 5 + textureSize[color];
 			double factr2 = 1 << (5 - cameraSizeInt) + 4 + textureSize[color];
 			double factr3 = 1 << (5 - cameraSizeInt) + textureSize[color];
