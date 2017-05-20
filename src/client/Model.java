@@ -28,9 +28,9 @@ public class Model
 		featuresLight = 512;
 		globalLight = 32;
 		initArrays(nPoints, nSurfaces);
-		anIntArrayArray279 = new int[nSurfaces][1];
+		surfacesOrdered = new int[nSurfaces][1];
 		for (int k = 0; k < nSurfaces; k++)
-			anIntArrayArray279[k][0] = k;
+			surfacesOrdered[k][0] = k;
 		
 	}
 
@@ -70,11 +70,11 @@ public class Model
 		lightSourceProjectToSurfNormal = new double[nbrSides];
 		normalLength = new double[nbrSides];
 		if (!aBoolean264) {
-			xDistToPointFromCameraView = new double[nbrCoordPoints];
-			yDistToPointFromCameraView = new double[nbrCoordPoints];
-			zDistToPointFromCameraView = new double[nbrCoordPoints];
-			xScreen = new double[nbrCoordPoints];
-			yScreen = new double[nbrCoordPoints];
+			xCoordCamDist = new double[nbrCoordPoints];
+			yCoordCamDist = new double[nbrCoordPoints];
+			zCoordCamDist = new double[nbrCoordPoints];
+			xProjected = new double[nbrCoordPoints];
+			yProjected = new double[nbrCoordPoints];
 		}
 		if (!aBoolean263) {
 			aByteArray259 = new byte[nbrSides];
@@ -114,11 +114,11 @@ public class Model
 	}
 
 	public void resetProjection() {
-		xDistToPointFromCameraView = new double[nbrCoordPoints];
-		yDistToPointFromCameraView = new double[nbrCoordPoints];
-		zDistToPointFromCameraView = new double[nbrCoordPoints];
-		xScreen = new double[nbrCoordPoints];
-		yScreen = new double[nbrCoordPoints];
+		xCoordCamDist = new double[nbrCoordPoints];
+		yCoordCamDist = new double[nbrCoordPoints];
+		zCoordCamDist = new double[nbrCoordPoints];
+		xProjected = new double[nbrCoordPoints];
+		yProjected = new double[nbrCoordPoints];
 	}
 
 	public void method176() {
@@ -160,7 +160,7 @@ public class Model
 		int nbrSurfaces = DataOperations.getUnsigned2Bytes(database, offset);
 		offset += 2;
 		initArrays(nbrCoordPoints, nbrSurfaces);
-		anIntArrayArray279 = new int[nbrSurfaces][1];
+		surfacesOrdered = new int[nbrSurfaces][1];
 		
 		
 		// The spatial coordinate points.
@@ -287,13 +287,13 @@ public class Model
         int nPoints = getNextData(data);
         int nSurfaces = getNextData(data);
         initArrays(nPoints, nSurfaces);
-        anIntArrayArray279 = new int[nSurfaces][];
+        surfacesOrdered = new int[nSurfaces][];
         for (int i = 0; i < nPoints; i++)
         {
             int x = getNextData(data);
             int z = getNextData(data);
             int y = getNextData(data);
-            insertCoordPointNoDuplicate(x, z, y);
+            insertCoordPoint(x, z, y);
         }
 
         for (int i = 0; i < nSurfaces; i++)
@@ -314,7 +314,7 @@ public class Model
                 ai1[j] = getNextData(data);
 
             int lastSurface = addSurface(pointsInCell, surfacePoints, texture1, texture2);
-            anIntArrayArray279[i] = ai1;
+            surfacesOrdered[i] = ai1;
             if (i3 == 0)
                 lightSourceProjectToSurfNormal[lastSurface] = 0;
             else
@@ -381,11 +381,11 @@ public class Model
 
         initArrays(totNbrPoints, totNbrSurfaces);
         if (flag)
-            anIntArrayArray279 = new int[totNbrSurfaces][];
+            surfacesOrdered = new int[totNbrSurfaces][];
         for (int i = 0; i < nModels; i++)
         {
             Model model = models[i];
-            model.method202();
+            model.setCurrentToDefaultConfig();
             globalLight = model.globalLight;
             featuresLight = model.featuresLight;
             lightSourceX = model.lightSourceX;
@@ -397,33 +397,32 @@ public class Model
                 int cellPoints[] = new int[model.pointsPerCell[j]];
                 int surface[] = model.surfaces[j];
                 for (int k = 0; k < model.pointsPerCell[j]; k++)
-                    cellPoints[k] = insertCoordPointNoDuplicate(
+                    cellPoints[k] = insertCoordPoint(
                     		model.xCoords[surface[k]],
                     		model.zCoords[surface[k]],
                     		model.yCoords[surface[k]]);
 
-                int l1 = addSurface(model.pointsPerCell[j],
+                int surfaceIdx = addSurface(model.pointsPerCell[j],
                 		cellPoints, model.surfaceTexture1[j],
                 		model.surfaceTexture2[j]);
-                lightSourceProjectToSurfNormal[l1] = model.lightSourceProjectToSurfNormal[j];
-                normalLength[l1] = model.normalLength[j];
+                lightSourceProjectToSurfNormal[surfaceIdx] = model.lightSourceProjectToSurfNormal[j];
+                normalLength[surfaceIdx] = model.normalLength[j];
                 if (flag)
-                    if (nModels > 1) {
-                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j].length + 1];
-                        anIntArrayArray279[l1][0] = i;
-                        for (int i2 = 0; i2 < model.anIntArrayArray279[j].length; i2++)
-                            anIntArrayArray279[l1][i2 + 1] = model.anIntArrayArray279[j][i2];
-
-                    } else {
-                        anIntArrayArray279[l1] = new int[model.anIntArrayArray279[j].length];
-                        for (int j2 = 0; j2 < model.anIntArrayArray279[j].length; j2++)
-                            anIntArrayArray279[l1][j2] = model.anIntArrayArray279[j][j2];
-
+                    if (nModels > 1)
+                    {
+                        surfacesOrdered[surfaceIdx] = new int[model.surfacesOrdered[j].length + 1];
+                        surfacesOrdered[surfaceIdx][0] = i;
+                        for (int k = 0; k < model.surfacesOrdered[j].length; k++)
+                            surfacesOrdered[surfaceIdx][k + 1] = model.surfacesOrdered[j][k];
+                    }
+                    else
+                    {
+                        surfacesOrdered[surfaceIdx] = new int[model.surfacesOrdered[j].length];
+                        for (int k = 0; k < model.surfacesOrdered[j].length; k++)
+                            surfacesOrdered[surfaceIdx][k] = model.surfacesOrdered[j][k];
                     }
             }
-
         }
-
         modelType = 1;
     }
 
@@ -435,10 +434,13 @@ public class Model
      * @param y
      * @return
      */
-    public int insertCoordPointNoDuplicate(double x, double z, double y)
+    public int insertCoordPoint(double x, double z, double y)
     {
+    	double scaleFactor = EngineHandle.SCALE_FACTOR*0.9;
         for (int i = 0; i < nbrCoordPoints; i++)
-            if (xCoords[i] == x && zCoords[i] == z && yCoords[i] == y)
+            if (Math.abs(xCoords[i] - x) < scaleFactor
+            		&& Math.abs(zCoords[i] - z) < scaleFactor
+            		&& Math.abs(yCoords[i] - y) < scaleFactor)
                 return i;
 
         if (nbrCoordPoints >= nPoints)
@@ -449,7 +451,7 @@ public class Model
         return nbrCoordPoints++;
     }
 
-    public int insertCoordPoint(double x, double z, double y)
+    public int addCoordPoint(double x, double z, double y)
     {
         if (nbrCoordPoints >= nPoints)
             return -1;
@@ -472,73 +474,79 @@ public class Model
         return nbrSurfaces++;
     }
 
-    public Model[] method182(double k, double l, int i1, int j1, int k1, boolean flag) {
-        method202();
-        int nPoints[] = new int[j1];
-        int nSides[] = new int[j1];
+    public Model[] makeModels(double factor1, double factor2,
+    		int factor3, int nModels, int k1, boolean flag) {
+        setCurrentToDefaultConfig();
+        int nPoints[] = new int[nModels];
+        int nSides[] = new int[nModels];
 
-        for (int i = 0; i < nbrSurfaces; i++)
+        for (int surf = 0; surf < nbrSurfaces; surf++)
         {
-            int xSum = 0;
-            int ySum = 0;
-            int pointsInCell = pointsPerCell[i];
-            int surface[] = surfaces[i];
-            for (int j = 0; j < pointsInCell; j++)
-            {
-                xSum += xCoords[surface[j]];
-                ySum += yCoords[surface[j]];
-            }
-
-            int k4 = ((int)(xSum / (pointsInCell * k)))
-            		+ ((int)(ySum / (pointsInCell * l))) * i1;
-            nPoints[k4] += pointsInCell;
-            nSides[k4]++;
-        }
-
-        Model models[] = new Model[j1];
-        for (int i = 0; i < j1; i++)
-        {
-            if (nPoints[i] > k1)
-                nPoints[i] = k1;
-            models[i] = new Model(nPoints[i], nSides[i], true, true, true, flag, true);
-            models[i].featuresLight = featuresLight;
-            models[i].globalLight = globalLight;
-        }
-
-        for (int i = 0; i < nbrSurfaces; i++) {
             double xSum = 0;
             double ySum = 0;
-            int pointsInCell = pointsPerCell[i];
-            int surface[] = surfaces[i];
+            int pointsInCell = pointsPerCell[surf];
+            int surface[] = surfaces[surf];
+            for (int p = 0; p < pointsInCell; p++)
+            {
+                xSum += xCoords[surface[p]];
+                ySum += yCoords[surface[p]];
+            }
+
+            int mdl = ((int)(xSum / (pointsInCell * factor1)))
+            		+ ((int)(ySum / (pointsInCell * factor2))) * factor3;
+            nPoints[mdl] += pointsInCell;
+            nSides[mdl]++;
+        }
+
+        Model models[] = new Model[nModels];
+        for (int mdl = 0; mdl < nModels; mdl++)
+        {
+            if (nPoints[mdl] > k1)
+                nPoints[mdl] = k1;
+            models[mdl] = new Model(nPoints[mdl], nSides[mdl], true, true, true, flag, true);
+            models[mdl].featuresLight = featuresLight;
+            models[mdl].globalLight = globalLight;
+        }
+
+        for (int surf = 0; surf < nbrSurfaces; surf++)
+        {
+            double xSum = 0;
+            double ySum = 0;
+            int pointsInCell = pointsPerCell[surf];
+            int surface[] = surfaces[surf];
             for (int j = 0; j < pointsInCell; j++)
             {
                 xSum += xCoords[surface[j]];
                 ySum += yCoords[surface[j]];
             }
 
-            int j5 = ((int)(xSum / (pointsInCell * k)) + ((int)(ySum / (pointsInCell * l))) * i1);
-            method183(models[j5], surface, pointsInCell, i);
+            int mdl = ((int)(xSum / (pointsInCell * factor1)) + ((int)(ySum / (pointsInCell * factor2))) * factor3);
+            makeModelSurfaces(models[mdl], surface, pointsInCell, surf);
         }
 
-        for (int i = 0; i < j1; i++)
+        for (int i = 0; i < nModels; i++)
             models[i].resetProjection();
 
         return models;
     }
 
-    public void method183(Model model, int ai[], int i, int j) {
-        int ai1[] = new int[i];
-        for (int k = 0; k < i; k++) {
-            int l = ai1[k] = model.insertCoordPointNoDuplicate(
-            		xCoords[ai[k]], zCoords[ai[k]], yCoords[ai[k]]);
-            model.pointBrightness[l] = pointBrightness[ai[k]];
+    public void makeModelSurfaces(Model model, int surface[],
+    		int pointsInCell, int surfacIdx)
+    {
+        int newSurface[] = new int[pointsInCell];
+        for (int k = 0; k < pointsInCell; k++) {
+            int point = newSurface[k] = model.insertCoordPoint(
+            		xCoords[surface[k]],
+            		zCoords[surface[k]],
+            		yCoords[surface[k]]);
+            model.pointBrightness[point] = pointBrightness[surface[k]];
         }
 
-        int i1 = model.addSurface(i, ai1, surfaceTexture1[j], surfaceTexture2[j]);
+        int lastSurface = model.addSurface(pointsInCell, newSurface, surfaceTexture1[surfacIdx], surfaceTexture2[surfacIdx]);
         if (!model.aBoolean263 && !aBoolean263)
-            model.entityType[i1] = entityType[j];
-        model.lightSourceProjectToSurfNormal[i1] = lightSourceProjectToSurfNormal[j];
-        model.normalLength[i1] = normalLength[j];
+            model.entityType[lastSurface] = entityType[surfacIdx];
+        model.lightSourceProjectToSurfNormal[lastSurface] = lightSourceProjectToSurfNormal[surfacIdx];
+        model.normalLength[lastSurface] = normalLength[surfacIdx];
     }
 
     public void setLightAndGradAndSource(
@@ -845,7 +853,7 @@ public class Model
 		setLightining();
 	}
 
-    public void method200()
+    public void resetWithCurrentConfig()
     {
         if (modelType == 2)
         { // 2d-sprites
@@ -888,7 +896,7 @@ public class Model
     		int cameraXRot, int cameraZRot, int cameraYRot,
     		int cameraSizeInt, double drawMinDist)
     {
-        method200();
+        resetWithCurrentConfig();
         if (yMin > Camera.yMaxHide || yMax < Camera.yMinHide
         		|| xMin > Camera.xMaxHide || xMax < Camera.xMinHide
         		|| zMin > Camera.zMaxHide || zMax < Camera.zMinHide)
@@ -932,35 +940,35 @@ public class Model
             }
             int factr = 1 << cameraSizeInt;
             if (u_y >= drawMinDist)
-                xScreen[i] = u_x * factr / u_y;
+                xProjected[i] = u_x * factr / u_y;
             else
-                xScreen[i] = u_x * factr;
+                xProjected[i] = u_x * factr;
             if (u_y >= drawMinDist)
-                yScreen[i] = u_z * factr / u_y;
+                yProjected[i] = u_z * factr / u_y;
             else
-                yScreen[i] = u_z * factr;
+                yProjected[i] = u_z * factr;
             /* new coordinate system for camera;
              * x grows left to right,
              * y grows top to bottom,
              * z grows into the monitor */
-            xDistToPointFromCameraView[i] = u_x;
-            yDistToPointFromCameraView[i] = u_z;
-            zDistToPointFromCameraView[i] = u_y;
+            xCoordCamDist[i] = u_x;
+            yCoordCamDist[i] = u_z;
+            zCoordCamDist[i] = u_y;
         }
     }
     
     public double getDistanceTo(int p)
     {
     	// seems more accurate sphere-like when using 1.25
-		double x = xDistToPointFromCameraView[p]*1.25;
-		double y = yDistToPointFromCameraView[p];
-		double z = zDistToPointFromCameraView[p];
+		double x = xCoordCamDist[p]*1.25;
+		double y = yCoordCamDist[p];
+		double z = zCoordCamDist[p];
 		return Math.sqrt(x*x + y*y + z*z);
     }
 
-    public void method202()
+    public void setCurrentToDefaultConfig()
     {
-        method200();
+        resetWithCurrentConfig();
         for (int i = 0; i < nbrCoordPoints; i++)
         {
             xCoords[i] = xCoordsDraw[i];
@@ -1013,11 +1021,11 @@ public class Model
     }
 
     public int nbrCoordPoints;
-    public double xDistToPointFromCameraView[];
-    public double yDistToPointFromCameraView[];
-    public double zDistToPointFromCameraView[];
-    public double xScreen[];
-    public double yScreen[];
+    public double xCoordCamDist[];
+    public double yCoordCamDist[];
+    public double zCoordCamDist[];
+    public double xProjected[];
+    public double yProjected[];
     public double pointBrightness[];
     public int nbrSurfaces;
     public int pointsPerCell[];
@@ -1063,7 +1071,7 @@ public class Model
     public double zCoordsDraw[];
     public double yCoordsDraw[];
     private int nSides;
-    private int anIntArrayArray279[][];
+    private int surfacesOrdered[][];
     private double xMinArray[];
     private double xMaxArray[];
     private double zMinArray[];

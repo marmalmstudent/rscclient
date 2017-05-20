@@ -112,7 +112,9 @@ public class Camera {
 			mobIndex = 0;
 	}
 
-	public int method268(int i, double x, double z, double y, double width, double height, int type) {
+	public int add2DModel(int i, double x, double z, double y,
+			double width, double height, int type)
+	{
 		anIntArray416[mobIndex] = i;
 		mobX[mobIndex] = x;
 		mobZ[mobIndex] = z;
@@ -120,8 +122,8 @@ public class Camera {
 		mobWidth[mobIndex] = width;
 		mobHeight[mobIndex] = height;
 		anIntArray422[mobIndex] = 0;
-		int p0 = aModel.insertCoordPoint(x, z, y);
-		int p1 = aModel.insertCoordPoint(x, z - height, y);
+		int p0 = aModel.addCoordPoint(x, z, y);
+		int p1 = aModel.addCoordPoint(x, z - height, y);
 		int surface[] = {
 				p0, p1
 		};
@@ -372,7 +374,7 @@ public class Camera {
 					boolean draw = false;
 					for (int k = 0; k < pointsInCell; k++)
 					{
-						double zDist = model.zDistToPointFromCameraView[surface[k]];
+						double zDist = model.zCoordCamDist[surface[k]];
 						if (zDist <= planeOfViewOffsetFromCamera
 								|| zDist >= drawModelMaxDist)
 							continue;
@@ -385,7 +387,7 @@ public class Camera {
 						int visibleXMask = 0;
 						for (int k = 0; k < pointsInCell; k++)
 						{
-							double x = model.xScreen[surface[k]];
+							double x = model.xProjected[surface[k]];
 							if (x > -halfWidth)
 								visibleXMask |= 1;
 							if (x < halfWidth)
@@ -399,7 +401,7 @@ public class Camera {
 							int visibleYMask = 0;
 							for (int k = 0; k < pointsInCell; k++)
 							{
-								int k1 = (int)model.yScreen[surface[k]];
+								int k1 = (int)model.yProjected[surface[k]];
 								if (k1 > -halfHeight)
 									visibleYMask |= 1;
 								if (k1 < halfHeight)
@@ -444,8 +446,8 @@ public class Camera {
 			{
 				int surface[] = model_1.surfaces[k];
 				int p0 = surface[0];
-				double x = model_1.xScreen[p0];
-				double y = model_1.yScreen[p0];
+				double x = model_1.xProjected[p0];
+				double y = model_1.yProjected[p0];
 				double distToCam = model_1.getDistanceTo(p0);
 				if (distToCam > planeOfViewOffsetFromCamera
 						&& distToCam < drawSpriteMaxDist)
@@ -482,14 +484,14 @@ public class Camera {
 			{
 				int surface[] = model.surfaces[l];
 				int p0 = surface[0];
-				double x = model.xScreen[p0];
-				double y = model.yScreen[p0];
-				double modelDist = model.zDistToPointFromCameraView[p0];
+				double x = model.xProjected[p0];
+				double y = model.yProjected[p0];
+				double modelDist = model.zCoordCamDist[p0];
 				double modelWidth = mobWidth[l] * fctr / modelDist;
 				double modelHeight = mobHeight[l] * fctr / modelDist;
 				int p1 = surface[1];
-				double length_y01 = y - model.yScreen[p1];
-				double length_x10 = model.xScreen[p1] - x;
+				double length_y01 = y - model.yProjected[p1];
+				double length_x10 = model.xProjected[p1] - x;
 				double j11 = length_x10 * length_y01 / modelHeight;
 				double modelX = x - modelWidth / 2;
 				double modelY = (halfHeight2 + y) - modelHeight;
@@ -523,18 +525,18 @@ public class Camera {
 				for (int i = 0; i < ptsPerCell; i++)
 				{
 					int dataPoint = surfaces[i];
-					xDistToPointFromCamera[i] = model.xDistToPointFromCameraView[dataPoint];
-					zDistToPointFromCamera[i] = model.yDistToPointFromCameraView[dataPoint];
-					yDistToPointFromCamera[i] = (int)model.zDistToPointFromCameraView[dataPoint];
+					xDistToPointFromCamera[i] = model.xCoordCamDist[dataPoint];
+					zDistToPointFromCamera[i] = model.yCoordCamDist[dataPoint];
+					yDistToPointFromCamera[i] = (int)model.zCoordCamDist[dataPoint];
 					if (model.lightSourceProjectToSurfNormal[l] == Model.INVISIBLE)
 						if (cm.normalDirectionToCamera < 0)
 							brightness = (int) (model.globalLight - model.pointBrightness[dataPoint]);
 						else
 							brightness = (int) (model.globalLight + model.pointBrightness[dataPoint]);
-					if (model.zDistToPointFromCameraView[dataPoint] >= planeOfViewOffsetFromCamera)
+					if (model.zCoordCamDist[dataPoint] >= planeOfViewOffsetFromCamera)
 					{
-						xScreen[pointsInSurfac] = model.xScreen[dataPoint];
-						yScreen[pointsInSurfac] = model.yScreen[dataPoint];
+						xScreen[pointsInSurfac] = model.xProjected[dataPoint];
+						yScreen[pointsInSurfac] = model.yProjected[dataPoint];
 						pointBrightness[pointsInSurfac] = brightness;
 						/* should chage this to allow for other
 						 * background colors than black */
@@ -550,11 +552,11 @@ public class Camera {
 							k9 = surfaces[ptsPerCell - 1];
 						else
 							k9 = surfaces[i - 1];
-						if (model.zDistToPointFromCameraView[k9] >= planeOfViewOffsetFromCamera)
+						if (model.zCoordCamDist[k9] >= planeOfViewOffsetFromCamera)
 						{
-							double k7 = model.zDistToPointFromCameraView[dataPoint] - model.zDistToPointFromCameraView[k9];
-							double i5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
-							double j6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
+							double k7 = model.zCoordCamDist[dataPoint] - model.zCoordCamDist[k9];
+							double i5 = model.xCoordCamDist[dataPoint] - ((model.xCoordCamDist[dataPoint] - model.xCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
+							double j6 = model.yCoordCamDist[dataPoint] - ((model.yCoordCamDist[dataPoint] - model.yCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - planeOfViewOffsetFromCamera)) / k7;
 							int factr = 1 << cameraSizeInt;
 							xScreen[pointsInSurfac] = i5 * factr / planeOfViewOffsetFromCamera;
 							yScreen[pointsInSurfac] = j6 * factr / planeOfViewOffsetFromCamera;
@@ -565,10 +567,10 @@ public class Camera {
 							k9 = surfaces[0];
 						else
 							k9 = surfaces[i + 1];
-						if (model.zDistToPointFromCameraView[k9] >= planeOfViewOffsetFromCamera) {
-							double l7 = model.zDistToPointFromCameraView[dataPoint] - model.zDistToPointFromCameraView[k9];
-							double j5 = model.xDistToPointFromCameraView[dataPoint] - ((model.xDistToPointFromCameraView[dataPoint] - model.xDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
-							double k6 = model.yDistToPointFromCameraView[dataPoint] - ((model.yDistToPointFromCameraView[dataPoint] - model.yDistToPointFromCameraView[k9]) * (model.zDistToPointFromCameraView[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
+						if (model.zCoordCamDist[k9] >= planeOfViewOffsetFromCamera) {
+							double l7 = model.zCoordCamDist[dataPoint] - model.zCoordCamDist[k9];
+							double j5 = model.xCoordCamDist[dataPoint] - ((model.xCoordCamDist[dataPoint] - model.xCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
+							double k6 = model.yCoordCamDist[dataPoint] - ((model.yCoordCamDist[dataPoint] - model.yCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - planeOfViewOffsetFromCamera)) / l7;
 							int factr = 1 << cameraSizeInt;
 							xScreen[pointsInSurfac] = j5 * factr / planeOfViewOffsetFromCamera;
 							yScreen[pointsInSurfac] = k6 * factr / planeOfViewOffsetFromCamera;
@@ -1095,15 +1097,15 @@ public class Camera {
 		int surfaceIdx = cameraModel.surface;
 		int surfaces[] = model.surfaces[surfaceIdx];
 		int pointsInCell = model.pointsPerCell[surfaceIdx];
-		double x0 = model.xDistToPointFromCameraView[surfaces[0]];
-		double y0 = model.yDistToPointFromCameraView[surfaces[0]];
-		double z0 = model.zDistToPointFromCameraView[surfaces[0]];
-		double u_x = model.xDistToPointFromCameraView[surfaces[1]] - x0;
-		double u_y = model.yDistToPointFromCameraView[surfaces[1]] - y0;
-		double u_z = model.zDistToPointFromCameraView[surfaces[1]] - z0;
-		double v_x = model.xDistToPointFromCameraView[surfaces[2]] - x0;
-		double v_y = model.yDistToPointFromCameraView[surfaces[2]] - y0;
-		double v_z = model.zDistToPointFromCameraView[surfaces[2]] - z0;
+		double x0 = model.xCoordCamDist[surfaces[0]];
+		double y0 = model.yCoordCamDist[surfaces[0]];
+		double z0 = model.zCoordCamDist[surfaces[0]];
+		double u_x = model.xCoordCamDist[surfaces[1]] - x0;
+		double u_y = model.yCoordCamDist[surfaces[1]] - y0;
+		double u_z = model.zCoordCamDist[surfaces[1]] - z0;
+		double v_x = model.xCoordCamDist[surfaces[2]] - x0;
+		double v_y = model.yCoordCamDist[surfaces[2]] - y0;
+		double v_z = model.zCoordCamDist[surfaces[2]] - z0;
 		double n_x = u_y * v_z - v_y * u_z;
 		double n_y = u_z * v_x - v_z * u_x;
 		double n_z = u_x * v_y - v_x * u_y;
@@ -1112,37 +1114,37 @@ public class Camera {
 		cameraModel.xNormal = n_x;
 		cameraModel.zNormal = n_y;
 		cameraModel.yNormal = n_z;
-		double zmin = model.zDistToPointFromCameraView[surfaces[0]];
+		double zmin = model.zCoordCamDist[surfaces[0]];
 		double zmax = zmin;
-		double xmin = model.xScreen[surfaces[0]];
+		double xmin = model.xProjected[surfaces[0]];
 		double xmax = xmin;
-		double ymin = model.yScreen[surfaces[0]];
+		double ymin = model.yProjected[surfaces[0]];
 		double ymax = ymin;
 		for (int i = 1; i < pointsInCell; i++)
 		{
-			double dist = model.zDistToPointFromCameraView[surfaces[i]];
+			double dist = model.zCoordCamDist[surfaces[i]];
 			if (dist > zmax)
 				zmax = dist;
 			else if (dist < zmin)
 				zmin = dist;
-			dist = (int)model.xScreen[surfaces[i]];
+			dist = model.xProjected[surfaces[i]];
 			if (dist > xmax)
 				xmax = dist;
 			else if (dist < xmin)
 				xmin = dist;
-			dist = (int)model.yScreen[surfaces[i]];
+			dist = model.yProjected[surfaces[i]];
 			if (dist > ymax)
 				ymax = dist;
 			else if (dist < ymin)
 				ymin = dist;
 		}
 
-		cameraModel.zMin = (int)zmin;
-		cameraModel.zMax = (int)zmax;
-		cameraModel.xMin = (int)xmin;
-		cameraModel.xMax = (int)xmax;
-		cameraModel.yMin = (int)ymin;
-		cameraModel.yMax = (int)ymax;
+		cameraModel.zMin = zmin;
+		cameraModel.zMax = zmax;
+		cameraModel.xMin = xmin;
+		cameraModel.xMax = xmax;
+		cameraModel.yMin = ymin;
+		cameraModel.yMax = ymax;
 	}
 
 	private void method294(int modelIdx)
@@ -1154,45 +1156,45 @@ public class Camera {
 		double n_x = 0D;
 		double n_z = 0D;
 		double n_y = 1D;
-		double u0_x = model.xDistToPointFromCameraView[surfaces[0]];
-		double u0_y = model.yDistToPointFromCameraView[surfaces[0]];
-		double u0_z = model.zDistToPointFromCameraView[surfaces[0]];
+		double u0_x = model.xCoordCamDist[surfaces[0]];
+		double u0_y = model.yCoordCamDist[surfaces[0]];
+		double u0_z = model.zCoordCamDist[surfaces[0]];
 		model.normalLength[surface] = 1D;
 		camMdl.normalDirectionToCamera = u0_x * n_x + u0_y * n_z + u0_z * n_y;
 		camMdl.xNormal = n_x;
 		camMdl.zNormal = n_z;
 		camMdl.yNormal = n_y;
-		double zmin = model.zDistToPointFromCameraView[surfaces[0]];
+		double zmin = model.zCoordCamDist[surfaces[0]];
 		double zmax = zmin;
-		double xmin = model.xScreen[surfaces[0]];
+		double xmin = model.xProjected[surfaces[0]];
 		double xmax = xmin;
-		if (model.xScreen[surfaces[1]] < xmin)
-			xmin = model.xScreen[surfaces[1]];
+		if (model.xProjected[surfaces[1]] < xmin)
+			xmin = model.xProjected[surfaces[1]];
 		else
-			xmax = model.xScreen[surfaces[1]];
-		double ymin = model.yScreen[surfaces[1]];
-		double ymax = model.yScreen[surfaces[0]];
-		double dist = model.zDistToPointFromCameraView[surfaces[1]];
+			xmax = model.xProjected[surfaces[1]];
+		double ymin = model.yProjected[surfaces[1]];
+		double ymax = model.yProjected[surfaces[0]];
+		double dist = model.zCoordCamDist[surfaces[1]];
 		if (dist > zmax)
 			zmax = dist;
 		else if (dist < zmin)
 			zmin = dist;
-		dist = model.xScreen[surfaces[1]];
+		dist = model.xProjected[surfaces[1]];
 		if (dist > xmax)
 			xmax = dist;
 		else if (dist < xmin)
 			xmin = dist;
-		dist = model.yScreen[surfaces[1]];
+		dist = model.yProjected[surfaces[1]];
 		if (dist > ymax)
 			ymax = dist;
 		else if (dist < ymin)
 			ymin = dist;
-		camMdl.zMin = (int)zmin;
-		camMdl.zMax = (int)zmax;
-		camMdl.xMin = (int)xmin - 20;
-		camMdl.xMax = (int)xmax + 20;
-		camMdl.yMin = (int)ymin;
-		camMdl.yMax = (int)ymax;
+		camMdl.zMin = zmin;
+		camMdl.zMax = zmax;
+		camMdl.xMin = xmin - 20;
+		camMdl.xMax = xmax + 20;
+		camMdl.yMin = ymin;
+		camMdl.yMax = ymax;
 	}
 
 	private boolean method295(CameraModel cm_0, CameraModel cm_1)
@@ -1211,9 +1213,9 @@ public class Camera {
 		int surfaces_1[] = model_1.surfaces[surfIdx_1];
 		int pointsInCell_0 = model_0.pointsPerCell[surfIdx_0];
 		int pointsInCell_1 = model_1.pointsPerCell[surfIdx_1];
-		double u0_x_1 = model_1.xDistToPointFromCameraView[surfaces_1[0]];
-		double u0_y_1 = model_1.yDistToPointFromCameraView[surfaces_1[0]];
-		double u0_z_1 = model_1.zDistToPointFromCameraView[surfaces_1[0]];
+		double u0_x_1 = model_1.xCoordCamDist[surfaces_1[0]];
+		double u0_y_1 = model_1.yCoordCamDist[surfaces_1[0]];
+		double u0_z_1 = model_1.zCoordCamDist[surfaces_1[0]];
 		double n_x = cm_1.xNormal;
 		double n_z = cm_1.zNormal;
 		double n_y = cm_1.yNormal;
@@ -1224,9 +1226,9 @@ public class Camera {
 		{
 			int point = surfaces_0[i];
 			// dot
-			double i2 = (u0_x_1 - model_0.xDistToPointFromCameraView[point]) * n_x
-					+ (u0_y_1 - model_0.yDistToPointFromCameraView[point]) * n_z
-					+ (u0_z_1 - model_0.zDistToPointFromCameraView[point]) * n_y;
+			double i2 = (u0_x_1 - model_0.xCoordCamDist[point]) * n_x
+					+ (u0_y_1 - model_0.yCoordCamDist[point]) * n_z
+					+ (u0_z_1 - model_0.zCoordCamDist[point]) * n_y;
 			if ((i2 >= -normLen_1 || directionToCam >= 0)
 					&& (i2 <= normLen_1 || directionToCam <= 0))
 				continue;
@@ -1236,9 +1238,9 @@ public class Camera {
 		if (!flag)
 			return true;
 
-		u0_x_1 = model_0.xDistToPointFromCameraView[surfaces_0[0]];
-		u0_y_1 = model_0.yDistToPointFromCameraView[surfaces_0[0]];
-		u0_z_1 = model_0.zDistToPointFromCameraView[surfaces_0[0]];
+		u0_x_1 = model_0.xCoordCamDist[surfaces_0[0]];
+		u0_y_1 = model_0.yCoordCamDist[surfaces_0[0]];
+		u0_z_1 = model_0.zCoordCamDist[surfaces_0[0]];
 		n_x = cm_0.xNormal;
 		n_z = cm_0.zNormal;
 		n_y = cm_0.yNormal;
@@ -1248,9 +1250,9 @@ public class Camera {
 		for (int i = 0; i < pointsInCell_1; i++)
 		{
 			int point = surfaces_1[i];
-			double j2 = (u0_x_1 - model_1.xDistToPointFromCameraView[point]) * n_x
-					+ (u0_y_1 - model_1.yDistToPointFromCameraView[point]) * n_z
-					+ (u0_z_1 - model_1.zDistToPointFromCameraView[point]) * n_y;
+			double j2 = (u0_x_1 - model_1.xCoordCamDist[point]) * n_x
+					+ (u0_y_1 - model_1.yCoordCamDist[point]) * n_z
+					+ (u0_z_1 - model_1.zCoordCamDist[point]) * n_y;
 			if ((j2 >= -normLen_1 || directionToCam <= 0)
 					&& (j2 <= normLen_1 || directionToCam >= 0))
 				continue;
@@ -1260,56 +1262,59 @@ public class Camera {
 		if (!flag)
 			return true;
 
-		int ai2[];
-		int ai3[];
+		int xSurfRect_0[];
+		int ySurfRect_0[];
 		if (pointsInCell_0 == 2)
-		{
-			ai2 = new int[4];
-			ai3 = new int[4];
+		{ // create rectangle surface
+			xSurfRect_0 = new int[4];
+			ySurfRect_0 = new int[4];
 			int p0_0 = surfaces_0[0];
 			int p1_0 = surfaces_0[1];
-			ai2[0] = (int)model_0.xScreen[p0_0] - 20;
-			ai2[1] = (int)model_0.xScreen[p1_0] - 20;
-			ai2[2] = (int)model_0.xScreen[p1_0] + 20;
-			ai2[3] = (int)model_0.xScreen[p0_0] + 20;
-			ai3[0] = ai3[3] = (int)model_0.yScreen[p0_0];
-			ai3[1] = ai3[2] = (int)model_0.yScreen[p1_0];
+			xSurfRect_0[0] = (int)model_0.xProjected[p0_0] - 20;
+			xSurfRect_0[1] = (int)model_0.xProjected[p1_0] - 20;
+			xSurfRect_0[2] = (int)model_0.xProjected[p1_0] + 20;
+			xSurfRect_0[3] = (int)model_0.xProjected[p0_0] + 20;
+			ySurfRect_0[0] = ySurfRect_0[3] = (int)model_0.yProjected[p0_0];
+			ySurfRect_0[1] = ySurfRect_0[2] = (int)model_0.yProjected[p1_0];
 		}
 		else
 		{
-			ai2 = new int[pointsInCell_0];
-			ai3 = new int[pointsInCell_0];
+			xSurfRect_0 = new int[pointsInCell_0];
+			ySurfRect_0 = new int[pointsInCell_0];
 			for (int j5 = 0; j5 < pointsInCell_0; j5++) {
 				int i6 = surfaces_0[j5];
-				ai2[j5] = (int)model_0.xScreen[i6];
-				ai3[j5] = (int)model_0.yScreen[i6];
+				xSurfRect_0[j5] = (int)model_0.xProjected[i6];
+				ySurfRect_0[j5] = (int)model_0.yProjected[i6];
 			}
 
 		}
-		int ai4[];
-		int ai5[];
-		if (pointsInCell_1 == 2) {
-			ai4 = new int[4];
-			ai5 = new int[4];
+		int xSurfRect_1[];
+		int ySurfRect_1[];
+		if (pointsInCell_1 == 2)
+		{ // create rectangle surface
+			xSurfRect_1 = new int[4];
+			ySurfRect_1 = new int[4];
 			int p0_1 = surfaces_1[0];
 			int p1_1 = surfaces_1[1];
-			ai4[0] = (int)model_1.xScreen[p0_1] - 20;
-			ai4[1] = (int)model_1.xScreen[p1_1] - 20;
-			ai4[2] = (int)model_1.xScreen[p1_1] + 20;
-			ai4[3] = (int)model_1.xScreen[p0_1] + 20;
-			ai5[0] = ai5[3] = (int)model_1.yScreen[p0_1];
-			ai5[1] = ai5[2] = (int)model_1.yScreen[p1_1];
-		} else {
-			ai4 = new int[pointsInCell_1];
-			ai5 = new int[pointsInCell_1];
+			xSurfRect_1[0] = (int)model_1.xProjected[p0_1] - 20;
+			xSurfRect_1[1] = (int)model_1.xProjected[p1_1] - 20;
+			xSurfRect_1[2] = (int)model_1.xProjected[p1_1] + 20;
+			xSurfRect_1[3] = (int)model_1.xProjected[p0_1] + 20;
+			ySurfRect_1[0] = ySurfRect_1[3] = (int)model_1.yProjected[p0_1];
+			ySurfRect_1[1] = ySurfRect_1[2] = (int)model_1.yProjected[p1_1];
+		}
+		else
+		{
+			xSurfRect_1 = new int[pointsInCell_1];
+			ySurfRect_1 = new int[pointsInCell_1];
 			for (int l5 = 0; l5 < pointsInCell_1; l5++) {
 				int j6 = surfaces_1[l5];
-				ai4[l5] = (int)model_1.xScreen[j6];
-				ai5[l5] = (int)model_1.yScreen[j6];
+				xSurfRect_1[l5] = (int)model_1.xProjected[j6];
+				ySurfRect_1[l5] = (int)model_1.yProjected[j6];
 			}
 
 		}
-		return !method309(ai2, ai3, ai4, ai5);
+		return !method309(xSurfRect_0, ySurfRect_0, xSurfRect_1, ySurfRect_1);
 	}
 
 	private boolean method296(CameraModel cameraModel_0, CameraModel cameraModel_1) {
@@ -1321,9 +1326,9 @@ public class Camera {
 		int surface_1[] = model_1.surfaces[surfaceIdx_1];
 		int ptsPerCell_0 = model_0.pointsPerCell[surfaceIdx_0];
 		int ptsPerCell_1 = model_1.pointsPerCell[surfaceIdx_1];
-		double a = model_1.xDistToPointFromCameraView[surface_1[0]];
-		double b = model_1.yDistToPointFromCameraView[surface_1[0]];
-		double c = model_1.zDistToPointFromCameraView[surface_1[0]];
+		double a = model_1.xCoordCamDist[surface_1[0]];
+		double b = model_1.yCoordCamDist[surface_1[0]];
+		double c = model_1.zCoordCamDist[surface_1[0]];
 		double n_x = cameraModel_1.xNormal;
 		double n_z = cameraModel_1.zNormal;
 		double n_y = cameraModel_1.yNormal;
@@ -1332,9 +1337,9 @@ public class Camera {
 		boolean flag = false;
 		for (int i4 = 0; i4 < ptsPerCell_0; i4++) {
 			int i1 = surface_0[i4];
-			double k1 = (a - model_0.xDistToPointFromCameraView[i1]) * n_x
-					+ (b - model_0.yDistToPointFromCameraView[i1]) * n_z
-					+ (c - model_0.zDistToPointFromCameraView[i1]) * n_y;
+			double k1 = (a - model_0.xCoordCamDist[i1]) * n_x
+					+ (b - model_0.yCoordCamDist[i1]) * n_z
+					+ (c - model_0.zCoordCamDist[i1]) * n_y;
 			if ((k1 >= -k3 || l3 >= 0) && (k1 <= k3 || l3 <= 0))
 				continue;
 			flag = true;
@@ -1343,9 +1348,9 @@ public class Camera {
 
 		if (!flag)
 			return true;
-		a = model_0.xDistToPointFromCameraView[surface_0[0]];
-		b = model_0.yDistToPointFromCameraView[surface_0[0]];
-		c = model_0.zDistToPointFromCameraView[surface_0[0]];
+		a = model_0.xCoordCamDist[surface_0[0]];
+		b = model_0.yCoordCamDist[surface_0[0]];
+		c = model_0.zCoordCamDist[surface_0[0]];
 		n_x = cameraModel_0.xNormal;
 		n_z = cameraModel_0.zNormal;
 		n_y = cameraModel_0.yNormal;
@@ -1354,9 +1359,9 @@ public class Camera {
 		flag = false;
 		for (int j4 = 0; j4 < ptsPerCell_1; j4++) {
 			int j1 = surface_1[j4];
-			double l1 = (a - model_1.xDistToPointFromCameraView[j1]) * n_x
-					+ (b - model_1.yDistToPointFromCameraView[j1]) * n_z
-					+ (c - model_1.zDistToPointFromCameraView[j1]) * n_y;
+			double l1 = (a - model_1.xCoordCamDist[j1]) * n_x
+					+ (b - model_1.yCoordCamDist[j1]) * n_z
+					+ (c - model_1.zCoordCamDist[j1]) * n_y;
 			if ((l1 >= -k3 || l3 <= 0) && (l1 <= k3 || l3 >= 0))
 				continue;
 			flag = true;
@@ -1492,278 +1497,588 @@ public class Camera {
 		return -1 - ((red & 0xf8) << 7 ) - ((green & 0xf8) << 2 ) - (blue >> 3);
 	}
 
-	public int method306(int i, int j, int k, int l, int i1) {
-		if (l == j)
-			return i;
+	public int findXOther(int yMinOther, int xNext, int yNext, int xMin, int yMin) {
+		if (yMin == yNext)
+			return xNext;
 		else
-			return i + 0*((k - i) * (i1 - j)) / (l - j);
+			return xNext + ((xMin - xNext) * (yMinOther - yNext)) / (yMin - yNext);
 	}
 
-	public boolean method307(int i, int j, int k, int l, boolean flag) {
-		if (flag && i <= k || i < k) {
-			if (i > l)
+	public boolean method307(int ymin_x, int j, int ymin_x_1,
+			int ymin_x_2, boolean ymin_x_not_smallest)
+	{
+		if (ymin_x_not_smallest && ymin_x <= ymin_x_1
+				|| ymin_x < ymin_x_1)
+		{
+			if (ymin_x > ymin_x_2)
 				return true;
-			if (j > k)
+			if (j > ymin_x_1)
 				return true;
-			if (j > l)
+			if (j > ymin_x_2)
 				return true;
-			return !flag;
+			return !ymin_x_not_smallest;
 		}
-		if (i < l)
+		if (ymin_x < ymin_x_2)
 			return true;
-		if (j < k)
+		if (j < ymin_x_1)
 			return true;
-		if (j < l)
+		if (j < ymin_x_2)
 			return true;
 		else
-			return flag;
+			return ymin_x_not_smallest;
 	}
 
-	public boolean method308(int i, int j, int k, boolean flag) {
-		if (flag && i <= k || i < k) {
-			if (j > k)
+	public boolean method308(int ymin_x_1, int ymin_x_2, int ymin_x, boolean ymin_x_not_smallest) {
+		if (ymin_x_not_smallest
+				&& ymin_x_1 <= ymin_x
+				|| ymin_x_1 < ymin_x)
+		{
+			if (ymin_x_2 > ymin_x)
 				return true;
-			return !flag;
+			return !ymin_x_not_smallest;
 		}
-		if (j < k)
+		if (ymin_x_2 < ymin_x)
 			return true;
 		else
-			return flag;
+			return ymin_x_not_smallest;
+	}
+	
+	private int findMinIdx(int[] arr)
+	{
+		int min = arr[0], idx = 0;
+		for (int i = 1; i < arr.length; i++)
+			if (arr[i] < min) {
+				min = arr[i];
+				idx = i;
+			}
+		return idx;
+	}
+	
+	private int findMaxIdx(int[] arr)
+	{
+		int max = arr[0], idx = 0;
+		for (int i = 1; i < arr.length; i++)
+			if (arr[i] > max) {
+				max = arr[i];
+				idx = i;
+			}
+		return idx;
 	}
 
-	public boolean method309(int ai[], int ai1[], int ai2[], int ai3[]) {
-		int i = ai.length;
-		int j = ai2.length;
+	public boolean method309(int x_0[], int y_0[], int x_1[], int y_1[]) {
+		int x_0_len = x_0.length;
+		int x_1_len = x_1.length;
 		byte byte0 = 0;
-		int i20;
-		int k20 = i20 = ai1[0];
-		int k = 0;
-		int j20;
-		int l20 = j20 = ai3[0];
-		int i1 = 0;
-		for (int i21 = 1; i21 < i; i21++)
-			if (ai1[i21] < i20) {
-				i20 = ai1[i21];
-				k = i21;
-			} else if (ai1[i21] > k20)
-				k20 = ai1[i21];
+		int y_min_idx_0 = findMinIdx(y_0);
+		int y_min_0 = y_0[y_min_idx_0];
+		int y_max_0 = y_0[findMaxIdx(y_0)];
+		int y_min_idx_1 = findMinIdx(y_1);
+		int y_min_1 = y_1[y_min_idx_1];
+		int y_max_1 = y_1[findMaxIdx(y_1)];
 
-		for (int j21 = 1; j21 < j; j21++)
-			if (ai3[j21] < j20) {
-				j20 = ai3[j21];
-				i1 = j21;
-			} else if (ai3[j21] > l20)
-				l20 = ai3[j21];
-
-		if (j20 >= k20)
+		if (y_min_1 >= y_max_0)
 			return false;
-		if (i20 >= l20)
+		if (y_min_0 >= y_max_1)
 			return false;
-		int l;
-		int j1;
-		boolean flag;
-		if (ai1[k] < ai3[i1]) {
-			for (l = k; ai1[l] < ai3[i1]; l = (l + 1) % i)
-				;
-			for (; ai1[k] < ai3[i1]; k = ((k - 1) + i) % i)
-				;
-			int k1 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-			int k6 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-			int l10 = ai2[i1];
-			flag = (k1 < l10) | (k6 < l10);
-			if (method308(k1, k6, l10, flag))
+		int smallest_y_arr_greater_than_other_y_arr_idx;
+		int y_min_idx_1_next;
+		boolean y1min_x_not_smallest;
+		if (y_0[y_min_idx_0] < y_1[y_min_idx_1])
+		{
+			for (smallest_y_arr_greater_than_other_y_arr_idx = y_min_idx_0; y_0[smallest_y_arr_greater_than_other_y_arr_idx] < y_1[y_min_idx_1];
+					smallest_y_arr_greater_than_other_y_arr_idx = (smallest_y_arr_greater_than_other_y_arr_idx + 1) % x_0_len);
+			for (; y_0[y_min_idx_0] < y_1[y_min_idx_1];
+					y_min_idx_0 = ((y_min_idx_0 - 1) + x_0_len) % x_0_len);
+			int y1min_x_1 = findXOther(
+					y_1[y_min_idx_1],
+					x_0[(y_min_idx_0 + 1) % x_0_len],
+					y_0[(y_min_idx_0 + 1) % x_0_len],
+					x_0[y_min_idx_0],
+					y_0[y_min_idx_0]);
+			int y1min_x_2 = findXOther(
+					y_1[y_min_idx_1],
+					x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+					y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+					x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+					y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+			int y1min_x = x_1[y_min_idx_1];
+			y1min_x_not_smallest = (y1min_x_1 < y1min_x) | (y1min_x_2 < y1min_x);
+			if (method308(y1min_x_1, y1min_x_2, y1min_x,
+					y1min_x_not_smallest))
 				return true;
-			j1 = (i1 + 1) % j;
-			i1 = ((i1 - 1) + j) % j;
-			if (k == l)
+			y_min_idx_1_next = (y_min_idx_1 + 1) % x_1_len;
+			y_min_idx_1 = ((y_min_idx_1 - 1) + x_1_len) % x_1_len;
+			if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
 				byte0 = 1;
-		} else {
-			for (j1 = i1; ai3[j1] < ai1[k]; j1 = (j1 + 1) % j)
-				;
-			for (; ai3[i1] < ai1[k]; i1 = ((i1 - 1) + j) % j)
-				;
-			int l1 = ai[k];
-			int i11 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[k]);
-			int l15 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[k]);
-			flag = (l1 < i11) | (l1 < l15);
-			if (method308(i11, l15, l1, !flag))
+		}
+		else
+		{
+			for (y_min_idx_1_next = y_min_idx_1; y_1[y_min_idx_1_next] < y_0[y_min_idx_0];
+					y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len);
+			for (; y_1[y_min_idx_1] < y_0[y_min_idx_0];
+					y_min_idx_1 = ((y_min_idx_1 - 1) + x_1_len) % x_1_len);
+			int y0min_x = x_0[y_min_idx_0];
+			int y0min_x_1 = findXOther(
+					y_0[y_min_idx_0],
+					x_1[(y_min_idx_1 + 1) % x_1_len],
+					y_1[(y_min_idx_1 + 1) % x_1_len],
+					x_1[y_min_idx_1],
+					y_1[y_min_idx_1]);
+			int y0min_x_2 = findXOther(
+					y_0[y_min_idx_0],
+					x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+					y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+					x_1[y_min_idx_1_next],
+					y_1[y_min_idx_1_next]);
+			y1min_x_not_smallest = (y0min_x < y0min_x_1) | (y0min_x < y0min_x_2);
+			if (method308(y0min_x_1, y0min_x_2, y0min_x,
+					!y1min_x_not_smallest))
 				return true;
-			l = (k + 1) % i;
-			k = ((k - 1) + i) % i;
-			if (i1 == j1)
+			smallest_y_arr_greater_than_other_y_arr_idx = (y_min_idx_0 + 1) % x_0_len;
+			y_min_idx_0 = ((y_min_idx_0 - 1) + x_0_len) % x_0_len;
+			if (y_min_idx_1 == y_min_idx_1_next)
 				byte0 = 2;
 		}
-		while (byte0 == 0) if (ai1[k] < ai1[l]) {
-			if (ai1[k] < ai3[i1]) {
-				if (ai1[k] < ai3[j1]) {
-					int i2 = ai[k];
-					int l6 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai1[k]);
-					int j11 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[k]);
-					int i16 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[k]);
-					if (method307(i2, l6, j11, i16, flag))
+		while (byte0 == 0)
+			if (y_0[y_min_idx_0] < y_0[smallest_y_arr_greater_than_other_y_arr_idx])
+			{
+				if (y_0[y_min_idx_0] < y_1[y_min_idx_1])
+				{
+					if (y_0[y_min_idx_0] < y_1[y_min_idx_1_next])
+					{
+						int y0min_x = x_0[y_min_idx_0];
+						int y0min_x_i = findXOther(
+								y_0[y_min_idx_0],
+								x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+								y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+								x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+								y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+						int y0min_x_1 = findXOther(
+								y_0[y_min_idx_0],
+								x_1[(y_min_idx_1 + 1) % x_1_len],
+								y_1[(y_min_idx_1 + 1) % x_1_len],
+								x_1[y_min_idx_1],
+								y_1[y_min_idx_1]);
+						int y0min_x_2 = findXOther(
+								y_0[y_min_idx_0],
+								x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+								y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+								x_1[y_min_idx_1_next],
+								y_1[y_min_idx_1_next]);
+						if (method307(y0min_x, y0min_x_i, y0min_x_1, y0min_x_2, y1min_x_not_smallest))
+							return true;
+						y_min_idx_0 = ((y_min_idx_0 - 1) + x_0_len) % x_0_len;
+						if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
+							byte0 = 1;
+					} else {
+						int j2 = findXOther(
+								y_1[y_min_idx_1_next],
+								x_0[(y_min_idx_0 + 1) % x_0_len],
+								y_0[(y_min_idx_0 + 1) % x_0_len],
+								x_0[y_min_idx_0],
+								y_0[y_min_idx_0]);
+						int i7 = findXOther(
+								y_1[y_min_idx_1_next],
+								x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+								y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+								x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+								y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+						int k11 = findXOther(
+								y_1[y_min_idx_1_next],
+								x_1[(y_min_idx_1 + 1) % x_1_len],
+								y_1[(y_min_idx_1 + 1) % x_1_len],
+								x_1[y_min_idx_1],
+								y_1[y_min_idx_1]);
+						int j16 = x_1[y_min_idx_1_next];
+						if (method307(j2, i7, k11, j16, y1min_x_not_smallest))
+							return true;
+						y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+						if (y_min_idx_1 == y_min_idx_1_next)
+							byte0 = 2;
+					}
+				} else if (y_1[y_min_idx_1] < y_1[y_min_idx_1_next]) {
+					int k2 = findXOther(
+							y_1[y_min_idx_1],
+							x_0[(y_min_idx_0 + 1) % x_0_len],
+							y_0[(y_min_idx_0 + 1) % x_0_len],
+							x_0[y_min_idx_0],
+							y_0[y_min_idx_0]);
+					int j7 = findXOther(
+							y_1[y_min_idx_1],
+							x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+					int l11 = x_1[y_min_idx_1];
+					int k16 = findXOther(
+							y_1[y_min_idx_1],
+							x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							x_1[y_min_idx_1_next],
+							y_1[y_min_idx_1_next]);
+					if (method307(k2, j7, l11, k16, y1min_x_not_smallest))
 						return true;
-					k = ((k - 1) + i) % i;
-					if (k == l)
-						byte0 = 1;
+					y_min_idx_1 = ((y_min_idx_1 - 1) + x_1_len) % x_1_len;
+					if (y_min_idx_1 == y_min_idx_1_next)
+						byte0 = 2;
 				} else {
-					int j2 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-					int i7 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-					int k11 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-					int j16 = ai2[j1];
-					if (method307(j2, i7, k11, j16, flag))
+					int l2 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_0[(y_min_idx_0 + 1) % x_0_len],
+							y_0[(y_min_idx_0 + 1) % x_0_len], x_0[y_min_idx_0],
+							y_0[y_min_idx_0]);
+					int k7 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+					int i12 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_1[(y_min_idx_1 + 1) % x_1_len],
+							y_1[(y_min_idx_1 + 1) % x_1_len], x_1[y_min_idx_1],
+							y_1[y_min_idx_1]);
+					int l16 = x_1[y_min_idx_1_next];
+					if (method307(l2, k7, i12, l16, y1min_x_not_smallest))
 						return true;
-					j1 = (j1 + 1) % j;
-					if (i1 == j1)
+					y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+					if (y_min_idx_1 == y_min_idx_1_next)
 						byte0 = 2;
 				}
-			} else if (ai3[i1] < ai3[j1]) {
-				int k2 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-				int j7 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-				int l11 = ai2[i1];
-				int k16 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai3[i1]);
-				if (method307(k2, j7, l11, k16, flag))
+			}
+			else if (y_0[smallest_y_arr_greater_than_other_y_arr_idx] < y_1[y_min_idx_1])
+			{
+				if (y_0[smallest_y_arr_greater_than_other_y_arr_idx] < y_1[y_min_idx_1_next]) {
+					int i3 = findXOther(
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							x_0[(y_min_idx_0 + 1) % x_0_len],
+							y_0[(y_min_idx_0 + 1) % x_0_len],
+							x_0[y_min_idx_0],
+							y_0[y_min_idx_0]);
+					int l7 = x_0[smallest_y_arr_greater_than_other_y_arr_idx];
+					int j12 = findXOther(
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							x_1[(y_min_idx_1 + 1) % x_1_len],
+							y_1[(y_min_idx_1 + 1) % x_1_len], x_1[y_min_idx_1],
+							y_1[y_min_idx_1]);
+					int i17 = findXOther(
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							x_1[y_min_idx_1_next],
+							y_1[y_min_idx_1_next]);
+					if (method307(i3, l7, j12, i17, y1min_x_not_smallest))
+						return true;
+					smallest_y_arr_greater_than_other_y_arr_idx = (smallest_y_arr_greater_than_other_y_arr_idx + 1) % x_0_len;
+					if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
+						byte0 = 1;
+				}
+				else
+				{
+					int j3 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_0[(y_min_idx_0 + 1) % x_0_len],
+							y_0[(y_min_idx_0 + 1) % x_0_len],
+							x_0[y_min_idx_0],
+							y_0[y_min_idx_0]);
+					int i8 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+					int k12 = findXOther(
+							y_1[y_min_idx_1_next],
+							x_1[(y_min_idx_1 + 1) % x_1_len],
+							y_1[(y_min_idx_1 + 1) % x_1_len],
+							x_1[y_min_idx_1],
+							y_1[y_min_idx_1]);
+					int j17 = x_1[y_min_idx_1_next];
+					if (method307(j3, i8, k12, j17, y1min_x_not_smallest))
+						return true;
+					y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+					if (y_min_idx_1 == y_min_idx_1_next)
+						byte0 = 2;
+				}
+			}
+			else if (y_1[y_min_idx_1] < y_1[y_min_idx_1_next])
+			{
+				int k3 = findXOther(
+						y_1[y_min_idx_1],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int j8 = findXOther(
+						y_1[y_min_idx_1],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int l12 = x_1[y_min_idx_1];
+				int k17 = findXOther(
+						y_1[y_min_idx_1],
+						x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						x_1[y_min_idx_1_next],
+						y_1[y_min_idx_1_next]);
+				if (method307(k3, j8, l12, k17, y1min_x_not_smallest))
 					return true;
-				i1 = ((i1 - 1) + j) % j;
-				if (i1 == j1)
+				y_min_idx_1 = ((y_min_idx_1 - 1) + x_1_len) % x_1_len;
+				if (y_min_idx_1 == y_min_idx_1_next)
 					byte0 = 2;
+			}
+			else
+			{
+				int l3 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int k8 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int i13 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int l17 = x_1[y_min_idx_1_next];
+				if (method307(l3, k8, i13, l17, y1min_x_not_smallest))
+					return true;
+				y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+				if (y_min_idx_1 == y_min_idx_1_next)
+					byte0 = 2;
+			}
+		while (byte0 == 1)
+			if (y_0[y_min_idx_0] < y_1[y_min_idx_1])
+			{
+				if (y_0[y_min_idx_0] < y_1[y_min_idx_1_next]) {
+					int i4 = x_0[y_min_idx_0];
+					int j13 = findXOther(
+							y_0[y_min_idx_0],
+							x_1[(y_min_idx_1 + 1) % x_1_len],
+							y_1[(y_min_idx_1 + 1) % x_1_len],
+							x_1[y_min_idx_1],
+							y_1[y_min_idx_1]);
+					int i18 = findXOther(
+							y_0[y_min_idx_0],
+							x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+							x_1[y_min_idx_1_next],
+							y_1[y_min_idx_1_next]);
+					return method308(j13, i18, i4, !y1min_x_not_smallest);
+				}
+				int j4 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int l8 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int k13 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int j18 = x_1[y_min_idx_1_next];
+				if (method307(j4, l8, k13, j18, y1min_x_not_smallest))
+					return true;
+				y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+				if (y_min_idx_1 == y_min_idx_1_next)
+					byte0 = 0;
+			} else if (y_1[y_min_idx_1] < y_1[y_min_idx_1_next]) {
+				int k4 = findXOther(
+						y_1[y_min_idx_1],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int i9 = findXOther(
+						y_1[y_min_idx_1],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int l13 = x_1[y_min_idx_1];
+				int k18 = findXOther(
+						y_1[y_min_idx_1],
+						x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						x_1[y_min_idx_1_next],
+						y_1[y_min_idx_1_next]);
+				if (method307(k4, i9, l13, k18, y1min_x_not_smallest))
+					return true;
+				y_min_idx_1 = ((y_min_idx_1 - 1) + x_1_len) % x_1_len;
+				if (y_min_idx_1 == y_min_idx_1_next)
+					byte0 = 0;
 			} else {
-				int l2 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-				int k7 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-				int i12 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-				int l16 = ai2[j1];
-				if (method307(l2, k7, i12, l16, flag))
+				int l4 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int j9 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int i14 = findXOther(
+						y_1[y_min_idx_1_next],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int l18 = x_1[y_min_idx_1_next];
+				if (method307(l4, j9, i14, l18, y1min_x_not_smallest))
 					return true;
-				j1 = (j1 + 1) % j;
-				if (i1 == j1)
-					byte0 = 2;
+				y_min_idx_1_next = (y_min_idx_1_next + 1) % x_1_len;
+				if (y_min_idx_1 == y_min_idx_1_next)
+					byte0 = 0;
 			}
-		} else if (ai1[l] < ai3[i1]) {
-			if (ai1[l] < ai3[j1]) {
-				int i3 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai1[l]);
-				int l7 = ai[l];
-				int j12 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[l]);
-				int i17 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[l]);
-				if (method307(i3, l7, j12, i17, flag))
+		while (byte0 == 2)
+			if (y_1[y_min_idx_1] < y_0[y_min_idx_0])
+			{
+				if (y_1[y_min_idx_1] < y_0[smallest_y_arr_greater_than_other_y_arr_idx])
+				{
+					int i5 = findXOther(
+							y_1[y_min_idx_1],
+							x_0[(y_min_idx_0 + 1) % x_0_len],
+							y_0[(y_min_idx_0 + 1) % x_0_len],
+							x_0[y_min_idx_0],
+							y_0[y_min_idx_0]);
+					int k9 = findXOther(
+							y_1[y_min_idx_1],
+							x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+							x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+							y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+					int j14 = x_1[y_min_idx_1];
+					return method308(i5, k9, j14, y1min_x_not_smallest);
+				}
+				int j5 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int l9 = x_0[smallest_y_arr_greater_than_other_y_arr_idx];
+				int k14 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int i19 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						x_1[y_min_idx_1_next],
+						y_1[y_min_idx_1_next]);
+				if (method307(j5, l9, k14, i19, y1min_x_not_smallest))
 					return true;
-				l = (l + 1) % i;
-				if (k == l)
-					byte0 = 1;
-			} else {
-				int j3 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-				int i8 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-				int k12 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-				int j17 = ai2[j1];
-				if (method307(j3, i8, k12, j17, flag))
+				smallest_y_arr_greater_than_other_y_arr_idx = (smallest_y_arr_greater_than_other_y_arr_idx + 1) % x_0_len;
+				if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
+					byte0 = 0;
+			}
+			else if (y_0[y_min_idx_0] < y_0[smallest_y_arr_greater_than_other_y_arr_idx])
+			{
+				int k5 = x_0[y_min_idx_0];
+				int i10 = findXOther(
+						y_0[y_min_idx_0],
+						x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+						x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+				int l14 = findXOther(
+						y_0[y_min_idx_0],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int j19 = findXOther(
+						y_0[y_min_idx_0],
+						x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						x_1[y_min_idx_1_next],
+						y_1[y_min_idx_1_next]);
+				if (method307(k5, i10, l14, j19, y1min_x_not_smallest))
 					return true;
-				j1 = (j1 + 1) % j;
-				if (i1 == j1)
-					byte0 = 2;
+				y_min_idx_0 = ((y_min_idx_0 - 1) + x_0_len) % x_0_len;
+				if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
+					byte0 = 0;
 			}
-		} else if (ai3[i1] < ai3[j1]) {
-			int k3 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-			int j8 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-			int l12 = ai2[i1];
-			int k17 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai3[i1]);
-			if (method307(k3, j8, l12, k17, flag))
-				return true;
-			i1 = ((i1 - 1) + j) % j;
-			if (i1 == j1)
-				byte0 = 2;
-		} else {
-			int l3 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-			int k8 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-			int i13 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-			int l17 = ai2[j1];
-			if (method307(l3, k8, i13, l17, flag))
-				return true;
-			j1 = (j1 + 1) % j;
-			if (i1 == j1)
-				byte0 = 2;
-		}
-		while (byte0 == 1) if (ai1[k] < ai3[i1]) {
-			if (ai1[k] < ai3[j1]) {
-				int i4 = ai[k];
-				int j13 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[k]);
-				int i18 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[k]);
-				return method308(j13, i18, i4, !flag);
+			else
+			{
+				int l5 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_0[(y_min_idx_0 + 1) % x_0_len],
+						y_0[(y_min_idx_0 + 1) % x_0_len],
+						x_0[y_min_idx_0],
+						y_0[y_min_idx_0]);
+				int j10 = x_0[smallest_y_arr_greater_than_other_y_arr_idx];
+				int i15 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_1[(y_min_idx_1 + 1) % x_1_len],
+						y_1[(y_min_idx_1 + 1) % x_1_len],
+						x_1[y_min_idx_1],
+						y_1[y_min_idx_1]);
+				int k19 = findXOther(
+						y_0[smallest_y_arr_greater_than_other_y_arr_idx],
+						x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+						x_1[y_min_idx_1_next],
+						y_1[y_min_idx_1_next]);
+				if (method307(l5, j10, i15, k19, y1min_x_not_smallest))
+					return true;
+				smallest_y_arr_greater_than_other_y_arr_idx = (smallest_y_arr_greater_than_other_y_arr_idx + 1) % x_0_len;
+				if (y_min_idx_0 == smallest_y_arr_greater_than_other_y_arr_idx)
+					byte0 = 0;
 			}
-			int j4 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-			int l8 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-			int k13 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-			int j18 = ai2[j1];
-			if (method307(j4, l8, k13, j18, flag))
-				return true;
-			j1 = (j1 + 1) % j;
-			if (i1 == j1)
-				byte0 = 0;
-		} else if (ai3[i1] < ai3[j1]) {
-			int k4 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-			int i9 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-			int l13 = ai2[i1];
-			int k18 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai3[i1]);
-			if (method307(k4, i9, l13, k18, flag))
-				return true;
-			i1 = ((i1 - 1) + j) % j;
-			if (i1 == j1)
-				byte0 = 0;
-		} else {
-			int l4 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[j1]);
-			int j9 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[j1]);
-			int i14 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai3[j1]);
-			int l18 = ai2[j1];
-			if (method307(l4, j9, i14, l18, flag))
-				return true;
-			j1 = (j1 + 1) % j;
-			if (i1 == j1)
-				byte0 = 0;
+		if (y_0[y_min_idx_0] < y_1[y_min_idx_1])
+		{
+			int y0min_x = x_0[y_min_idx_0];
+			int y0min_x_1 = findXOther(
+					y_0[y_min_idx_0],
+					x_1[(y_min_idx_1 + 1) % x_1_len],
+					y_1[(y_min_idx_1 + 1) % x_1_len],
+					x_1[y_min_idx_1],
+					y_1[y_min_idx_1]);
+			int y0min_x_2 = findXOther(
+					y_0[y_min_idx_0],
+					x_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+					y_1[((y_min_idx_1_next - 1) + x_1_len) % x_1_len],
+					x_1[y_min_idx_1_next],
+					y_1[y_min_idx_1_next]);
+			return method308(y0min_x_1, y0min_x_2, y0min_x, !y1min_x_not_smallest);
 		}
-		while (byte0 == 2) if (ai3[i1] < ai1[k]) {
-			if (ai3[i1] < ai1[l]) {
-				int i5 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-				int k9 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-				int j14 = ai2[i1];
-				return method308(i5, k9, j14, flag);
-			}
-			int j5 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai1[l]);
-			int l9 = ai[l];
-			int k14 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[l]);
-			int i19 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[l]);
-			if (method307(j5, l9, k14, i19, flag))
-				return true;
-			l = (l + 1) % i;
-			if (k == l)
-				byte0 = 0;
-		} else if (ai1[k] < ai1[l]) {
-			int k5 = ai[k];
-			int i10 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai1[k]);
-			int l14 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[k]);
-			int j19 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[k]);
-			if (method307(k5, i10, l14, j19, flag))
-				return true;
-			k = ((k - 1) + i) % i;
-			if (k == l)
-				byte0 = 0;
-		} else {
-			int l5 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai1[l]);
-			int j10 = ai[l];
-			int i15 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[l]);
-			int k19 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[l]);
-			if (method307(l5, j10, i15, k19, flag))
-				return true;
-			l = (l + 1) % i;
-			if (k == l)
-				byte0 = 0;
-		}
-		if (ai1[k] < ai3[i1]) {
-			int i6 = ai[k];
-			int j15 = method306(ai2[(i1 + 1) % j], ai3[(i1 + 1) % j], ai2[i1], ai3[i1], ai1[k]);
-			int l19 = method306(ai2[((j1 - 1) + j) % j], ai3[((j1 - 1) + j) % j], ai2[j1], ai3[j1], ai1[k]);
-			return method308(j15, l19, i6, !flag);
-		}
-		int j6 = method306(ai[(k + 1) % i], ai1[(k + 1) % i], ai[k], ai1[k], ai3[i1]);
-		int k10 = method306(ai[((l - 1) + i) % i], ai1[((l - 1) + i) % i], ai[l], ai1[l], ai3[i1]);
-		int k15 = ai2[i1];
-		return method308(j6, k10, k15, flag);
+		int y1min_x_1 = findXOther(
+				y_1[y_min_idx_1],
+				x_0[(y_min_idx_0 + 1) % x_0_len],
+				y_0[(y_min_idx_0 + 1) % x_0_len],
+				x_0[y_min_idx_0],
+				y_0[y_min_idx_0]);
+		int y1min_x_2 = findXOther(
+				y_1[y_min_idx_1],
+				x_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+				y_0[((smallest_y_arr_greater_than_other_y_arr_idx - 1) + x_0_len) % x_0_len],
+				x_0[smallest_y_arr_greater_than_other_y_arr_idx],
+				y_0[smallest_y_arr_greater_than_other_y_arr_idx]);
+		int y1min_x = x_1[y_min_idx_1];
+		return method308(y1min_x_1, y1min_x_2, y1min_x, y1min_x_not_smallest);
 	}
 
 	public void moveCamera(double factor, int keyMask)

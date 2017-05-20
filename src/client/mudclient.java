@@ -2342,9 +2342,11 @@ public class mudclient extends GameWindowMiddleMan
 		if (currentMenuID == 3600)
 			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
 		if (currentMenuID == 700) {
-			int l1 = xToTileX(actionX);
-			int l3 = yToTileY(actionY);
-			method112(sectionX, sectionY, l1, l3, true);
+			int x = xToTileX(actionX);
+			int y = yToTileY(actionY);
+			method112(sectionX, sectionY, x, y, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(71);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
@@ -2352,9 +2354,11 @@ public class mudclient extends GameWindowMiddleMan
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 710) {
-			int i2 = xToTileX(actionX);
-			int i4 = yToTileY(actionY);
-			method112(sectionX, sectionY, i2, i4, true);
+			int x = xToTileX(actionX);
+			int y = yToTileY(actionY);
+			method112(sectionX, sectionY, x, y, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(142);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
@@ -2362,17 +2366,21 @@ public class mudclient extends GameWindowMiddleMan
 			selectedItem = -1;
 		}
 		if (currentMenuID == 720) {
-			int j2 = xToTileX(actionX);
-			int j4 = yToTileY(actionY);
-			method112(sectionX, sectionY, j2, j4, true);
+			int x = xToTileX(actionX);
+			int y = yToTileY(actionY);
+			method112(sectionX, sectionY, x, y, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(177);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.formatPacket();
 		}
 		if (currentMenuID == 725) {
-			int k2 = xToTileX(actionX);
-			int k4 = yToTileY(actionY);
-			method112(sectionX, sectionY, k2, k4, true);
+			int x = xToTileX(actionX);
+			int y = yToTileY(actionY);
+			method112(sectionX, sectionY, x, y, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(74);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.formatPacket();
@@ -2381,6 +2389,8 @@ public class mudclient extends GameWindowMiddleMan
 			int l2 = xToTileX(actionX);
 			int l4 = yToTileY(actionY);
 			method112(sectionX, sectionY, l2, l4, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(73);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.formatPacket();
@@ -2391,6 +2401,8 @@ public class mudclient extends GameWindowMiddleMan
 			int i3 = xToTileX(actionX);
 			int i5 = yToTileY(actionY);
 			method112(sectionX, sectionY, i3, i5, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(55);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
@@ -2401,6 +2413,8 @@ public class mudclient extends GameWindowMiddleMan
 			int j3 = xToTileX(actionX);
 			int j5 = yToTileY(actionY);
 			method112(sectionX, sectionY, j3, j5, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(16);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
@@ -2411,6 +2425,8 @@ public class mudclient extends GameWindowMiddleMan
 			int k3 = xToTileX(actionX);
 			int k5 = yToTileY(actionY);
 			method112(sectionX, sectionY, k3, k5, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(57);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.formatPacket();
@@ -2432,6 +2448,8 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		if (currentMenuID == 900) {
 			method112(sectionX, sectionY, actionX, actionY, true);
+			mapClickX = -1;
+			mapClickX = -1;
 			super.streamClass.createPacket(232);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionX + areaX);
@@ -2441,6 +2459,8 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		if (currentMenuID == 920) {
 			method112(sectionX, sectionY, actionX, actionY, false);
+			mapClickX = -1;
+			mapClickX = -1;
 			if (actionPictureType == -24)
 				actionPictureType = 24;
 		}
@@ -2528,10 +2548,10 @@ public class mudclient extends GameWindowMiddleMan
 		modelY *= EngineHandle.GAME_SIZE;
 		modelX1 *= EngineHandle.GAME_SIZE;
 		modelX2 *= EngineHandle.GAME_SIZE;
-		int p0 = model.insertCoordPointNoDuplicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
-		int p1 = model.insertCoordPointNoDuplicate(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - height, modelY);
-		int p2 = model.insertCoordPointNoDuplicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - height, modelX2);
-		int p3 = model.insertCoordPointNoDuplicate(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
+		int p0 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
+		int p1 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - height, modelY);
+		int p2 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - height, modelX2);
+		int p3 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
 		int surface[] = {
 				p0, p1, p2, p3
 		};
@@ -2658,7 +2678,7 @@ public class mudclient extends GameWindowMiddleMan
 				double z = -engineHandle.getAveragedElevation(x, y);
 				double mobWidth = 145 * EngineHandle.SCALE_FACTOR;
 				double mobHeight = 220 * EngineHandle.SCALE_FACTOR;
-				int l3 = gameCamera.method268(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
+				int l3 = gameCamera.add2DModel(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
 				fightCount++;
 				if (mob == ourPlayer)
 					gameCamera.setOurPlayer(l3);
@@ -2689,7 +2709,7 @@ public class mudclient extends GameWindowMiddleMan
 					double k10 = (py * player.anInt176 + ny * (attackingInt40 - player.anInt176)) / attackingInt40;
 					double mobWidth = 32 * EngineHandle.SCALE_FACTOR;
 					double mobHeight = 32 * EngineHandle.SCALE_FACTOR;
-					gameCamera.method268(SPRITE_PROJECTILE_START + player.attackingCameraInt,
+					gameCamera.add2DModel(SPRITE_PROJECTILE_START + player.attackingCameraInt,
 							i10, j10, k10, mobWidth, mobHeight, 0);
 					fightCount++;
 				}
@@ -2703,7 +2723,7 @@ public class mudclient extends GameWindowMiddleMan
 			double mobz = -engineHandle.getAveragedElevation(mobx, moby);
 			double mobWidth = EntityHandler.getNpcDef(npc.type).getCamera1() * EngineHandle.SCALE_FACTOR;
 			double mobHeight = EntityHandler.getNpcDef(npc.type).getCamera2() * EngineHandle.SCALE_FACTOR;
-			int i9 = gameCamera.method268(20000 + l1, mobx, mobz, moby, mobWidth, mobHeight, l1 + 30000);
+			int i9 = gameCamera.add2DModel(20000 + l1, mobx, mobz, moby, mobWidth, mobHeight, l1 + 30000);
 			fightCount++;
 			if (npc.currentSprite == 8)
 				gameCamera.setCombat(i9, -30);
@@ -2715,7 +2735,7 @@ public class mudclient extends GameWindowMiddleMan
 			double y = groundItemY[j2] * EngineHandle.GAME_SIZE + EngineHandle.GAME_SIZE/2;
 			double mobWidth = 96 * EngineHandle.SCALE_FACTOR;
 			double mobHeight = 64 * EngineHandle.SCALE_FACTOR;
-			gameCamera.method268(40000 + groundItemType[j2], x,
+			gameCamera.add2DModel(40000 + groundItemType[j2], x,
 					-engineHandle.getAveragedElevation(x, y) - groundItemZ[j2],
 					y, mobWidth, mobHeight, j2 + 20000);
 			fightCount++;
@@ -2731,7 +2751,7 @@ public class mudclient extends GameWindowMiddleMan
 				mobHeight = 256 * EngineHandle.SCALE_FACTOR;
 			if (j9 == 1)
 				mobHeight = 64 * EngineHandle.SCALE_FACTOR;
-			gameCamera.method268(50000 + k3, x, -engineHandle.getAveragedElevation(x, y),
+			gameCamera.add2DModel(50000 + k3, x, -engineHandle.getAveragedElevation(x, y),
 					y, mobWidth, mobHeight, k3 + 50000);
 			fightCount++;
 		}
@@ -8182,7 +8202,8 @@ public class mudclient extends GameWindowMiddleMan
 		return false;
 	}
 
-	private final void setPixelsAndAroundColour(int x, int y, int colour) {
+	private final void setPixelsAndAroundColour(int x, int y, int colour)
+	{
 		gameGraphics.setMinimapPixel(x, y, colour);
 		gameGraphics.setMinimapPixel(x - 1, y, colour);
 		gameGraphics.setMinimapPixel(x + 1, y, colour);
@@ -8258,58 +8279,73 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)k1,
 				miniMapY + miniMapHeight / 2 + (int)i3, SPRITE_MEDIA_START - 1,
 				i1 + 64 & 0xff, k);
-		for (int i7 = 0; i7 < objectCount; i7++)
+		for (int i = 0; i < objectCount; i++)
 		{
-			double l1 = (((objectX[i7] * gameSize + gameSize/2) - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
-			double j3 = (((objectY[i7] * gameSize + gameSize/2) - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
-			tmp = (j3 * sin + l1 * cos) / 8;
-			j3 = (j3 * cos - l1 * sin) / 8;
-			l1 = tmp;
-			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)l1,
-					miniMapY + miniMapHeight / 2 - (int)j3, 0x00ffff);
+			double x = (((objectX[i] * gameSize + gameSize/2) - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
+			double y = (((objectY[i] * gameSize + gameSize/2) - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
+			tmp = (y * sin + x * cos) / 8;
+			y = (y * cos - x * sin) / 8;
+			x = tmp;
+			if (!EntityHandler.getObjectDef(objectType[i]).getCommand1().equalsIgnoreCase("WalkTo"))
+				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+						miniMapY + miniMapHeight / 2 - (int)y, 3, 0x00ffff, 0xff);
 		}
 
-		for (int j7 = 0; j7 < groundItemCount; j7++)
+		for (int i = 0; i < groundItemCount; i++)
 		{
-			double i2 = (((groundItemX[j7] * gameSize + gameSize/2) - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
-			double k3 = (((groundItemY[j7] * gameSize + gameSize/2) - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
-			tmp = (k3 * sin + i2 * cos) / 8;
-			k3 = (k3 * cos - i2 * sin) / 8;
-			i2 = tmp;
-			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)i2,
-					(miniMapY + miniMapHeight / 2) - (int)k3, 0xff0000);
+			double x = (((groundItemX[i] * gameSize + gameSize/2) - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
+			double y = (((groundItemY[i] * gameSize + gameSize/2) - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
+			tmp = (y * sin + x * cos) / 8;
+			y = (y * cos - x * sin) / 8;
+			x = tmp;
+			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xff0000, 0xff);
+			/*
+			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)x,
+					miniMapY + miniMapHeight / 2 - (int)y, 0xff0000);*/
 		}
 
-		for (int k7 = 0; k7 < npcCount; k7++)
+		for (int i = 0; i < npcCount; i++)
 		{
-			Mob mob = npcArray[k7];
-			double j2 = ((mob.currentX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
-			double l3 = ((mob.currentY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
-			tmp = (l3 * sin + j2 * cos) / 8;
-			l3 = (l3 * cos - j2 * sin) / 8;
-			j2 = tmp;
-			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)j2,
-					(miniMapY + miniMapHeight / 2) - (int)l3, 0xffff00);
+			Mob mob = npcArray[i];
+			double x = ((mob.currentX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
+			double y = ((mob.currentY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
+			tmp = (y * sin + x * cos) / 8;
+			y = (y * cos - x * sin) / 8;
+			x = tmp;
+			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xffff00, 0xff);
+			if (EntityHandler.getNpcDef(mob.type).attackable)
+				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+						miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
+			else
+				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x0000ff, 0xff);
+			/*
+			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)x,
+					(miniMapY + miniMapHeight / 2) - (int)y, 0xffff00);*/
 		}
 
-		for (int l7 = 0; l7 < playerCount; l7++) {
-			Mob mob_1 = playerArray[l7];
-			double k2 = ((mob_1.currentX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
-			double i4 = ((mob_1.currentY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
-			tmp = (i4 * sin + k2 * cos) / 8;
-			i4 = (i4 * cos - k2 * sin) / 8;
-			k2 = tmp;
-			int j8 = 0xffffff;
+		for (int i = 0; i < playerCount; i++) {
+			Mob mob = playerArray[i];
+			double x = ((mob.currentX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
+			double y = ((mob.currentY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
+			tmp = (y * sin + x * cos) / 8;
+			y = (y * cos - x * sin) / 8;
+			x = tmp;
+			int color = 0xffffff;
 			for (int k8 = 0; k8 < super.friendsCount; k8++) {
-				if (mob_1.nameLong != super.friendsListLongs[k8]
+				if (mob.nameLong != super.friendsListLongs[k8]
 						|| super.friendsListOnlineStatus[k8] != 99)
 					continue;
-				j8 = 0x00ff00;
+				color = 0x00ff00;
 				break;
 			}
-
-			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)k2,
-					(miniMapY + miniMapHeight / 2) - (int)i4, j8);
+			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+					miniMapY + miniMapHeight / 2 - (int)y, 3, color, 0xff);
+			/*
+			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)x,
+					(miniMapY + miniMapHeight / 2) - (int)y, color);*/
 		}
 
 		// player dot on map

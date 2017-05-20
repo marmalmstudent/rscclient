@@ -7,12 +7,12 @@ public class CameraModel {
         anInt369 = -1;
     }
 
-    protected int xMin;
-    protected int yMin;
-    protected int xMax;
-    protected int yMax;
-    protected int zMin;
-    protected int zMax;
+    protected double xMin;
+    protected double yMin;
+    protected double xMax;
+    protected double yMax;
+    protected double zMin;
+    protected double zMax;
     protected Model model;
     protected int surface;
     protected double drawOrderVal;

@@ -187,9 +187,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         int i3 = j - k;
         if (i3 < 0)
             i3 = 0;
-        int j3 = j + k;
-        if (j3 >= gameWindowHeight)
-            j3 = gameWindowHeight - 1;
+        int yMax = j + k;
+        if (yMax >= gameWindowHeight)
+            yMax = gameWindowHeight - 1;
         byte yStep = 1;
         if (f1Toggle)
         {
@@ -197,7 +197,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             if ((i3 & 1) != 0)
                 i3++;
         }
-        for (int y = i3; y <= j3; y += yStep) {
+        for (int y = i3; y <= yMax; y += yStep) {
             int l3 = y - j;
             int i4 = (int) Math.sqrt(k * k - l3 * l3);
             int x = i - i4;

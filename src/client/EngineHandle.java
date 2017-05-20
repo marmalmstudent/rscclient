@@ -446,7 +446,7 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
-                    model.insertCoordPointNoDuplicate(x * GAME_SIZE, z, y * GAME_SIZE);
+                    model.insertCoordPoint(x * GAME_SIZE, z, y * GAME_SIZE);
                 }
             }
 
@@ -638,10 +638,10 @@ public class EngineHandle
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                     {
                         int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
-                        int p00 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
-                        int p10 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
-                        int p11 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
-                        int p01 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
+                        int p00 = model.insertCoordPoint(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
+                        int p10 = model.insertCoordPoint((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
+                        int p11 = model.insertCoordPoint((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
+                        int p01 = model.insertCoordPoint(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
                         int rect[] = {p00, p10, p11, p01};
                         int i = model.addSurface(4, rect, color, Model.INVISIBLE);
                         selectedX[i] = x;
@@ -660,10 +660,10 @@ public class EngineHandle
                             		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getTexture() == 4)
                             {
                                 int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getColour();
-                                int p00 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
-                                int p10 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
-                                int p11 = model.insertCoordPointNoDuplicate((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
-                                int p01 = model.insertCoordPointNoDuplicate(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
+                                int p00 = model.insertCoordPoint(x * GAME_SIZE, -getGroundElevation(x, y), y * GAME_SIZE);
+                                int p10 = model.insertCoordPoint((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y), y * GAME_SIZE);
+                                int p11 = model.insertCoordPoint((x + 1) * GAME_SIZE, -getGroundElevation(x + 1, y + 1), (y + 1) * GAME_SIZE);
+                                int p01 = model.insertCoordPoint(x * GAME_SIZE, -getGroundElevation(x, y + 1), (y + 1) * GAME_SIZE);
                                 int rect[] = {p00, p10, p11, p01};
                                 int j = model.addSurface(4, rect, color, Model.INVISIBLE);
                                 selectedX[j] = x;
@@ -677,7 +677,7 @@ public class EngineHandle
             }
 
             model.setLightAndGradAndSource(true, 40, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-            aModelArray596 = aModel.method182(
+            aModelArray596 = aModel.makeModels(
             		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
             		8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
@@ -753,7 +753,7 @@ public class EngineHandle
         }
         // viewport walls, fences etc.
         aModel.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
-        walls[hSector] = aModel.method182(
+        walls[hSector] = aModel.makeModels(
         		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
         		8, 64, 338, true);
         for (int building = 0; building < 64; building++)
@@ -914,9 +914,9 @@ public class EngineHandle
                     		&& getRoofTexture(i - 1, j - 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                        rect[0] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
+                        rect[1] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
+                        rect[2] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
                     else if (getDiagonalWalls(i, j) > 12000
@@ -924,9 +924,9 @@ public class EngineHandle
                     		&& getRoofTexture(i + 1, j + 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                        rect[0] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                        rect[1] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                        rect[2] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
                     else if (getDiagonalWalls(i, j) > 0
@@ -934,9 +934,9 @@ public class EngineHandle
                     		&& getRoofTexture(i + 1, j - 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                        rect[0] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
+                        rect[1] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                        rect[2] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
                     else if (getDiagonalWalls(i, j) > 0
@@ -944,25 +944,25 @@ public class EngineHandle
                     		&& getRoofTexture(i - 1, j + 1) == 0)
                     {
                         int rect[] = new int[3];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                        rect[0] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                        rect[1] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
+                        rect[2] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
                         aModel.addSurface(3, rect, color, Model.INVISIBLE);
                     }
                     else if (z[0] == z[1] && z[2] == z[3]) {
                         int rect[] = new int[4];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
-                        rect[3] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                        rect[0] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                        rect[1] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                        rect[2] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
+                        rect[3] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
                     }
                     else if (z[0] == z[3] && z[1] == z[2]) {
                         int rect[] = new int[4];
-                        rect[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
-                        rect[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                        rect[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                        rect[3] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                        rect[0] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
+                        rect[1] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                        rect[2] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                        rect[3] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
                         aModel.addSurface(4, rect, color, Model.INVISIBLE);
                     }
                     else
@@ -975,27 +975,27 @@ public class EngineHandle
                         if (!flag1)
                         {
                             int rect1[] = new int[3];
-                            rect1[0] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                            rect1[1] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
-                            rect1[2] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
+                            rect1[0] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                            rect1[1] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
+                            rect1[2] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
                             aModel.addSurface(3, rect1, color, Model.INVISIBLE);
                             int rec2[] = new int[3];
-                            rec2[0] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
-                            rec2[1] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                            rec2[2] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
+                            rec2[0] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
+                            rec2[1] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                            rec2[2] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
                             aModel.addSurface(3, rec2, color, Model.INVISIBLE);
                         }
                         else
                         {
                             int rect1[] = new int[3];
-                            rect1[0] = aModel.insertCoordPointNoDuplicate(x_big[0], z[0], y_big[0]);
-                            rect1[1] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
-                            rect1[2] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
+                            rect1[0] = aModel.insertCoordPoint(x_big[0], z[0], y_big[0]);
+                            rect1[1] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
+                            rect1[2] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
                             aModel.addSurface(3, rect1, color, Model.INVISIBLE);
                             int rect2[] = new int[3];
-                            rect2[0] = aModel.insertCoordPointNoDuplicate(x_big[3], z[2], y_big[2]);
-                            rect2[1] = aModel.insertCoordPointNoDuplicate(x_big[1], z[3], y_big[3]);
-                            rect2[2] = aModel.insertCoordPointNoDuplicate(x_big[2], z[1], y_big[1]);
+                            rect2[0] = aModel.insertCoordPoint(x_big[3], z[2], y_big[2]);
+                            rect2[1] = aModel.insertCoordPoint(x_big[1], z[3], y_big[3]);
+                            rect2[2] = aModel.insertCoordPoint(x_big[2], z[1], y_big[1]);
                             aModel.addSurface(3, rect2, color, Model.INVISIBLE);
                         }
                     }
@@ -1003,7 +1003,7 @@ public class EngineHandle
             }
         }
         aModel.setLightAndGradAndSource(true, 50, 50, Camera.light_x, Camera.light_z, Camera.light_y);
-        roofs[hSector] = aModel.method182(
+        roofs[hSector] = aModel.makeModels(
         		1536*SCALE_FACTOR, 1536*SCALE_FACTOR,
         		8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
@@ -1224,10 +1224,10 @@ public class EngineHandle
         double y_1 = ySector_1 * GAME_SIZE;
         double x_2 = xSector_2 * GAME_SIZE;
         double y_2 = ySector_2 * GAME_SIZE;
-        int p0 = model.insertCoordPointNoDuplicate(x_1, -elevation[xSector_1][ySector_1], y_1);
-        int p1 = model.insertCoordPointNoDuplicate(x_1, -elevation[xSector_1][ySector_1] - height, y_1);
-        int p2 = model.insertCoordPointNoDuplicate(x_2, -elevation[xSector_2][ySector_2] - height, y_2);
-        int p3 = model.insertCoordPointNoDuplicate(x_2, -elevation[xSector_2][ySector_2], y_2);
+        int p0 = model.insertCoordPoint(x_1, -elevation[xSector_1][ySector_1], y_1);
+        int p1 = model.insertCoordPoint(x_1, -elevation[xSector_1][ySector_1] - height, y_1);
+        int p2 = model.insertCoordPoint(x_2, -elevation[xSector_2][ySector_2] - height, y_2);
+        int p3 = model.insertCoordPoint(x_2, -elevation[xSector_2][ySector_2], y_2);
         int i4 = model.addSurface(4, new int[]{p0, p1, p2, p3}, texture1, texture2);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
             model.entityType[i4] = 30000 + i;
