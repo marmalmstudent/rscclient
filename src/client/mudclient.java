@@ -1061,11 +1061,7 @@ public class mudclient extends GameWindowMiddleMan
 					offset += bufferSize;
 				}
 				datainputstream.close();
-
-				if (j == 0)
-					gameDataModels[j] = new Model(1, 1);
-				else
-					gameDataModels[j] = new Model(model, 0, true);
+				gameDataModels[j] = new Model(model, 0, true);
 				gameDataModels[j].transparent = EntityHandler.getModelName(j).equals("giantcrystal");
 			}
 		}
@@ -8299,10 +8295,7 @@ public class mudclient extends GameWindowMiddleMan
 			y = (y * cos - x * sin) / 8;
 			x = tmp;
 			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
-					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xff0000, 0xff);
-			/*
-			setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)x,
-					miniMapY + miniMapHeight / 2 - (int)y, 0xff0000);*/
+					miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
 		}
 
 		for (int i = 0; i < npcCount; i++)
