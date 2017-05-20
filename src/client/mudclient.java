@@ -3455,6 +3455,7 @@ public class mudclient extends GameWindowMiddleMan
 		loadSprite(SPRITE_MEDIA_START + 23, "media", 1);
 		loadSprite(SPRITE_MEDIA_START + 24, "media", 1);
 		loadSprite(SPRITE_MEDIA_START + 25, "media", 2);
+		loadSprite(SPRITE_MEDIA_START + 27, "media", 2);
 		loadSprite(SPRITE_UTIL_START, "util", 2);
 		loadSprite(SPRITE_UTIL_START + 2, "util", 4);
 		loadSprite(SPRITE_UTIL_START + 6, "util", 2);
@@ -8321,6 +8322,8 @@ public class mudclient extends GameWindowMiddleMan
 
 		for (int i = 0; i < playerCount; i++) {
 			Mob mob = playerArray[i];
+			if (mob == ourPlayer)
+				continue;
 			double x = ((mob.currentX - ourPlayer.currentX) * 3 * k) / (2048*scaleFactor);
 			double y = ((mob.currentY - ourPlayer.currentY) * 3 * k) / (2048*scaleFactor);
 			tmp = (y * sin + x * cos) / 8;
@@ -8342,12 +8345,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 
 		// player dot on map
-		gameGraphics.method212(miniMapX + miniMapWidth / 2,
-				miniMapY + miniMapHeight / 2, 2, 0xffffff, 0xff);
-		// compas
-		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
-				cameraZRot + 128 & 0xff, 128);
-		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
+		Sprite sprite;
 		if (Math.abs(mapClickX - ourPlayer.currentX) > gameSize
 				|| Math.abs(mapClickY - ourPlayer.currentY) > gameSize)
 		{
@@ -8359,15 +8357,11 @@ public class mudclient extends GameWindowMiddleMan
 				l3 = (l3 * cos - j2 * sin) / 8;
 				j2 = tmp;
 
-				Sprite sprite;
-				sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 18];
+				sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 27];
 				gameGraphics.drawPicture(
-						miniMapX + miniMapWidth / 2 + (int)j2 - sprite.getWidth(),
-						miniMapY + miniMapHeight / 2 - (int)l3 - sprite.getHeight(),
-						SPRITE_MEDIA_START + 18);
-				/*
-				setPixelsAndAroundColour(miniMapX + miniMapWidth / 2 + (int)j2,
-						(miniMapY + miniMapHeight / 2) - (int)l3, 0xff00ff);*/
+						miniMapX + miniMapWidth / 2 + (int)j2 - sprite.getWidth()/2,
+						miniMapY + miniMapHeight / 2 - (int)l3 - sprite.getHeight()/2,
+						SPRITE_MEDIA_START + 27);
 			}
 		}
 		else
@@ -8375,6 +8369,15 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			mapClickY = -1;
 		}
+		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 28];
+		gameGraphics.drawPicture(
+				miniMapX + miniMapWidth / 2 - sprite.getWidth()/2,
+				miniMapY + miniMapHeight / 2 - sprite.getHeight()+4,
+				SPRITE_MEDIA_START + 28);
+		// compas
+		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
+				cameraZRot + 128 & 0xff, 128);
+		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
 		if (!canClick)
 			return;
 		if (super.mouseX >= miniMapX
