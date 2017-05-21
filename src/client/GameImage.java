@@ -179,15 +179,16 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void method212(int i, int j, int k, int fgColor, int fg_alpha) {
-        int bg_alpha = 256 - fg_alpha;
-        int fg_red = (fgColor >> 16 & 0xff) * fg_alpha;
-        int fg_green = (fgColor >> 8 & 0xff) * fg_alpha;
-        int fg_blue = (fgColor & 0xff) * fg_alpha;
-        int i3 = j - k;
+    public void drawCircle(int xCenter, int yCenter,
+    		int radius, int fgColor, int fgAlpha) {
+        int bg_alpha = 256 - fgAlpha;
+        int fg_red = (fgColor >> 16 & 0xff) * fgAlpha;
+        int fg_green = (fgColor >> 8 & 0xff) * fgAlpha;
+        int fg_blue = (fgColor & 0xff) * fgAlpha;
+        int i3 = yCenter - radius;
         if (i3 < 0)
             i3 = 0;
-        int yMax = j + k;
+        int yMax = yCenter + radius;
         if (yMax >= gameWindowHeight)
             yMax = gameWindowHeight - 1;
         byte yStep = 1;
@@ -198,12 +199,12 @@ public class GameImage implements ImageProducer, ImageObserver {
                 i3++;
         }
         for (int y = i3; y <= yMax; y += yStep) {
-            int l3 = y - j;
-            int i4 = (int) Math.sqrt(k * k - l3 * l3);
-            int x = i - i4;
+            int j = y - yCenter;
+            int i = (int) (Math.sqrt(radius * radius - j * j) + 0.5);
+            int x = xCenter - i;
             if (x < 0)
                 x = 0;
-            int k4 = i + i4;
+            int k4 = xCenter + i;
             if (k4 >= gameWindowWidth)
                 k4 = gameWindowWidth - 1;
             int offset = x + y * gameWindowWidth;
@@ -1257,48 +1258,61 @@ public class GameImage implements ImageProducer, ImageObserver {
             if (xEnd - xStart <= 0) {
                 offset += windowWidth;
             } else {
-                int l11 = anIntArray342[y] << 9;
-                int i12 = ((anIntArray343[y] << 9) - l11) / (xEnd - xStart);
-                int j12 = anIntArray344[y] << 9;
-                int k12 = ((anIntArray345[y] << 9) - j12) / (xEnd - xStart);
+                int xDrawStart = anIntArray342[y] << 9;
+                int xStep = ((anIntArray343[y] << 9) - xDrawStart) / (xEnd - xStart);
+                int yDrawstart = anIntArray344[y] << 9;
+                int yStep = ((anIntArray345[y] << 9) - yDrawstart) / (xEnd - xStart);
                 if (xStart < imageX) {
-                    l11 += (imageX - xStart) * i12;
-                    j12 += (imageX - xStart) * k12;
+                    xDrawStart += (imageX - xStart) * xStep;
+                    yDrawstart += (imageX - xStart) * yStep;
                     xStart = imageX;
                 }
                 if (xEnd > imageWidth)
                     xEnd = imageWidth;
                 if (!lowDef || (y & 1) == 0)
                     if (!sprites[sprite].requiresShift())
-                        method243(imagePixelArray, mapPixels, 0, offset + xStart, l11, j12, i12, k12, xStart - xEnd, spriteWidth);
+                        drawMapSpriteWOShift(imagePixelArray, mapPixels,
+                        		offset + xStart, xDrawStart,
+                        		yDrawstart, xStep, yStep,
+                        		xStart - xEnd,
+                        		spriteWidth);
                     else
-                        method244(imagePixelArray, mapPixels, 0, offset + xStart, l11, j12, i12, k12, xStart - xEnd, spriteWidth);
+                        drawMapSpriteWShift(imagePixelArray, mapPixels,
+                        		offset + xStart, xDrawStart,
+                        		yDrawstart, xStep, yStep, xStart - xEnd,
+                        		spriteWidth);
                 offset += windowWidth;
             }
         }
 
     }
 
-    private void method243(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1) {
-        for (i = k1; i < 0; i++) {
-            imagePixelArray[j++] = ai1[(k >> 17) + (l >> 17) * l1];
-            k += i1;
-            l += j1;
+    private void drawMapSpriteWOShift(
+    		int imagePixels[], int spritePixels[],
+    		int offset, int x, int y, int xStep, int yStep,
+    		int length, int spriteWidth)
+    {
+        for (int i = length; i < 0; i++) {
+        	imagePixels[offset++] = spritePixels[(x >> 17) + (y >> 17) * spriteWidth];
+            x += xStep;
+            y += yStep;
         }
 
     }
 
-    private void method244(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1) {
-        for (int i2 = k1; i2 < 0; i2++) {
-            i = ai1[(k >> 17) + (l >> 17) * l1];
-            if (i != 0)
-                imagePixelArray[j++] = i;
-            else
-                j++;
-            k += i1;
-            l += j1;
+    private void drawMapSpriteWShift(
+    		int imagePixels[], int spritePixels[],
+    		int offset, int x, int y, int xStep, int yStep,
+    		int length, int spriteWidth)
+    {
+    	int pixelVal;
+        for (int i = length; i < 0; i++)
+        {
+            if ((pixelVal = spritePixels[(x >> 17) + (y >> 17) * spriteWidth]) != 0)
+            	imagePixels[offset] = pixelVal;
+            offset++;
+            x += xStep;
+            y += yStep;
         }
 
     }

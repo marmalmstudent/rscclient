@@ -2469,11 +2469,11 @@ public class mudclient extends GameWindowMiddleMan
 		int i2 = anIntArray923[i1];
 		if (l1 == 0) {
 			int j2 = 255 + i2 * 5 * 256;
-			gameGraphics.method212(i + k / 2, j + l / 2, 20 + i2 * 2, j2, 255 - i2 * 5);
+			gameGraphics.drawCircle(i + k / 2, j + l / 2, 20 + i2 * 2, j2, 255 - i2 * 5);
 		}
 		if (l1 == 1) {
 			int k2 = 0xff0000 + i2 * 5 * 256;
-			gameGraphics.method212(i + k / 2, j + l / 2, 10 + i2, k2, 255 - i2 * 5);
+			gameGraphics.drawCircle(i + k / 2, j + l / 2, 10 + i2, k2, 255 - i2 * 5);
 		}
 	}
 
@@ -8267,8 +8267,8 @@ public class mudclient extends GameWindowMiddleMan
 				miniMapX + miniMapWidth, miniMapY + miniMapHeight);
 		int k = 192;
 		int i1 = cameraZRot & 0x3ff;
-		double k1 = ((ourPlayer.currentX - 47.5D) * 3 * k) / 16D;
-		double i3 = ((ourPlayer.currentY - 47.5D) * 3 * k) / 16D;
+		double k1 = ((ourPlayer.currentX - 47.1875) * 3 * k) / 16D;
+		double i3 = ((ourPlayer.currentY - 47.1875) * 3 * k) / 16D;
 		double sin = Trig.sin1024[0x400 - i1 & 0x3ff];
 		double cos = Trig.cos1024[0x400 - i1 & 0x3ff];
 		double tmp = (i3 * sin + k1 * cos) / 8;
@@ -8278,6 +8278,8 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)k1,
 				miniMapY + miniMapHeight / 2 + (int)i3, SPRITE_MEDIA_START - 1,
 				i1 + 256 & 0x3ff, k);
+		gameGraphics.drawCircle(miniMapX + miniMapWidth / 2,
+				miniMapY + miniMapHeight / 2, 20, 0xff00ff, 0xff);
 		for (int i = 0; i < objectCount; i++)
 		{
 			double x = (((objectX[i] + 0.5) - ourPlayer.currentX) * 3 * k) / 16D;
@@ -8286,7 +8288,7 @@ public class mudclient extends GameWindowMiddleMan
 			y = (y * cos - x * sin) / 8;
 			x = tmp;
 			if (!EntityHandler.getObjectDef(objectType[i]).getCommand1().equalsIgnoreCase("WalkTo"))
-				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 						miniMapY + miniMapHeight / 2 - (int)y, 1, 0x00ffff, 0xff);
 		}
 
@@ -8297,7 +8299,7 @@ public class mudclient extends GameWindowMiddleMan
 			tmp = (y * sin + x * cos) / 8;
 			y = (y * cos - x * sin) / 8;
 			x = tmp;
-			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 					miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
 		}
 
@@ -8309,13 +8311,13 @@ public class mudclient extends GameWindowMiddleMan
 			tmp = (y * sin + x * cos) / 8;
 			y = (y * cos - x * sin) / 8;
 			x = tmp;
-			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xffff00, 0xff);
 			if (EntityHandler.getNpcDef(mob.type).attackable)
-				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 						miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
 			else
-				gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x0000ff, 0xff);
 		}
 
@@ -8336,7 +8338,7 @@ public class mudclient extends GameWindowMiddleMan
 				color = 0x00ff00;
 				break;
 			}
-			gameGraphics.method212(miniMapX + miniMapWidth / 2 + (int)x,
+			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 					miniMapY + miniMapHeight / 2 - (int)y, 3, color, 0xff);
 		}
 
