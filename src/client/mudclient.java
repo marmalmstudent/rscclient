@@ -425,9 +425,9 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	final void method45(int i, int j, int k, int l, int i1, int j1, int k1)
+	final void method45(int i, int j, int wSprite, int l, int id, int j1, int xOffs)
 	{
-		Mob mob = npcArray[i1];
+		Mob mob = npcArray[id];
 		int l1 = mob.currentSprite + (cameraZRot + 16) / 32 & 7;
 		boolean flag = false;
 		int i2 = l1;
@@ -447,14 +447,14 @@ public class mudclient extends GameWindowMiddleMan
 			i2 = 5;
 			l1 = 2;
 			flag = false;
-			i -= (EntityHandler.getNpcDef(mob.type).getCombatSprite() * k1) / 100;
+			i -= (EntityHandler.getNpcDef(mob.type).getCombatSprite() * xOffs) / 100;
 			j2 = i2 * 3 + npcCombatModelArray1[(loginTimer
 					/ (EntityHandler.getNpcDef(mob.type).getCombatModel() - 1)) % 8];
 		} else if (mob.currentSprite == 9) {
 			i2 = 5;
 			l1 = 2;
 			flag = true;
-			i += (EntityHandler.getNpcDef(mob.type).getCombatSprite() * k1) / 100;
+			i += (EntityHandler.getNpcDef(mob.type).getCombatSprite() * xOffs) / 100;
 			j2 = i2 * 3 + npcCombatModelArray2[(loginTimer
 					/ EntityHandler.getNpcDef(mob.type).getCombatModel()) % 8];
 		}
@@ -471,10 +471,10 @@ public class mudclient extends GameWindowMiddleMan
 					k4 += 15;
 				if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasAttack()) {
 					int l4 = k4 + EntityHandler.getAnimationDef(k3).getNumber();
-					i4 = (i4 * k) / ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth();
+					i4 = (i4 * wSprite) / ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth();
 					j4 = (j4 * l) / ((GameImage) (gameGraphics)).sprites[l4].getTotalHeight();
-					int i5 = (k * ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(k3).getNumber()].getTotalWidth();
-					i4 -= (i5 - k) / 2;
+					int i5 = (wSprite * ((GameImage) (gameGraphics)).sprites[l4].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(k3).getNumber()].getTotalWidth();
+					i4 -= (i5 - wSprite) / 2;
 					int colour = EntityHandler.getAnimationDef(k3).getCharColour();
 					int skinColour = 0;
 					if (colour == 1) {
@@ -497,30 +497,36 @@ public class mudclient extends GameWindowMiddleMan
 			if (mobMsgWidth[mobMessageCount] > 150)
 				mobMsgWidth[mobMessageCount] = 150;
 			mobMsgHeight[mobMessageCount] = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
-			mobMsgX[mobMessageCount] = i + k / 2;
+			mobMsgX[mobMessageCount] = i + wSprite / 2;
 			mobMsgY[mobMessageCount] = j;
 			mobMsg[mobMessageCount++] = mob.lastMessage;
 		}
-		if (mob.currentSprite == 8 || mob.currentSprite == 9 || mob.combatTimer != 0) {
+		if (mob.currentSprite == 8
+				|| mob.currentSprite == 9
+				|| mob.combatTimer != 0)
+		{
 			if (mob.combatTimer > 0) {
 				int i3 = i;
 				if (mob.currentSprite == 8)
-					i3 -= (20 * k1) / 100;
+					i3 -= (10 * xOffs) / 100;
 				else if (mob.currentSprite == 9)
-					i3 += (20 * k1) / 100;
-				int l3 = (mob.hitPointsCurrent * 30) / mob.hitPointsBase;
-				anIntArray786[anInt718] = i3 + k / 2;
-				anIntArray787[anInt718] = j;
-				anIntArray788[anInt718++] = l3;
+					i3 += (10 * xOffs) / 100;
+				int l3 = (mob.hitPointsCurrent * hpBarWidth) / mob.hitPointsBase;
+				mobHPBar[mobHPBarCount] = mob;
+				mobHPBarX[mobHPBarCount] = i3 + wSprite / 2;
+				mobHPBarY[mobHPBarCount] = j;
+				mobHPBarHealthPercent[mobHPBarCount++] = l3;
 			}
 			if (mob.combatTimer > 150) {
-				int j3 = i;
+				int xSprite = i;
 				if (mob.currentSprite == 8)
-					j3 -= (10 * k1) / 100;
+					xSprite -= (10 * xOffs) / 100;
 				else if (mob.currentSprite == 9)
-					j3 += (10 * k1) / 100;
-				gameGraphics.drawPicture((j3 + k / 2) - 12, (j + l / 2) - 12, SPRITE_MEDIA_START + 12);
-				gameGraphics.drawText(String.valueOf(mob.anInt164), (j3 + k / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
+					xSprite += (10 * xOffs) / 100;
+				gameGraphics.drawPicture(
+						(xSprite + wSprite / 2) - 12, (j + l / 2) - 12,
+						SPRITE_MEDIA_START + 12);
+				gameGraphics.drawText( Integer.toString(mob.dmgRcv), (xSprite + wSprite / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
 			}
 		}
 	}
@@ -749,7 +755,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final void drawLoginScreen()
 	{
 		hasReceivedWelcomeBoxDetails = false;
-		gameGraphics.f1Toggle = false;
+		gameGraphics.lowDef = false;
 		gameGraphics.resetImagePixels(0);
 		drawLoginScreenSprites();
 		if (loginScreenNumber == 0)
@@ -870,7 +876,7 @@ public class mudclient extends GameWindowMiddleMan
 		return super.getGraphics();
 	}
 
-	final void method52(int i, int j, int k, int l, int playerID, int j1, int k1)
+	final void method52(int x, int y, int width, int height, int playerID, int j1, int xOffs)
 	{
 		Mob plr = playerArray[playerID];
 		if (plr.colourBottomType == 255)
@@ -893,13 +899,13 @@ public class mudclient extends GameWindowMiddleMan
 			i2 = 5;
 			l1 = 2;
 			flag = false;
-			i -= (5 * k1) / 100;
+			x -= (5 * xOffs) / 100;
 			j2 = i2 * 3 + npcCombatModelArray1[(loginTimer / 5) % 8];
 		} else if (plr.currentSprite == 9) {
 			i2 = 5;
 			l1 = 2;
 			flag = true;
-			i += (5 * k1) / 100;
+			x += (5 * xOffs) / 100;
 			j2 = i2 * 3 + npcCombatModelArray2[(loginTimer / 6) % 8];
 		}
 		for (int k2 = 0; k2 < 12; k2++)
@@ -907,44 +913,44 @@ public class mudclient extends GameWindowMiddleMan
 			int l2 = npcAnimationArray[l1][k2];
 			int l3 = plr.animationCount[l2] - 1;
 			if (l3 >= 0) {
-				int k4 = 0;
-				int i5 = 0;
+				int w = 0;
+				int h = 0;
 				int animationFrame = j2;
 				if (flag && i2 >= 1 && i2 <= 3)
 					if (EntityHandler.getAnimationDef(l3).hasFlip())
 						animationFrame += 15;
 					else if (l2 == 4 && i2 == 1) {
-						k4 = -22;
-						i5 = -3;
+						w = -22;
+						h = -3;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					} else if (l2 == 4 && i2 == 2) {
-						k4 = 0;
-						i5 = -8;
+						w = 0;
+						h = -8;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					} else if (l2 == 4 && i2 == 3) {
-						k4 = 26;
-						i5 = -5;
+						w = 26;
+						h = -5;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					} else if (l2 == 3 && i2 == 1) {
-						k4 = 22;
-						i5 = 3;
+						w = 22;
+						h = 3;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					} else if (l2 == 3 && i2 == 2) {
-						k4 = 0;
-						i5 = 8;
+						w = 0;
+						h = 8;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					} else if (l2 == 3 && i2 == 3) {
-						k4 = -26;
-						i5 = 5;
+						w = -26;
+						h = 5;
 						animationFrame = i2 * 3 + walkModel[(2 + plr.stepCount / 6) % 4];
 					}
 				if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasAttack())
 				{
 					int k5 = animationFrame + EntityHandler.getAnimationDef(l3).getNumber();
-					k4 = (k4 * k) / ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth();
-					i5 = (i5 * l) / ((GameImage) (gameGraphics)).sprites[k5].getTotalHeight();
-					int l5 = (k * ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getTotalWidth();
-					k4 -= (l5 - k) / 2;
+					w = (w * width) / ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth();
+					h = (h * height) / ((GameImage) (gameGraphics)).sprites[k5].getTotalHeight();
+					int l5 = (width * ((GameImage) (gameGraphics)).sprites[k5].getTotalWidth()) / ((GameImage) (gameGraphics)).sprites[EntityHandler.getAnimationDef(l3).getNumber()].getTotalWidth();
+					w -= (l5 - width) / 2;
 					int colour = EntityHandler.getAnimationDef(l3).getCharColour();
 					int skinColour = chrSkinClrs[plr.colourSkinType];
 					if (colour == 1)
@@ -953,7 +959,7 @@ public class mudclient extends GameWindowMiddleMan
 						colour = chrTopBottomClrs[plr.colourTopType];
 					else if (colour == 3)
 						colour = chrTopBottomClrs[plr.colourBottomType];
-					gameGraphics.spriteClip4(i + k4, j + i5, l5, l, k5,
+					gameGraphics.spriteClip4(x + w, y + h, l5, height, k5,
 							colour, skinColour, j1, flag);
 				}
 			}
@@ -967,14 +973,14 @@ public class mudclient extends GameWindowMiddleMan
 			mobMsgHeight[mobMessageCount] = (
 					(gameGraphics.textWidth(plr.lastMessage, 1) / 300)
 					* gameGraphics.messageFontHeight(1));
-			mobMsgX[mobMessageCount] = i + k / 2;
-			mobMsgY[mobMessageCount] = j;
+			mobMsgX[mobMessageCount] = x + width / 2;
+			mobMsgY[mobMessageCount] = y;
 			mobMsg[mobMessageCount++] = plr.lastMessage;
 		}
-		if (plr.anInt163 > 0) {
-			anIntArray858[anInt699] = i + k / 2;
-			anIntArray859[anInt699] = j;
-			anIntArray705[anInt699] = k1;
+		if (plr.skullTimer > 0) {
+			anIntArray858[anInt699] = x + width / 2;
+			anIntArray859[anInt699] = y;
+			anIntArray705[anInt699] = xOffs;
 			anIntArray706[anInt699++] = plr.anInt162;
 		}
 		if (plr.currentSprite == 8
@@ -983,42 +989,44 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			if (plr.combatTimer > 0)
 			{
-				int i3 = i;
+				int xHP = x;
 				if (plr.currentSprite == 8)
-					i3 -= (20 * k1) / 100;
+					xHP -= (10 * xOffs) / 100;
 				else if (plr.currentSprite == 9)
-					i3 += (20 * k1) / 100;
-				int i4 = (plr.hitPointsCurrent * 30) / plr.hitPointsBase;
-				anIntArray786[anInt718] = i3 + k / 2; //player hitpointsbar x-position
-				anIntArray787[anInt718] = j;
-				anIntArray788[anInt718++] = i4;
+					xHP += (10 * xOffs) / 100;
+				int healthPercent = (plr.hitPointsCurrent * hpBarWidth) / plr.hitPointsBase;
+				mobHPBar[mobHPBarCount] = plr;
+				mobHPBarX[mobHPBarCount] = xHP + width / 2; //player hitpointsbar x-position
+				mobHPBarY[mobHPBarCount] = y;
+				mobHPBarHealthPercent[mobHPBarCount++] = healthPercent;
 			}
 			if (plr.combatTimer > 150)
 			{
-				int j3 = i;
+				int xTxt = x;
 				if (plr.currentSprite == 8)
-					j3 -= (10 * k1) / 100;
+					xTxt -= (10 * xOffs) / 100;
 				else if (plr.currentSprite == 9)
-					j3 += (10 * k1) / 100;
+					xTxt += (10 * xOffs) / 100;
 				// red star, i.e. damage was dealt to player
-				gameGraphics.drawPicture((j3 + k / 2) - 12,
-						(j + l / 2) - 12, SPRITE_MEDIA_START + 11);
-				gameGraphics.drawText(String.valueOf(plr.anInt164),
-						(j3 + k / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
+				gameGraphics.drawPicture((xTxt + width / 2) - 12,
+						(y + height / 2) - 12, SPRITE_MEDIA_START + 11);
+				gameGraphics.drawText(Integer.toString(plr.dmgRcv),
+						(xTxt + width / 2) - 1,
+						y + height / 2 + 5, 3, 0xffffff);
 			}
 		}
-		if (plr.anInt179 == 1 && plr.anInt163 == 0)
+		if (plr.anInt179 == 1 && plr.skullTimer == 0)
 		{
-			int k3 = j1 + i + k / 2;
+			int xSkull = j1 + x + width / 2;
 			if (plr.currentSprite == 8)
-				k3 -= (20 * k1) / 100;
+				xSkull -= (10 * xOffs) / 100;
 			else if (plr.currentSprite == 9)
-				k3 += (20 * k1) / 100;
-			int j4 = (16 * k1) / 100;
-			int l4 = (16 * k1) / 100;
+				xSkull += (10 * xOffs) / 100;
+			int w = (16 * xOffs) / 100;
+			int h = (16 * xOffs) / 100;
 			// wildy skull
-			gameGraphics.spriteClip1(k3 - j4 / 2, j - l4 / 2 - (10 * k1) / 100,
-					j4, l4, SPRITE_MEDIA_START + 13);
+			gameGraphics.spriteClip1(xSkull - w / 2, y - h / 2 - (10 * xOffs) / 100,
+					w, h, SPRITE_MEDIA_START + 13);
 		}
 	}
 
@@ -1591,7 +1599,7 @@ public class mudclient extends GameWindowMiddleMan
 	 */
 	private final void method62()
 	{
-		gameGraphics.f1Toggle = false;
+		gameGraphics.lowDef = false;
 		gameGraphics.resetImagePixels(0);
 		chrDesignMenu.drawMenu(true);
 		int i = windowHalfWidth - 116;
@@ -2696,7 +2704,7 @@ public class mudclient extends GameWindowMiddleMan
 				if (npc != null) {
 					double px = player.currentX;
 					double py = player.currentY;
-					double pz = -engineHandle.getAveragedElevation(px, py) - 110;
+					double pz = -engineHandle.getAveragedElevation(px, py) - 110 * EngineHandle.SCALE_FACTOR;
 					double nx = npc.currentX;
 					double ny = npc.currentY;
 					double nz = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getCamera2() / 2;
@@ -2752,12 +2760,12 @@ public class mudclient extends GameWindowMiddleMan
 			fightCount++;
 		}
 
-		gameGraphics.f1Toggle = false;
+		gameGraphics.lowDef = false;
 		if (sectorHeight == 3)
 			gameGraphics.resetImagePixels(0);
 		else
 			gameGraphics.resetImagePixels(GameImage.BACKGROUND);
-		gameGraphics.f1Toggle = super.keyF1Toggle;
+		gameGraphics.lowDef = super.keyF1Toggle;
 		if (sectorHeight == 3)
 		{ // underground, flickering light
 			int globalLight = 40 + (int) (Math.random() * 3D);
@@ -2766,7 +2774,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		anInt699 = 0;
 		mobMessageCount = 0;
-		anInt718 = 0;
+		mobHPBarCount = 0;
 		if (freeCamera)
 		{
 			handleCharacterControlBinds();
@@ -4932,8 +4940,8 @@ public class mudclient extends GameWindowMiddleMan
 				mob.currentSprite = mob.nextSprite;
 			if (mob.lastMessageTimeout > 0)
 				mob.lastMessageTimeout--;
-			if (mob.anInt163 > 0)
-				mob.anInt163--;
+			if (mob.skullTimer > 0)
+				mob.skullTimer--;
 			if (mob.combatTimer > 0)
 				mob.combatTimer--;
 			if (playerAliveTimeout > 0)
@@ -5031,8 +5039,8 @@ public class mudclient extends GameWindowMiddleMan
 			}
 			if (mob_1.lastMessageTimeout > 0)
 				mob_1.lastMessageTimeout--;
-			if (mob_1.anInt163 > 0)
-				mob_1.anInt163--;
+			if (mob_1.skullTimer > 0)
+				mob_1.skullTimer--;
 			if (mob_1.combatTimer > 0)
 				mob_1.combatTimer--;
 		}
@@ -6282,7 +6290,7 @@ public class mudclient extends GameWindowMiddleMan
 						mobUpdateOffset += 2;
 						if (mob != null)
 						{
-							mob.anInt163 = 150;
+							mob.skullTimer = 150;
 							mob.anInt162 = i30;
 						}
 					}
@@ -6304,7 +6312,7 @@ public class mudclient extends GameWindowMiddleMan
 						int hits = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						int hitsBase = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						if (mob != null) {
-							mob.anInt164 = j30;
+							mob.dmgRcv = j30;
 							mob.hitPointsCurrent = hits;
 							mob.hitPointsBase = hitsBase;
 							mob.combatTimer = 200;
@@ -7040,7 +7048,7 @@ public class mudclient extends GameWindowMiddleMan
 						i10++;
 						if (mob_2 != null)
 						{
-							mob_2.anInt164 = l32;
+							mob_2.dmgRcv = l32;
 							mob_2.hitPointsCurrent = i36;
 							mob_2.hitPointsBase = k38;
 							mob_2.combatTimer = 200;
@@ -8246,12 +8254,20 @@ public class mudclient extends GameWindowMiddleMan
 					EntityHandler.getItemDef(j3).getPictureMask(), 0, 0, false);
 		}
 
-		for (int j1 = 0; j1 < anInt718; j1++) {
-			int i2 = anIntArray786[j1];
-			int l2 = anIntArray787[j1];
-			int k3 = anIntArray788[j1];
-			gameGraphics.drawBoxAlpha(i2 - 15, l2 - 3, k3, 5, 65280, 192);
-			gameGraphics.drawBoxAlpha((i2 - 15) + k3, l2 - 3, 30 - k3, 5, 0xff0000, 192);
+		for (int i = 0; i < mobHPBarCount; i++) {
+			Mob mob = mobHPBar[i];
+			int xHP = mobHPBarX[i];
+			int yHP = mobHPBarY[i];
+			int hpPercent = mobHPBarHealthPercent[i];
+			gameGraphics.drawBoxEdge(xHP - hpBarWidth/2-1, yHP - hpBarHeight/2-1,
+					hpBarWidth+2, hpBarHeight+2, 0x0);
+			gameGraphics.drawBoxAlpha(xHP - hpBarWidth/2, yHP - hpBarHeight/2,
+					hpPercent, hpBarHeight, 0xff00, 0xff);
+			gameGraphics.drawBoxAlpha(xHP - hpBarWidth/2 + hpPercent, yHP - hpBarHeight/2,
+					hpBarWidth - hpPercent, hpBarHeight, 0xff0000, 0xff);
+			gameGraphics.drawText(
+					Integer.toString(mob.hitPointsCurrent)+"/"+Integer.toString(mob.hitPointsBase),
+					xHP, yHP-3, 1, 0xffff00);
 		}
 
 	}
@@ -8267,8 +8283,8 @@ public class mudclient extends GameWindowMiddleMan
 		double scaleFactor = EngineHandle.SCALE_FACTOR;
 		double k1 = ((ourPlayer.currentX - 6040.0*scaleFactor) * 3 * k) / (2048.0 * scaleFactor);
 		double i3 = ((ourPlayer.currentY - 6040.0*scaleFactor) * 3 * k) / (2048.0 * scaleFactor);
-		double sin = Camera.sin1024[0x400 - i1 * 4 & 0x3ff];
-		double cos = Camera.cos1024[0x400 - i1 * 4 & 0x3ff];
+		double sin = Trig.sin1024[0x400 - i1 * 4 & 0x3ff];
+		double cos = Trig.cos1024[0x400 - i1 * 4 & 0x3ff];
 		double tmp = (i3 * sin + k1 * cos) / 8;
 		i3 = (i3 * cos - k1 * sin) / 8;
 		k1 = tmp;
@@ -8389,8 +8405,8 @@ public class mudclient extends GameWindowMiddleMan
 			int j1 = cameraZRot + anInt985 & 0xff;
 			double xCoord = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 0x4000*scaleFactor) / (3 * l);
 			double yCoord = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 0x4000*scaleFactor) / (3 * l);
-			double sin1 = Camera.sin1024[0x400 - j1 * 4 & 0x3ff];
-			double cos1 = Camera.cos1024[0x400 - j1 * 4 & 0x3ff];
+			double sin1 = Trig.sin1024[0x400 - j1 * 4 & 0x3ff];
+			double cos1 = Trig.cos1024[0x400 - j1 * 4 & 0x3ff];
 			tmp = yCoord * sin1 + xCoord * cos1;
 			yCoord = yCoord * cos1 - xCoord * sin1;
 			xCoord = tmp;
@@ -8523,9 +8539,12 @@ public class mudclient extends GameWindowMiddleMan
 		duelNoWeapons = false;
 		anIntArray782 = new int[50];
 		duelConfirmOpponentItemsI = new Item[8];
-		anIntArray786 = new int[50];
-		anIntArray787 = new int[50];
-		anIntArray788 = new int[50];
+		mobHPBar = new Mob[50];
+		mobHPBarX = new int[50];
+		mobHPBarY = new int[50];
+		mobHPBarHealthPercent = new int[50];
+		hpBarWidth = 50;
+		hpBarHeight = 7;
 		objectModelArray = new Model[1500];
 		cameraZRot = 128;
 		cameraXRot = 912;
@@ -8712,7 +8731,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int mouseOverMenu;
 	private int walkModel[] = {0, 1, 2, 1};
 	private boolean showQuestionMenu;
-	private int anInt718;
+	private int mobHPBarCount;
 	private double viewDistance;
 	private double cameraZoom;
 	public boolean loggedIn;
@@ -8760,9 +8779,12 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean duelNoPrayer;
 	private boolean duelNoWeapons;
 	private int anIntArray782[];
-	private int anIntArray786[];
-	private int anIntArray787[];
-	private int anIntArray788[];
+	private Mob mobHPBar[];
+	private int mobHPBarX[];
+	private int mobHPBarY[];
+	private int hpBarWidth;
+	private int hpBarHeight;
+	private int mobHPBarHealthPercent[];
 	private int xMinReloadNextSect;
 	private int yMinReloadNextSect;
 	private int xMaxReloadNextSect;

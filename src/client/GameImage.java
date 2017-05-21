@@ -25,7 +25,7 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     public GameImage(int width, int height, int k, Component component)
     {
-        f1Toggle = false;
+        lowDef = false;
         drawStringShadows = false;
         imageHeight = height;
         imageWidth = width;
@@ -164,7 +164,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     public void resetImagePixels(int color)
     {
         int size = gameWindowWidth * gameWindowHeight;
-        if (!f1Toggle) {
+        if (!lowDef) {
             for (int j = 0; j < size; ++j)
                 imagePixelArray[j] = color;
             return;
@@ -191,7 +191,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (yMax >= gameWindowHeight)
             yMax = gameWindowHeight - 1;
         byte yStep = 1;
-        if (f1Toggle)
+        if (lowDef)
         {
             yStep = 2;
             if ((i3 & 1) != 0)
@@ -239,7 +239,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         int blue_a_mult = (colour & 0xff) * alpha;
         int skip = gameWindowWidth - width;
         byte yStep = 1;
-        if (f1Toggle) {
+        if (lowDef) {
             yStep = 2;
             skip += gameWindowWidth;
             if ((y & 1) != 0) {
@@ -279,7 +279,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         int clrTopBlu = colorTop & 0xff;
         int skipNLastPixels = gameWindowWidth - width;
         byte yStep = 1;
-        if (f1Toggle)
+        if (lowDef)
         {
             yStep = 2;
             skipNLastPixels += gameWindowWidth;
@@ -319,7 +319,7 @@ public class GameImage implements ImageProducer, ImageObserver {
 
         int skip = gameWindowWidth - width;
         byte yStep = 1;
-        if (f1Toggle) {
+        if (lowDef) {
             yStep = 2;
             skip += gameWindowWidth;
             if ((y & 1) != 0) {
@@ -502,7 +502,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             if (k1 <= 0 || j1 <= 0)
                 return;
             byte byte0 = 1;
-            if (f1Toggle) {
+            if (lowDef) {
                 byte0 = 2;
                 l1 += gameWindowWidth;
                 i2 += sprites[picture].getWidth();
@@ -568,7 +568,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 k3 += j4;
             }
             byte byte0 = 1;
-            if (f1Toggle) {
+            if (lowDef) {
                 byte0 = 2;
                 k3 += gameWindowWidth;
                 k2 += k2;
@@ -623,7 +623,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         if (spriteWidth <= 0 || spriteHeight <= 0)
             return;
         byte byte0 = 1;
-        if (f1Toggle) {
+        if (lowDef) {
             byte0 = 2;
             i2 += gameWindowWidth;
             j2 += sprites[spriteId].getWidth();
@@ -693,7 +693,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 l3 += k4;
             }
             byte byte0 = 1;
-            if (f1Toggle) {
+            if (lowDef) {
                 byte0 = 2;
                 l3 += gameWindowWidth;
                 l2 += l2;
@@ -767,7 +767,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 l3 += k4;
             }
             byte byte0 = 1;
-            if (f1Toggle) {
+            if (lowDef) {
                 byte0 = 2;
                 l3 += gameWindowWidth;
                 l2 += l2;
@@ -1280,7 +1280,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                 }
                 if (xEnd > imageWidth)
                     xEnd = imageWidth;
-                if (!f1Toggle || (y & 1) == 0)
+                if (!lowDef || (y & 1) == 0)
                     if (!sprites[sprite].requiresShift())
                         method243(imagePixelArray, mapPixels, 0, offset + xStart, l11, j12, i12, k12, xStart - xEnd, spriteWidth);
                     else
@@ -1383,7 +1383,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             if (startY + newHeight >= imageHeight)
                 newHeight -= ((startY + newHeight) - imageHeight) + 1;
             int i5 = windowYIdx / gameWindowWidth & 1;
-            if (!f1Toggle)
+            if (!lowDef)
                 i5 = 2;
             if (skinColor == 0xffffff)
             {
@@ -1803,8 +1803,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         drawString(s, i - textWidth(s, k), j, k, l);
     }
 
-    public void drawText(String s, int i, int j, int k, int l) {
-        drawString(s, i - textWidth(s, k) / 2, j, k, l);
+    public void drawText(String str, int xCenter, int y, int txtType, int color) {
+        drawString(str, xCenter - textWidth(str, txtType) / 2, y, txtType, color);
     }
 
     public void drawBoxTextColour(String s, int i, int j, int k, int l, int i1) {
@@ -2096,7 +2096,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     private int imageHeight;
     private int imageX;
     private int imageWidth;
-    public boolean f1Toggle;
+    public boolean lowDef;
     static byte aByteArrayArray336[][] = new byte[50][];
     static int charIndexes[];
     public boolean drawStringShadows;

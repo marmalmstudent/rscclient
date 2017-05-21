@@ -31,8 +31,8 @@ final class Mob {
 	public String lastMessage;
 	public int lastMessageTimeout;
 	public int anInt162;
-	public int anInt163;
-	public int anInt164;
+	public int skullTimer;
+	public int dmgRcv;
 	public int hitPointsCurrent;
 	public int hitPointsBase;
 	public int combatTimer;

@@ -669,24 +669,24 @@ public class Model
         {
             if (y != 0)
             {
-                double sin = sin256[y];
-                double cos = cos256[y];
+                double sin = Trig.sin256[y];
+                double cos = Trig.cos256[y];
                 double tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
                 zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
                 xCoordsDraw[i] = tmp;
             }
             if (x != 0)
             {
-            	double sin = sin256[x];
-            	double cos = cos256[x];
+            	double sin = Trig.sin256[x];
+            	double cos = Trig.cos256[x];
                 double tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin;
                 yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos;
                 zCoordsDraw[i] = tmp;
             }
             if (z != 0)
             {
-            	double sin = sin256[z];
-            	double cos = cos256[z];
+            	double sin = Trig.sin256[z];
+            	double cos = Trig.cos256[z];
                 double tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
                 yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
                 xCoordsDraw[i] = tmp;
@@ -905,14 +905,14 @@ public class Model
             return;
         }
         visible = true;
-        double ySin = cameraYRot != 0 ? sin1024[cameraYRot] : 0;
-        double yCos = cameraYRot != 0 ? cos1024[cameraYRot] : 0;
+        double ySin = cameraYRot != 0 ? Trig.sin1024[cameraYRot] : 0;
+        double yCos = cameraYRot != 0 ? Trig.cos1024[cameraYRot] : 0;
 
-        double zSin = cameraZRot != 0 ? sin1024[cameraZRot] : 0;
-        double zCos = cameraZRot != 0 ? cos1024[cameraZRot] : 0;
+        double zSin = cameraZRot != 0 ? Trig.sin1024[cameraZRot] : 0;
+        double zCos = cameraZRot != 0 ? Trig.cos1024[cameraZRot] : 0;
 
-        double xSin = cameraXRot != 0 ? sin1024[cameraXRot] : 0;
-        double xCos = cameraXRot != 0 ? cos1024[cameraXRot] : 0;
+        double xSin = cameraXRot != 0 ? Trig.sin1024[cameraXRot] : 0;
+        double xCos = cameraXRot != 0 ? Trig.cos1024[cameraXRot] : 0;
 
         for (int i = 0; i < nbrCoordPoints; i++)
         {
@@ -1057,10 +1057,6 @@ public class Model
     public boolean aBoolean262;
     public boolean aBoolean263;
     public boolean aBoolean264;
-    private static double sin256[];
-    private static double cos256[];
-    private static double sin1024[];
-    private static double cos1024[];
     private static byte aByteArray267[];
     private static int anIntArray268[];
     private int invisible;
@@ -1106,21 +1102,8 @@ public class Model
     private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
     static {
-        sin256 = new double[0x100];
-        cos256 = new double[0x100];
-        sin1024 = new double[0x400];
-        cos1024 = new double[0x400];
         aByteArray267 = new byte[64];
         anIntArray268 = new int[256];
-        for (int i = 0; i < 0x100;
-        		sin256[i++] = Math.sin((double) i * 0.02454369D));
-        for (int i = 0; i < 0x100;
-        		cos256[i++] = Math.cos((double) i * 0.02454369D));
-
-        for (int i = 0; i < 0x400;
-        		sin1024[i++] = Math.sin((double) i * 0.00613592315D));
-        for (int i = 0; i < 0x400;
-        		cos1024[i++] = Math.cos((double) i * 0.00613592315D));
 
         for (int k = 0; k < 10; k++)
             aByteArray267[k] = (byte) (48 + k);

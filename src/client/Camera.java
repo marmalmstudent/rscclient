@@ -13,18 +13,18 @@ public class Camera {
 		gradient2Step = false;
 		aDouble387 = 1.1D;
 		anInt388 = 1;
-		aBoolean389 = false;
+		aBoolean = false;
 		maxVisibleModelCount = 100;
 		visibleModelsArray = new Model[maxVisibleModelCount];
 		visibleModelIntArray = new int[maxVisibleModelCount];
 		anInt402 = 4;
-		xScreen = new double[40];
-		yScreen = new double[40];
+		xScreen = new int[40];
+		yScreen = new int[40];
 		pointBrightness = new int[40];
-		xDistToPointFromCamera = new double[40];
-		zDistToPointFromCamera = new double[40];
-		yDistToPointFromCamera = new double[40];
-		f1Toggle = false;
+		xCoordCamDist = new double[40];
+		yCoordCamDist = new double[40];
+		zCoordCamDist = new double[40];
+		lowDef = false;
 		this.gameImage = gameImage;
 		halfWidth = gameImage.gameWindowWidth / 2;
 		halfHeight = gameImage.gameWindowHeight / 2;
@@ -46,7 +46,7 @@ public class Camera {
 		mobX = new double[nSurfaces];
 		mobZ = new double[nSurfaces];
 		mobY = new double[nSurfaces];
-		anIntArray422 = new int[nSurfaces];
+		attackAnimXOffset = new double[nSurfaces];
 		if (aByteArray434 == null)
 			aByteArray434 = new byte[17691];
 		cameraXPos = 0;
@@ -55,16 +55,6 @@ public class Camera {
 		cameraXRot = 0;
 		cameraZRot = 0;
 		cameraYRot = 0;
-		for (int i1 = 0; i1 < 256; i1++)
-				sin256[i1] = (int) (Math.sin((double) i1 * 0.02454369D) * 32768D);
-		for (int i1 = 0; i1 < 256; i1++)
-				cos256[i1] = (int) (Math.cos((double) i1 * 0.02454369D) * 32768D);
-
-		for (int j1 = 0; j1 < 1024; j1++)
-				sin1024[j1] = Math.sin((double) j1 * 0.00613592315D);
-		for (int j1 = 0; j1 < 1024; j1++)
-				cos1024[j1] = Math.cos((double) j1 * 0.00613592315D);
-
 	}
 
 	public void addModel(Model model) {
@@ -121,7 +111,7 @@ public class Camera {
 		mobY[mobIndex] = y;
 		mobWidth[mobIndex] = width;
 		mobHeight[mobIndex] = height;
-		anIntArray422[mobIndex] = 0;
+		attackAnimXOffset[mobIndex] = 0;
 		int p0 = spriteModels.addCoordPoint(x, z, y);
 		int p1 = spriteModels.addCoordPoint(x, z - height, y);
 		int surface[] = {
@@ -137,15 +127,15 @@ public class Camera {
 		spriteModels.aByteArray259[i] = 1;
 	}
 
-	public void setCombat(int i, int j) {
-		anIntArray422[i] = j;
+	public void setCombat(int id, double xOffs) {
+		attackAnimXOffset[id] = xOffs;
 	}
 
 	public void updateMouseCoords(int x, int y) {
 		mouseX = x - halfWidth2;
 		mouseY = y;
 		currentVisibleModelCount = 0;
-		aBoolean389 = true;
+		aBoolean = true;
 	}
 
 	public int method272() {
@@ -295,22 +285,22 @@ public class Camera {
 		int zRot = -cameraZRot + 1024 & 0x3ff;
 		int yRot = -cameraYRot + 1024 & 0x3ff;
 		if (yRot != 0) {
-			double sin = sin1024[yRot];
-			double cos = cos1024[yRot];
+			double sin = Trig.sin1024[yRot];
+			double cos = Trig.cos1024[yRot];
 			double tmp = y * sin + x * cos;
 				y = y * cos - x * sin;
 				x = tmp;
 		}
 		if (xRot != 0) {
-			double sin = sin1024[xRot];
-			double cos = cos1024[xRot];
+			double sin = Trig.sin1024[xRot];
+			double cos = Trig.cos1024[xRot];
 			double tmp = y * cos - dist * sin;
 			dist = y * sin + dist * cos;
 			y = tmp;
 		}
 		if (zRot != 0) {
-			double sin = sin1024[zRot];
-			double cos = cos1024[zRot];
+			double sin = Trig.sin1024[zRot];
+			double cos = Trig.cos1024[zRot];
 			double tmp = dist * sin + x * cos;
 			dist = dist * cos - x * sin;
 			x = tmp;
@@ -330,7 +320,7 @@ public class Camera {
 	}
 
 	public void finishCamera() {
-		f1Toggle = gameImage.f1Toggle;
+		lowDef = gameImage.lowDef;
 		int fctr = 1 << cameraSizeInt;
 		double xBounds = halfWidth * drawModelMaxDist / fctr;
 		double yBounds = halfHeight * drawModelMaxDist / fctr;
@@ -366,7 +356,7 @@ public class Camera {
 				cameraZRot, cameraYRot, cameraSizeInt, viewPlaneDist);
 		cameraModelCount = 0;
 		for (int i = 0; i < modelCount; i++)
-		{
+		{ /* Calculate draw order for 3D model surfaces */
 			Model model = modelArray[i];
 			if (model.visible)
 			{
@@ -437,13 +427,12 @@ public class Camera {
 						}
 					}
 				}
-
 			}
 		}
 
 		Model model_1 = spriteModels;
 		if (model_1.visible)
-		{
+		{ /* Calculate draw order for 2D model surfaces */
 			for (int k = 0; k < model_1.nbrSurfaces; k++)
 			{
 				int surface[] = model_1.surfaces[k];
@@ -470,20 +459,20 @@ public class Camera {
 					}
 				}
 			}
-
 		}
+
 		if (cameraModelCount == 0)
 			return;
 		lastCameraModelCount = cameraModelCount;
 		sortModelsByDistToCam(cameraModels, 0, cameraModelCount - 1);
-		method277(100, cameraModels, cameraModelCount);
-		for (int i4 = 0; i4 < cameraModelCount; i4++)
+		method277(100, cameraModels, cameraModelCount); // not sure what this does
+		for (int i = 0; i < cameraModelCount; i++)
 		{
-			CameraModel cm = cameraModels[i4];
+			CameraModel cm = cameraModels[i];
 			Model model = cm.model;
 			int l = cm.surface;
 			if (model == spriteModels)
-			{
+			{ // 2D models
 				int surface[] = model.surfaces[l];
 				int p0 = surface[0];
 				double x = model.xProjected[p0];
@@ -497,12 +486,13 @@ public class Camera {
 				double j11 = length_x10 * length_y01 / modelHeight;
 				double modelX = x - modelWidth / 2;
 				double modelY = (halfHeight2 + y) - modelHeight;
+				
 				gameImage.doSpriteClip1((int)modelX + halfWidth2, (int)modelY,
 						(int)modelWidth, (int)modelHeight, anIntArray416[l],
-						(int)j11, (int) ((256 << cameraSizeInt) / modelDist));
-				if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount)
+						(int)j11, (int) ((512 * EngineHandle.SCALE_FACTOR * fctr) / modelDist));
+				if (aBoolean && currentVisibleModelCount < maxVisibleModelCount)
 				{
-					modelX += (anIntArray422[l] << cameraSizeInt) / modelDist;
+					modelX += (attackAnimXOffset[l] * fctr) / modelDist;
 					if (mouseY >= modelY && mouseY <= modelY + modelHeight
 							&& mouseX >= modelX && mouseX <= modelX + modelWidth
 							&& !model.aBoolean263 && model.aByteArray259[l] == 0)
@@ -514,7 +504,7 @@ public class Camera {
 				}
 			}
 			else
-			{
+			{ // 3D model
 				int pointsInSurfac = 0;
 				int brightness = 0;
 				int ptsPerCell = model.pointsPerCell[l];
@@ -524,95 +514,94 @@ public class Camera {
 						brightness = (int) (model.globalLight - model.lightSourceProjectToSurfNormal[l]);
 					else
 						brightness = (int) (model.globalLight + model.lightSourceProjectToSurfNormal[l]);
-				for (int i = 0; i < ptsPerCell; i++)
+				for (int j = 0; j < ptsPerCell; j++)
 				{
-					int dataPoint = surfaces[i];
-					xDistToPointFromCamera[i] = model.xCoordCamDist[dataPoint];
-					zDistToPointFromCamera[i] = model.yCoordCamDist[dataPoint];
-					yDistToPointFromCamera[i] = (int)model.zCoordCamDist[dataPoint];
+					int pt = surfaces[j];
+					xCoordCamDist[j] = model.xCoordCamDist[pt];
+					yCoordCamDist[j] = model.yCoordCamDist[pt];
+					zCoordCamDist[j] = model.zCoordCamDist[pt];
 					if (model.lightSourceProjectToSurfNormal[l] == Model.INVISIBLE)
 						if (cm.normalDirectionToCamera < 0)
-							brightness = (int) (model.globalLight - model.pointBrightness[dataPoint]);
+							brightness = (int) (model.globalLight - model.pointBrightness[pt]);
 						else
-							brightness = (int) (model.globalLight + model.pointBrightness[dataPoint]);
-					if (model.zCoordCamDist[dataPoint] >= viewPlaneDist)
+							brightness = (int) (model.globalLight + model.pointBrightness[pt]);
+					if (model.zCoordCamDist[pt] >= viewPlaneDist)
 					{
-						xScreen[pointsInSurfac] = model.xProjected[dataPoint];
-						yScreen[pointsInSurfac] = model.yProjected[dataPoint];
+						xScreen[pointsInSurfac] = (int) model.xProjected[pt];
+						yScreen[pointsInSurfac] = (int) model.yProjected[pt];
 						pointBrightness[pointsInSurfac] = brightness;
 						/* should chage this to allow for other
 						 * background colors than black */
-						double dstnc = model.getDistanceTo(dataPoint);
+						double dstnc = model.getDistanceTo(pt);
 						if (dstnc > fadeDist)
 							pointBrightness[pointsInSurfac] += (dstnc - fadeDist) / fadeFactor;
 						pointsInSurfac++;
 					}
 					else
 					{
-						int k9;
-						if (i == 0)
-							k9 = surfaces[ptsPerCell - 1];
+						int pt_other;
+						if (j == 0)
+							pt_other = surfaces[ptsPerCell - 1];
 						else
-							k9 = surfaces[i - 1];
-						if (model.zCoordCamDist[k9] >= viewPlaneDist)
+							pt_other = surfaces[j - 1];
+						if (model.zCoordCamDist[pt_other] >= viewPlaneDist)
 						{
-							double k7 = model.zCoordCamDist[dataPoint] - model.zCoordCamDist[k9];
-							double i5 = model.xCoordCamDist[dataPoint] - ((model.xCoordCamDist[dataPoint] - model.xCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - viewPlaneDist)) / k7;
-							double j6 = model.yCoordCamDist[dataPoint] - ((model.yCoordCamDist[dataPoint] - model.yCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - viewPlaneDist)) / k7;
-							int factr = 1 << cameraSizeInt;
-							xScreen[pointsInSurfac] = i5 * factr / viewPlaneDist;
-							yScreen[pointsInSurfac] = j6 * factr / viewPlaneDist;
+							double z = model.zCoordCamDist[pt] - model.zCoordCamDist[pt_other];
+							double x = model.xCoordCamDist[pt] - ((model.xCoordCamDist[pt] - model.xCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
+							double y = model.yCoordCamDist[pt] - ((model.yCoordCamDist[pt] - model.yCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
+							xScreen[pointsInSurfac] = (int) (x * fctr / viewPlaneDist);
+							yScreen[pointsInSurfac] = (int) (y * fctr / viewPlaneDist);
 							pointBrightness[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
-						if (i == ptsPerCell - 1)
-							k9 = surfaces[0];
+						if (j == ptsPerCell - 1)
+							pt_other = surfaces[0];
 						else
-							k9 = surfaces[i + 1];
-						if (model.zCoordCamDist[k9] >= viewPlaneDist) {
-							double l7 = model.zCoordCamDist[dataPoint] - model.zCoordCamDist[k9];
-							double j5 = model.xCoordCamDist[dataPoint] - ((model.xCoordCamDist[dataPoint] - model.xCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - viewPlaneDist)) / l7;
-							double k6 = model.yCoordCamDist[dataPoint] - ((model.yCoordCamDist[dataPoint] - model.yCoordCamDist[k9]) * (model.zCoordCamDist[dataPoint] - viewPlaneDist)) / l7;
-							int factr = 1 << cameraSizeInt;
-							xScreen[pointsInSurfac] = j5 * factr / viewPlaneDist;
-							yScreen[pointsInSurfac] = k6 * factr / viewPlaneDist;
+							pt_other = surfaces[j + 1];
+						if (model.zCoordCamDist[pt_other] >= viewPlaneDist)
+						{
+							double z = model.zCoordCamDist[pt] - model.zCoordCamDist[pt_other];
+							double x = model.xCoordCamDist[pt] - ((model.xCoordCamDist[pt] - model.xCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
+							double y = model.yCoordCamDist[pt] - ((model.yCoordCamDist[pt] - model.yCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
+							xScreen[pointsInSurfac] = (int) (x * fctr / viewPlaneDist);
+							yScreen[pointsInSurfac] = (int) (y * fctr / viewPlaneDist);
 							pointBrightness[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
 					}
 				}
 
-				for (int i12 = 0; i12 < ptsPerCell; i12++)
+				for (int j = 0; j < ptsPerCell; j++)
 				{
-					if (pointBrightness[i12] < 0)
-						pointBrightness[i12] = 0;
-					else if (pointBrightness[i12] > 255)
-						pointBrightness[i12] = 255;
+					if (pointBrightness[j] < 0)
+						pointBrightness[j] = 0;
+					else if (pointBrightness[j] > 255)
+						pointBrightness[j] = 255;
 				}
 
 				if (pointsInSurfac == 0)
 					continue;
 				makeTriangle(0, 0, 0, pointsInSurfac, xScreen, yScreen, pointBrightness, model, l);
 				if (modelYMax > modelYMin)
-					applyColor(0, ptsPerCell, xDistToPointFromCamera, zDistToPointFromCamera,
-							yDistToPointFromCamera, cm.color, model);
+					applyColor(0, ptsPerCell, xCoordCamDist, yCoordCamDist,
+							zCoordCamDist, cm.color, model);
 			}
 		}
 
-		aBoolean389 = false;
+		aBoolean = false;
 	}
 
 	private void makeTriangle(int xMin, int xMax, int xMinBright, int pointsInSurface,
-			double triangleX[], double triangleY[], int brightness[],
+			int triangleX[], int triangleY[], int brightness[],
 			Model model, int j1)
 	{
 		int i, j;
 		int[] p_y = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_y[i] = (int)triangleY[i] + halfHeight2;
+			p_y[i] = triangleY[i] + halfHeight2;
 		int[] p_x = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_x[i] = (int)triangleX[i];
+			p_x[i] = triangleX[i];
 		int[] p_b = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
 			p_b[i] = brightness[i];
@@ -699,7 +688,7 @@ public class Camera {
 		if (modelYMin < halfHeight2 - halfHeight)
 			modelYMin = halfHeight2 - halfHeight;
 
-		if (aBoolean389 && currentVisibleModelCount < maxVisibleModelCount
+		if (aBoolean && currentVisibleModelCount < maxVisibleModelCount
 				&& mouseY >= modelYMin && mouseY < modelYMax)
 		{
 			CameraVariables cameraVariables_1 = cameraVariables[mouseY];
@@ -728,16 +717,9 @@ public class Camera {
 				color = 0;
 			setTexturePixels(color);
 			--k;
-			double vecScale = 1/EngineHandle.SCALE_FACTOR;
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
-			for (int i = 0; i < p_x.length; ++i)
-				p_x[i] *= vecScale;
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
-			for (int i = 0; i < p_z.length; ++i)
-				p_z[i] *= vecScale;
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
-			for (int i = 0; i < p_y.length; ++i)
-				p_y[i] *= vecScale;
 			double factr1 = 1 << 5 + textureSize[color];
 			double factr2 = 1 << (5 - cameraSizeInt) + 4 + textureSize[color];
 			double factr3 = 1 << (5 - cameraSizeInt) + textureSize[color];
@@ -766,7 +748,7 @@ public class Camera {
 			nk_y += nk_z * i16;
 			n1_y += n1_z * i16;
 			n_y += n_z * i16;
-			if (f1Toggle)
+			if (lowDef)
 			{
 				if ((modelYMin & 1) == 1)
 				{
@@ -857,7 +839,7 @@ public class Camera {
 		int imgPixSkip = width;
 		int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
 		byte yStep = 1;
-		if (f1Toggle)
+		if (lowDef)
 		{
 			if ((modelYMin & 1) == 1)
 			{
@@ -1062,16 +1044,16 @@ public class Camera {
 		
 		if (xRot != 0)
 		{
-			double sin = sin1024[xRot];
-			double cos = cos1024[xRot];
+			double sin = Trig.sin1024[xRot];
+			double cos = Trig.cos1024[xRot];
 			double tmp = cameraZOffset * cos - cameraYOffset * sin;
 			cameraYOffset = cameraYOffset * cos + cameraZOffset * sin;
 			cameraZOffset = tmp;
 		}
 		if (zRot != 0)
 		{
-			double sin = sin1024[zRot];
-			double cos = cos1024[zRot];
+			double sin = Trig.sin1024[zRot];
+			double cos = Trig.cos1024[zRot];
 			double camXOffsTmp = cameraYOffset * sin + cameraXOffset * cos;
 			cameraYOffset = cameraYOffset * cos - cameraXOffset * sin;
 			cameraXOffset = camXOffsTmp;
@@ -1079,8 +1061,8 @@ public class Camera {
 		
 		if (yRot != 0)
 		{
-			double sin = sin1024[yRot];
-			double cos = cos1024[yRot];
+			double sin = Trig.sin1024[yRot];
+			double cos = Trig.cos1024[yRot];
 			double tmp = cameraZOffset * sin + cameraXOffset * cos;
 			cameraZOffset = cameraZOffset * cos - cameraXOffset * sin;
 			cameraXOffset = tmp;
@@ -2122,13 +2104,13 @@ public class Camera {
 		double dy = 0;
 		if ((keyMask & 4) == 4)
 		{ // key up (move forward)
-			dx = -Math.sin(theta);
-			dy = Math.cos(theta);
+			dx = -Trig.sin1024[cameraZRot];
+			dy = Trig.cos1024[cameraZRot];
 		}
 		else if ((keyMask & 8) == 8)
 		{  // key down (move backward)
-			dx = Math.sin(theta);
-			dy = -Math.cos(theta);
+			dx = Trig.sin1024[cameraZRot];
+			dy = -Trig.cos1024[cameraZRot];
 		}
 		double xMove = factor*dx;
 		double yMove = factor*dy;
@@ -2177,14 +2159,10 @@ public class Camera {
 	public double drawSpriteMaxDist;
 	public double fadeFactor;
 	public double fadeDist;
-	public static double sin1024[] = new double[0x400];
-	public static double cos1024[] = new double[0x400];
-	private static int sin256[] = new int[0x100];
-	private static int cos256[] = new int[0x100];
 	public boolean gradient2Step;
 	public double aDouble387;
 	public int anInt388;
-	private boolean aBoolean389;
+	private boolean aBoolean;
 	private int mouseX;
 	private int mouseY;
 	private int currentVisibleModelCount;
@@ -2217,7 +2195,7 @@ public class Camera {
 	private double mobY[];
 	private double mobWidth[];
 	private double mobHeight[];
-	private int anIntArray422[];
+	private double attackAnimXOffset[];
 	public Model spriteModels;
 	int nbrTextures;
 	byte colorIndexArray[][];
@@ -2231,13 +2209,13 @@ public class Camera {
 	CameraVariables cameraVariables[];
 	int modelYMin;
 	int modelYMax;
-	double xScreen[];
-	double yScreen[];
+	int xScreen[];
+	int yScreen[];
 	int pointBrightness[];
-	double xDistToPointFromCamera[];
-	double zDistToPointFromCamera[];
-	double yDistToPointFromCamera[];
-	boolean f1Toggle;
+	double xCoordCamDist[];
+	double yCoordCamDist[];
+	double zCoordCamDist[];
+	boolean lowDef;
 	static double xMinHide;
 	static double xMaxHide;
 	static double yMinHide;
@@ -2247,4 +2225,43 @@ public class Camera {
 	int anInt454;
 	int anInt455;
 
+	private class CameraVariables
+	{
+		public CameraVariables()
+		{
+		}
+
+		int leftX;
+		int rightX;
+		int leftXBright;
+		int rightXBright;
+	}
+	
+	private class CameraModel
+	{
+
+	    public CameraModel()
+	    {
+	        aBoolean367 = false;
+	        anInt369 = -1;
+	    }
+
+	    protected double xMin;
+	    protected double yMin;
+	    protected double xMax;
+	    protected double yMax;
+	    protected double zMin;
+	    protected double zMax;
+	    protected Model model;
+	    protected int surface;
+	    protected double drawOrderVal;
+	    protected double xNormal;
+	    protected double zNormal;
+	    protected double yNormal;
+	    protected double normalDirectionToCamera;
+	    protected int color;
+	    protected boolean aBoolean367;
+	    protected int anInt368;
+	    protected int anInt369;
+	}
 }

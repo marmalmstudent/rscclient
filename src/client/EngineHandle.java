@@ -1459,7 +1459,7 @@ public class EngineHandle
     public int[] selectedX;
     public int[] selectedY;
     public int[][] walkableValue;
-    public static final double GAME_SIZE = 2;
+    public static final double GAME_SIZE = 8;
     public static final double SCALE_FACTOR = GAME_SIZE/128;
     public static final double ROOF_LIM = 0x13880;
     public static final int WALKABLE_0 = 0x1;
