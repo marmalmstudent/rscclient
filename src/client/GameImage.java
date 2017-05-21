@@ -1086,98 +1086,28 @@ public class GameImage implements ImageProducer, ImageObserver {
         p_y[1] = spriteHeight - 1;
         p_y[2] = spriteHeight - 1;
         p_y[3] = 0;
-        
+
+        double min_y_rot;
+        double max_y_rot;
+        double x_bnd_img;
+        double y_bnd_sprite;
+        double x_bnd_sprite;
+
         if (Math.abs(p_y_rot[1] - p_y_rot[0]) > 0.25)
         {
             slope_1 = (p_x_rot[1] - p_x_rot[0]) / (p_y_rot[1] - p_y_rot[0]);
             slope_2 = (p_y[1] - p_y[0]) / (p_y_rot[1]- p_y_rot[0]);
         }
-        double min_y_rot;
-        double max_y_rot;
-        double x_bnd_img;
-        double y_bnd_sprite;
-        if (p_y_rot[0] > p_y_rot[1]) {
-            x_bnd_img = p_x_rot[1];
-            y_bnd_sprite = p_y[1];
-            min_y_rot = p_y_rot[1];
-            max_y_rot = p_y_rot[0];
-        } else {
+        if (p_y_rot[1] > p_y_rot[0]) {
             x_bnd_img = p_x_rot[0];
             y_bnd_sprite = p_y[0];
             min_y_rot = p_y_rot[0];
             max_y_rot = p_y_rot[1];
-        }
-        if (min_y_rot < 0) {
-            x_bnd_img -= slope_1 * min_y_rot;
-            y_bnd_sprite -= slope_2 * min_y_rot;
-            min_y_rot = 0;
-        }
-        if (max_y_rot > windowHeight - 1)
-            max_y_rot = windowHeight - 1;
-        for (int l9 = (int) min_y_rot; l9 <= max_y_rot; l9++)
-        {
-            x_start[l9] = x_end[l9] = x_bnd_img;
-            x_bnd_img += slope_1;
-            x_start_sprite[l9] = x_end_sprite[l9] = 0;
-            y_start_sprite[l9] = y_end_sprite[l9] = y_bnd_sprite;
-            y_bnd_sprite += slope_2;
-        }
-
-        if (Math.abs(p_y_rot[3] - p_y_rot[0]) > 0.25) {
-            slope_1 = (p_x_rot[3] - p_x_rot[0]) / (p_y_rot[3] - p_y_rot[0]);
-            slope_3 = (p_x[3] - p_x[0]) / (p_y_rot[3] - p_y_rot[0]);
-        }
-        double x_bnd_sprite;
-        if (p_y_rot[0] > p_y_rot[3]) {
-            x_bnd_img = p_x_rot[3];
-            x_bnd_sprite = p_x[3];
-            min_y_rot = p_y_rot[3];
+        } else {
+            x_bnd_img = p_x_rot[1];
+            y_bnd_sprite = p_y[1];
+            min_y_rot = p_y_rot[1];
             max_y_rot = p_y_rot[0];
-        } else {
-            x_bnd_img = p_x_rot[0];
-            x_bnd_sprite = p_x[0];
-            min_y_rot = p_y_rot[0];
-            max_y_rot = p_y_rot[3];
-        }
-        if (min_y_rot < 0) {
-            x_bnd_img -= slope_1 * min_y_rot;
-            x_bnd_sprite -= slope_3 * min_y_rot;
-            min_y_rot = 0;
-        }
-        if (max_y_rot > windowHeight - 1)
-            max_y_rot = windowHeight - 1;
-        for (int i10 = (int) min_y_rot; i10 <= max_y_rot; i10++)
-        {
-            if (x_bnd_img < x_start[i10]) {
-                x_start[i10] = x_bnd_img;
-                x_start_sprite[i10] = x_bnd_sprite;
-                y_start_sprite[i10] = 0;
-            }
-            if (x_bnd_img > x_end[i10]) {
-                x_end[i10] = x_bnd_img;
-                x_end_sprite[i10] = x_bnd_sprite;
-                y_end_sprite[i10] = 0;
-            }
-            x_bnd_img += slope_1;
-            x_bnd_sprite += slope_3;
-        }
-
-        if (Math.abs(p_y_rot[2] - p_y_rot[3]) > 0.25) {
-            slope_1 = (p_x_rot[2] - p_x_rot[3]) / (p_y_rot[2] - p_y_rot[3]);
-            slope_2 = (p_y[2] - p_y[3]) / (p_y_rot[2] - p_y_rot[3]);
-        }
-        if (p_y_rot[3] > p_y_rot[2]) {
-            x_bnd_img = p_x_rot[2];
-            x_bnd_sprite = p_x[2];
-            y_bnd_sprite = p_y[2];
-            min_y_rot = p_y_rot[2];
-            max_y_rot = p_y_rot[3];
-        } else {
-            x_bnd_img = p_x_rot[3];
-            x_bnd_sprite = p_x[3];
-            y_bnd_sprite = p_y[3];
-            min_y_rot = p_y_rot[3];
-            max_y_rot = p_y_rot[2];
         }
         if (min_y_rot < 0) {
             x_bnd_img -= slope_1 * min_y_rot;
@@ -1186,24 +1116,18 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
-        for (int j10 = (int) min_y_rot; j10 <= max_y_rot; j10++) {
-            if (x_bnd_img < x_start[j10]) {
-                x_start[j10] = x_bnd_img;
-                x_start_sprite[j10] = x_bnd_sprite;
-                y_start_sprite[j10] = y_bnd_sprite;
-            }
-            if (x_bnd_img > x_end[j10]) {
-                x_end[j10] = x_bnd_img;
-                x_end_sprite[j10] = x_bnd_sprite;
-                y_end_sprite[j10] = y_bnd_sprite;
-            }
+        for (int i = (int) min_y_rot; i <= max_y_rot; i++)
+        {
+            x_start[i] = x_end[i] = x_bnd_img;
             x_bnd_img += slope_1;
+            x_start_sprite[i] = x_end_sprite[i] = 0;
+            y_start_sprite[i] = y_end_sprite[i] = y_bnd_sprite;
             y_bnd_sprite += slope_2;
         }
 
-        if (Math.abs(p_y_rot[1] - p_y_rot[2]) > 0.25) {
-            slope_1 = (p_x_rot[1] - p_x_rot[2]) / (p_y_rot[1] - p_y_rot[2]);
-            slope_3 = (p_x[1] - p_x[2]) / (p_y_rot[1] - p_y_rot[2]);
+        if (Math.abs(p_y_rot[2] - p_y_rot[1]) > 0.25) {
+            slope_1 = (p_x_rot[2] - p_x_rot[1]) / (p_y_rot[2] - p_y_rot[1]);
+            slope_3 = (p_x[2] - p_x[1]) / (p_y_rot[2] - p_y_rot[1]);
         }
         if (p_y_rot[2] > p_y_rot[1]) {
             x_bnd_img = p_x_rot[1];
@@ -1225,16 +1149,94 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
-        for (int k10 = (int) min_y_rot; k10 <= max_y_rot; k10++) {
-            if (x_bnd_img < x_start[k10]) {
-                x_start[k10] = x_bnd_img;
-                x_start_sprite[k10] = x_bnd_sprite;
-                y_start_sprite[k10] = y_bnd_sprite;
+        for (int i = (int) min_y_rot; i <= max_y_rot; i++) {
+            if (x_bnd_img < x_start[i]) {
+                x_start[i] = x_bnd_img;
+                x_start_sprite[i] = x_bnd_sprite;
+                y_start_sprite[i] = y_bnd_sprite;
             }
-            if (x_bnd_img > x_end[k10]) {
-                x_end[k10] = x_bnd_img;
-                x_end_sprite[k10] = x_bnd_sprite;
-                y_end_sprite[k10] = y_bnd_sprite;
+            if (x_bnd_img > x_end[i]) {
+                x_end[i] = x_bnd_img;
+                x_end_sprite[i] = x_bnd_sprite;
+                y_end_sprite[i] = y_bnd_sprite;
+            }
+            x_bnd_img += slope_1;
+            x_bnd_sprite += slope_3;
+        }
+
+        if (Math.abs(p_y_rot[3] - p_y_rot[2]) > 0.25)
+        {
+            slope_1 = (p_x_rot[3] - p_x_rot[2]) / (p_y_rot[3] - p_y_rot[2]);
+            slope_2 = (p_y[3] - p_y[2]) / (p_y_rot[3] - p_y_rot[2]);
+        }
+        if (p_y_rot[3] > p_y_rot[2]) {
+            x_bnd_img = p_x_rot[2];
+            x_bnd_sprite = p_x[2];
+            y_bnd_sprite = p_y[2];
+            min_y_rot = p_y_rot[2];
+            max_y_rot = p_y_rot[3];
+        } else {
+            x_bnd_img = p_x_rot[3];
+            x_bnd_sprite = p_x[3];
+            y_bnd_sprite = p_y[3];
+            min_y_rot = p_y_rot[3];
+            max_y_rot = p_y_rot[2];
+        }
+        if (min_y_rot < 0) {
+            x_bnd_img -= slope_1 * min_y_rot;
+            y_bnd_sprite -= slope_2 * min_y_rot;
+            min_y_rot = 0;
+        }
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int i = (int) min_y_rot; i <= max_y_rot; i++) {
+            if (x_bnd_img < x_start[i]) {
+                x_start[i] = x_bnd_img;
+                x_start_sprite[i] = x_bnd_sprite;
+                y_start_sprite[i] = y_bnd_sprite;
+            }
+            if (x_bnd_img > x_end[i]) {
+                x_end[i] = x_bnd_img;
+                x_end_sprite[i] = x_bnd_sprite;
+                y_end_sprite[i] = y_bnd_sprite;
+            }
+            x_bnd_img += slope_1;
+            y_bnd_sprite += slope_2;
+        }
+
+        if (Math.abs(p_y_rot[0] - p_y_rot[3]) > 0.25) {
+            slope_1 = (p_x_rot[0] - p_x_rot[3]) / (p_y_rot[0] - p_y_rot[3]);
+            slope_3 = (p_x[0] - p_x[3]) / (p_y_rot[0] - p_y_rot[3]);
+        }
+        if (p_y_rot[0] > p_y_rot[3]) {
+            x_bnd_img = p_x_rot[3];
+            x_bnd_sprite = p_x[3];
+            min_y_rot = p_y_rot[3];
+            max_y_rot = p_y_rot[0];
+        } else {
+            x_bnd_img = p_x_rot[0];
+            x_bnd_sprite = p_x[0];
+            min_y_rot = p_y_rot[0];
+            max_y_rot = p_y_rot[3];
+        }
+        if (min_y_rot < 0) {
+            x_bnd_img -= slope_1 * min_y_rot;
+            x_bnd_sprite -= slope_3 * min_y_rot;
+            min_y_rot = 0;
+        }
+        if (max_y_rot > windowHeight - 1)
+            max_y_rot = windowHeight - 1;
+        for (int i = (int) min_y_rot; i <= max_y_rot; i++)
+        {
+            if (x_bnd_img < x_start[i]) {
+                x_start[i] = x_bnd_img;
+                x_start_sprite[i] = x_bnd_sprite;
+                y_start_sprite[i] = 0;
+            }
+            if (x_bnd_img > x_end[i]) {
+                x_end[i] = x_bnd_img;
+                x_end_sprite[i] = x_bnd_sprite;
+                y_end_sprite[i] = 0;
             }
             x_bnd_img += slope_1;
             x_bnd_sprite += slope_3;
@@ -1253,7 +1255,8 @@ public class GameImage implements ImageProducer, ImageObserver {
             	double xStep = ((x_end_sprite[y]) - xDrawStart) / (xEnd - xStart);
             	double yDrawstart = y_start_sprite[y];
             	double yStep = ((y_end_sprite[y]) - yDrawstart) / (xEnd - xStart);
-                if (xStart < imageX) {
+                if (xStart < imageX)
+                {
                     xDrawStart += (imageX - xStart) * xStep;
                     yDrawstart += (imageX - xStart) * yStep;
                     xStart = imageX;
@@ -1302,7 +1305,6 @@ public class GameImage implements ImageProducer, ImageObserver {
     		int length, int spriteWidth)
     {
     	int pixelVal;
-    	try {
         for (int i = length; i < 0; i++)
         {
             if ((pixelVal = spritePixels[(int)(x + 0.5) + (int)(y + 0.5) * spriteWidth]) != 0)
@@ -1311,10 +1313,6 @@ public class GameImage implements ImageProducer, ImageObserver {
             x += xStep;
             y += yStep;
         }
-    	} catch (Exception e) {
-        	System.out.printf("%f, %f, %f, %f\n",x,y,xStep,yStep);
-    	}
-
     }
 
     public void doSpriteClip1(int startX, int startY, int newWidth,
