@@ -3914,8 +3914,8 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			objectX[objIdx] -= areaXDiff;
 			objectY[objIdx] -= areaYDiff;
-			int currObjX = objectX[objIdx];
-			int currObjY = objectY[objIdx];
+			double currObjX = objectX[objIdx];
+			double currObjY = objectY[objIdx];
 			int currObjType = objectType[objIdx];
 			int currObjId = objectID[objIdx];
 			Model model = objectModelArray[objIdx];
@@ -3938,7 +3938,7 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					gameCamera.addModel(model); // objects
 					model.setTranslate(x, -engineHandle.getAveragedElevation(x, y), y);
-					engineHandle.method412(currObjX, currObjY, currObjType, currObjId); // shadows
+					engineHandle.method412((int)currObjX, (int)currObjY, currObjType, currObjId); // shadows
 					if (currObjType == 74)
 						model.addTranslate(0, -480, 0);
 				}
@@ -5329,8 +5329,8 @@ public class mudclient extends GameWindowMiddleMan
 		/* updating models blow it seems */
 		for (int k2 = 0; k2 < objectCount; k2++)
 		{
-			int xObj = objectX[k2];
-			int yObj = objectY[k2];
+			double xObj = objectX[k2];
+			double yObj = objectY[k2];
 			if (xObj >= 0 && yObj >= 0
 					&& xObj < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
 					&& yObj < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT
@@ -5686,8 +5686,8 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final void animateObject(int i, String s) {
-		int x = objectX[i];
-		int y = objectY[i];
+		double x = objectX[i];
+		double y = objectY[i];
 		double tileXDist = x - ourPlayer.currentX;
 		double tileYDist = y - ourPlayer.currentY;
 		double maxAnimateDist = gameCamera.drawModelMaxDist;
@@ -5723,7 +5723,9 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawImage(aGraphics936, 0, 0);
 		for (int i = 0; i < objectCount; i++) {
 			gameCamera.removeModel(objectModelArray[i]);
-			engineHandle.updateObject(objectX[i], objectY[i], objectType[i], objectID[i]);
+			engineHandle.updateObject(
+					(int)objectX[i], (int)objectY[i],
+					objectType[i], objectID[i]);
 		}
 
 		for (int j = 0; j < doorCount; j++) {
@@ -6156,8 +6158,8 @@ public class mudclient extends GameWindowMiddleMan
 						offset += 3;
 						for (int i24 = 0; i24 < objectCount; i24++)
 						{
-							int l26 = (objectX[i24] >> 3) - l14;
-							int k29 = (objectY[i24] >> 3) - k19;
+							double l26 = objectX[i24] / 8 - l14;
+							double k29 = objectY[i24] / 8 - k19;
 							if (l26 != 0 || k29 != 0)
 							{
 								if (i24 != j8)
@@ -6174,7 +6176,9 @@ public class mudclient extends GameWindowMiddleMan
 							else
 							{
 								gameCamera.removeModel(objectModelArray[i24]);
-								engineHandle.updateObject(objectX[i24], objectY[i24], objectType[i24], objectID[i24]);
+								engineHandle.updateObject(
+										(int)objectX[i24], (int)objectY[i24],
+										objectType[i24], objectID[i24]);
 							}
 						}
 
@@ -6184,8 +6188,8 @@ public class mudclient extends GameWindowMiddleMan
 					{
 						int model_id = DataOperations.getUnsigned2Bytes(data, offset);
 						offset += 2;
-						int obj_x = sectionX + data[offset++];
-						int obj_y = sectionY + data[offset++];
+						double obj_x = sectionX + data[offset++];
+						double obj_y = sectionY + data[offset++];
 						int obj_id = data[offset++];
 						int k = 0;
 						for (int j = 0; j < objectCount; j++)
@@ -6207,13 +6211,15 @@ public class mudclient extends GameWindowMiddleMan
 							else
 							{
 								gameCamera.removeModel(objectModelArray[j]);
-								engineHandle.updateObject(objectX[j], objectY[j], objectType[j], objectID[j]);
+								engineHandle.updateObject(
+										(int)objectX[j], (int)objectY[j],
+										objectType[j], objectID[j]);
 							}
 
 						objectCount = k;
 						if (model_id != 60000)
 						{
-							engineHandle.registerObjectDir(obj_x, obj_y, obj_id);
+							engineHandle.registerObjectDir((int)obj_x, (int)obj_y, obj_id);
 							int i34;
 							int j37;
 							if (obj_id == 0 || obj_id == 4)
@@ -6237,7 +6243,7 @@ public class mudclient extends GameWindowMiddleMan
 							model_1.addRotation(0, obj_id * 32, 0);
 							model_1.addTranslate(x_transl, -engineHandle.getAveragedElevation(x_transl, y_transl), y_transl);
 							model_1.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-							engineHandle.method412(obj_x, obj_y, model_id, obj_id);
+							engineHandle.method412((int)obj_x, (int)obj_y, model_id, obj_id);
 							if (model_id == 74)
 								model_1.addTranslate(0, -480, 0);
 							objectX[objectCount] = obj_x;
@@ -6579,8 +6585,8 @@ public class mudclient extends GameWindowMiddleMan
 						l += 3;
 						for (int groundItem = 0; groundItem < groundItemCount; groundItem++)
 						{
-							int newX = (groundItemX[groundItem] >> 3) - newSectionX;
-							int newY = (groundItemY[groundItem] >> 3) - newSectionY;
+							double newX = groundItemX[groundItem] / 8 - newSectionX;
+							double newY = groundItemY[groundItem] / 8 - newSectionY;
 							if (newX != 0 || newY != 0)
 							{
 								if (groundItem != newCount)
@@ -6600,8 +6606,8 @@ public class mudclient extends GameWindowMiddleMan
 					{
 						int i8 = DataOperations.getUnsigned2Bytes(data, l);
 						l += 2;
-						int k14 = sectionX + data[l++];
-						int j19 = sectionY + data[l++];
+						double k14 = sectionX + data[l++];
+						double j19 = sectionY + data[l++];
 						if ((i8 & 0x8000) == 0)
 						{ // New Item
 							groundItemX[groundItemCount] = k14;
@@ -6680,8 +6686,8 @@ public class mudclient extends GameWindowMiddleMan
 					int currentCount = 0;
 					for (int currentItem = 0; currentItem < groundItemCount; currentItem++)
 					{
-						int currentItemOffsetX = (groundItemX[currentItem] >> 3) - currentItemSectionX;
-						int currentItemOffsetY = (groundItemY[currentItem] >> 3) - currentItemSectionY;
+						double currentItemOffsetX = groundItemX[currentItem] / 8 - currentItemSectionX;
+						double currentItemOffsetY = groundItemY[currentItem] / 8 - currentItemSectionY;
 						if (currentItemOffsetX != 0 || currentItemOffsetY != 0)
 						{
 							if (currentItem != currentCount)
@@ -6699,8 +6705,8 @@ public class mudclient extends GameWindowMiddleMan
 					currentCount = 0;
 					for (int j33 = 0; j33 < objectCount; j33++)
 					{
-						int k36 = (objectX[j33] >> 3) - currentItemSectionX;
-						int l38 = (objectY[j33] >> 3) - currentItemSectionY;
+						double k36 = objectX[j33] / 8 - currentItemSectionX;
+						double l38 = objectY[j33] / 8 - currentItemSectionY;
 						if (k36 != 0 || l38 != 0)
 						{
 							if (j33 != currentCount)
@@ -6717,7 +6723,9 @@ public class mudclient extends GameWindowMiddleMan
 						else
 						{
 							gameCamera.removeModel(objectModelArray[j33]);
-							engineHandle.updateObject(objectX[j33], objectY[j33], objectType[j33], objectID[j33]);
+							engineHandle.updateObject(
+									(int)objectX[j33], (int)objectY[j33],
+									objectType[j33], objectID[j33]);
 						}
 					}
 
@@ -8521,8 +8529,8 @@ public class mudclient extends GameWindowMiddleMan
 		newBankItemsI = new Item[256];
 		duelConfirmMyItemsI = new Item[8];
 		mobArrayIndexes = new int[500];
-		objectX = new int[1500];
-		objectY = new int[1500];
+		objectX = new double[1500];
+		objectY = new double[1500];
 		objectType = new int[1500];
 		objectID = new int[1500];
 		ourPlayer = new Mob();
@@ -8558,8 +8566,8 @@ public class mudclient extends GameWindowMiddleMan
 		anIntArray944 = new int[50];
 		doorDirection = new int[500];
 		doorType = new int[500];
-		groundItemX = new int[8000];
-		groundItemY = new int[8000];
+		groundItemX = new double[8000];
+		groundItemY = new double[8000];
 		groundItemType = new int[8000];
 		groundItemZ = new double[8000];
 		selectedShopItemIndex = -1;
@@ -8821,8 +8829,8 @@ public class mudclient extends GameWindowMiddleMan
 	private double lastAutoCameraRotatePlayerX;
 	private double lastAutoCameraRotatePlayerY;
 	private int questionMenuCount;
-	private int objectX[];
-	private int objectY[];
+	private double objectX[];
+	private double objectY[];
 	private int objectType[];
 	private int objectID[];
 	private Mob ourPlayer;
@@ -8884,8 +8892,8 @@ public class mudclient extends GameWindowMiddleMan
 	private int anInt953;
 	private int anInt954;
 	private int anInt955;
-	private int groundItemX[];
-	private int groundItemY[];
+	private double groundItemX[];
+	private double groundItemY[];
 	private int groundItemType[];
 	private double groundItemZ[];
 	private int selectedShopItemIndex;

@@ -1087,9 +1087,6 @@ public class EngineHandle
         }
     }
 
-    /* Something to do with drawing the ground and roads/floors on
-     * the minimap
-     */
     public void drawOnMinimap(int tile_x, int tile_y, int k, int neColor16, int swColor16)
     {
         int x = tile_x * 3;
