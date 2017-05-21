@@ -1274,17 +1274,17 @@ public class GameImage implements ImageProducer, ImageObserver {
                 if (!lowDef || (y & 1) == 0)
                     if (!sprites[sprite].requiresShift())
                         drawMapSpriteWOShift(imagePixelArray, mapPixels,
-                        		offset + (int)(xStart + 0.5),
+                        		(int)(offset + xStart),
                         		xDrawStart, yDrawstart,
                         		xStep, yStep,
-                        		(int)(xStart + 0.5) - (int)(xEnd + 0.5),
+                        		(int)(xStart - xEnd),
                         		spriteWidth);
                     else
                         drawMapSpriteWShift(imagePixelArray, mapPixels,
-                        		offset + (int)(xStart + 0.5),
+                        		(int)(offset + xStart),
                         		xDrawStart, yDrawstart,
                         		xStep, yStep,
-                        		(int)(xStart + 0.5) - (int)(xEnd + 0.5),
+                        		(int)(xStart - xEnd),
                         		spriteWidth);
                 offset += windowWidth;
             }
