@@ -1033,9 +1033,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         int p3_y = p0_y;
         int p1_x = p0_x;
         int p1_y = p2_y;
-        rot1 &= 0xff;
-        double sin = Trig.sin256[rot1] * rot2;
-        double cos = Trig.cos256[rot1] * rot2;
+        rot1 &= 0x3ff;
+        double sin = Trig.sin1024[rot1] * rot2;
+        double cos = Trig.cos1024[rot1] * rot2;
         int p0_x_rot = (int) (xCorner + (p0_y * sin + p0_x * cos) / 128);
         int p0_y_rot = (int) (yCorner + (p0_y * cos - p0_x * sin) / 128);
         int p3_x_rot = (int) (xCorner + (p3_y * sin + p3_x * cos) / 128);

@@ -428,7 +428,7 @@ public class mudclient extends GameWindowMiddleMan
 	final void method45(int i, int j, int wSprite, int l, int id, int j1, int xOffs)
 	{
 		Mob mob = npcArray[id];
-		int l1 = mob.currentSprite + (cameraZRot + 16) / 32 & 7;
+		int l1 = mob.currentSprite + (cameraZRot + 64) / 128 & 7;
 		boolean flag = false;
 		int i2 = l1;
 		if (i2 == 5) {
@@ -881,7 +881,7 @@ public class mudclient extends GameWindowMiddleMan
 		Mob plr = playerArray[playerID];
 		if (plr.colourBottomType == 255)
 			return;
-		int l1 = plr.currentSprite + (cameraZRot + 16) / 32 & 7;
+		int l1 = plr.currentSprite + (cameraZRot + 64) / 128 & 7;
 		boolean flag = false;
 		int i2 = l1;
 		if (i2 == 5) {
@@ -2769,19 +2769,22 @@ public class mudclient extends GameWindowMiddleMan
 					lastAutoCameraRotatePlayerY = ourPlayer.currentY;
 				}
 			}
-			cameraZRot = cameraAutoAngle * 32;
+			cameraZRot = cameraAutoAngle * 128;
 			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
 			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
 			gameCamera.setCamera(plrX,
 					-engineHandle.getAveragedElevation(plrX, plrY),
-					plrY, cameraXRot, cameraZRot * 4, 0,
+					plrY, cameraXRot, cameraZRot, 0,
 					15.625D, cameraZoom);
 		} else {
 			if (configAutoCameraAngle && !zoomCamera)
 				autoRotateCamera();
-			double l5 = lastAutoCameraRotatePlayerX + screenRotationX;
-			double i8 = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(l5, -engineHandle.getAveragedElevation(l5, i8), i8, cameraXRot, cameraZRot * 4, 0, cameraHeight, cameraZoom);
+			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
+			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
+			gameCamera.setCamera(plrX,
+					-engineHandle.getAveragedElevation(plrX, plrY),
+					plrY, cameraXRot, cameraZRot, 0,
+					cameraHeight, cameraZoom);
 		}
 		gameCamera.finishCamera();
 		method119();
@@ -5052,31 +5055,31 @@ public class mudclient extends GameWindowMiddleMan
 				lastAutoCameraRotatePlayerY += (ourPlayer.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
 			if (configAutoCameraAngle)
 			{
-				int k1 = cameraAutoAngle * 32;
-				int j3 = k1 - cameraZRot;
+				int autoAngle = cameraAutoAngle * 128;
+				int zRotDiff = autoAngle - cameraZRot;
 				byte byte0 = 1;
-				if (j3 != 0)
+				if (zRotDiff != 0)
 				{
 					cameraRotationBaseAddition++;
-					if (j3 > 128)
+					if (zRotDiff > 1024)
 					{
 						byte0 = -1;
-						j3 = 256 - j3;
+						zRotDiff = 1024 - zRotDiff;
 					}
-					else if (j3 > 0)
+					else if (zRotDiff > 0)
 						byte0 = 1;
-					else if (j3 < -128)
+					else if (zRotDiff < -1024)
 					{
 						byte0 = 1;
-						j3 = 256 + j3;
+						zRotDiff = 1024 + zRotDiff;
 					}
-					else if (j3 < 0)
+					else if (zRotDiff < 0)
 					{
 						byte0 = -1;
-						j3 = -j3;
+						zRotDiff = -zRotDiff;
 					}
-					cameraZRot += ((cameraRotationBaseAddition * j3 + 255) / 256) * byte0;
-					cameraZRot &= 0xff;
+					cameraZRot += ((cameraRotationBaseAddition * zRotDiff + 1023) / 1024) * byte0;
+					cameraZRot &= 0x3ff;
 				}
 				else
 					cameraRotationBaseAddition = 0;
@@ -5246,9 +5249,9 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 		else if (super.keyLeftDown)
-			cameraZRot = cameraZRot + 2 & 0xff;
+			cameraZRot = cameraZRot + 8 & 0x3ff;
 		else if (super.keyRightDown)
-			cameraZRot = cameraZRot - 2 & 0xff;
+			cameraZRot = cameraZRot - 8 & 0x3ff;
 		else if (super.keyUpDown && cameraXRot > 0x390)
 			cameraXRot = cameraXRot - 8 & 0x3ff;
 		else if (super.keyDownDown && cameraXRot < 0x3f8)
@@ -8262,19 +8265,19 @@ public class mudclient extends GameWindowMiddleMan
 				miniMapHeight+2, 0x000000);
 		gameGraphics.setDimensions(miniMapX, miniMapY,
 				miniMapX + miniMapWidth, miniMapY + miniMapHeight);
-		int k = 192 + anInt986;
-		int i1 = cameraZRot + anInt985 & 0xff;
+		int k = 192;
+		int i1 = cameraZRot & 0x3ff;
 		double k1 = ((ourPlayer.currentX - 47.5D) * 3 * k) / 16D;
 		double i3 = ((ourPlayer.currentY - 47.5D) * 3 * k) / 16D;
-		double sin = Trig.sin1024[0x400 - i1 * 4 & 0x3ff];
-		double cos = Trig.cos1024[0x400 - i1 * 4 & 0x3ff];
+		double sin = Trig.sin1024[0x400 - i1 & 0x3ff];
+		double cos = Trig.cos1024[0x400 - i1 & 0x3ff];
 		double tmp = (i3 * sin + k1 * cos) / 8;
 		i3 = (i3 * cos - k1 * sin) / 8;
 		k1 = tmp;
 		/* minimap tiles */
 		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)k1,
 				miniMapY + miniMapHeight / 2 + (int)i3, SPRITE_MEDIA_START - 1,
-				i1 + 64 & 0xff, k);
+				i1 + 256 & 0x3ff, k);
 		for (int i = 0; i < objectCount; i++)
 		{
 			double x = (((objectX[i] + 0.5) - ourPlayer.currentX) * 3 * k) / 16D;
@@ -8369,7 +8372,7 @@ public class mudclient extends GameWindowMiddleMan
 				SPRITE_MEDIA_START + 28);
 		// compas
 		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
-				cameraZRot + 128 & 0xff, 128);
+				cameraZRot + 512 & 0x3ff, 128);
 		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
 		if (!canClick)
 			return;
@@ -8378,12 +8381,12 @@ public class mudclient extends GameWindowMiddleMan
 				&& super.mouseX < miniMapX + miniMapWidth
 				&& super.mouseY < miniMapY + miniMapHeight)
 		{
-			int l = 192 + anInt986;
-			int j1 = cameraZRot + anInt985 & 0xff;
+			int l = 192;
+			int j1 = cameraZRot & 0x3ff;
 			double xCoord = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 128D) / (3 * l);
 			double yCoord = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 128D) / (3 * l);
-			double sin1 = Trig.sin1024[0x400 - j1 * 4 & 0x3ff];
-			double cos1 = Trig.cos1024[0x400 - j1 * 4 & 0x3ff];
+			double sin1 = Trig.sin1024[0x400 - j1 & 0x3ff];
+			double cos1 = Trig.cos1024[0x400 - j1 & 0x3ff];
 			tmp = yCoord * sin1 + xCoord * cos1;
 			yCoord = yCoord * cos1 - xCoord * sin1;
 			xCoord = tmp;
@@ -8509,7 +8512,7 @@ public class mudclient extends GameWindowMiddleMan
 		hpBarWidth = 50;
 		hpBarHeight = 7;
 		objectModelArray = new Model[1500];
-		cameraZRot = 128;
+		cameraZRot = 512;
 		cameraXRot = 912;
 		showWelcomeBox = false;
 		chrBodyGender = 1;
@@ -8919,8 +8922,6 @@ public class mudclient extends GameWindowMiddleMan
 	long privateMessageTarget;
 	private long duelOpponentNameLong;
 	protected String tradeOtherPlayerName;
-	private int anInt985;
-	private int anInt986;
 	public int chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, chatBoxVisRows,
 	chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight;
 	public static int SCROLL_BAR_WIDTH = 11;
