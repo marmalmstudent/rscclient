@@ -3016,7 +3016,7 @@ public class mudclient extends GameWindowMiddleMan
 			int k1 = ai[j1];
 			Model model = models[j1];
 			if (model.entityType[k1] <= 65535 || model.entityType[k1] >= 0x30d40 && model.entityType[k1] <= 0x493e0)
-				if (model == gameCamera.aModel) {
+				if (model == gameCamera.spriteModels) {
 					int i2 = model.entityType[k1] % 10000;
 					int l2 = model.entityType[k1] / 10000;
 					if (l2 == 1) {

@@ -1,8 +1,10 @@
 package client;
 
-public class CameraModel {
+public class CameraModel
+{
 
-    public CameraModel() {
+    public CameraModel()
+    {
         aBoolean367 = false;
         anInt369 = -1;
     }

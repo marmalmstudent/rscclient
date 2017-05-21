@@ -8,7 +8,7 @@ public class Model
 	public static final int INVISIBLE = 0xbc614e; // 12345678, probably
 	public static final int BIG_NUMBER = 9999999;
 	public Model(int nPoints, int nSurfaces) {
-		modelType = 1;
+		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
 		transparentTexture = false;
@@ -35,7 +35,7 @@ public class Model
 	}
 
 	public Model(int nbrCoordPoints, int nbrSides, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
-		modelType = 1;
+		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
 		transparentTexture = false;
@@ -136,7 +136,7 @@ public class Model
 	}
 
 	public Model(byte database[], int offset, boolean flag) {
-		modelType = 1;
+		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
 		transparentTexture = false;
@@ -240,12 +240,12 @@ public class Model
 			
 		}
 		this.nbrSurfaces = nbrSurfaces;
-		modelType = 1;
+		modelType = Model.MODEL_3D;
 	}
 
     public Model(String path)
     {
-        modelType = 1;
+        modelType = Model.MODEL_3D;
         visible = true;
         aBoolean254 = true;
         transparentTexture = false;
@@ -321,11 +321,11 @@ public class Model
                 lightSourceProjectToSurfNormal[lastSurface] = invisible;
         }
 
-        modelType = 1;
+        modelType = Model.MODEL_3D;
     }
 
     public Model(Model model[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
-        modelType = 1;
+        modelType = Model.MODEL_3D;
         visible = true;
         aBoolean254 = true;
         transparentTexture = false;
@@ -348,7 +348,7 @@ public class Model
     }
 
     public Model(Model models[], int i) {
-        modelType = 1;
+        modelType = Model.MODEL_3D;
         visible = true;
         aBoolean254 = true;
         transparentTexture = false;
@@ -423,7 +423,7 @@ public class Model
                     }
             }
         }
-        modelType = 1;
+        modelType = Model.MODEL_3D;
     }
 
     /**
@@ -470,7 +470,7 @@ public class Model
         surfaces[nbrSurfaces] = surfacePoints;
         surfaceTexture1[nbrSurfaces] = texture1;
         surfaceTexture2[nbrSurfaces] = texture2;
-        modelType = 1;
+        modelType = Model.MODEL_3D;
         return nbrSurfaces++;
     }
 
@@ -607,7 +607,7 @@ public class Model
         rotateZ = z & 0xff;
         rotateY = y & 0xff;
         checkActions();
-        modelType = 1; // 1 for 3d model
+        modelType = Model.MODEL_3D;
     }
 
     public void addTranslate(double x, double z, double y)
@@ -621,7 +621,7 @@ public class Model
         translateZ = z;
         translateY = y;
         checkActions();
-        modelType = 1;
+        modelType = Model.MODEL_3D;
     }
 
     private void checkActions()
@@ -855,7 +855,7 @@ public class Model
 
     public void resetWithCurrentConfig()
     {
-        if (modelType == 2)
+        if (modelType == Model.MODEL_2D)
         { // 2d-sprites
             modelType = 0;
             for (int i = 0; i < nbrCoordPoints; i++)
@@ -869,7 +869,7 @@ public class Model
             longestLength = xMax = zMax = yMax = BIG_NUMBER;
             return;
         }
-        if (modelType == 1)
+        if (modelType == Model.MODEL_3D)
         { // 3d objects
             modelType = 0;
             for (int j = 0; j < nbrCoordPoints; j++)
@@ -897,9 +897,9 @@ public class Model
     		int cameraSizeInt, double drawMinDist)
     {
         resetWithCurrentConfig();
-        if (yMin > Camera.yMaxHide || yMax < Camera.yMinHide
+        if (yMin > Camera.distMaxHide || yMax < Camera.distMinHide
         		|| xMin > Camera.xMaxHide || xMax < Camera.xMinHide
-        		|| zMin > Camera.zMaxHide || zMax < Camera.zMinHide)
+        		|| zMin > Camera.yMaxHide || zMax < Camera.yMinHide)
         {
             visible = false;
             return;
@@ -1005,7 +1005,7 @@ public class Model
         translateZ = model.translateZ;
         translateY = model.translateY;
         checkActions();
-        modelType = 1;
+        modelType = Model.MODEL_3D;
     }
 
     public int getNextData(byte abyte0[])
@@ -1038,6 +1038,7 @@ public class Model
     public double zNormals[];
     private double yNormals[];
     public int modelType;
+    public static final int MODEL_3D = 1, MODEL_2D = 2;
     public boolean visible;
     public double xMin;
     public double xMax;
