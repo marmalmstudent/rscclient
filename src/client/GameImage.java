@@ -1022,233 +1022,222 @@ public class GameImage implements ImageProducer, ImageObserver {
     {
         int windowWidth = gameWindowWidth;
         int windowHeight = gameWindowHeight;
-        int p0_x = -sprites[sprite].getTotalWidth() / 2;
-        int p0_y = -sprites[sprite].getTotalHeight() / 2;
-        if (sprites[sprite].requiresShift()) {
-            p0_x += sprites[sprite].getXShift();
-            p0_y += sprites[sprite].getYShift();
-        }
-        int p2_x = p0_x + sprites[sprite].getWidth();
-        int p2_y = p0_y + sprites[sprite].getHeight();
-        int p3_x = p2_x;
-        int p3_y = p0_y;
-        int p1_x = p0_x;
-        int p1_y = p2_y;
+        int x0 = -sprites[sprite].getTotalWidth() / 2 + sprites[sprite].getXShift();
+        int x1 = x0 + sprites[sprite].getWidth();
+        int y0 = -sprites[sprite].getTotalHeight() / 2 + sprites[sprite].getYShift();
+        int y1 = y0 + sprites[sprite].getHeight();
+        double[] p_x = { x0, x0, x1, x1 };
+        double[] p_y = { y0, y1, y1, y0 };
         rot1 &= 0x3ff;
         double sin = Trig.sin1024[rot1] * rot2;
         double cos = Trig.cos1024[rot1] * rot2;
-        double p0_x_rot = xCorner + (p0_y * sin + p0_x * cos) / 128;
-        double p0_y_rot = yCorner + (p0_y * cos - p0_x * sin) / 128;
-        double p3_x_rot = xCorner + (p3_y * sin + p3_x * cos) / 128;
-        double p3_y_rot = yCorner + (p3_y * cos - p3_x * sin) / 128;
-        double p2_x_rot = xCorner + (p2_y * sin + p2_x * cos) / 128;
-        double p2_y_rot = yCorner + (p2_y * cos - p2_x * sin) / 128;
-        double p1_x_rot = xCorner + (p1_y * sin + p1_x * cos) / 128;
-        double p1_y_rot = yCorner + (p1_y * cos - p1_x * sin) / 128;
+        double[] p_x_rot = {
+        		xCorner + (p_y[0] * sin + p_x[0] * cos) / 128,
+        		xCorner + (p_y[1] * sin + p_x[1] * cos) / 128,
+        		xCorner + (p_y[2] * sin + p_x[2] * cos) / 128,
+        		xCorner + (p_y[3] * sin + p_x[3] * cos) / 128
+        };
+        double[] p_y_rot = {
+        		yCorner + (p_y[0] * cos - p_x[0] * sin) / 128,
+        		yCorner + (p_y[1] * cos - p_x[1] * sin) / 128,
+        		yCorner + (p_y[2] * cos - p_x[2] * sin) / 128,
+        		yCorner + (p_y[3] * cos - p_x[3] * sin) / 128
+        };
         if (rot2 == 192 && (rot1 & 0xff) == (anInt348 & 0xff))
             anInt346++;
         else if (rot2 == 128)
             anInt348 = rot1;
         else
             anInt347++;
-        double ymn = p0_y_rot;
-        double ymx = p0_y_rot;
-        if (p3_y_rot < ymn)
-        	ymn = p3_y_rot;
-        else if (p3_y_rot > ymx)
-        	ymx = p3_y_rot;
-        if (p2_y_rot < ymn)
-        	ymn = p2_y_rot;
-        else if (p2_y_rot > ymx)
-        	ymx = p2_y_rot;
-        if (p1_y_rot < ymn)
-        	ymn = p1_y_rot;
-        else if (p1_y_rot > ymx)
-        	ymx = p1_y_rot;
+        double ymn = p_y_rot[0];
+        double ymx = p_y_rot[0];
+        for (double j : p_y_rot)
+        	if (j < ymn)
+        		ymn = j;
+        	else if (j > ymx)
+        		ymx = j;
         int ymin = (int)ymn;
         int ymax = (int)ymx;
         if (ymin < imageY)
             ymin = imageY;
         if (ymax > imageHeight)
             ymax = imageHeight;
-        if (x_start == null
-        		|| x_start.length != windowHeight + 1)
-        {
-            x_start = new double[windowHeight + 1];
-            x_end = new double[windowHeight + 1];
-            x_start_sprite = new double[windowHeight + 1];
-            x_end_sprite = new double[windowHeight + 1];
-            y_start_sprite = new double[windowHeight + 1];
-            y_end_sprite = new double[windowHeight + 1];
-        }
-        for (int i7 = ymin; i7 <= ymax; i7++) {
-            x_start[i7] = 0x5f5e0ff;
-            x_end[i7] = 0xfa0a1f01;
-        }
+        double[] x_start = new double[windowHeight + 1];
+        double[] x_end = new double[windowHeight + 1];
+        double[] x_start_sprite = new double[windowHeight + 1];
+        double[] x_end_sprite = new double[windowHeight + 1];
+        double[] y_start_sprite = new double[windowHeight + 1];
+        double[] y_end_sprite = new double[windowHeight + 1];
+        for (int i = ymin; i <= ymax;
+        		x_start[i++] = 99999999D);
+        for (int i = ymin; i <= ymax;
+        		x_end[i++] = -99999999D);
 
         double slope_1 = 0;
         double slope_3 = 0;
         double slope_2 = 0;
         int spriteWidth = sprites[sprite].getWidth();
         int spriteHeight = sprites[sprite].getHeight();
-        p0_x = 0;
-        p0_y = 0;
-        p3_x = spriteWidth - 1;
-        p3_y = 0;
-        p2_x = spriteWidth - 1;
-        p2_y = spriteHeight - 1;
-        p1_x = 0;
-        p1_y = spriteHeight - 1;
-        if (Math.abs(p1_y_rot - p0_y_rot) > 0.25)
+        p_x[0] = 0;
+        p_x[1] = 0;
+        p_x[2] = spriteWidth - 1;
+        p_x[3] = spriteWidth - 1;
+        p_y[0] = 0;
+        p_y[1] = spriteHeight - 1;
+        p_y[2] = spriteHeight - 1;
+        p_y[3] = 0;
+        
+        if (Math.abs(p_y_rot[1] - p_y_rot[0]) > 0.25)
         {
-            slope_1 = (p1_x_rot - p0_x_rot) / (p1_y_rot - p0_y_rot);
-            slope_2 = (p1_y - p0_y) / (p1_y_rot - p0_y_rot);
+            slope_1 = (p_x_rot[1] - p_x_rot[0]) / (p_y_rot[1] - p_y_rot[0]);
+            slope_2 = (p_y[1] - p_y[0]) / (p_y_rot[1]- p_y_rot[0]);
         }
         double min_y_rot;
         double max_y_rot;
-        double min_x_rot;
-        double min_y;
-        if (p0_y_rot > p1_y_rot) {
-            min_x_rot = p1_x_rot;
-            min_y = p1_y;
-            min_y_rot = p1_y_rot;
-            max_y_rot = p0_y_rot;
+        double x_bnd_img;
+        double y_bnd_sprite;
+        if (p_y_rot[0] > p_y_rot[1]) {
+            x_bnd_img = p_x_rot[1];
+            y_bnd_sprite = p_y[1];
+            min_y_rot = p_y_rot[1];
+            max_y_rot = p_y_rot[0];
         } else {
-            min_x_rot = p0_x_rot;
-            min_y = p0_y;
-            min_y_rot = p0_y_rot;
-            max_y_rot = p1_y_rot;
+            x_bnd_img = p_x_rot[0];
+            y_bnd_sprite = p_y[0];
+            min_y_rot = p_y_rot[0];
+            max_y_rot = p_y_rot[1];
         }
         if (min_y_rot < 0) {
-            min_x_rot -= slope_1 * min_y_rot;
-            min_y -= slope_2 * min_y_rot;
+            x_bnd_img -= slope_1 * min_y_rot;
+            y_bnd_sprite -= slope_2 * min_y_rot;
             min_y_rot = 0;
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
-        for (int l9 = (int) min_y_rot; l9 <= max_y_rot; l9++) {
-            x_start[l9] = x_end[l9] = min_x_rot;
-            min_x_rot += slope_1;
+        for (int l9 = (int) min_y_rot; l9 <= max_y_rot; l9++)
+        {
+            x_start[l9] = x_end[l9] = x_bnd_img;
+            x_bnd_img += slope_1;
             x_start_sprite[l9] = x_end_sprite[l9] = 0;
-            y_start_sprite[l9] = y_end_sprite[l9] = min_y;
-            min_y += slope_2;
+            y_start_sprite[l9] = y_end_sprite[l9] = y_bnd_sprite;
+            y_bnd_sprite += slope_2;
         }
 
-        if (Math.abs(p3_y_rot - p0_y_rot) > 0.25) {
-            slope_1 = (p3_x_rot - p0_x_rot) / (p3_y_rot - p0_y_rot);
-            slope_3 = (p3_x - p0_x) / (p3_y_rot - p0_y_rot);
+        if (Math.abs(p_y_rot[3] - p_y_rot[0]) > 0.25) {
+            slope_1 = (p_x_rot[3] - p_x_rot[0]) / (p_y_rot[3] - p_y_rot[0]);
+            slope_3 = (p_x[3] - p_x[0]) / (p_y_rot[3] - p_y_rot[0]);
         }
-        double min_x;
-        if (p0_y_rot > p3_y_rot) {
-            min_x_rot = p3_x_rot;
-            min_x = p3_x;
-            min_y_rot = p3_y_rot;
-            max_y_rot = p0_y_rot;
+        double x_bnd_sprite;
+        if (p_y_rot[0] > p_y_rot[3]) {
+            x_bnd_img = p_x_rot[3];
+            x_bnd_sprite = p_x[3];
+            min_y_rot = p_y_rot[3];
+            max_y_rot = p_y_rot[0];
         } else {
-            min_x_rot = p0_x_rot;
-            min_x = p0_x;
-            min_y_rot = p0_y_rot;
-            max_y_rot = p3_y_rot;
+            x_bnd_img = p_x_rot[0];
+            x_bnd_sprite = p_x[0];
+            min_y_rot = p_y_rot[0];
+            max_y_rot = p_y_rot[3];
         }
         if (min_y_rot < 0) {
-            min_x_rot -= slope_1 * min_y_rot;
-            min_x -= slope_3 * min_y_rot;
+            x_bnd_img -= slope_1 * min_y_rot;
+            x_bnd_sprite -= slope_3 * min_y_rot;
             min_y_rot = 0;
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
         for (int i10 = (int) min_y_rot; i10 <= max_y_rot; i10++)
         {
-            if (min_x_rot < x_start[i10]) {
-                x_start[i10] = min_x_rot;
-                x_start_sprite[i10] = min_x;
+            if (x_bnd_img < x_start[i10]) {
+                x_start[i10] = x_bnd_img;
+                x_start_sprite[i10] = x_bnd_sprite;
                 y_start_sprite[i10] = 0;
             }
-            if (min_x_rot > x_end[i10]) {
-                x_end[i10] = min_x_rot;
-                x_end_sprite[i10] = min_x;
+            if (x_bnd_img > x_end[i10]) {
+                x_end[i10] = x_bnd_img;
+                x_end_sprite[i10] = x_bnd_sprite;
                 y_end_sprite[i10] = 0;
             }
-            min_x_rot += slope_1;
-            min_x += slope_3;
+            x_bnd_img += slope_1;
+            x_bnd_sprite += slope_3;
         }
 
-        if (Math.abs(p2_y_rot - p3_y_rot) > 0.25) {
-            slope_1 = (p2_x_rot - p3_x_rot) / (p2_y_rot - p3_y_rot);
-            slope_2 = (p2_y - p3_y) / (p2_y_rot - p3_y_rot);
+        if (Math.abs(p_y_rot[2] - p_y_rot[3]) > 0.25) {
+            slope_1 = (p_x_rot[2] - p_x_rot[3]) / (p_y_rot[2] - p_y_rot[3]);
+            slope_2 = (p_y[2] - p_y[3]) / (p_y_rot[2] - p_y_rot[3]);
         }
-        if (p3_y_rot > p2_y_rot) {
-            min_x_rot = p2_x_rot;
-            min_x = p2_x;
-            min_y = p2_y;
-            min_y_rot = p2_y_rot;
-            max_y_rot = p3_y_rot;
+        if (p_y_rot[3] > p_y_rot[2]) {
+            x_bnd_img = p_x_rot[2];
+            x_bnd_sprite = p_x[2];
+            y_bnd_sprite = p_y[2];
+            min_y_rot = p_y_rot[2];
+            max_y_rot = p_y_rot[3];
         } else {
-            min_x_rot = p3_x_rot;
-            min_x = p3_x;
-            min_y = p3_y;
-            min_y_rot = p3_y_rot;
-            max_y_rot = p2_y_rot;
+            x_bnd_img = p_x_rot[3];
+            x_bnd_sprite = p_x[3];
+            y_bnd_sprite = p_y[3];
+            min_y_rot = p_y_rot[3];
+            max_y_rot = p_y_rot[2];
         }
         if (min_y_rot < 0) {
-            min_x_rot -= slope_1 * min_y_rot;
-            min_y -= slope_2 * min_y_rot;
+            x_bnd_img -= slope_1 * min_y_rot;
+            y_bnd_sprite -= slope_2 * min_y_rot;
             min_y_rot = 0;
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
         for (int j10 = (int) min_y_rot; j10 <= max_y_rot; j10++) {
-            if (min_x_rot < x_start[j10]) {
-                x_start[j10] = min_x_rot;
-                x_start_sprite[j10] = min_x;
-                y_start_sprite[j10] = min_y;
+            if (x_bnd_img < x_start[j10]) {
+                x_start[j10] = x_bnd_img;
+                x_start_sprite[j10] = x_bnd_sprite;
+                y_start_sprite[j10] = y_bnd_sprite;
             }
-            if (min_x_rot > x_end[j10]) {
-                x_end[j10] = min_x_rot;
-                x_end_sprite[j10] = min_x;
-                y_end_sprite[j10] = min_y;
+            if (x_bnd_img > x_end[j10]) {
+                x_end[j10] = x_bnd_img;
+                x_end_sprite[j10] = x_bnd_sprite;
+                y_end_sprite[j10] = y_bnd_sprite;
             }
-            min_x_rot += slope_1;
-            min_y += slope_2;
+            x_bnd_img += slope_1;
+            y_bnd_sprite += slope_2;
         }
 
-        if (Math.abs(p1_y_rot - p2_y_rot) > 0.25) {
-            slope_1 = (p1_x_rot - p2_x_rot) / (p1_y_rot - p2_y_rot);
-            slope_3 = (p1_x - p2_x) / (p1_y_rot - p2_y_rot);
+        if (Math.abs(p_y_rot[1] - p_y_rot[2]) > 0.25) {
+            slope_1 = (p_x_rot[1] - p_x_rot[2]) / (p_y_rot[1] - p_y_rot[2]);
+            slope_3 = (p_x[1] - p_x[2]) / (p_y_rot[1] - p_y_rot[2]);
         }
-        if (p2_y_rot > p1_y_rot) {
-            min_x_rot = p1_x_rot;
-            min_x = p1_x;
-            min_y = p1_y;
-            min_y_rot = p1_y_rot;
-            max_y_rot = p2_y_rot;
+        if (p_y_rot[2] > p_y_rot[1]) {
+            x_bnd_img = p_x_rot[1];
+            x_bnd_sprite = p_x[1];
+            y_bnd_sprite = p_y[1];
+            min_y_rot = p_y_rot[1];
+            max_y_rot = p_y_rot[2];
         } else {
-            min_x_rot = p2_x_rot;
-            min_x = p2_x;
-            min_y = p2_y;
-            min_y_rot = p2_y_rot;
-            max_y_rot = p1_y_rot;
+            x_bnd_img = p_x_rot[2];
+            x_bnd_sprite = p_x[2];
+            y_bnd_sprite = p_y[2];
+            min_y_rot = p_y_rot[2];
+            max_y_rot = p_y_rot[1];
         }
         if (min_y_rot < 0) {
-            min_x_rot -= slope_1 * min_y_rot;
-            min_x -= slope_3 * min_y_rot;
+            x_bnd_img -= slope_1 * min_y_rot;
+            x_bnd_sprite -= slope_3 * min_y_rot;
             min_y_rot = 0;
         }
         if (max_y_rot > windowHeight - 1)
             max_y_rot = windowHeight - 1;
         for (int k10 = (int) min_y_rot; k10 <= max_y_rot; k10++) {
-            if (min_x_rot < x_start[k10]) {
-                x_start[k10] = min_x_rot;
-                x_start_sprite[k10] = min_x;
-                y_start_sprite[k10] = min_y;
+            if (x_bnd_img < x_start[k10]) {
+                x_start[k10] = x_bnd_img;
+                x_start_sprite[k10] = x_bnd_sprite;
+                y_start_sprite[k10] = y_bnd_sprite;
             }
-            if (min_x_rot > x_end[k10]) {
-                x_end[k10] = min_x_rot;
-                x_end_sprite[k10] = min_x;
-                y_end_sprite[k10] = min_y;
+            if (x_bnd_img > x_end[k10]) {
+                x_end[k10] = x_bnd_img;
+                x_end_sprite[k10] = x_bnd_sprite;
+                y_end_sprite[k10] = y_bnd_sprite;
             }
-            min_x_rot += slope_1;
-            min_x += slope_3;
+            x_bnd_img += slope_1;
+            x_bnd_sprite += slope_3;
         }
 
         int offset = ymin * windowWidth;
