@@ -1439,7 +1439,7 @@ public class EngineHandle
     public int[] selectedY;
     public int[][] walkableValue;
     public static final double SCALE_FACTOR = 1.0/128.0;
-    public static final double ROOF_LIM = 0x13880;
+    public static final double ROOF_LIM = 0x271;
     public static final int WALKABLE_0 = 0x1;
     public static final int WALKABLE_1 = 0x2;
     public static final int WALKABLE_2 = 0x4;

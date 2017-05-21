@@ -5335,7 +5335,7 @@ public class mudclient extends GameWindowMiddleMan
 			actionPictureType--;
 		else if (actionPictureType < 0)
 			actionPictureType++;
-		gameCamera.animateTexture(17);
+		gameCamera.animateTexture(17, 1);
 		modelUpdatingTimer++;
 		if (modelUpdatingTimer > 5)
 		{

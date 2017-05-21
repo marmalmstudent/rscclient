@@ -666,13 +666,13 @@ public class Camera {
 				{
 					if (min_x[j] < xMin)
 					{
-						xMin = (int) min_x[j];
-						xMinBright = (int) min_b[j];
+						xMin = min_x[j];
+						xMinBright = min_b[j];
 					}
 					if (min_x[j] > xMax)
 					{
-						xMax = (int) min_x[j];
-						xMaxBright = (int) min_b[j];
+						xMax = min_x[j];
+						xMaxBright = min_b[j];
 					}
 					min_x[j] += slope_x[j];
 					min_b[j] += slope_b[j];
@@ -1412,23 +1412,30 @@ public class Camera {
 		}
 	}
 
-	public void animateTexture(int texture)
+	public void animateTexture(int texture, int shiftMask)
 	{
 		if (texturePixels[texture] == null)
 			return;
 		int sideLen = 1 << textureSize[texture];
 		int sizeReverse = sideLen-1;
-		int rowsReverse = sideLen*sizeReverse;
 		int txtrPixels[] = texturePixels[texture];
-		for (int row = 0; row < sideLen; row++)
+		if ((shiftMask & 1) == 1)
 		{
-			int rowReverse = row + rowsReverse;
-			int l = txtrPixels[rowReverse];
-			for (int j1 = 0; j1 < sizeReverse; j1++) {
-				txtrPixels[rowReverse] = txtrPixels[rowReverse - sideLen];
-				rowReverse -= sideLen;
+			int rowsReverse = sideLen*sizeReverse;
+			for (int row = 0; row < sideLen; row++)
+			{
+				int rowReverse = row + rowsReverse;
+				int l = txtrPixels[rowReverse];
+				for (int j1 = 0; j1 < sizeReverse; j1++) {
+					txtrPixels[rowReverse] = txtrPixels[rowReverse - sideLen];
+					rowReverse -= sideLen;
+				}
+				texturePixels[texture][rowReverse] = l;
 			}
-			texturePixels[texture][rowReverse] = l;
+		}
+		if ((shiftMask & 2) == 2)
+		{
+			// TODO: animate along columns
 		}
 	}
 
