@@ -2070,36 +2070,9 @@ public class Camera {
 		if (!mc.getFreeCamera())
 			return;
 		if ((keyMask & 1) == 1) // left key
-		{
 			cameraZRot = cameraZRot - 8 & 0x3ff;
-		}
 		else if ((keyMask & 2) == 2)
-		{
 			cameraZRot = cameraZRot + 8 & 0x3ff;
-		}
-		/*      cameraLeftRigtRot
-		 *             N
-		 *    		   0
-		 *	  NW 896       128 NE
-		 * 			  \|/
-		 *	W  768   -----   256  E
-		 * 			  /|\
-		 *	  SW 640       384 SE
-		 *			  512
-		 * 			   S
-		 */
-		double theta = 2*Math.PI*(cameraZRot % 1024)/1024.0;
-		/*       theta*180/PI
-		 *            --y
-		 *             0
-		 *    NW 315        45 NE
-		 *            \|/
-		 * --x  270  -----   90  ++x
-		 *            /|\
-		 *    SW 225        135 SE
-		 *            180
-		 *            ++y
-		 */
 		double dx = 0;
 		double dy = 0;
 		if ((keyMask & 4) == 4)
@@ -2112,14 +2085,13 @@ public class Camera {
 			dx = Trig.sin1024[cameraZRot];
 			dy = -Trig.cos1024[cameraZRot];
 		}
-		cameraXPos += factor*dx;
-		cameraYPos += factor*dy;
+		translateCamera(factor*dx, factor*dy);
 	}
 	
 	public void translateCamera(double x, double y)
 	{
 		cameraXPos += x;
-		cameraZPos += y;
+		cameraYPos += y;
 	}
 
 	public double getCameraY()

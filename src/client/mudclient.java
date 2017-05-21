@@ -2147,8 +2147,6 @@ public class mudclient extends GameWindowMiddleMan
 			// we want to always show the minimap
 			/*
         	mouseOverMenu = (mouseOverMenu != 2) ? 2 : 0;
-            anInt985 = (int) (Math.random() * 13D) - 6;
-            anInt986 = (int) (Math.random() * 23D) - 11;
 			 */
 			mouseButtonClick = 0;
 		}
@@ -2785,6 +2783,12 @@ public class mudclient extends GameWindowMiddleMan
 					-engineHandle.getAveragedElevation(plrX, plrY),
 					plrY, cameraXRot, cameraZRot, 0,
 					cameraHeight, cameraZoom);
+			/*
+			gameCamera.setCamera(ourPlayer.currentX,
+					-engineHandle.getAveragedElevation(
+							ourPlayer.currentX, ourPlayer.currentY),
+					ourPlayer.currentY, cameraXRot, cameraZRot, 0,
+					cameraHeight, cameraZoom);*/
 		}
 		gameCamera.finishCamera();
 		method119();
@@ -3922,14 +3926,18 @@ public class mudclient extends GameWindowMiddleMan
 			int currObjType = objectType[objIdx];
 			int currObjId = objectID[objIdx];
 			Model model = objectModelArray[objIdx];
-			try {
+			try
+			{
 				int currObjId2 = objectID[objIdx];
 				int currObjWidth;
 				int currObjeHeight;
-				if (currObjId2 == 0 || currObjId2 == 4) {
+				if (currObjId2 == 0 || currObjId2 == 4)
+				{
 					currObjWidth = EntityHandler.getObjectDef(currObjType).getWidth();
 					currObjeHeight = EntityHandler.getObjectDef(currObjType).getHeight();
-				} else {
+				}
+				else
+				{
 					currObjeHeight = EntityHandler.getObjectDef(currObjType).getWidth();
 					currObjWidth = EntityHandler.getObjectDef(currObjType).getHeight();
 				}
@@ -3940,38 +3948,45 @@ public class mudclient extends GameWindowMiddleMan
 						&& currObjY < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
 				{
 					gameCamera.addModel(model); // objects
-					model.setTranslate(x, -engineHandle.getAveragedElevation(x, y), y);
+					model.setTranslate(x,
+							-engineHandle.getAveragedElevation(x, y),
+							y);
 					engineHandle.method412((int)currObjX, (int)currObjY, currObjType, currObjId); // shadows
 					if (currObjType == 74)
 						model.addTranslate(0, -480, 0);
 				}
 			}
-			catch (RuntimeException runtimeexception) {
+			catch (RuntimeException runtimeexception)
+			{
 				System.out.println("Loc Error: " + runtimeexception.getMessage());
 				System.out.println("i:" + objIdx + " obj:" + model);
 				runtimeexception.printStackTrace();
 			}
 		}
 
-		for (int k2 = 0; k2 < doorCount; k2++) {
+		for (int k2 = 0; k2 < doorCount; k2++)
+		{
 			doorX[k2] -= areaXDiff;
 			doorY[k2] -= areaYDiff;
 			int i3 = doorX[k2];
 			int l3 = doorY[k2];
 			int j4 = doorType[k2];
 			int i5 = doorDirection[k2];
-			try {
+			try
+			{
 				engineHandle.method408(i3, l3, i5, j4);
 				Model model_1 = makeModel(i3, l3, i5, j4, k2);
 				doorModel[k2] = model_1;
 			}
-			catch (RuntimeException runtimeexception1) {
+			catch (RuntimeException runtimeexception1)
+			{
 				System.out.println("Bound Error: " + runtimeexception1.getMessage());
 				runtimeexception1.printStackTrace();
 			}
 		}
 
-		for (int j3 = 0; j3 < groundItemCount; j3++) {
+		for (int j3 = 0; j3 < groundItemCount; j3++)
+		{
 			groundItemX[j3] -= areaXDiff;
 			groundItemY[j3] -= areaYDiff;
 		}
@@ -3980,7 +3995,8 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX -= areaXDiff;
 		if (mapClickY >= 0)
 			mapClickY -= areaYDiff;
-		for (int i4 = 0; i4 < playerCount; i4++) {
+		for (int i4 = 0; i4 < playerCount; i4++)
+		{
 			Mob mob = playerArray[i4];
 			mob.currentX -= areaXDiff;
 			mob.currentY -= areaYDiff;
@@ -3989,7 +4005,6 @@ public class mudclient extends GameWindowMiddleMan
 				mob.waypointsY[j5] -= areaYDiff;
 			}
 		}
-		gameCamera.translateCamera(areaXDiff, areaYDiff);
 
 		for (int k4 = 0; k4 < npcCount; k4++) {
 			Mob mob_1 = npcArray[k4];
@@ -5030,10 +5045,10 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		if (cameraAutoAngleDebug)
 		{
-			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500
-					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500)
+			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 3.90625)
 			{
 				lastAutoCameraRotatePlayerX = ourPlayer.currentX;
 				lastAutoCameraRotatePlayerY = ourPlayer.currentY;
@@ -5041,10 +5056,10 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else
 		{
-			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -500
-					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 500
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -500
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 500)
+			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 3.90625)
 			{
 				lastAutoCameraRotatePlayerX = ourPlayer.currentX;
 				lastAutoCameraRotatePlayerY = ourPlayer.currentY;
@@ -8261,40 +8276,41 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final void drawMapMenu(boolean canClick) {
-		gameGraphics.drawBox(miniMapX-1, miniMapY-1, miniMapWidth+2,
-				miniMapHeight+2, 0x000000);
+		gameGraphics.drawBox(miniMapX-1, miniMapY-1,
+				miniMapWidth+2, miniMapHeight+2, 0x000000);
+		/* set to minimap dimensions */
 		gameGraphics.setDimensions(miniMapX, miniMapY,
 				miniMapX + miniMapWidth, miniMapY + miniMapHeight);
-
 		int zRot = cameraZRot & 0x3ff;
-		double xPlrOnMap = (ourPlayer.currentX - 47.1875) * 4.5;
-		double yPlrOnMap = (ourPlayer.currentY - 47.1875) * 4.5;
 		double sin = Trig.sin1024[0x400 - zRot & 0x3ff];
 		double cos = Trig.cos1024[0x400 - zRot & 0x3ff];
-		double tmp = yPlrOnMap * sin + xPlrOnMap * cos;
-		yPlrOnMap = yPlrOnMap * cos - xPlrOnMap * sin;
-		xPlrOnMap = tmp;
 
 		/* minimap tiles */
-		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)xPlrOnMap,
-				miniMapY + miniMapHeight / 2 + (int)yPlrOnMap, SPRITE_MEDIA_START - 1,
+		double x = (ourPlayer.currentX - 47.1875) * 4.5;
+		double y = (ourPlayer.currentY - 47.1875) * 4.5;
+		double tmp = y * sin + x * cos;
+		y = y * cos - x * sin;
+		x = tmp;
+		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)x,
+				miniMapY + miniMapHeight / 2 + (int)y, SPRITE_MEDIA_START - 1,
 				zRot + 256 & 0x3ff, 192);
+
 		for (int i = 0; i < objectCount; i++)
 		{
-			double x = ((objectX[i] + 0.5) - ourPlayer.currentX) * 4.5;
-			double y = ((objectY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			x = ((objectX[i] + 0.5) - ourPlayer.currentX) * 4.5;
+			y = ((objectY[i] + 0.5) - ourPlayer.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
 			if (!EntityHandler.getObjectDef(objectType[i]).getCommand1().equalsIgnoreCase("WalkTo"))
 				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
-						miniMapY + miniMapHeight / 2 - (int)y, 1, 0x00ffff, 0xff);
+						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x00ffff, 0xff);
 		}
 
 		for (int i = 0; i < groundItemCount; i++)
 		{
-			double x = ((groundItemX[i] + 0.5) - ourPlayer.currentX) * 4.5;
-			double y = ((groundItemY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			x = ((groundItemX[i] + 0.5) - ourPlayer.currentX) * 4.5;
+			y = ((groundItemY[i] + 0.5) - ourPlayer.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8305,8 +8321,8 @@ public class mudclient extends GameWindowMiddleMan
 		for (int i = 0; i < npcCount; i++)
 		{
 			Mob mob = npcArray[i];
-			double x = (mob.currentX - ourPlayer.currentX) * 4.5;
-			double y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			x = (mob.currentX - ourPlayer.currentX) * 4.5;
+			y = (mob.currentY - ourPlayer.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8325,8 +8341,8 @@ public class mudclient extends GameWindowMiddleMan
 			Mob mob = playerArray[i];
 			if (mob == ourPlayer)
 				continue;
-			double x = (mob.currentX - ourPlayer.currentX) * 4.5;
-			double y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			x = (mob.currentX - ourPlayer.currentX) * 4.5;
+			y = (mob.currentY - ourPlayer.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8342,15 +8358,15 @@ public class mudclient extends GameWindowMiddleMan
 					miniMapY + miniMapHeight / 2 - (int)y, 3, color, 0xff);
 		}
 
-		// player dot on map
 		Sprite sprite;
+		/* Waypoint target */
 		if (Math.abs(mapClickX - ourPlayer.currentX) > 1D
 				|| Math.abs(mapClickY - ourPlayer.currentY) > 1D)
 		{
 			if (mapClickX >= 0 && mapClickY >= 0)
 			{
-				double x = (mapClickX - ourPlayer.currentX) * 4.5;
-				double y = (mapClickY - ourPlayer.currentY) * 4.5;
+				x = (mapClickX - ourPlayer.currentX) * 4.5;
+				y = (mapClickY - ourPlayer.currentY) * 4.5;
 				tmp = y * sin + x * cos;
 				y = y * cos - x * sin;
 				x = tmp;
@@ -8367,14 +8383,18 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			mapClickY = -1;
 		}
+		/* player dot on map */
 		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 28];
 		gameGraphics.drawPicture(
 				miniMapX + miniMapWidth / 2 - sprite.getWidth()/2,
 				miniMapY + miniMapHeight / 2 - sprite.getHeight()+4,
 				SPRITE_MEDIA_START + 28);
-		// compas
+
+		/* compas */
 		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
 				cameraZRot + 512 & 0x3ff, 128);
+
+		/* restore dimensions */
 		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
 		if (!canClick)
 			return;
@@ -8383,21 +8403,18 @@ public class mudclient extends GameWindowMiddleMan
 				&& super.mouseX < miniMapX + miniMapWidth
 				&& super.mouseY < miniMapY + miniMapHeight)
 		{
-			int j1 = cameraZRot & 0x3ff;
-			double xCoord = (super.mouseX - (miniMapX + miniMapWidth / 2)) * 0.2222222222222222;
-			double yCoord = (super.mouseY - (miniMapY + miniMapHeight / 2)) * 0.2222222222222222;
-			double sin1 = Trig.sin1024[0x400 - j1 & 0x3ff];
-			double cos1 = Trig.cos1024[0x400 - j1 & 0x3ff];
-			tmp = yCoord * sin1 + xCoord * cos1;
-			yCoord = yCoord * cos1 - xCoord * sin1;
-			xCoord = tmp;
-			xCoord += ourPlayer.currentX;
-			yCoord = ourPlayer.currentY - yCoord;
+			x = (super.mouseX - (miniMapX + miniMapWidth / 2)) * 0.2222222222222222;
+			y = (super.mouseY - (miniMapY + miniMapHeight / 2)) * 0.2222222222222222;
+			tmp = y * sin + x * cos;
+			y = y * cos - x * sin;
+			x = tmp;
+			x += ourPlayer.currentX;
+			y = ourPlayer.currentY - y;
 			if (mouseButtonClick == 1)
 			{
-				walkTo(sectionX, sectionY, (int)xCoord, (int)yCoord, false);
-				mapClickX = xCoord;
-				mapClickY = yCoord;
+				walkTo(sectionX, sectionY, (int)x, (int)y, false);
+				mapClickX = x;
+				mapClickY = y;
 			}
 			mouseButtonClick = 0;
 		}

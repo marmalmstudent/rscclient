@@ -180,40 +180,44 @@ public class GameImage implements ImageProducer, ImageObserver {
     }
 
     public void drawCircle(int xCenter, int yCenter,
-    		int radius, int fgColor, int fgAlpha) {
+    		int radius, int fgColor, int fgAlpha)
+    {
         int bg_alpha = 256 - fgAlpha;
         int fg_red = (fgColor >> 16 & 0xff) * fgAlpha;
         int fg_green = (fgColor >> 8 & 0xff) * fgAlpha;
         int fg_blue = (fgColor & 0xff) * fgAlpha;
-        int i3 = yCenter - radius;
-        if (i3 < 0)
-            i3 = 0;
-        int yMax = yCenter + radius;
-        if (yMax >= gameWindowHeight)
-            yMax = gameWindowHeight - 1;
+        int yStart = yCenter - radius;
+        if (yStart < 0)
+            yStart = 0;
+        int yStop = yCenter + radius;
+        if (yStop >= gameWindowHeight)
+            yStop = gameWindowHeight - 1;
         byte yStep = 1;
         if (lowDef)
         {
             yStep = 2;
-            if ((i3 & 1) != 0)
-                i3++;
+            if ((yStart & 1) != 0)
+                yStart++;
         }
-        for (int y = i3; y <= yMax; y += yStep) {
+        for (int y = yStart; y <= yStop; y += yStep)
+        {
             int j = y - yCenter;
-            int i = (int) (Math.sqrt(radius * radius - j * j) + 0.5);
-            int x = xCenter - i;
-            if (x < 0)
-                x = 0;
-            int k4 = xCenter + i;
-            if (k4 >= gameWindowWidth)
-                k4 = gameWindowWidth - 1;
-            int offset = x + y * gameWindowWidth;
-            for (int i5 = x; i5 <= k4; i5++)
+            int i = (int) (Math.sqrt(radius * radius - j * j));
+            int xStart = xCenter - i;
+            if (xStart < 0)
+                xStart = 0;
+            int xStop = xCenter + i;
+            if (xStop >= gameWindowWidth)
+                xStop = gameWindowWidth - 1;
+            int offset = xStart + y * gameWindowWidth;
+            for (int x = xStart; x <= xStop; x++)
             {
                 int bg_red = (imagePixelArray[offset] >> 16 & 0xff) * bg_alpha;
                 int bg_green = (imagePixelArray[offset] >> 8 & 0xff) * bg_alpha;
                 int bg_blue = (imagePixelArray[offset] & 0xff) * bg_alpha;
-                int pixelVal = ((fg_red + bg_red >> 8) << 16) + ((fg_green + bg_green >> 8) << 8) + (fg_blue + bg_blue >> 8);
+                int pixelVal = ((fg_red + bg_red & 0xff00) << 8)
+                		+ (fg_green + bg_green & 0xff00)
+                		+ (fg_blue + bg_blue >> 8);
                 imagePixelArray[offset++] = pixelVal;
             }
 
@@ -1018,7 +1022,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     }
 
     public void drawMinimapTiles(int xCorner, int yCorner,
-    		int sprite, int rot1, int rot2)
+    		int sprite, int phi, int theta)
     {
         int windowWidth = gameWindowWidth;
         int windowHeight = gameWindowHeight;
@@ -1028,25 +1032,26 @@ public class GameImage implements ImageProducer, ImageObserver {
         int y1 = y0 + sprites[sprite].getHeight();
         double[] p_x = { x0, x0, x1, x1 };
         double[] p_y = { y0, y1, y1, y0 };
-        rot1 &= 0x3ff;
-        double sin = Trig.sin1024[rot1] * rot2;
-        double cos = Trig.cos1024[rot1] * rot2;
+        phi &= 0x3ff;
+        double sin = Trig.sin1024[phi] * theta;
+        double cos = Trig.cos1024[phi] * theta;
+        double fctr = 1D/128D;
         double[] p_x_rot = {
-        		xCorner + (p_y[0] * sin + p_x[0] * cos) / 128,
-        		xCorner + (p_y[1] * sin + p_x[1] * cos) / 128,
-        		xCorner + (p_y[2] * sin + p_x[2] * cos) / 128,
-        		xCorner + (p_y[3] * sin + p_x[3] * cos) / 128
+        		xCorner + (p_y[0] * sin + p_x[0] * cos) * fctr,
+        		xCorner + (p_y[1] * sin + p_x[1] * cos) * fctr,
+        		xCorner + (p_y[2] * sin + p_x[2] * cos) * fctr,
+        		xCorner + (p_y[3] * sin + p_x[3] * cos) * fctr
         };
         double[] p_y_rot = {
-        		yCorner + (p_y[0] * cos - p_x[0] * sin) / 128,
-        		yCorner + (p_y[1] * cos - p_x[1] * sin) / 128,
-        		yCorner + (p_y[2] * cos - p_x[2] * sin) / 128,
-        		yCorner + (p_y[3] * cos - p_x[3] * sin) / 128
+        		yCorner + (p_y[0] * cos - p_x[0] * sin) * fctr,
+        		yCorner + (p_y[1] * cos - p_x[1] * sin) * fctr,
+        		yCorner + (p_y[2] * cos - p_x[2] * sin) * fctr,
+        		yCorner + (p_y[3] * cos - p_x[3] * sin) * fctr
         };
-        if (rot2 == 192 && (rot1 & 0xff) == (anInt348 & 0xff))
+        if (theta == 192 && (phi & 0xff) == (anInt348 & 0xff))
             anInt346++;
-        else if (rot2 == 128)
-            anInt348 = rot1;
+        else if (theta == 128)
+            anInt348 = phi;
         else
             anInt347++;
         double ymn = p_y_rot[0];

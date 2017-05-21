@@ -1,5 +1,7 @@
 package client;
 
+import java.awt.Point;
+
 public class Trig
 {
 	static double sin1024[];
