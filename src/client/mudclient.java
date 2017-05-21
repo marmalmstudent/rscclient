@@ -8265,27 +8265,26 @@ public class mudclient extends GameWindowMiddleMan
 				miniMapHeight+2, 0x000000);
 		gameGraphics.setDimensions(miniMapX, miniMapY,
 				miniMapX + miniMapWidth, miniMapY + miniMapHeight);
-		int k = 192;
-		int i1 = cameraZRot & 0x3ff;
-		double k1 = ((ourPlayer.currentX - 47.1875) * 3 * k) / 16D;
-		double i3 = ((ourPlayer.currentY - 47.1875) * 3 * k) / 16D;
-		double sin = Trig.sin1024[0x400 - i1 & 0x3ff];
-		double cos = Trig.cos1024[0x400 - i1 & 0x3ff];
-		double tmp = (i3 * sin + k1 * cos) / 8;
-		i3 = (i3 * cos - k1 * sin) / 8;
-		k1 = tmp;
+
+		int zRot = cameraZRot & 0x3ff;
+		double xPlrOnMap = (ourPlayer.currentX - 47.1875) * 4.5;
+		double yPlrOnMap = (ourPlayer.currentY - 47.1875) * 4.5;
+		double sin = Trig.sin1024[0x400 - zRot & 0x3ff];
+		double cos = Trig.cos1024[0x400 - zRot & 0x3ff];
+		double tmp = yPlrOnMap * sin + xPlrOnMap * cos;
+		yPlrOnMap = yPlrOnMap * cos - xPlrOnMap * sin;
+		xPlrOnMap = tmp;
+
 		/* minimap tiles */
-		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)k1,
-				miniMapY + miniMapHeight / 2 + (int)i3, SPRITE_MEDIA_START - 1,
-				i1 + 256 & 0x3ff, k);
-		gameGraphics.drawCircle(miniMapX + miniMapWidth / 2,
-				miniMapY + miniMapHeight / 2, 20, 0xff00ff, 0xff);
+		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)xPlrOnMap,
+				miniMapY + miniMapHeight / 2 + (int)yPlrOnMap, SPRITE_MEDIA_START - 1,
+				zRot + 256 & 0x3ff, 192);
 		for (int i = 0; i < objectCount; i++)
 		{
-			double x = (((objectX[i] + 0.5) - ourPlayer.currentX) * 3 * k) / 16D;
-			double y = (((objectY[i] + 0.5) - ourPlayer.currentY) * 3 * k) / 16D;
-			tmp = (y * sin + x * cos) / 8;
-			y = (y * cos - x * sin) / 8;
+			double x = ((objectX[i] + 0.5) - ourPlayer.currentX) * 4.5;
+			double y = ((objectY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			tmp = y * sin + x * cos;
+			y = y * cos - x * sin;
 			x = tmp;
 			if (!EntityHandler.getObjectDef(objectType[i]).getCommand1().equalsIgnoreCase("WalkTo"))
 				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
@@ -8294,10 +8293,10 @@ public class mudclient extends GameWindowMiddleMan
 
 		for (int i = 0; i < groundItemCount; i++)
 		{
-			double x = (((groundItemX[i] + 0.5) - ourPlayer.currentX) * 3 * k) / 16D;
-			double y = (((groundItemY[i] + 0.5) - ourPlayer.currentY) * 3 * k) / 16D;
-			tmp = (y * sin + x * cos) / 8;
-			y = (y * cos - x * sin) / 8;
+			double x = ((groundItemX[i] + 0.5) - ourPlayer.currentX) * 4.5;
+			double y = ((groundItemY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			tmp = y * sin + x * cos;
+			y = y * cos - x * sin;
 			x = tmp;
 			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 					miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
@@ -8306,10 +8305,10 @@ public class mudclient extends GameWindowMiddleMan
 		for (int i = 0; i < npcCount; i++)
 		{
 			Mob mob = npcArray[i];
-			double x = ((mob.currentX - ourPlayer.currentX) * 3 * k) / 16D;
-			double y = ((mob.currentY - ourPlayer.currentY) * 3 * k) / 16D;
-			tmp = (y * sin + x * cos) / 8;
-			y = (y * cos - x * sin) / 8;
+			double x = (mob.currentX - ourPlayer.currentX) * 4.5;
+			double y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			tmp = y * sin + x * cos;
+			y = y * cos - x * sin;
 			x = tmp;
 			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xffff00, 0xff);
@@ -8321,19 +8320,20 @@ public class mudclient extends GameWindowMiddleMan
 						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x0000ff, 0xff);
 		}
 
-		for (int i = 0; i < playerCount; i++) {
+		for (int i = 0; i < playerCount; i++)
+		{
 			Mob mob = playerArray[i];
 			if (mob == ourPlayer)
 				continue;
-			double x = ((mob.currentX - ourPlayer.currentX) * 3 * k) / 16D;
-			double y = ((mob.currentY - ourPlayer.currentY) * 3 * k) / 16D;
-			tmp = (y * sin + x * cos) / 8;
-			y = (y * cos - x * sin) / 8;
+			double x = (mob.currentX - ourPlayer.currentX) * 4.5;
+			double y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			tmp = y * sin + x * cos;
+			y = y * cos - x * sin;
 			x = tmp;
 			int color = 0xffffff;
-			for (int k8 = 0; k8 < super.friendsCount; k8++) {
-				if (mob.nameLong != super.friendsListLongs[k8]
-						|| super.friendsListOnlineStatus[k8] != 99)
+			for (int j = 0; j < super.friendsCount; j++) {
+				if (mob.nameLong != super.friendsListLongs[j]
+						|| super.friendsListOnlineStatus[j] != 99)
 					continue;
 				color = 0x00ff00;
 				break;
@@ -8349,16 +8349,16 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			if (mapClickX >= 0 && mapClickY >= 0)
 			{
-				double j2 = ((mapClickX - ourPlayer.currentX) * 3 * k) / 16D;
-				double l3 = ((mapClickY - ourPlayer.currentY) * 3 * k) / 16D;
-				tmp = (l3 * sin + j2 * cos) / 8;
-				l3 = (l3 * cos - j2 * sin) / 8;
-				j2 = tmp;
+				double x = (mapClickX - ourPlayer.currentX) * 4.5;
+				double y = (mapClickY - ourPlayer.currentY) * 4.5;
+				tmp = y * sin + x * cos;
+				y = y * cos - x * sin;
+				x = tmp;
 
 				sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 27];
 				gameGraphics.drawPicture(
-						miniMapX + miniMapWidth / 2 + (int)j2 - sprite.getWidth()/2,
-						miniMapY + miniMapHeight / 2 - (int)l3 - sprite.getHeight()/2,
+						miniMapX + miniMapWidth / 2 + (int)x - sprite.getWidth()/2,
+						miniMapY + miniMapHeight / 2 - (int)y - sprite.getHeight()/2,
 						SPRITE_MEDIA_START + 27);
 			}
 		}
@@ -8383,10 +8383,9 @@ public class mudclient extends GameWindowMiddleMan
 				&& super.mouseX < miniMapX + miniMapWidth
 				&& super.mouseY < miniMapY + miniMapHeight)
 		{
-			int l = 192;
 			int j1 = cameraZRot & 0x3ff;
-			double xCoord = ((super.mouseX - (miniMapX + miniMapWidth / 2)) * 128D) / (3 * l);
-			double yCoord = ((super.mouseY - (miniMapY + miniMapHeight / 2)) * 128D) / (3 * l);
+			double xCoord = (super.mouseX - (miniMapX + miniMapWidth / 2)) * 0.2222222222222222;
+			double yCoord = (super.mouseY - (miniMapY + miniMapHeight / 2)) * 0.2222222222222222;
 			double sin1 = Trig.sin1024[0x400 - j1 & 0x3ff];
 			double cos1 = Trig.cos1024[0x400 - j1 & 0x3ff];
 			tmp = yCoord * sin1 + xCoord * cos1;
