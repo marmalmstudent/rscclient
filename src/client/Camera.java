@@ -9,7 +9,7 @@ public class Camera {
 		nbrColors = 50;
 		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
-		viewPlaneDist = 5*EngineHandle.SCALE_FACTOR;
+		viewPlaneDist = 0.0390625D;
 		gradient2Step = false;
 		aDouble387 = 1.1D;
 		anInt388 = 1;
@@ -489,7 +489,7 @@ public class Camera {
 				
 				gameImage.doSpriteClip1((int)modelX + halfWidth2, (int)modelY,
 						(int)modelWidth, (int)modelHeight, anIntArray416[l],
-						(int)j11, (int) ((512 * EngineHandle.SCALE_FACTOR * fctr) / modelDist));
+						(int)j11, (int) ((4D * fctr) / modelDist));
 				if (aBoolean && currentVisibleModelCount < maxVisibleModelCount)
 				{
 					modelX += (attackAnimXOffset[l] * fctr) / modelDist;
@@ -1070,7 +1070,7 @@ public class Camera {
 		if (!mc.getFreeCamera())
 		{
 			cameraXPos = playerX - cameraXOffset*cameraZoom;
-			cameraZPos = playerZ - cameraZOffset*cameraZoom - 200*EngineHandle.SCALE_FACTOR;
+			cameraZPos = playerZ - cameraZOffset*cameraZoom - 1.5625;
 			cameraYPos = playerY - cameraYOffset*cameraZoom;
 		}
 	}
@@ -2112,10 +2112,8 @@ public class Camera {
 			dx = Trig.sin1024[cameraZRot];
 			dy = -Trig.cos1024[cameraZRot];
 		}
-		double xMove = factor*dx;
-		double yMove = factor*dy;
-		cameraXPos += xMove;
-		cameraYPos += yMove;
+		cameraXPos += factor*dx;
+		cameraYPos += factor*dy;
 	}
 	
 	public void translateCamera(double x, double y)
@@ -2126,12 +2124,12 @@ public class Camera {
 
 	public double getCameraY()
 	{
-		return cameraYPos/EngineHandle.GAME_SIZE;
+		return cameraYPos;
 	}
 
 	public double getCameraX()
 	{
-		return cameraXPos/EngineHandle.GAME_SIZE;
+		return cameraXPos;
 	}
 
 	public double getCameraZ()
@@ -2139,12 +2137,12 @@ public class Camera {
 		return cameraZPos;
 	}
 
-	public int getCameraAzimuth()
+	public int getCameraZRot()
 	{
 		return cameraZRot;
 	}
 
-	public int getCameraElevation()
+	public int getCameraXRot()
 	{
 		return cameraXRot;
 	}

@@ -166,17 +166,17 @@ public class Model
 		// The spatial coordinate points.
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			xCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
+			xCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.SCALE_FACTOR;
 			offset += 2;
 		}
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			zCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
+			zCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.SCALE_FACTOR;
 			offset += 2;
 		}
 		for (int i = 0; i < nbrCoordPoints; i++)
 		{
-			yCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.GAME_SIZE / 128;
+			yCoords[i] = DataOperations.getSigned2Bytes(database, offset) * EngineHandle.SCALE_FACTOR;
 			offset += 2;
 		}
 		
@@ -436,11 +436,10 @@ public class Model
      */
     public int insertCoordPoint(double x, double z, double y)
     {
-    	double scaleFactor = EngineHandle.SCALE_FACTOR*0.9;
         for (int i = 0; i < nbrCoordPoints; i++)
-            if (Math.abs(xCoords[i] - x) < scaleFactor
-            		&& Math.abs(zCoords[i] - z) < scaleFactor
-            		&& Math.abs(yCoords[i] - y) < scaleFactor)
+            if (Math.abs(xCoords[i] - x) < 0.00625
+            		&& Math.abs(zCoords[i] - z) < 0.00625
+            		&& Math.abs(yCoords[i] - y) < 0.00625)
                 return i;
 
         if (nbrCoordPoints >= nPoints)

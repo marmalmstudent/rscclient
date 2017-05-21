@@ -33,7 +33,7 @@ public class NPCDef extends EntityDef {
     /**
      * Something to do with the camera
      */
-    public int camera1, camera2;
+    public double width, height;
     /**
      * Something to do with models
      */
@@ -95,12 +95,12 @@ public class NPCDef extends EntityDef {
         return skinColour;
     }
 
-    public int getCamera1() {
-        return camera1;
+    public double getWidth() {
+        return width;
     }
 
-    public int getCamera2() {
-        return camera2;
+    public double getHeight() {
+        return height;
     }
 
     public int getWalkModel() {

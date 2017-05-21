@@ -581,7 +581,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             return;
         }
         catch (Exception _ex) {
-            System.out.println("error in sprite clipping routine");
+            System.out.println("spriteClip1: error in sprite clipping routine");
         }
     }
 
@@ -706,7 +706,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             return;
         }
         catch (Exception _ex) {
-            System.out.println("error in sprite clipping routine");
+            System.out.println("spriteClip2: error in sprite clipping routine");
         }
     }
 
@@ -780,7 +780,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             return;
         }
         catch (Exception _ex) {
-            System.out.println("error in sprite clipping routine");
+            System.out.println("spriteClip3: error in sprite clipping routine");
         }
     }
     
@@ -1425,7 +1425,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         catch (Exception _ex)
         {
-            System.out.println("error in sprite clipping routine");
+        	_ex.printStackTrace();
+        	System.exit(1);
+            //System.out.println("spriteClip4: error in sprite clipping routine");
         }
     }
 /*

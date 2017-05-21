@@ -289,7 +289,7 @@ public class ParseXML
 	private ElevationDef getElevationDef(Element el)
 	{
 		ElevationDef ed = new ElevationDef();
-		ed.roofHeight = getIntValue(el, "unknown1")*EngineHandle.SCALE_FACTOR;
+		ed.roofHeight = getIntValue(el, "unknown1") * EngineHandle.SCALE_FACTOR;
 		ed.unknown2 = getIntValue(el, "unknown2");
 		return ed;
 	}
@@ -328,8 +328,8 @@ public class ParseXML
 		nd.topColour = getIntValue(el, "topColour");
 		nd.bottomColour = getIntValue(el, "bottomColour");
 		nd.skinColour = getIntValue(el, "skinColour");
-		nd.camera1 = getIntValue(el, "camera1");
-		nd.camera2 = getIntValue(el, "camera2");
+		nd.width = getIntValue(el, "camera1") * EngineHandle.SCALE_FACTOR;
+		nd.height = getIntValue(el, "camera2") * EngineHandle.SCALE_FACTOR;
 		nd.walkModel = getIntValue(el, "walkModel");
 		nd.combatModel = getIntValue(el, "combatModel");
 		nd.combatSprite = getIntValue(el, "combatSprite");
