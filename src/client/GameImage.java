@@ -1021,18 +1021,6 @@ public class GameImage implements ImageProducer, ImageObserver {
     {
         int windowWidth = gameWindowWidth;
         int windowHeight = gameWindowHeight;
-        if (sin256 == null)
-        {
-            sin256 = new double[256];
-            for (int l1 = 0; l1 < 256; l1++)
-            	sin256[l1] = Math.sin((double) l1 * 0.02454369D);
-        }
-        if (cos256 == null)
-        {
-            cos256 = new double[256];
-            for (int l1 = 0; l1 < 256; l1++)
-            	cos256[l1] = Math.cos((double) l1 * 0.02454369D);
-        }
         int p0_x = -sprites[sprite].getTotalWidth() / 2;
         int p0_y = -sprites[sprite].getTotalHeight() / 2;
         if (sprites[sprite].requiresShift()) {
@@ -1046,8 +1034,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         int p1_x = p0_x;
         int p1_y = p2_y;
         rot1 &= 0xff;
-        double sin = sin256[rot1] * rot2;
-        double cos = cos256[rot1] * rot2;
+        double sin = Trig.sin256[rot1] * rot2;
+        double cos = Trig.cos256[rot1] * rot2;
         int p0_x_rot = (int) (xCorner + (p0_y * sin + p0_x * cos) / 128);
         int p0_y_rot = (int) (yCorner + (p0_y * cos - p0_x * sin) / 128);
         int p3_x_rot = (int) (xCorner + (p3_y * sin + p3_x * cos) / 128);
@@ -2102,8 +2090,6 @@ public class GameImage implements ImageProducer, ImageObserver {
     static byte aByteArrayArray336[][] = new byte[50][];
     static int charIndexes[];
     public boolean drawStringShadows;
-    double sin256[];
-    double cos256[];
     int anIntArray340[];
     int anIntArray341[];
     int anIntArray342[];

@@ -8401,7 +8401,6 @@ public class mudclient extends GameWindowMiddleMan
 
 	protected final void handleScrollEvent(int scrollDirection)
 	{
-		// cameraZoomFactor = 150.0; // how much further away the camera moves
 		if (scrollDirection > 0D)
 		{
 			if (cameraZoom < 1.41)
