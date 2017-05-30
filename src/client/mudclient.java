@@ -137,22 +137,22 @@ public class mudclient extends GameWindowMiddleMan
 		case 42:
 			super.streamClass.createPacket(42);
 			super.streamClass.addByte(id);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 48: // close bank
 		super.streamClass.createPacket(48);
-		super.streamClass.formatPacket();
+		super.streamClass.writePktSize();
 		showBank = false;
 		break;
 		case 53: // confirm trade
 			tradeConfirmAccepted = true;
 			super.streamClass.createPacket(53);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 56:
 			super.streamClass.createPacket(56);
 			super.streamClass.addByte(id);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			prayerOn[id] = true;
 			playSound("prayeron");
 			break;
@@ -164,7 +164,7 @@ public class mudclient extends GameWindowMiddleMan
 				super.streamClass.add2ByteInt(tradeMyItemsI[i].id);
 				super.streamClass.add4ByteInt(tradeMyItemsI[i].amount);
 			}
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			tradeOtherAccepted = false;
 			tradeWeAccepted = false;
 			break;
@@ -176,7 +176,7 @@ public class mudclient extends GameWindowMiddleMan
 				super.streamClass.add2ByteInt(duelMyItemsI[i].id);
 				super.streamClass.add4ByteInt(duelMyItemsI[i].amount);
 			}
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			duelOpponentAccepted = false;
 			duelMyAccepted = false;
 			break;
@@ -184,29 +184,29 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(157);
 			super.streamClass.addByte(id);
 			super.streamClass.addByte(amount);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 183: // bank withdraw
 			super.streamClass.createPacket(183);
 			super.streamClass.add2ByteInt(id);
 			super.streamClass.add4ByteInt(amount);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 198: // bank deposit
 			super.streamClass.createPacket(198);
 			super.streamClass.add2ByteInt(id);
 			super.streamClass.add4ByteInt(amount);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 211: // trade accept button
 			tradeWeAccepted = true;
 			super.streamClass.createPacket(211);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 216: // trade decline
 			showTradeWindow = false;
 			super.streamClass.createPacket(216);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			break;
 		case 218: // accept character remake?
 			super.streamClass.createPacket(218);
@@ -218,14 +218,14 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(chrTopClr);
 			super.streamClass.addByte(chrBottomClr);
 			super.streamClass.addByte(chrSkinClr);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			gameGraphics.resetImagePixels(0);
 			showCharacterLookScreen = false;
 			break;
 		case 248:  // switch prayer off
 			super.streamClass.createPacket(248);
 			super.streamClass.addByte(id);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			prayerOn[id] = false;
 			playSound("prayeroff");
 			break;
@@ -1732,7 +1732,7 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		}
 		super.streamClass.createPacket(129);
-		super.streamClass.formatPacket();
+		super.streamClass.writePktSize();
 		logoutTimeout = 1000;
 	}
 
@@ -2203,7 +2203,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 210) {
@@ -2213,7 +2213,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 220) {
@@ -2223,7 +2223,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 3200)
 			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
@@ -2234,7 +2234,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.addByte(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 310) {
@@ -2244,7 +2244,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.addByte(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 320) {
@@ -2253,7 +2253,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.addByte(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 2300) {
 			walkToAction(actionX, actionY, actionType);
@@ -2261,7 +2261,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.addByte(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 3300)
 			displayMessage(EntityHandler.getDoorDef(actionType).getDescription(), 3, 0);
@@ -2271,7 +2271,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionVariable2);
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 410) {
@@ -2280,7 +2280,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionVariable2);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 420) {
@@ -2288,14 +2288,14 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(51);
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 2400) {
 			walkToObject(actionX, actionY, actionType, actionVariable);
 			super.streamClass.createPacket(40);
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 3400)
 			displayMessage(EntityHandler.getObjectDef(actionType).getDescription(), 3, 0);
@@ -2303,30 +2303,30 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(49);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 610) {
 			super.streamClass.createPacket(27);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 620) {
 			super.streamClass.createPacket(92);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 630) {
 			super.streamClass.createPacket(181);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 640) {
 			super.streamClass.createPacket(89);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 650) {
 			selectedItem = actionType;
@@ -2336,7 +2336,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (currentMenuID == 660) {
 			super.streamClass.createPacket(147);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 			mouseOverMenu = 0;
 			displayMessage("Dropping " + inventory[actionType].name(), 4, 0);
@@ -2350,7 +2350,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(71);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 710) {
@@ -2360,7 +2360,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(142);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 720) {
@@ -2369,7 +2369,7 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			super.streamClass.createPacket(177);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 725) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2377,7 +2377,7 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			super.streamClass.createPacket(74);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 715 || currentMenuID == 2715) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2385,7 +2385,7 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			super.streamClass.createPacket(73);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 3700)
 			displayMessage(EntityHandler.getNpcDef(actionType).getDescription(), 3, 0);
@@ -2396,7 +2396,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(55);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 810) {
@@ -2406,7 +2406,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(16);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedItem = -1;
 		}
 		if (currentMenuID == 805 || currentMenuID == 2805) {
@@ -2415,22 +2415,22 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX = -1;
 			super.streamClass.createPacket(57);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 2806) {
 			super.streamClass.createPacket(222);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 2810) {
 			super.streamClass.createPacket(166);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 2820) {
 			super.streamClass.createPacket(68);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 		}
 		if (currentMenuID == 900) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2440,7 +2440,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 920) {
@@ -2453,7 +2453,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (currentMenuID == 1000) {
 			super.streamClass.createPacket(206);
 			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.formatPacket();
+			super.streamClass.writePktSize();
 			selectedSpell = -1;
 		}
 		if (currentMenuID == 4000) {
@@ -2913,7 +2913,7 @@ public class mudclient extends GameWindowMiddleMan
 					continue;
 				super.streamClass.createPacket(154);
 				super.streamClass.addByte(i);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 				break;
 			}
 
@@ -4484,20 +4484,20 @@ public class mudclient extends GameWindowMiddleMan
 							super.streamClass.createPacket(128);
 							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].id);
 							super.streamClass.add4ByteInt(i4);
-							super.streamClass.formatPacket();
+							super.streamClass.writePktSize();
 						}
 						if (inventoryCount(j2) > 0 && i > 2 && j >= 229 && i < 112 && j <= 240) {
 							int j4 = (shopItemSellPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
 							super.streamClass.createPacket(255);
 							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].id);
 							super.streamClass.add4ByteInt(j4);
-							super.streamClass.formatPacket();
+							super.streamClass.writePktSize();
 						}
 					}
 				}
 			} else {
 				super.streamClass.createPacket(253);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 				showShop = false;
 				return;
 			}
@@ -5482,17 +5482,17 @@ public class mudclient extends GameWindowMiddleMan
 			if (super.mouseX < byte0 || super.mouseY < byte1 || super.mouseX > byte0 + 468 || super.mouseY > byte1 + 262) {
 				showDuelConfirmWindow = false;
 				super.streamClass.createPacket(35);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 			}
 			if (super.mouseX >= (byte0 + 118) - 35 && super.mouseX <= byte0 + 118 + 70 && super.mouseY >= byte1 + 238 && super.mouseY <= byte1 + 238 + 21) {
 				duelWeAccept = true;
 				super.streamClass.createPacket(87);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 			}
 			if (super.mouseX >= (byte0 + 352) - 35 && super.mouseX <= byte0 + 353 + 70 && super.mouseY >= byte1 + 238 && super.mouseY <= byte1 + 238 + 21) {
 				showDuelConfirmWindow = false;
 				super.streamClass.createPacket(35);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 			}
 			mouseButtonClick = 0;
 		}
@@ -5598,7 +5598,7 @@ public class mudclient extends GameWindowMiddleMan
 				super.streamClass.createPacket(7);
 				super.streamClass.addTwo4ByteInts(l);
 				super.streamClass.addByte(abuseSelectedType);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 			}
 			showAbuseWindow = 0;
 			return;
@@ -6930,7 +6930,7 @@ public class mudclient extends GameWindowMiddleMan
 						super.streamClass.add2ByteInt(dummyMob.mobIntUnknown);
 					}
 
-					super.streamClass.formatPacket();
+					super.streamClass.writePktSize();
 					mobCount = 0;
 				}
 				break;
@@ -7269,7 +7269,7 @@ public class mudclient extends GameWindowMiddleMan
 			{
 				super.streamClass.createPacket(156);
 				super.streamClass.addString(runtimeexception.toString());
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 				handlePacketErrorCount++;
 			}
 		}
@@ -7334,7 +7334,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(sectionYArray[currentStep] - walkSectionY);
 		}
 
-		super.streamClass.formatPacket();
+		super.streamClass.writePktSize();
 		return true;
 	}
 
@@ -7389,7 +7389,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(sectionYArray[currentStep] - walkSectionY);
 		}
 
-		super.streamClass.formatPacket();
+		super.streamClass.writePktSize();
 		actionPictureType = -24;
 		actionPictureX = super.mouseX; // guessing the little red/yellow x that appears when you click
 		actionPictureY = super.mouseY;
@@ -7421,7 +7421,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(sectionYArray[currentStep] - walkSectionY);
 		}
 
-		super.streamClass.formatPacket();
+		super.streamClass.writePktSize();
 		actionPictureType = -24;
 		actionPictureX = super.mouseX;
 		actionPictureY = super.mouseY;
@@ -7688,7 +7688,7 @@ public class mudclient extends GameWindowMiddleMan
 								super.streamClass.add4ByteInt(duelMyItemsI[duelItem].amount);
 							}
 
-							super.streamClass.formatPacket();
+							super.streamClass.writePktSize();
 							duelOpponentAccepted = false;
 							duelMyAccepted = false;
 						}
@@ -7719,7 +7719,7 @@ public class mudclient extends GameWindowMiddleMan
 							super.streamClass.add4ByteInt(duelMyItemsI[i3].amount);
 						}
 
-						super.streamClass.formatPacket();
+						super.streamClass.writePktSize();
 						duelOpponentAccepted = false;
 						duelMyAccepted = false;
 					}
@@ -7747,24 +7747,24 @@ public class mudclient extends GameWindowMiddleMan
 					super.streamClass.addByte(duelNoMagic ? 1 : 0);
 					super.streamClass.addByte(duelNoPrayer ? 1 : 0);
 					super.streamClass.addByte(duelNoWeapons ? 1 : 0);
-					super.streamClass.formatPacket();
+					super.streamClass.writePktSize();
 					duelOpponentAccepted = false;
 					duelMyAccepted = false;
 				}
 				if (i >= 217 && j >= 238 && i <= 286 && j <= 259) {
 					duelMyAccepted = true;
 					super.streamClass.createPacket(252);
-					super.streamClass.formatPacket();
+					super.streamClass.writePktSize();
 				}
 				if (i >= 394 && j >= 238 && i < 463 && j < 259) {
 					showDuelWindow = false;
 					super.streamClass.createPacket(35);
-					super.streamClass.formatPacket();
+					super.streamClass.writePktSize();
 				}
 			} else if (mouseButtonClick != 0) {
 				showDuelWindow = false;
 				super.streamClass.createPacket(35);
-				super.streamClass.formatPacket();
+				super.streamClass.writePktSize();
 			}
 			mouseButtonClick = 0;
 			itemIncrement = 0;

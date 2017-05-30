@@ -200,7 +200,7 @@ public abstract class GameWindowMiddleMan extends GameWindow {
         if (l - lastPing > 5000L) {
             lastPing = l;
             streamClass.createPacket(5);
-            streamClass.formatPacket();
+            streamClass.writePktSize();
         }
         try {
             streamClass.writePacket(20);
@@ -308,14 +308,14 @@ public abstract class GameWindowMiddleMan extends GameWindow {
         streamClass.addByte(privateMessages);
         streamClass.addByte(tradeRequests);
         streamClass.addByte(duelRequests);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
     }
 
     protected final void addToIgnoreList(String s) {
         long l = DataOperations.stringLength12ToLong(s);
         streamClass.createPacket(25);
         streamClass.addTwo4ByteInts(l);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
         for (int i = 0; i < ignoreListCount; i++)
             if (ignoreListLongs[i] == l)
                 return;
@@ -331,7 +331,7 @@ public abstract class GameWindowMiddleMan extends GameWindow {
     protected final void removeFromIgnoreList(long l) {
         streamClass.createPacket(108);
         streamClass.addTwo4ByteInts(l);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
         for (int i = 0; i < ignoreListCount; i++)
             if (ignoreListLongs[i] == l) {
                 ignoreListCount--;
@@ -346,7 +346,7 @@ public abstract class GameWindowMiddleMan extends GameWindow {
     protected final void addToFriendsList(String s) {
         streamClass.createPacket(168);
         streamClass.addTwo4ByteInts(DataOperations.stringLength12ToLong(s));
-        streamClass.formatPacket();
+        streamClass.writePktSize();
         long l = DataOperations.stringLength12ToLong(s);
         for (int i = 0; i < friendsCount; i++)
             if (friendsListLongs[i] == l)
@@ -365,7 +365,7 @@ public abstract class GameWindowMiddleMan extends GameWindow {
     protected final void removeFromFriends(long l) {
         streamClass.createPacket(52);
         streamClass.addTwo4ByteInts(l);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
         for (int i = 0; i < friendsCount; i++) {
             if (friendsListLongs[i] != l)
                 continue;
@@ -385,19 +385,19 @@ public abstract class GameWindowMiddleMan extends GameWindow {
         streamClass.createPacket(254);
         streamClass.addTwo4ByteInts(user);
         streamClass.addBytes(message, 0, messageLength);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
     }
 
     protected final void sendChatMessage(byte abyte0[], int i) {
         streamClass.createPacket(145);
         streamClass.addBytes(abyte0, 0, i);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
     }
 
     protected final void sendChatString(String s) {
         streamClass.createPacket(90);
         streamClass.addString(s);
-        streamClass.formatPacket();
+        streamClass.writePktSize();
     }
 
     protected abstract void loginScreenPrint(String s, String s1);

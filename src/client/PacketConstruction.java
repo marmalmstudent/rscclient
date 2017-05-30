@@ -11,23 +11,10 @@ public class PacketConstruction {
         readInputStream(length, 0, abyte0);
     }
 
-    public void formatPacket() {
-        if (skip8Offset != 8)
-            packetOffset++;
-        int j = packetOffset - packetStart - 2;
-        if (j >= 160) {
-            packetData[packetStart] = (byte) (160 + j / 256);
-            packetData[packetStart + 1] = (byte) (j & 0xff);
-        } else {
-            packetData[packetStart] = (byte) j;
-            packetOffset--;
-            packetData[packetStart + 1] = packetData[packetOffset];
-        }
-        if (maxPacketLength <= 10000) {
-            int k = packetData[packetStart + 2] & 0xff;
-            packetCommandCount[k]++;
-            packetCommandLength[k] += packetOffset - packetStart;
-        }
+    public void writePktSize() {
+        int pktLen = packetOffset - packetStart - 2;
+        packetData[packetStart] = (byte) (pktLen / 256);
+        packetData[packetStart + 1] = (byte) (pktLen & 0xff);
         packetStart = packetOffset;
     }
 
@@ -72,17 +59,10 @@ public class PacketConstruction {
             }
             if (length == 0 && inputStreamAvailable() >= 2) {
                 length = readInputStream();
-                if (length >= 160)
-                    length = (length - 160) * 256 + readInputStream();
+                length = length*256 + readInputStream();
             }
             if (length > 0 && inputStreamAvailable() >= length) {
-                if (length >= 160) {
-                    readInputStream(length, data);
-                } else {
-                    data[length - 1] = (byte) readInputStream();
-                    if (length > 1)
-                        readInputStream(length - 1, data);
-                }
+            	readInputStream(length, data);
                 int readBytes = length;
                 length = 0;
                 packetReadCount = 0;
@@ -107,7 +87,7 @@ public class PacketConstruction {
 
     public void finalisePacket()
             throws IOException {
-        formatPacket();
+        writePktSize();
         writePacket(0);
     }
 
@@ -173,9 +153,7 @@ public class PacketConstruction {
         if (packetData == null)
             packetData = new byte[maxPacketLength];
         packetData[packetStart + 2] = (byte) i;
-        packetData[packetStart + 3] = 0;
         packetOffset = packetStart + 3;
-        skip8Offset = 8;
     }
 
     public int readInputStream()
@@ -185,7 +163,6 @@ public class PacketConstruction {
 
     public PacketConstruction() {
         packetOffset = 3;
-        skip8Offset = 8;
         errorText = "";
         maxPacketLength = 5000;
         error = false;
@@ -196,7 +173,6 @@ public class PacketConstruction {
     public int maxPacketReadCount;
     public int packetStart;
     private int packetOffset;
-    private int skip8Offset;
     public byte packetData[];
     private static int anIntArray521[] = {
             0, 1, 3, 7, 15, 31, 63, 127, 255, 511,
@@ -217,11 +193,9 @@ public class PacketConstruction {
     final int anInt532 = 124;
     final int anInt533 = 34;
     static char aCharArray536[];
-    public static int packetCommandCount[] = new int[256];
     protected String errorText;
     protected int maxPacketLength;
     protected int packetCount;
-    public static int packetCommandLength[] = new int[256];
     protected boolean error;
     public static int anInt543;
 
