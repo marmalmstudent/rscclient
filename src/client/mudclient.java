@@ -1655,12 +1655,13 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final Mob makePlayer(int mobArrayIndex, double x, double y, int sprite) {
-		if (mobArray[mobArrayIndex] == null) {
-			mobArray[mobArrayIndex] = new Mob();
-			mobArray[mobArrayIndex].serverIndex = mobArrayIndex;
-			mobArray[mobArrayIndex].mobIntUnknown = 0;
+		
+		if (mobArray.get(mobArrayIndex) == null) {
+			mobArray.set(mobArrayIndex, new Mob());
+			mobArray.get(mobArrayIndex).serverIndex = mobArrayIndex;
+			mobArray.get(mobArrayIndex).mobIntUnknown = 0;
 		}
-		Mob mob = mobArray[mobArrayIndex];
+		Mob mob = mobArray.get(mobArrayIndex);
 		boolean flag = false;
 		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
 			if (itr.next().serverIndex != mobArrayIndex)
@@ -2695,7 +2696,7 @@ public class mudclient extends GameWindowMiddleMan
 				if (player.attackingNpcIndex != -1)
 					npc = npcRecordArray[player.attackingNpcIndex];
 				else if (player.attackingMobIndex != -1)
-					npc = mobArray[player.attackingMobIndex];
+					npc = mobArray.get(player.attackingMobIndex);
 				if (npc != null) {
 					double px = player.currentX;
 					double py = player.currentY;
@@ -5828,8 +5829,10 @@ public class mudclient extends GameWindowMiddleMan
 		objectCount = 0;
 		doorCount = 0;
 		groundItemCount = 0;
-		for (int k = 0; k < mobArray.length; k++)
-			mobArray[k] = null;
+		
+		mobArray.clear();
+		for (int i = 0; i < 8000; ++i)
+			mobArray.add(null);
 
 		playerArray.clear();
 
@@ -6192,8 +6195,9 @@ public class mudclient extends GameWindowMiddleMan
 			{
 			case 4:
 				int currentMob = DataOperations.getUnsigned2Bytes(data, 1);
-				if (mobArray[currentMob] != null) // todo: check what that mobArray is
-					tradeOtherPlayerName = mobArray[currentMob].name;
+				try {
+					tradeOtherPlayerName = mobArray.get(currentMob).name;
+				} catch (IndexOutOfBoundsException _ex) {}
 				showTradeWindow = true;
 				tradeOtherAccepted = false;
 				tradeWeAccepted = false;
@@ -6339,9 +6343,9 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					int mobArrayIndex = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 					mobUpdateOffset += 2;
-					if (mobArrayIndex < 0 || mobArrayIndex > mobArray.length)
+					if (mobArrayIndex < 0 || mobArrayIndex > mobArray.size())
 						return;
-					Mob mob = mobArray[mobArrayIndex];
+					Mob mob = mobArray.get(mobArrayIndex);
 					if (mob == null)
 						return;
 					byte mobUpdateType = data[mobUpdateOffset++];
@@ -6986,7 +6990,7 @@ public class mudclient extends GameWindowMiddleMan
 					super.streamClass.add2ByteInt(mobCount);
 					for (currentMob = 0; currentMob < mobCount; currentMob++)
 					{
-						Mob dummyMob = mobArray[mobArrayIndexes[currentMob]];
+						Mob dummyMob = mobArray.get(mobArrayIndexes[currentMob]);
 						super.streamClass.add2ByteInt(dummyMob.serverIndex);
 						super.streamClass.add2ByteInt(dummyMob.mobIntUnknown);
 					}
@@ -7208,8 +7212,8 @@ public class mudclient extends GameWindowMiddleMan
 				break;
 			case 229:
 				int j5 = DataOperations.getUnsigned2Bytes(data, 1);
-				if (mobArray[j5] != null)
-					duelOpponentName = mobArray[j5].name;
+				if (mobArray.get(j5) != null)
+					duelOpponentName = mobArray.get(j5).name;
 				showDuelWindow = true;
 				duelMyItemCount = 0;
 				duelOpponentItemCount = 0;
@@ -8545,7 +8549,6 @@ public class mudclient extends GameWindowMiddleMan
 		prayerOn = new boolean[50];
 		tradeOtherAccepted = false;
 		tradeWeAccepted = false;
-		mobArray = new Mob[8000];
 		anIntArray705 = new int[50];
 		anIntArray706 = new int[50];
 		sectorHeight = -1;
@@ -8609,6 +8612,7 @@ public class mudclient extends GameWindowMiddleMan
 		tradeConfirmAccepted = false;
 		playerArray = new ArrayList<Mob>(500);
 		lastPlayerArray = new ArrayList<Mob>(500);
+		mobArray = new ArrayList<Mob>(8000);
 		serverMessageBoxTop = false;
 		cameraHeight = 8.59375D;
 		cameraZoom = 1.0;
@@ -8737,7 +8741,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean prayerOn[];
 	protected boolean tradeOtherAccepted;
 	protected boolean tradeWeAccepted;
-	private Mob mobArray[];
 	private int npcCombatModelArray1[] = {0, 1, 2, 1, 0, 0, 0, 0};
 	private int anIntArray705[];
 	private int anIntArray706[];
@@ -8889,7 +8892,6 @@ public class mudclient extends GameWindowMiddleMan
 	private double objectY[];
 	private int objectType[];
 	private int objectID[];
-	private Mob ourPlayer;
 	int sectionX;
 	int sectionY;
 	int serverIndex;
@@ -8902,7 +8904,8 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean tradeConfirmAccepted;
 	private int anInt892;
 	private EngineHandle engineHandle;
-	private List<Mob> playerArray, lastPlayerArray;
+	private List<Mob> playerArray, lastPlayerArray, mobArray;
+	private Mob ourPlayer;
 	private boolean serverMessageBoxTop;
 	private int referId;
 	private int anInt900;
