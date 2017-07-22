@@ -18,9 +18,11 @@ import client.util.DataConversions;
 import client.util.misc;
 
 import entityhandling.EntityHandler;
+import entityhandling.defs.DoorDef;
+import entityhandling.defs.GameObjectDef;
 import entityhandling.defs.ItemDef;
 import entityhandling.defs.NPCDef;
-
+import entityhandling.defs.SpellDef;
 import model.Sprite;
 
 import player.Item;
@@ -42,6 +44,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -1458,67 +1463,72 @@ public class mudclient extends GameWindowMiddleMan
 			if (selectedSpell >= 0) {
 				if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3)
 				{
-					rightClickMenu[menuLength].text1 = "Cast "
-							+ EntityHandler.getSpellDef(selectedSpell).getName()
-							+ " on";
-					rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-					rightClickMenu[menuLength].id = 600;
-					rightClickMenu[menuLength].actionType = currentInventorySlot;
-					rightClickMenu[menuLength].actionVariable = selectedSpell;
-					menuLength++;
+					MenuRightClick mrc = new MenuRightClick();
+					mrc.text1 = String.format("Cast %s on",
+							EntityHandler.getSpellDef(selectedSpell).getName());
+					mrc.text2 = "@lre@" + item.getName();
+					mrc.id = 600;
+					mrc.actionType = currentInventorySlot;
+					mrc.actionVariable = selectedSpell;
+					rightClickMenu.add(mrc);
 					return;
 				}
 			} else {
 				if (selectedItem >= 0) {
-					rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-					rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-					rightClickMenu[menuLength].id = 610;
-					rightClickMenu[menuLength].actionType = currentInventorySlot;
-					rightClickMenu[menuLength].actionVariable = selectedItem;
-					menuLength++;
+					MenuRightClick mrc = new MenuRightClick();
+					mrc.text1 = String.format("Use %s with", selectedItemName);
+					mrc.text2 = "@lre@" + item.getName();
+					mrc.id = 610;
+					mrc.actionType = currentInventorySlot;
+					mrc.actionVariable = selectedItem;
+					rightClickMenu.add(mrc);
 					return;
 				}
 				if (wearing[currentInventorySlot] == 1) {
-					rightClickMenu[menuLength].text1 = "Remove";
-					rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-					rightClickMenu[menuLength].id = 620;
-					rightClickMenu[menuLength].actionType = currentInventorySlot;
-					menuLength++;
+					MenuRightClick mrc = new MenuRightClick();
+					mrc.text1 = "Remove";
+					mrc.text2 = "@lre@" + item.getName();
+					mrc.id = 620;
+					mrc.actionType = currentInventorySlot;
+					rightClickMenu.add(mrc);
 				} else if (item.isWieldable()) {
-					rightClickMenu[menuLength].text1 = "Wear";
-					rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-					rightClickMenu[menuLength].id = 630;
-					rightClickMenu[menuLength].actionType = currentInventorySlot;
-					menuLength++;
+					MenuRightClick mrc = new MenuRightClick();
+					mrc.text1 = "Wear";
+					mrc.text2 = "@lre@" + item.getName();
+					mrc.id = 630;
+					mrc.actionType = currentInventorySlot;
+					rightClickMenu.add(mrc);
 				}
 				if (!item.getCommand().equals("")) {
-					rightClickMenu[menuLength].text1 = item.getCommand();
-					rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-					rightClickMenu[menuLength].id = 640;
-					rightClickMenu[menuLength].actionType = currentInventorySlot;
-					menuLength++;
+					MenuRightClick mrc = new MenuRightClick();
+					mrc.text1 = item.getCommand();
+					mrc.text2 = "@lre@" + item.getName();
+					mrc.id = 640;
+					mrc.actionType = currentInventorySlot;
+					rightClickMenu.add(mrc);
 				}
-				rightClickMenu[menuLength].text1 = "Use";
-				rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-				rightClickMenu[menuLength].id = 650;
-				rightClickMenu[menuLength].actionType = currentInventorySlot;
-				menuLength++;
-				rightClickMenu[menuLength].text1 = "Drop";
-				rightClickMenu[menuLength].text2 = "@lre@" + item.getName();
-				rightClickMenu[menuLength].id = 660;
-				rightClickMenu[menuLength].actionType = currentInventorySlot;
-				menuLength++;
-				rightClickMenu[menuLength].text1 = "Examine";
-				rightClickMenu[menuLength].text2 = "@lre@" + item.getName() +
+				MenuRightClick mrc = new MenuRightClick();
+				mrc.text1 = "Use";
+				mrc.text2 = "@lre@" + item.getName();
+				mrc.id = 650;
+				mrc.actionType = currentInventorySlot;
+				rightClickMenu.add(mrc);
+				
+				mrc = new MenuRightClick();
+				mrc.text1 = "Drop";
+				mrc.text2 = "@lre@" + item.getName();
+				mrc.id = 660;
+				mrc.actionType = currentInventorySlot;
+				rightClickMenu.add(mrc);
+				
+				mrc = new MenuRightClick();
+				mrc.text1 = "Examine";
+				mrc.text2 = "@lre@" + item.getName() +
 						(ourPlayer.admin >= 2 ? " @or1@(" + item.getID() + ")" : "");
-				rightClickMenu[menuLength].id = 3600;
-				rightClickMenu[menuLength].actionType = item.getID();
-				menuLength++;
+				mrc.id = 3600;
+				mrc.actionType = item.getID();
+				rightClickMenu.add(mrc);
 			}
-		}
-		else
-		{ // we don't want to click through empty inventory slots
-			menuLength++;
 		}
 	}
 
@@ -1536,7 +1546,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (invPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				mouseOverMenu = 0;
@@ -1545,7 +1554,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (invPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside inventory but not on the grid or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -1938,8 +1946,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (plrPan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				mouseOverMenu = 0;
@@ -1948,7 +1954,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (plrPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside info panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -2199,14 +2204,14 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void menuClick(int index)
+	private final void menuClick(MenuRightClick clickedItem)
 	{
-		int actionX = (int)rightClickMenu[index].actionX;
-		int actionY = (int)rightClickMenu[index].actionY;
-		int actionType = rightClickMenu[index].actionType;
-		int actionVariable = rightClickMenu[index].actionVariable;
-		int actionVariable2 = rightClickMenu[index].actionVariable2;
-		int currentMenuID = rightClickMenu[index].id;
+		int actionX = (int) clickedItem.actionX;
+		int actionY = (int) clickedItem.actionY;
+		int actionType = clickedItem.actionType;
+		int actionVariable = clickedItem.actionVariable;
+		int actionVariable2 = clickedItem.actionVariable2;
+		int currentMenuID = clickedItem.id;
 		if (currentMenuID == 200) {
 			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
 			super.streamClass.createPacket(104);
@@ -2870,18 +2875,20 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void drawRightClickMenu() {
 		if (mouseButtonClick != 0) {
-			for (int i = 0; i < menuLength; i++) {
-				int k = MenuRightClick.menuX + 2;
-				int i1 = MenuRightClick.menuY + 27 + i * 15;
-				if (super.mouseX <= k - 2
-						|| super.mouseY <= i1 - 12
-						|| super.mouseY >= i1 + 4 
-						|| super.mouseX >= (k - 3) + MenuRightClick.menuWidth)
+			int i = 0;
+			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
+			{
+				MenuRightClick tmp = itr.next();
+				int xMenu = MenuRightClick.menuX + 2;
+				int yMenu = MenuRightClick.menuY + 27 + i * 15;
+				if (super.mouseX <= xMenu - 2
+						|| super.mouseY <= yMenu - 12
+						|| super.mouseY >= yMenu + 4 
+						|| super.mouseX >= (xMenu - 3) + MenuRightClick.menuWidth)
 					continue;
-				menuClick(rightClickMenu[i].indices);
+				menuClick(tmp);
 				break;
 			}
-
 			mouseButtonClick = 0;
 			showRightClickMenu = false;
 			return;
@@ -2895,16 +2902,20 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		gameGraphics.drawBoxAlpha(MenuRightClick.menuX, MenuRightClick.menuY, MenuRightClick.menuWidth, MenuRightClick.menuHeight, 0xd0d0d0, 160);
 		gameGraphics.drawString("Choose option", MenuRightClick.menuX + 2, MenuRightClick.menuY + 12, 1, 65535);
-		for (int j = 0; j < menuLength; j++) {
-			int l = MenuRightClick.menuX + 2;
-			int j1 = MenuRightClick.menuY + 27 + j * 15;
-			int k1 = 0xffffff;
-			if (super.mouseX > l - 2
-					&& super.mouseY > j1 - 12
-					&& super.mouseY < j1 + 4
-					&& super.mouseX < (l - 3) + MenuRightClick.menuWidth)
-				k1 = 0xffff00;
-			gameGraphics.drawString(rightClickMenu[rightClickMenu[j].indices].text1 + " " + rightClickMenu[rightClickMenu[j].indices].text2, l, j1, 1, k1);
+		
+		int i = 0;
+		for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
+		{
+			MenuRightClick tmp = itr.next();
+			int xMenu = MenuRightClick.menuX + 2;
+			int yMenu = MenuRightClick.menuY + 27 + i * 15;
+			int color = 0xffffff;
+			if (super.mouseX > xMenu - 2
+					&& super.mouseY > yMenu - 12
+					&& super.mouseY < yMenu + 4
+					&& super.mouseX < (xMenu - 3) + MenuRightClick.menuWidth)
+				color = 0xffff00;
+			gameGraphics.drawString(tmp.text1 + " " + tmp.text2, xMenu, yMenu, 1, color);
 		}
 
 	}
@@ -3001,6 +3012,58 @@ public class mudclient extends GameWindowMiddleMan
 		drawLoginScreen();
 		resetCurrentTimeArray();
 	}
+	
+	private String getLevelDiffColor(int levelDiff)
+	{
+		if (levelDiff < 0)
+			return "@or1@";
+		else if (levelDiff < -3)
+			return "@or2@";
+		else if (levelDiff < -6)
+			return "@or3@";
+		else if (levelDiff < -9)
+			return "@red@";
+		else if (levelDiff > 0)
+			return "@gr1@";
+		else if (levelDiff > 3)
+			return "@gr2@";
+		else if (levelDiff > 6)
+			return "@gr3@";
+		else if (levelDiff > 9)
+			return "@gre@";
+		else
+			return "@yel@";
+	}
+	
+	private MenuRightClick addExamine(String tex1, String text2,
+			String adminText, int id, int actionType)
+	{
+		MenuRightClick mrc = new MenuRightClick();
+		mrc.text1 = tex1;
+		mrc.text2 = text2 + adminText;
+		mrc.id = id;
+		mrc.actionType = actionType;
+		return mrc;
+	}
+	
+	private MenuRightClick addCommand(String tex1, String text2,
+			int id, double actionX, double actionY, Integer actionType,
+			Integer actionVariable, Integer actionVariable2)
+	{
+		MenuRightClick mrc = new MenuRightClick();
+		mrc.text1 = tex1;
+		mrc.text2 = text2;
+		mrc.id = id;
+		mrc.actionX = actionX;
+		mrc.actionY = actionY;
+		if (actionType != null)
+			mrc.actionType = actionType.intValue();
+		if (actionVariable != null)
+			mrc.actionVariable = actionVariable.intValue();
+		if (actionVariable2 != null)
+			mrc.actionVariable2 = actionVariable2.intValue();
+		return mrc;
+	}
 
 	private final void drawInventoryRightClickMenu()
 	{
@@ -3014,352 +3077,361 @@ public class mudclient extends GameWindowMiddleMan
 		for (int l = 0; l < doorCount; l++)
 			aBooleanArray970[l] = false;
 
-		int i1 = gameCamera.method272();
+		SpellDef spellDef = EntityHandler.getSpellDef(selectedSpell);
+
+		int nVisMdl = gameCamera.getVisibleModelCount();
 		Model models[] = gameCamera.getVisibleModels();
-		int ai[] = gameCamera.method273();
-		for (int j1 = 0; j1 < i1; j1++) {
-			if (menuLength > 200)
+		int ai[] = gameCamera.visibleModelIntArray();
+		for (int mdl = 0; mdl < nVisMdl; mdl++)
+		{
+			if (getMenuLength() > 200)
 				break;
-			int k1 = ai[j1];
-			Model model = models[j1];
-			if (model.entityType[k1] <= 65535 || model.entityType[k1] >= 0x30d40 && model.entityType[k1] <= 0x493e0)
-				if (model == gameCamera.spriteModels) {
-					int i2 = model.entityType[k1] % 10000;
-					int l2 = model.entityType[k1] / 10000;
-					if (l2 == 1) {
-						String s = "";
+			int k1 = ai[mdl];
+			Model model = models[mdl];
+			if (model.entityType[k1] <= 65535
+					|| model.entityType[k1] >= 0x30d40
+					&& model.entityType[k1] <= 0x493e0)
+			{
+				if (model == gameCamera.spriteModels)
+				{ /* 2D sprites */
+					int modelIdx = model.entityType[k1] % 10000;
+					int modelType = model.entityType[k1] / 10000;
+					if (modelType == 1)
+					{ /* another player */
+						Mob otherPlr = playerArray[modelIdx];
 						int k3 = 0;
-						if (ourPlayer.level > 0 && playerArray[i2].level > 0)
-							k3 = ourPlayer.level - playerArray[i2].level;
-						if (k3 < 0)
-							s = "@or1@";
-						if (k3 < -3)
-							s = "@or2@";
-						if (k3 < -6)
-							s = "@or3@";
-						if (k3 < -9)
-							s = "@red@";
-						if (k3 > 0)
-							s = "@gr1@";
-						if (k3 > 3)
-							s = "@gr2@";
-						if (k3 > 6)
-							s = "@gr3@";
-						if (k3 > 9)
-							s = "@gre@";
-						s = " " + s + "(level-" + playerArray[i2].level + ")";
-						if (selectedSpell >= 0) {
-							if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 1 || EntityHandler.getSpellDef(selectedSpell).getSpellType() == 2) {
-								rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on";
-								rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-								rightClickMenu[menuLength].id = 800;
-								rightClickMenu[menuLength].actionX = playerArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = playerArray[i2].currentY;
-								rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-								rightClickMenu[menuLength].actionVariable = selectedSpell;
-								menuLength++;
+						if (ourPlayer.level > 0 && otherPlr.level > 0)
+							k3 = ourPlayer.level - otherPlr.level;
+						String levelText = String.format("%s(level-%d)",
+								getLevelDiffColor(k3), otherPlr.level);
+						if (selectedSpell >= 0)
+						{
+							if (spellDef.getSpellType() == 1
+									|| spellDef.getSpellType() == 2)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										800, otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, selectedSpell, null);
+								rightClickMenu.add(mrc);
 							}
-						} else if (selectedItem >= 0) {
-							rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-							rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-							rightClickMenu[menuLength].id = 810;
-							rightClickMenu[menuLength].actionX = playerArray[i2].currentX;
-							rightClickMenu[menuLength].actionY = playerArray[i2].currentY;
-							rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-							rightClickMenu[menuLength].actionVariable = selectedItem;
-							menuLength++;
-						} else {
-							if (i > 0 && (playerArray[i2].currentY - 0.5) + wildY + areaY < 2203) {
-								rightClickMenu[menuLength].text1 = "Attack";
-								rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-								if (k3 >= 0 && k3 < 5)
-									rightClickMenu[menuLength].id = 805;
-								else
-									rightClickMenu[menuLength].id = 2805;
-								rightClickMenu[menuLength].actionX = playerArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = playerArray[i2].currentY;
-								rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-								menuLength++;
-							} else {
-								rightClickMenu[menuLength].text1 = "Duel with";
-								rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-								rightClickMenu[menuLength].actionX = playerArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = playerArray[i2].currentY;
-								rightClickMenu[menuLength].id = 2806;
-								rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-								menuLength++;
-							}
-							rightClickMenu[menuLength].text1 = "Trade with";
-							rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-							rightClickMenu[menuLength].id = 2810;
-							rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-							menuLength++;
-							rightClickMenu[menuLength].text1 = "Follow";
-							rightClickMenu[menuLength].text2 = "@whi@" + playerArray[i2].name + s;
-							rightClickMenu[menuLength].id = 2820;
-							rightClickMenu[menuLength].actionType = playerArray[i2].serverIndex;
-							menuLength++;
 						}
-					} else if (l2 == 2) {
-						ItemDef itemDef = EntityHandler.getItemDef(groundItemType[i2]);
-						if (selectedSpell >= 0) {
-							if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3) {
-								rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on";
-								rightClickMenu[menuLength].text2 = "@lre@" + itemDef.getName();
-								rightClickMenu[menuLength].id = 200;
-								rightClickMenu[menuLength].actionX = groundItemX[i2];
-								rightClickMenu[menuLength].actionY = groundItemY[i2];
-								rightClickMenu[menuLength].actionType = groundItemType[i2];
-								rightClickMenu[menuLength].actionVariable = selectedSpell;
-								menuLength++;
-							}
-						} else if (selectedItem >= 0) {
-							rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-							rightClickMenu[menuLength].text2 = "@lre@" + itemDef.getName();
-							rightClickMenu[menuLength].id = 210;
-							rightClickMenu[menuLength].actionX = groundItemX[i2];
-							rightClickMenu[menuLength].actionY = groundItemY[i2];
-							rightClickMenu[menuLength].actionType = groundItemType[i2];
-							rightClickMenu[menuLength].actionVariable = selectedItem;
-							menuLength++;
-						} else {
-							rightClickMenu[menuLength].text1 = "Take";
-							rightClickMenu[menuLength].text2 = "@lre@" + itemDef.getName();
-							rightClickMenu[menuLength].id = 220;
-							rightClickMenu[menuLength].actionX = groundItemX[i2];
-							rightClickMenu[menuLength].actionY = groundItemY[i2];
-							rightClickMenu[menuLength].actionType = groundItemType[i2];
-							menuLength++;
-							rightClickMenu[menuLength].text1 = "Examine";
-							rightClickMenu[menuLength].text2 = "@lre@" + itemDef.getName() + (ourPlayer.admin >= 2 ? " @or1@(" + groundItemType[i2] + ":" + (groundItemX[i2] + areaX) + "," + (groundItemY[i2] + areaY) + ")" : "");
-							rightClickMenu[menuLength].id = 3200;
-							rightClickMenu[menuLength].actionType = groundItemType[i2];
-							menuLength++;
+						else if (selectedItem >= 0)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selectedItemName),
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									810, otherPlr.currentX, otherPlr.currentY,
+									otherPlr.serverIndex, selectedItem, null);
+							rightClickMenu.add(mrc);
 						}
-					} else if (l2 == 3) {
-						String s1 = "";
-						int l3 = -1;
-						NPCDef npcDef = EntityHandler.getNpcDef(npcArray[i2].type);
-						if (npcDef.isAttackable()) {
-							int j4 = (npcDef.getAtt() + npcDef.getDef() + npcDef.getStr() + npcDef.getHits()) / 4;
-							int k4 = (playerStatBase[0] + playerStatBase[1] + playerStatBase[2] + playerStatBase[3] + 27) / 4;
-							l3 = k4 - j4;
-							s1 = "@yel@";
-							if (l3 < 0)
-								s1 = "@or1@";
-							if (l3 < -3)
-								s1 = "@or2@";
-							if (l3 < -6)
-								s1 = "@or3@";
-							if (l3 < -9)
-								s1 = "@red@";
-							if (l3 > 0)
-								s1 = "@gr1@";
-							if (l3 > 3)
-								s1 = "@gr2@";
-							if (l3 > 6)
-								s1 = "@gr3@";
-							if (l3 > 9)
-								s1 = "@gre@";
-							s1 = " " + s1 + "(level-" + j4 + ")";
-						}
-						if (selectedSpell >= 0) {
-							if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 2) {
-								rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on";
-								rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName();
-								rightClickMenu[menuLength].id = 700;
-								rightClickMenu[menuLength].actionX = npcArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = npcArray[i2].currentY;
-								rightClickMenu[menuLength].actionType = npcArray[i2].serverIndex;
-								rightClickMenu[menuLength].actionVariable = selectedSpell;
-								menuLength++;
+						else
+						{
+							if (i > 0 && (otherPlr.currentY - 0.5) + wildY + areaY < 2203)
+							{
+								MenuRightClick mrc = addCommand("Attack",
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										(k3 >= 0 && k3 < 5 ? 805 : 2805),
+										otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, null, null);
+								rightClickMenu.add(mrc);
 							}
-						} else if (selectedItem >= 0) {
-							rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-							rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName();
-							rightClickMenu[menuLength].id = 710;
-							rightClickMenu[menuLength].actionX = npcArray[i2].currentX;
-							rightClickMenu[menuLength].actionY = npcArray[i2].currentY;
-							rightClickMenu[menuLength].actionType = npcArray[i2].serverIndex;
-							rightClickMenu[menuLength].actionVariable = selectedItem;
-							menuLength++;
-						} else {
-							if (npcDef.isAttackable()) {
-								rightClickMenu[menuLength].text1 = "Attack";
-								rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName() + s1;
-								if (l3 >= 0)
-									rightClickMenu[menuLength].id = 715;
-								else
-									rightClickMenu[menuLength].id = 2715;
-								rightClickMenu[menuLength].actionX = npcArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = npcArray[i2].currentY;
-								rightClickMenu[menuLength].actionType = npcArray[i2].serverIndex;
-								menuLength++;
+							else
+							{
+								MenuRightClick mrc = addCommand("Duel with",
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										2806, otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, null, null);
+								rightClickMenu.add(mrc);
 							}
-							rightClickMenu[menuLength].text1 = "Talk-to";
-							rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName();
-							rightClickMenu[menuLength].id = 720;
-							rightClickMenu[menuLength].actionX = npcArray[i2].currentX;
-							rightClickMenu[menuLength].actionY = npcArray[i2].currentY;
-							rightClickMenu[menuLength].actionType = npcArray[i2].serverIndex;
-							menuLength++;
-							if (!npcDef.getCommand().equals("")) {
-								rightClickMenu[menuLength].text1 = npcDef.getCommand();
-								rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName();
-								rightClickMenu[menuLength].id = 725;
-								rightClickMenu[menuLength].actionX = npcArray[i2].currentX;
-								rightClickMenu[menuLength].actionY = npcArray[i2].currentY;
-								rightClickMenu[menuLength].actionType = npcArray[i2].serverIndex;
-								menuLength++;
-							}
-							rightClickMenu[menuLength].text1 = "Examine";
-							rightClickMenu[menuLength].text2 = "@yel@" + npcDef.getName() + (ourPlayer.admin >= 2 ? " @or1@(" + npcArray[i2].type + ")" : "");
-							rightClickMenu[menuLength].id = 3700;
-							rightClickMenu[menuLength].actionType = npcArray[i2].type;
-							menuLength++;
+							MenuRightClick mrc = addExamine("Trade with",
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									"", 2810, otherPlr.serverIndex);
+							rightClickMenu.add(mrc);
+
+							mrc = addExamine("Follow",
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									"", 2820, otherPlr.serverIndex);
+							rightClickMenu.add(mrc);
 						}
 					}
-				} else if (model != null && model.anInt257 >= 10000) {
+					else if (modelType == 2)
+					{ /* item on gound */
+						ItemDef itemDef = EntityHandler.getItemDef(groundItemType[modelIdx]);
+						if (selectedSpell >= 0)
+						{
+							if (spellDef.getSpellType() == 3)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@lre@%s", itemDef.getName()),
+										200, groundItemX[modelIdx], groundItemY[modelIdx],
+										groundItemType[modelIdx], selectedSpell, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selectedItem >= 0)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selectedItemName),
+									String.format("@lre@%s", itemDef.getName()),
+									210, groundItemX[modelIdx], groundItemY[modelIdx],
+									groundItemType[modelIdx], selectedItem, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							MenuRightClick mrc = addCommand( "Take",
+									String.format("@lre@%s", itemDef.getName()),
+									220, groundItemX[modelIdx], groundItemY[modelIdx],
+									groundItemType[modelIdx], null, null);
+							rightClickMenu.add(mrc);
+
+							String adminText = "";
+							if (ourPlayer.admin >= 2)
+								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
+										groundItemType[modelIdx],
+										groundItemX[modelIdx] + areaX,
+										groundItemY[modelIdx] + areaY);
+							mrc = addExamine("Examine", "@lre@" + itemDef.getName(),
+									adminText, 3200, groundItemType[modelIdx]);
+							rightClickMenu.add(mrc);
+						}
+					}
+					else if (modelType == 3)
+					{ /* NPC */
+						Mob theNPC = npcArray[modelIdx];
+						String s1 = "";
+						int l3 = -1;
+						NPCDef npcDef = EntityHandler.getNpcDef(theNPC.type);
+						if (npcDef.isAttackable())
+						{
+							int npcLevel = (npcDef.getAtt() + npcDef.getDef() + npcDef.getStr() + npcDef.getHits()) / 4;
+							int plrLevel = (playerStatBase[0] + playerStatBase[1] + playerStatBase[2] + playerStatBase[3] + 27) / 4;
+							l3 = plrLevel - npcLevel;
+
+							s1 = String.format("%s(level-%d)",
+									getLevelDiffColor(plrLevel - npcLevel), npcLevel);
+						}
+						if (selectedSpell >= 0)
+						{
+							if (spellDef.getSpellType() == 2)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@yel@%s", npcDef.getName()),
+										700, theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, selectedSpell, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selectedItem >= 0)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selectedItemName),
+									String.format("@yel@%s", npcDef.getName()),
+									710, theNPC.currentX, theNPC.currentY,
+									theNPC.serverIndex, selectedItem, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (npcDef.isAttackable())
+							{
+								MenuRightClick mrc = addCommand("Attack",
+										String.format("@yel@%s %s",
+												npcDef.getName(), s1),
+										(l3 >= 0 ? 715 : 2715),
+										theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+							MenuRightClick mrc = addCommand("Talk-to",
+									String.format("@yel@%s",
+											npcDef.getName()),
+									720, theNPC.currentX, theNPC.currentY,
+									theNPC.serverIndex, null, null);
+							rightClickMenu.add(mrc);
+							if (!npcDef.getCommand().equals(""))
+							{
+								mrc = addCommand(npcDef.getCommand(),
+										String.format("@yel@%s",
+												npcDef.getName()),
+										725, theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+
+							String adminText = "";
+							if (ourPlayer.admin >= 2)
+								adminText = String.format(" @or1@(%d)",
+										npcArray[modelIdx].type);
+							mrc = addExamine("Examine", "@yel@" + npcDef.getName(),
+									adminText, 3700, theNPC.type);
+							rightClickMenu.add(mrc);
+						}
+					}
+				}
+				else if (model != null && model.anInt257 >= 10000)
+				{ /* Doors */
 					int j2 = model.anInt257 - 10000;
 					int i3 = doorType[j2];
-					if (!aBooleanArray970[j2]) {
-						if (selectedSpell >= 0) {
-							if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 4) {
-								rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on";
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getDoorDef(i3).getName();
-								rightClickMenu[menuLength].id = 300;
-								rightClickMenu[menuLength].actionX = doorX[j2];
-								rightClickMenu[menuLength].actionY = doorY[j2];
-								rightClickMenu[menuLength].actionType = doorDirection[j2];
-								rightClickMenu[menuLength].actionVariable = selectedSpell;
-								menuLength++;
+					DoorDef dDef = EntityHandler.getDoorDef(i3);
+					if (!aBooleanArray970[j2])
+					{
+						if (selectedSpell >= 0)
+						{
+							if (spellDef.getSpellType() == 4)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@cya@%s", dDef.getName()),
+										300, doorX[j2], doorY[j2],
+										doorDirection[j2], selectedSpell, null);
+								rightClickMenu.add(mrc);
 							}
-						} else if (selectedItem >= 0) {
-							rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-							rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getDoorDef(i3).getName();
-							rightClickMenu[menuLength].id = 310;
-							rightClickMenu[menuLength].actionX = doorX[j2];
-							rightClickMenu[menuLength].actionY = doorY[j2];
-							rightClickMenu[menuLength].actionType = doorDirection[j2];
-							rightClickMenu[menuLength].actionVariable = selectedItem;
-							menuLength++;
-						} else {
-							if (!EntityHandler.getDoorDef(i3).getCommand1().equalsIgnoreCase("WalkTo")) {
-								rightClickMenu[menuLength].text1 = EntityHandler.getDoorDef(i3).getCommand1();
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getDoorDef(i3).getName();
-								rightClickMenu[menuLength].id = 320;
-								rightClickMenu[menuLength].actionX = doorX[j2];
-								rightClickMenu[menuLength].actionY = doorY[j2];
-								rightClickMenu[menuLength].actionType = doorDirection[j2];
-								menuLength++;
+						}
+						else if (selectedItem >= 0)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selectedItemName),
+									String.format("@cya@%s", dDef.getName()),
+									310, doorX[j2], doorY[j2],
+									doorDirection[j2], selectedItem, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (!dDef.getCommand1().equalsIgnoreCase("WalkTo"))
+							{
+								MenuRightClick mrc = addCommand(dDef.getCommand1(),
+										String.format("@cya@%s", dDef.getName()),
+										320, doorX[j2], doorY[j2],
+										doorDirection[j2], null, null);
+								rightClickMenu.add(mrc);
 							}
-							if (!EntityHandler.getDoorDef(i3).getCommand2().equalsIgnoreCase("Examine")) {
-								rightClickMenu[menuLength].text1 = EntityHandler.getDoorDef(i3).getCommand2();
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getDoorDef(i3).getName();
-								rightClickMenu[menuLength].id = 2300;
-								rightClickMenu[menuLength].actionX = doorX[j2];
-								rightClickMenu[menuLength].actionY = doorY[j2];
-								rightClickMenu[menuLength].actionType = doorDirection[j2];
-								menuLength++;
+							if (!dDef.getCommand2().equalsIgnoreCase("Examine"))
+							{
+								MenuRightClick mrc = addCommand(dDef.getCommand2(),
+										String.format("@cya@%s", dDef.getName()),
+										2300,  doorX[j2], doorY[j2],
+										doorDirection[j2], null, null);
+								rightClickMenu.add(mrc);
 							}
-							rightClickMenu[menuLength].text1 = "Examine";
-							rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getDoorDef(i3).getName() + (ourPlayer.admin >= 2 ? " @or1@(" + i3 + ":" + (doorX[j2] + areaX) + "," + (doorY[j2] + areaY) + ")" : "");
-							rightClickMenu[menuLength].id = 3300;
-							rightClickMenu[menuLength].actionType = i3;
-							menuLength++;
+
+							String adminText = "";
+							if (ourPlayer.admin >= 2)
+								adminText = String.format(" @or1@(%d: %d,%d)",
+										i3, doorX[j2] + areaX, doorY[j2] + areaY);
+							MenuRightClick mrc = addExamine("Examine",
+									"@cya@" + dDef.getName(),
+									adminText, 3300, i3);
+							rightClickMenu.add(mrc);
 						}
 						aBooleanArray970[j2] = true;
 					}
-				} else if (model != null && model.anInt257 >= 0) {
+				}
+				else if (model != null && model.anInt257 >= 0)
+				{ /* Game objects */
 					int k2 = model.anInt257;
 					int j3 = objectType[k2];
-					if (!aBooleanArray827[k2]) {
-						if (selectedSpell >= 0) {
-							if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 5) {
-								rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on";
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getObjectDef(j3).getName();
-								rightClickMenu[menuLength].id = 400;
-								rightClickMenu[menuLength].actionX = objectX[k2];
-								rightClickMenu[menuLength].actionY = objectY[k2];
-								rightClickMenu[menuLength].actionType = objectID[k2];
-								rightClickMenu[menuLength].actionVariable = objectType[k2];
-								rightClickMenu[menuLength].actionVariable2 = selectedSpell;
-								menuLength++;
+					GameObjectDef gobjDef = EntityHandler.getObjectDef(j3);
+					if (!aBooleanArray827[k2])
+					{
+						if (selectedSpell >= 0)
+						{
+							if (spellDef.getSpellType() == 5)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@cya@%s", gobjDef.getName()),
+										400, objectX[k2], objectY[k2],
+										objectID[k2], objectType[k2], selectedSpell);
+								rightClickMenu.add(mrc);
 							}
-						} else if (selectedItem >= 0) {
-							rightClickMenu[menuLength].text1 = "Use " + selectedItemName + " with";
-							rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getObjectDef(j3).getName();
-							rightClickMenu[menuLength].id = 410;
-							rightClickMenu[menuLength].actionX = objectX[k2];
-							rightClickMenu[menuLength].actionY = objectY[k2];
-							rightClickMenu[menuLength].actionType = objectID[k2];
-							rightClickMenu[menuLength].actionVariable = objectType[k2];
-							rightClickMenu[menuLength].actionVariable2 = selectedItem;
-							menuLength++;
-						} else {
-							if (!EntityHandler.getObjectDef(j3).getCommand1().equalsIgnoreCase("WalkTo")) {
-								rightClickMenu[menuLength].text1 = EntityHandler.getObjectDef(j3).getCommand1();
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getObjectDef(j3).getName();
-								rightClickMenu[menuLength].id = 420;
-								rightClickMenu[menuLength].actionX = objectX[k2];
-								rightClickMenu[menuLength].actionY = objectY[k2];
-								rightClickMenu[menuLength].actionType = objectID[k2];
-								rightClickMenu[menuLength].actionVariable = objectType[k2];
-								menuLength++;
+						}
+						else if (selectedItem >= 0)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selectedItemName),
+									String.format("@cya@%s", gobjDef.getName()),
+									410, objectX[k2], objectY[k2],
+									objectID[k2], objectType[k2], selectedItem);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (!gobjDef.getCommand1().equalsIgnoreCase("WalkTo"))
+							{
+								MenuRightClick mrc = addCommand(gobjDef.getCommand1(),
+										String.format("@cya@%s", gobjDef.getName()),
+										420, objectX[k2], objectY[k2],
+										 objectID[k2], objectType[k2], null);
+								rightClickMenu.add(mrc);
 							}
-							if (!EntityHandler.getObjectDef(j3).getCommand2().equalsIgnoreCase("Examine")) {
-								rightClickMenu[menuLength].text1 = EntityHandler.getObjectDef(j3).getCommand2();
-								rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getObjectDef(j3).getName();
-								rightClickMenu[menuLength].id = 2400;
-								rightClickMenu[menuLength].actionX = objectX[k2];
-								rightClickMenu[menuLength].actionY = objectY[k2];
-								rightClickMenu[menuLength].actionType = objectID[k2];
-								rightClickMenu[menuLength].actionVariable = objectType[k2];
-								menuLength++;
+							if (!gobjDef.getCommand2().equalsIgnoreCase("Examine"))
+							{
+								MenuRightClick mrc = addCommand(gobjDef.getCommand2(),
+										String.format("@cya@%s", gobjDef.getName()),
+										2400,  objectX[k2], objectY[k2],
+										objectID[k2], objectType[k2], null);
+								rightClickMenu.add(mrc);
 							}
-							rightClickMenu[menuLength].text1 = "Examine";
-							rightClickMenu[menuLength].text2 = "@cya@" + EntityHandler.getObjectDef(j3).getName() + (ourPlayer.admin >= 2 ? " @or1@(" + j3 + ":" + (objectX[k2] + areaX) + "," + (objectY[k2] + areaY) + ")" : "");
-							rightClickMenu[menuLength].id = 3400;
-							rightClickMenu[menuLength].actionType = j3;
-							menuLength++;
+
+							String adminText = "";
+							if (ourPlayer.admin >= 2)
+								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
+										j3, objectX[k2] + areaX,
+										objectY[k2] + areaY);
+							MenuRightClick mrc = addExamine("Examine",
+									"@cya@" + gobjDef.getName(),
+									adminText, 3400, j3);
+							rightClickMenu.add(mrc);
 						}
 						aBooleanArray827[k2] = true;
 					}
-				} else {
+				}
+				else
+				{
 					if (k1 >= 0)
 						k1 = model.entityType[k1] - 0x30d40;
 					if (k1 >= 0)
 						j = k1;
 				}
+			}
 		}
 
-		if (selectedSpell >= 0 && EntityHandler.getSpellDef(selectedSpell).getSpellType() <= 1) {
-			rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on self";
-			rightClickMenu[menuLength].text2 = "";
-			rightClickMenu[menuLength].id = 1000;
-			rightClickMenu[menuLength].actionType = selectedSpell;
-			menuLength++;
+		if (selectedSpell >= 0 && spellDef.getSpellType() <= 1)
+		{
+			MenuRightClick mrc = addExamine(
+					String.format("Cast %s on self", spellDef.getName()),
+					"", "", 1000, selectedSpell);
+			rightClickMenu.add(mrc);
 		}
-		if (j != -1) {
+		if (j != -1)
+		{
 			int l1 = j;
-			if (selectedSpell >= 0) {
-				if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 6) {
-					rightClickMenu[menuLength].text1 = "Cast " + EntityHandler.getSpellDef(selectedSpell).getName() + " on ground";
-					rightClickMenu[menuLength].text2 = "";
-					rightClickMenu[menuLength].id = 900;
-					rightClickMenu[menuLength].actionX = engineHandle.selectedX[l1];
-					rightClickMenu[menuLength].actionY = engineHandle.selectedY[l1];
-					rightClickMenu[menuLength].actionType = selectedSpell;
-					menuLength++;
+			if (selectedSpell >= 0)
+			{
+				if (spellDef.getSpellType() == 6)
+				{
+					MenuRightClick mrc = addCommand(
+							String.format("Cast %s on ground", spellDef.getName()),
+							"", 900, engineHandle.selectedX[l1],
+							engineHandle.selectedY[l1],
+							selectedSpell, null, null);
+					rightClickMenu.add(mrc);
 					return;
 				}
-			} else if (selectedItem < 0) {
-				rightClickMenu[menuLength].text1 = "Walk here";
-				rightClickMenu[menuLength].text2 = "";
-				rightClickMenu[menuLength].id = 920;
-				rightClickMenu[menuLength].actionX = engineHandle.selectedX[l1];
-				rightClickMenu[menuLength].actionY = engineHandle.selectedY[l1];
-				menuLength++;
+			}
+			else if (selectedItem < 0)
+			{
+				MenuRightClick mrc = addCommand("Walk here",
+						"", 920, engineHandle.selectedX[l1],
+						engineHandle.selectedY[l1],
+						null, null, null);
+				rightClickMenu.add(mrc);
 			}
 		}
 	}
@@ -3577,39 +3649,32 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		if (selectedSpell >= 0 || selectedItem >= 0)
 		{
-			rightClickMenu[menuLength].text1 = "Cancel";
-			rightClickMenu[menuLength].text2 = "";
-			rightClickMenu[menuLength].id = 4000;
-			menuLength++;
+			MenuRightClick rmc = new MenuRightClick();
+			rmc.text1 = "Cancel";
+			rmc.text2 = "";
+			rmc.id = 4000;
+			rightClickMenu.add(rmc);
 		}
-		for (int i = 0; i < menuLength; i++)
-			rightClickMenu[i].indices = i;
 
-		for (boolean flag = false; !flag;)
-		{
-			flag = true;
-			for (int j = 0; j < menuLength - 1; j++) {
-				int l = rightClickMenu[j].indices;
-				int j1 = rightClickMenu[j + 1].indices;
-				if (rightClickMenu[l].id > rightClickMenu[j1].id) {
-					rightClickMenu[j].indices = j1;
-					rightClickMenu[j + 1].indices = l;
-					flag = false;
-				}
+		rightClickMenu.sort(new Comparator<MenuRightClick>() {
+			@Override
+			public int compare(MenuRightClick a, MenuRightClick b) {
+				return a.id < b.id ? -1 : a.id == b.id ? 0 : 1;
 			}
+		});
 
-		}
-
+		int menuLength = getMenuLength();
 		if (menuLength > 20)
-			menuLength = 20;
+			menuLength = 20; // should drop all but the first 20 instead.
 		if (menuLength > 0)
 		{
-			int k = -1;
-			for (int i1 = 0; i1 < menuLength; i1++) {
-				if (rightClickMenu[rightClickMenu[i1].indices].text2 == null
-						|| rightClickMenu[rightClickMenu[i1].indices].text2.length() <= 0)
+			MenuRightClick leftClickOption = null;
+			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
+			{
+				MenuRightClick tmp = itr.next();
+				if (tmp.text2 == null || tmp.text2.length() <= 0)
 					continue;
-				k = i1;
+				leftClickOption = tmp;
 				break;
 			}
 
@@ -3619,9 +3684,10 @@ public class mudclient extends GameWindowMiddleMan
 				s = "Choose a target";
 			else if ((selectedItem >= 0 || selectedSpell >= 0)
 					&& menuLength > 1)
-				s = "@whi@" + rightClickMenu[rightClickMenu[0].indices].text1 + " " + rightClickMenu[rightClickMenu[0].indices].text2;
-			else if (k != -1)
-				s = rightClickMenu[rightClickMenu[k].indices].text2 + ": @whi@" + rightClickMenu[rightClickMenu[0].indices].text1;
+				s = "@whi@" + rightClickMenu.get(0).text1 + " " + rightClickMenu.get(0).text2;
+			else if (leftClickOption != null)
+				s = leftClickOption.text2 + ": @whi@" + rightClickMenu.get(0).text1;
+			
 			if (menuLength == 2 && s != null)
 				s = s + "@whi@ / 1 more option";
 			if (menuLength > 2 && s != null)
@@ -3631,7 +3697,7 @@ public class mudclient extends GameWindowMiddleMan
 					|| configMouseButtons && mouseButtonClick == 1
 					&& menuLength == 1)
 			{
-				menuClick(rightClickMenu[0].indices);
+				menuClick(rightClickMenu.get(0));
 				mouseButtonClick = 0;
 				return;
 			}
@@ -3640,8 +3706,10 @@ public class mudclient extends GameWindowMiddleMan
 			{
 				MenuRightClick.menuHeight = (menuLength + 1) * 15;
 				MenuRightClick.menuWidth = gameGraphics.textWidth("Choose option", 1) + 5;
-				for (int k1 = 0; k1 < menuLength; k1++) {
-					int l1 = gameGraphics.textWidth(rightClickMenu[k1].text1 + " " + rightClickMenu[k1].text2, 1) + 5;
+				for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
+				{
+					MenuRightClick tmp = itr.next();
+					int l1 = gameGraphics.textWidth(tmp.text1 + " " + tmp.text2, 1) + 5;
 					if (l1 > MenuRightClick.menuWidth)
 						MenuRightClick.menuWidth = l1;
 				}
@@ -3657,6 +3725,7 @@ public class mudclient extends GameWindowMiddleMan
 					MenuRightClick.menuX = windowWidth - 2 - MenuRightClick.menuWidth;
 				if (MenuRightClick.menuY + MenuRightClick.menuHeight > windowHeight - 19)
 					MenuRightClick.menuY = windowHeight - 19 - MenuRightClick.menuHeight;
+
 				mouseButtonClick = 0;
 			}
 		}
@@ -3880,7 +3949,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (friendPan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				mouseOverMenu = 0;
@@ -3889,7 +3957,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (magicPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside friends panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -4270,8 +4337,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (magicPan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				mouseOverMenu = 0;
@@ -4280,7 +4345,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (magicPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside info panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -4852,7 +4916,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (optPan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				mouseOverMenu = 0;
@@ -4861,7 +4924,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (optPan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside settings panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -5789,7 +5851,6 @@ public class mudclient extends GameWindowMiddleMan
 		showBank = false;
 		super.friendsCount = 0;
 		
-		for (int i = 0; i < rightClickMenu.length; rightClickMenu[i++] = new MenuRightClick());
 
 		self = new Player();
 	}
@@ -6058,7 +6119,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (tradePan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				formatPacket(216, -1, -1);
@@ -6067,7 +6127,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (tradePan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside settings panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -7534,7 +7593,6 @@ public class mudclient extends GameWindowMiddleMan
 		else if (tradePan.getFrame().getCloseButton().isMouseOverButton(
 				super.mouseX, super.mouseY))
 		{ // close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 			{
 				formatPacket(216, -1, -1);
@@ -7543,7 +7601,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else if (tradePan.getFrame().isMouseOver(super.mouseX, super.mouseY))
 		{ // click inside settings panel but not on the content or close button
-			menuLength++;
 			if (mouseButtonClick == 1)
 				mouseButtonClick = 0;
 		}
@@ -8058,7 +8115,7 @@ public class mudclient extends GameWindowMiddleMan
 			checkMouseOverMenus();
 			boolean noMenusShown = !showQuestionMenu && !showRightClickMenu;
 			if (noMenusShown)
-				menuLength = 0;
+				rightClickMenu.clear();
 			if ((mouseOverMenu == 0
 					|| mouseOverMenu == 1
 					|| mouseOverMenu == 2
@@ -8468,7 +8525,7 @@ public class mudclient extends GameWindowMiddleMan
 		currentUser = "";
 		currentPass = "";
 		
-		rightClickMenu = new MenuRightClick[250];
+		rightClickMenu = new ArrayList<MenuRightClick>();
 		
 		duelOpponentAccepted = false;
 		duelMyAccepted = false;
@@ -8640,8 +8697,8 @@ public class mudclient extends GameWindowMiddleMan
 
 	private Item shopItems[];
 	
-	private MenuRightClick[] rightClickMenu;
-	private int menuLength;
+	private List<MenuRightClick> rightClickMenu;
+	private int getMenuLength() { return rightClickMenu.size(); }
 	
 	private boolean combatWindow;
 	private int lastLoggedInDays;

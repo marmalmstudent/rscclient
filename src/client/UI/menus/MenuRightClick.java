@@ -15,7 +15,6 @@ public class MenuRightClick
 	public int actionType;
 	public int actionVariable;
 	public int actionVariable2;
-	public int indices;
 	public int actionID;
 	public int actionCmd1;
 	public int actionCmd2;
@@ -31,7 +30,6 @@ public class MenuRightClick
 		actionType = 0;
 		actionVariable = 0;
 		actionVariable2 = 0;
-		indices = 0;
 		actionID = 0;
 		actionCmd1 = 0;
 		actionCmd2 = 0;

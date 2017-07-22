@@ -138,11 +138,11 @@ public class Camera {
 		aBoolean = true;
 	}
 
-	public int method272() {
+	public int getVisibleModelCount() {
 		return currentVisibleModelCount;
 	}
 
-	public int[] method273() {
+	public int[] visibleModelIntArray() {
 		return visibleModelIntArray;
 	}
 
