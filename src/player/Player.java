@@ -1,5 +1,7 @@
 package player;
 
+import java.util.List;
+
 public class Player
 {
 	public static final int MAX_INVENTORY_SLOTS = 30;
@@ -11,5 +13,15 @@ public class Player
 	{
 		inventory = new ItemContainer(MAX_INVENTORY_SLOTS);
 		bank = new ItemContainer(MAX_BANK_SLOTS);
+	}
+	
+	public List<Item> getInventoryItems()
+	{
+		return inventory.getItems();
+	}
+	
+	public List<Item> getBankItems()
+	{
+		return bank.getItems();
 	}
 }

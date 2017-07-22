@@ -1,6 +1,7 @@
 package player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,8 +11,6 @@ import exceptions.ItemNotFoundException;
 
 public class ItemContainer
 {
-	private final int maxItems;
-	private List<Item> items;
 	
 	public ItemContainer(int maxItems)
 	{
@@ -31,7 +30,7 @@ public class ItemContainer
 	}
 	
 	/**
-	 * Calculated the number of available slots in this container.
+	 * Calculates the number of available slots in this container.
 	 * 
 	 * @return The number of available slots in this container.
 	 */
@@ -40,9 +39,19 @@ public class ItemContainer
 		return maxItems - items.size();
 	}
 	
+	/**
+	 * Calculates the number of occupied slots in this container.
+	 * 
+	 * @return The number of occupied slots in this container.
+	 */
 	public int occupiedSlots()
 	{
 		return items.size();
+	}
+	
+	public List<Item> getItems()
+	{
+		return Collections.unmodifiableList(items);
 	}
 	
 	/**
@@ -55,7 +64,7 @@ public class ItemContainer
 	 * @throws ItemContainerFullException If this container does not have room for
 	 * 		{@code item}.
 	 */
-	public void addItem(Item item) throws ItemContainerFullException
+	protected void depositItem(Item item) throws ItemContainerFullException
 	{
 		if (!item.isStackable())
 		{
@@ -82,7 +91,7 @@ public class ItemContainer
 	 * @throws ItemNotFoundException If this container does not have an item with
 	 * 		the same id as {@code item}.
 	 */
-	public void delItem(Item item) throws ItemNotFoundException
+	protected void withdrawItem(Item item) throws ItemNotFoundException
 	{
 		Item foundItem = findItem(item.getID());
 		if (foundItem == null)
@@ -92,6 +101,9 @@ public class ItemContainer
 		if (foundItem.getAmount() == 0)
 			items.remove(foundItem);
 	}
+	
+	private final int maxItems;
+	private List<Item> items;
 	
 	/**
 	 * Attempts to find the first occurrence of an item with the id {@code id}
