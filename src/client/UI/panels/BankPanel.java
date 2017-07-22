@@ -11,7 +11,7 @@ import client.UI.InGameFrame;
 import client.UI.InGameGrid;
 import client.UI.InGamePanel;
 import entityhandling.EntityHandler;
-import model.Item;
+import player.Item;
 
 public class BankPanel extends InGamePanel
 {
@@ -70,7 +70,7 @@ public class BankPanel extends InGamePanel
 	    	depBtnPanel.addButton(withDepButtonText[i]);
 	}
 	
-	public int getWithAmt(int mouseX, int mouseY, int itemCount)
+	public long getWithAmt(int mouseX, int mouseY, long itemCount)
 	{
 		int count = 1;
 		for (int i = 0; i < withBtnPanel.getNbrButtons()-1; ++i)
@@ -163,9 +163,9 @@ public class BankPanel extends InGamePanel
 		if (selectedBankItemIdx < 0)
 			selectedBankItemId = -1;
 		else
-			selectedBankItemId = bankItems[selectedBankItemIdx].id;
+			selectedBankItemId = bankItems[selectedBankItemIdx].getID();
 		if (selectedBankItemId != -1) {
-			int selectedBankItemCount = bankItems[selectedBankItemIdx].amount;
+			long selectedBankItemCount = bankItems[selectedBankItemIdx].getAmount();
 			if (selectedBankItemCount > 0) {
 				graphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
 						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 15, 1, 0xffffff);
@@ -182,7 +182,7 @@ public class BankPanel extends InGamePanel
 	}
 
 	public void drawBankWithText(InGameButtonPanel btnPan,
-			int selectedBankItemCount, int mouseX, int mouseY)
+			long selectedBankItemCount, int mouseX, int mouseY)
 	{
 		int yOffset = 10;
 

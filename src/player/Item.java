@@ -45,6 +45,13 @@ public class Item
 		return new Item(id, amount);
 	}
 	
+	public void setAmount(long amt) throws ItemAmountOutOfBoundsException
+	{
+		if (amt < 0 || amt > stackSize)
+			throw new ItemAmountOutOfBoundsException();
+		amount = amt;
+	}
+	
 	/**
 	 * Adds {@code amt} to this item.
 	 * 

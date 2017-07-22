@@ -4,8 +4,7 @@ import java.util.List;
 
 import client.GameImageMiddleMan;
 import client.mudclient;
-import entityhandling.EntityHandler;
-import model.Item;
+import player.Item;
 
 public class InGameGrid extends InGamePanel
 {
@@ -66,10 +65,10 @@ public class InGameGrid extends InGamePanel
 				int slotY = y + row*ITEM_SLOT_HEIGHT;
 				drawItemBox(depositedItems[itemIdx], slotX, slotY,
 						selectedDepIdx == itemIdx,
-						itemIdx < depItemCount && depositedItems[itemIdx].id != -1);
-				if (itemIdx < depItemCount && depositedItems[itemIdx].id != -1)
+						itemIdx < depItemCount && depositedItems[itemIdx].getID() != -1);
+				if (itemIdx < depItemCount && depositedItems[itemIdx].getID() != -1)
 				{
-					drawDepositedText(slotX, slotY, depositedItems[itemIdx].amount,
+					drawDepositedText(slotX, slotY, depositedItems[itemIdx].getAmount(),
 							depositedTextColor);
 					drawWithdrawnText(slotX, slotY,
 							mudclient.itemCount(depositedItems[itemIdx], withdrawnItems, withItemCount),
@@ -90,14 +89,14 @@ public class InGameGrid extends InGamePanel
 
 			drawItemBox(items.get(j), col, row,
 					j < itemCount && selected[j] == 1,
-					j < itemCount && items.get(j).id != -1);
-			if (j < itemCount && items.get(j).id != -1
-					&& items.get(j).stackable())
-				drawDepositedText(col, row, items.get(j).amount, textColor);
+					j < itemCount && items.get(j).getID() != -1);
+			if (j < itemCount && items.get(j).getID() != -1
+					&& items.get(j).isStackable())
+				drawDepositedText(col, row, items.get(j).getAmount(), textColor);
 		}
 	}
 
-	public void drawDepositedText(int col, int row, int amount, int color)
+	public void drawDepositedText(int col, int row, long amount, int color)
 	{
 		graphics.drawString(mudclient.getAbbreviatedValue(amount),
 				col + 1, row + 10, 1, color);
@@ -132,7 +131,7 @@ public class InGameGrid extends InGamePanel
 			graphics.spriteClip4(slotX+1, slotY+1,
 					InGameGrid.ITEM_SLOT_WIDTH-1,
 					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					mudclient.SPRITE_ITEM_START + item.icon(),
-					item.color(), 0, 0, false);
+					mudclient.SPRITE_ITEM_START + item.getIcon(),
+					item.getColor(), 0, 0, false);
 	}
 }
