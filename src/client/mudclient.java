@@ -894,7 +894,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	final void method52(int x, int y, int width, int height, int playerID, int j1, int xOffs)
 	{
-		Mob plr = playerArray[playerID];
+		Mob plr = playerArray.get(playerID);
 		if (plr.colourBottomType == 255)
 			return;
 		int l1 = plr.currentSprite + (cameraZRot + 64) / 128 & 7;
@@ -1662,8 +1662,8 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		Mob mob = mobArray[mobArrayIndex];
 		boolean flag = false;
-		for (int i1 = 0; i1 < lastPlayerCount; i1++) {
-			if (lastPlayerArray[i1].serverIndex != mobArrayIndex)
+		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
+			if (itr.next().serverIndex != mobArrayIndex)
 				continue;
 			flag = true;
 			break;
@@ -1686,7 +1686,7 @@ public class mudclient extends GameWindowMiddleMan
 			mob.nextSprite = mob.currentSprite = sprite;
 			mob.stepCount = 0;
 		}
-		playerArray[playerCount++] = mob;
+		playerArray.add(mob);
 		return mob;
 	}
 
@@ -2571,7 +2571,7 @@ public class mudclient extends GameWindowMiddleMan
 		loginScreenNumber = 2;
 		currentUser = "";
 		currentPass = "";
-		playerCount = 0;
+		playerArray.clear();
 		npcCount = 0;
 	}
 
@@ -2668,8 +2668,9 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		gameCamera.updateFightCount(fightCount);
 		fightCount = 0;
-		for (int i1 = 0; i1 < playerCount; i1++) {
-			Mob mob = playerArray[i1];
+		int i1 = 0;
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext(); i1++) {
+			Mob mob = itr.next();
 			if (mob.colourBottomType != 255) {
 				double x = mob.currentX;
 				double y = mob.currentY;
@@ -2687,8 +2688,8 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		for (int j1 = 0; j1 < playerCount; j1++) {
-			Mob player = playerArray[j1];
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();) {
+			Mob player = itr.next();
 			if (player.anInt176 > 0) {
 				Mob npc = null;
 				if (player.attackingNpcIndex != -1)
@@ -3098,7 +3099,7 @@ public class mudclient extends GameWindowMiddleMan
 					int modelType = model.entityType[k1] / 10000;
 					if (modelType == 1)
 					{ /* another player */
-						Mob otherPlr = playerArray[modelIdx];
+						Mob otherPlr = playerArray.get(modelIdx);
 						int k3 = 0;
 						if (ourPlayer.level > 0 && otherPlr.level > 0)
 							k3 = ourPlayer.level - otherPlr.level;
@@ -4073,9 +4074,9 @@ public class mudclient extends GameWindowMiddleMan
 			mapClickX -= areaXDiff;
 		if (mapClickY >= 0)
 			mapClickY -= areaYDiff;
-		for (int i4 = 0; i4 < playerCount; i4++)
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
-			Mob mob = playerArray[i4];
+			Mob mob = itr.next();
 			mob.currentX -= areaXDiff;
 			mob.currentY -= areaYDiff;
 			for (int j5 = 0; j5 <= mob.waypointCurrent; j5++) {
@@ -4931,9 +4932,9 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void updatePlayers()
 	{
-		for (int i = 0; i < playerCount; i++)
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
-			Mob mob = playerArray[i];
+			Mob mob = itr.next();
 			int k = (mob.waypointCurrent + 1) % 10;
 			if (mob.waypointEndSprite != k)
 			{
@@ -5379,9 +5380,9 @@ public class mudclient extends GameWindowMiddleMan
 			GameImage.anInt346 = 0;
 			GameImage.anInt347 = 0;
 		}
-		for (int l = 0; l < playerCount; l++)
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
-			Mob mob_2 = playerArray[l];
+			Mob mob_2 = itr.next();
 			if (mob_2.anInt176 > 0)
 				mob_2.anInt176--;
 		}
@@ -5827,12 +5828,10 @@ public class mudclient extends GameWindowMiddleMan
 		objectCount = 0;
 		doorCount = 0;
 		groundItemCount = 0;
-		playerCount = 0;
 		for (int k = 0; k < mobArray.length; k++)
 			mobArray[k] = null;
 
-		for (int l = 0; l < playerArray.length; l++)
-			playerArray[l] = null;
+		playerArray.clear();
 
 		npcCount = 0;
 		for (int i1 = 0; i1 < npcRecordArray.length; i1++)
@@ -6166,9 +6165,10 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private Mob getLastPlayer(int serverIndex) {
-		for (int i1 = 0; i1 < lastPlayerCount; i1++) {
-			if (lastPlayerArray[i1].serverIndex == serverIndex) {
-				return lastPlayerArray[i1];
+		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
+			Mob tmp = itr.next();
+			if (tmp.serverIndex == serverIndex) {
+				return tmp;
 			}
 		}
 		return null;
@@ -6879,9 +6879,10 @@ public class mudclient extends GameWindowMiddleMan
 			case 145:
 				if (!hasWorldInfo)
 					return;
-				lastPlayerCount = playerCount;
-				for (int k = 0; k < lastPlayerCount; k++)
-					lastPlayerArray[k] = playerArray[k];
+				
+				lastPlayerArray.clear();
+				for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
+					lastPlayerArray.add(itr.next());
 
 				int currentOffset = 8;
 				sectionX = DataOperations.getIntFromByteArray(data, currentOffset, 11);
@@ -6902,7 +6903,7 @@ public class mudclient extends GameWindowMiddleMan
 					ourPlayer.currentX = ourPlayer.waypointsX[0] = mapEnterX;
 					ourPlayer.currentY = ourPlayer.waypointsY[0] = mapEnterY;
 				}
-				playerCount = 0;
+				playerArray.clear();
 				ourPlayer = makePlayer(serverIndex, mapEnterX, mapEnterY, mobSprite);
 				int newPlayerCount = DataOperations.getIntFromByteArray(data, currentOffset, 8);
 				currentOffset += 8;
@@ -6953,7 +6954,7 @@ public class mudclient extends GameWindowMiddleMan
 							lastMob.nextSprite = needsNextSprite;
 						}
 					}
-					playerArray[playerCount++] = lastMob;
+					playerArray.add(lastMob);
 				}
 
 				mobCount = 0;
@@ -8394,9 +8395,9 @@ public class mudclient extends GameWindowMiddleMan
 						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x0000ff, 0xff);
 		}
 
-		for (int i = 0; i < playerCount; i++)
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
-			Mob mob = playerArray[i];
+			Mob mob = itr.next();
 			if (mob == ourPlayer)
 				continue;
 			x = (mob.currentX - ourPlayer.currentX) * 4.5;
@@ -8566,7 +8567,6 @@ public class mudclient extends GameWindowMiddleMan
 		selectedItemName = "";
 		anIntArray757 = new int[50];
 		showCharacterLookScreen = false;
-		lastPlayerArray = new Mob[500];
 		appletMode = true;
 		gameDataModels = new Model[1000];
 		configMouseButtons = false;
@@ -8607,7 +8607,8 @@ public class mudclient extends GameWindowMiddleMan
 		serverIndex = -1;
 		showTradeConfirmWindow = false;
 		tradeConfirmAccepted = false;
-		playerArray = new Mob[500];
+		playerArray = new ArrayList<Mob>(500);
+		lastPlayerArray = new ArrayList<Mob>(500);
 		serverMessageBoxTop = false;
 		cameraHeight = 8.59375D;
 		cameraZoom = 1.0;
@@ -8718,8 +8719,6 @@ public class mudclient extends GameWindowMiddleMan
 	private String serverMessage;
 	private String duelOpponentName;
 	private int mouseOverBankPageText;
-	private int playerCount;
-	private int lastPlayerCount;
 	private int fightCount;
 	private int wearing[];
 	private int mobMessageCount;
@@ -8790,7 +8789,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int anIntArray757[];
 	private boolean showCharacterLookScreen;
 	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
-	private Mob lastPlayerArray[];
 	private int inputBoxType;
 	private boolean appletMode;
 	private int combatStyle;
@@ -8904,7 +8902,7 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean tradeConfirmAccepted;
 	private int anInt892;
 	private EngineHandle engineHandle;
-	private Mob playerArray[];
+	private List<Mob> playerArray, lastPlayerArray;
 	private boolean serverMessageBoxTop;
 	private int referId;
 	private int anInt900;
