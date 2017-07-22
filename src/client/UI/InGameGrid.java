@@ -1,5 +1,7 @@
 package client.UI;
 
+import java.util.List;
+
 import client.GameImageMiddleMan;
 import client.mudclient;
 import entityhandling.EntityHandler;
@@ -53,7 +55,7 @@ public class InGameGrid extends InGamePanel
 	public void drawStorableGrid(
 			Item[] depositedItems, int depItemStart, int depItemCount,
 			int depositedTextColor, int selectedDepIdx,
-			Item[] withdrawnItems, int withItemCount, int withdrawnTextColor)
+			List<Item> withdrawnItems, int withItemCount, int withdrawnTextColor)
 	{
 		int itemIdx = depItemStart;
 		for (int row = 0; row < nRows; row++)
@@ -78,7 +80,7 @@ public class InGameGrid extends InGamePanel
 		}
 	}
 
-	public void drawStaticGrid(Item[] items, int itemCount, int[] selected,
+	public void drawStaticGrid(List<Item> items, int itemCount, int[] selected,
 			int textColor)
 	{
 		for (int j = 0; j < getSlots(); j++)
@@ -86,12 +88,12 @@ public class InGameGrid extends InGamePanel
 			int col = x + (j % nCols) * ITEM_SLOT_WIDTH;
 			int row = y + (j / nCols) * ITEM_SLOT_HEIGHT;
 
-			drawItemBox(items[j], col, row,
+			drawItemBox(items.get(j), col, row,
 					j < itemCount && selected[j] == 1,
-					j < itemCount && items[j].id != -1);
-			if (j < itemCount && items[j].id != -1
-					&& items[j].stackable())
-				drawDepositedText(col, row, items[j].amount, textColor);
+					j < itemCount && items.get(j).id != -1);
+			if (j < itemCount && items.get(j).id != -1
+					&& items.get(j).stackable())
+				drawDepositedText(col, row, items.get(j).amount, textColor);
 		}
 	}
 

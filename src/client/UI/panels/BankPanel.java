@@ -1,6 +1,7 @@
 package client.UI.panels;
 
 import java.awt.Rectangle;
+import java.util.List;
 
 import client.GameImageMiddleMan;
 import client.mudclient;
@@ -141,7 +142,7 @@ public class BankPanel extends InGamePanel
 	}
 	
 	public void drawBankDepWithPanel(Item[] bankItems, int selectedBankItemIdx,
-			Item[] invItems, int nInvItems, int mouseX, int mouseY)
+			List<Item> invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		graphics.drawBoxAlpha(
 				getBottomInfoBoxX(), getBottomInfoBoxY(),
@@ -214,7 +215,7 @@ public class BankPanel extends InGamePanel
 
 	public void drawBankDepText(InGameButtonPanel btnPan,
 			Item[] bankItems, int selectedBankItemIdx,
-			Item[] invItems, int nInvItems, int mouseX, int mouseY)
+			List<Item> invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		int yOffset = 10;
 

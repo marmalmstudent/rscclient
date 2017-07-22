@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Player
 {
-	public static final int MAX_INVENTORY_SLOTS = 30;
+	public static final int MAX_INVENTORY_SLOTS = 35;
 	public static final int MAX_BANK_SLOTS = 256;
 	
 	private ItemContainer inventory, bank;
