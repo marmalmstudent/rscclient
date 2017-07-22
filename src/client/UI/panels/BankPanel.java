@@ -141,7 +141,7 @@ public class BankPanel extends InGamePanel
 				getTopInfoBoxY() + 12, 1, 0x00ffff);
 	}
 	
-	public void drawBankDepWithPanel(Item[] bankItems, int selectedBankItemIdx,
+	public void drawBankDepWithPanel(List<Item> bankItems, int selectedBankItemIdx,
 			List<Item> invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		graphics.drawBoxAlpha(
@@ -163,16 +163,16 @@ public class BankPanel extends InGamePanel
 		if (selectedBankItemIdx < 0)
 			selectedBankItemId = -1;
 		else
-			selectedBankItemId = bankItems[selectedBankItemIdx].getID();
+			selectedBankItemId = bankItems.get(selectedBankItemIdx).getID();
 		if (selectedBankItemId != -1) {
-			long selectedBankItemCount = bankItems[selectedBankItemIdx].getAmount();
+			long selectedBankItemCount = bankItems.get(selectedBankItemIdx).getAmount();
 			if (selectedBankItemCount > 0) {
 				graphics.drawString("Withdraw " + EntityHandler.getItemDef(selectedBankItemId).getName(),
 						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 15, 1, 0xffffff);
 				drawBankWithText(getWithButtonPanel(), selectedBankItemCount,
 						mouseX, mouseY);
 			}
-			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems, nInvItems) > 0) {
+			if (mudclient.itemCount(bankItems.get(selectedBankItemIdx), invItems, nInvItems) > 0) {
 				graphics.drawString("Deposit " + EntityHandler.getItemDef(selectedBankItemId).getName(),
 						getBottomInfoBoxX() + 2, getBottomInfoBoxY() + 40, 1, 0xffffff);
 				drawBankDepText(getDepButtonPanel(), bankItems, selectedBankItemIdx,
@@ -214,7 +214,7 @@ public class BankPanel extends InGamePanel
 	}
 
 	public void drawBankDepText(InGameButtonPanel btnPan,
-			Item[] bankItems, int selectedBankItemIdx,
+			List<Item> bankItems, int selectedBankItemIdx,
 			List<Item> invItems, int nInvItems, int mouseX, int mouseY)
 	{
 		int yOffset = 10;
@@ -224,7 +224,7 @@ public class BankPanel extends InGamePanel
 		for (int i = 0; i < btnPan.getNbrButtons()-1; ++i)
 		{
 			button = btnPan.getButton(i);
-			if (mudclient.itemCount(bankItems[selectedBankItemIdx], invItems, nInvItems) >= count)
+			if (mudclient.itemCount(bankItems.get(selectedBankItemIdx), invItems, nInvItems) >= count)
 			{
 				graphics.drawString(
 						button.getButtonText(), button.getX() + 2,

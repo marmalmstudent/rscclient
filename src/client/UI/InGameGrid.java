@@ -52,7 +52,7 @@ public class InGameGrid extends InGamePanel
 	}
 
 	public void drawStorableGrid(
-			Item[] depositedItems, int depItemStart, int depItemCount,
+			List<Item> depositedItems, int depItemStart, int depItemCount,
 			int depositedTextColor, int selectedDepIdx,
 			List<Item> withdrawnItems, int withItemCount, int withdrawnTextColor)
 	{
@@ -63,15 +63,15 @@ public class InGameGrid extends InGamePanel
 			{
 				int slotX = x + col*ITEM_SLOT_WIDTH;
 				int slotY = y + row*ITEM_SLOT_HEIGHT;
-				drawItemBox(depositedItems[itemIdx], slotX, slotY,
+				drawItemBox(depositedItems.get(itemIdx), slotX, slotY,
 						selectedDepIdx == itemIdx,
-						itemIdx < depItemCount && depositedItems[itemIdx].getID() != -1);
-				if (itemIdx < depItemCount && depositedItems[itemIdx].getID() != -1)
+						itemIdx < depItemCount && depositedItems.get(itemIdx).getID() != -1);
+				if (itemIdx < depItemCount && depositedItems.get(itemIdx).getID() != -1)
 				{
-					drawDepositedText(slotX, slotY, depositedItems[itemIdx].getAmount(),
+					drawDepositedText(slotX, slotY, depositedItems.get(itemIdx).getAmount(),
 							depositedTextColor);
 					drawWithdrawnText(slotX, slotY,
-							mudclient.itemCount(depositedItems[itemIdx], withdrawnItems, withItemCount),
+							mudclient.itemCount(depositedItems.get(itemIdx), withdrawnItems, withItemCount),
 							withdrawnTextColor);
 				}
 				++itemIdx;

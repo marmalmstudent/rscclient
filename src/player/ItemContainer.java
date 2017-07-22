@@ -18,7 +18,7 @@ public class ItemContainer
 		this.maxItems = maxItems;
 		items = new ArrayList<Item>(maxItems);
 		for (int i = 0; i < maxItems; ++i)
-			depositItem(new Item(0, stackAll));
+			items.add(new Item(0, stackAll));
 	}
 	
 	/**
