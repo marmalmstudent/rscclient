@@ -12,10 +12,13 @@ import exceptions.ItemNotFoundException;
 public class ItemContainer
 {
 	
-	public ItemContainer(int maxItems)
+	public ItemContainer(int maxItems, boolean stackAll)
 	{
+		this.stackAll = stackAll;
 		this.maxItems = maxItems;
 		items = new ArrayList<Item>(maxItems);
+		for (int i = 0; i < maxItems; ++i)
+			depositItem(new Item(0, stackAll));
 	}
 	
 	/**
@@ -51,7 +54,9 @@ public class ItemContainer
 	
 	public List<Item> getItems()
 	{
-		return Collections.unmodifiableList(items);
+		// TODO: return unmodifiable list
+		//return Collections.unmodifiableList(items);
+		return items;
 	}
 	
 	/**
@@ -70,14 +75,14 @@ public class ItemContainer
 		{
 			if (isFull())
 				throw new ItemContainerFullException();
-			items.add(item);
+			items.add(new Item(item.getID(), stackAll, item.getAmount()));
 		}
 		
 		Item nextAvailable = findItem(item.getID());
 		if (nextAvailable != null)
 			nextAvailable.addAmount(item.getAmount());
 		else
-			items.add(item);
+			items.add(new Item(item.getID(), stackAll, item.getAmount()));
 	}
 	
 	/**
@@ -102,6 +107,7 @@ public class ItemContainer
 			items.remove(foundItem);
 	}
 	
+	private boolean stackAll;
 	private final int maxItems;
 	private List<Item> items;
 	

@@ -11,8 +11,8 @@ public class Player
 	
 	public Player()
 	{
-		inventory = new ItemContainer(MAX_INVENTORY_SLOTS);
-		bank = new ItemContainer(MAX_BANK_SLOTS);
+		inventory = new ItemContainer(MAX_INVENTORY_SLOTS, false);
+		bank = new ItemContainer(MAX_BANK_SLOTS, true);
 	}
 	
 	public List<Item> getInventoryItems()

@@ -168,8 +168,8 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(tradeMyItemCount);
 			for (int i = 0; i < tradeMyItemCount; i++)
 			{
-				super.streamClass.add2ByteInt(tradeMyItemsI[i].getID());
-				super.streamClass.add4ByteInt((int) tradeMyItemsI[i].getAmount());
+				super.streamClass.add2ByteInt(tradeMyItems[i].getID());
+				super.streamClass.add4ByteInt((int) tradeMyItems[i].getAmount());
 			}
 			super.streamClass.writePktSize();
 			tradeOtherAccepted = false;
@@ -289,24 +289,24 @@ public class mudclient extends GameWindowMiddleMan
 		boolean addNewItem = true;
 		for (int i = 0; i < tradeMyItemCount; ++i)
 		{
-			if (tradeMyItemsI[i].getID() != id)
+			if (tradeMyItems[i].getID() != id)
 				continue;
 			if (!EntityHandler.getItemDef(id).isStackable())
 				break;
-			if (inventoryCount(id) < (tradeMyItemsI[i].getAmount() + amount))
+			if (inventoryCount(id) < (tradeMyItems[i].getAmount() + amount))
 			{
 				displayMessage("@cya@You do not have that many"
 						+ EntityHandler.getItemDef(id).getName()
 						+ " to offer", 3, 0);
 				return;
 			}
-			tradeMyItemsI[i].addAmount(amount);
+			tradeMyItems[i].addAmount(amount);
 			addNewItem = false;
 			break;
 		}
 		if (addNewItem)
 		{
-			tradeMyItemsI[tradeMyItemCount++] = new Item(id, amount);
+			tradeMyItems[tradeMyItemCount++] = new Item(id, false, amount);
 		}
 		formatPacket(70, -1, -1);
 	}
@@ -340,7 +340,7 @@ public class mudclient extends GameWindowMiddleMan
 			break;
 		}
 		if (addNewItem)
-			duelMyItems[duelMyItemCount++] = new Item(id, amount);
+			duelMyItems[duelMyItemCount++] = new Item(id, false, amount);
 		formatPacket(123, -1, -1);
 	}
 
@@ -602,11 +602,11 @@ public class mudclient extends GameWindowMiddleMan
 		int amount = 0;
 		for (int index = 0; index < inventoryCount; index++)
 		{
-			if (inventory.get(index).getID() == reqID)
+			if (self.getInventoryItems().get(index).getID() == reqID)
 				if (!EntityHandler.getItemDef(reqID).isStackable())
 					++amount;
 				else
-					amount += inventory.get(index).getAmount();
+					amount += self.getInventoryItems().get(index).getAmount();
 		}
 		return amount;
 	}
@@ -622,6 +622,10 @@ public class mudclient extends GameWindowMiddleMan
 				else
 					amount += items.get(index).getAmount();
 		}
+		/*
+		System.out.printf("%s, %b, %d, %d\n", item.getName(), item.isStackable(),
+				item.getAmount(), amount);
+				*/
 		return amount;
 	}
 
@@ -1400,7 +1404,7 @@ public class mudclient extends GameWindowMiddleMan
 		InGameGrid bankGrid = bankPan.getBankGrid();
 		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
 		bankGrid.drawStorableGrid(bankItems, itemIdx, bankItemCount, bankPan.getBankCountTextColor(), selectedBankItem, self.getInventoryItems(), inventoryCount, 0x00ffff);
-		bankPan.drawBankDepWithPanel(bankItems, selectedBankItem, inventory, inventoryCount, super.mouseX, super.mouseY);
+		bankPan.drawBankDepWithPanel(bankItems, selectedBankItem, self.getInventoryItems(), inventoryCount, super.mouseX, super.mouseY);
 	}
 
 	/**
@@ -1450,7 +1454,7 @@ public class mudclient extends GameWindowMiddleMan
 				+ (yInInv / itemSlotHeight) * invGrid.getCols();
 		if (currentInventorySlot < invGrid.getCols()*invGrid.getRows())
 		{
-			Item item = inventory.get(currentInventorySlot);
+			Item item = self.getInventoryItems().get(currentInventorySlot);
 			if (selectedSpell >= 0) {
 				if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3)
 				{
@@ -1521,7 +1525,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final void drawInventoryMenu(boolean flag)
 	{
 		invPan.getFrame().drawComponent(super.mouseX, super.mouseY);
-		invPan.getInvGrid().drawStaticGrid(inventory,
+		invPan.getInvGrid().drawStaticGrid(self.getInventoryItems(),
 				inventoryCount, wearing,
 				invPan.getInvCountTextColor());
 		if (!flag)
@@ -2338,7 +2342,7 @@ public class mudclient extends GameWindowMiddleMan
 		if (currentMenuID == 650) {
 			selectedItem = actionType;
 			mouseOverMenu = 0;
-			selectedItemName = inventory.get(selectedItem).getName();
+			selectedItemName = self.getInventoryItems().get(selectedItem).getName();
 		}
 		if (currentMenuID == 660) {
 			super.streamClass.createPacket(147);
@@ -2346,7 +2350,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.writePktSize();
 			selectedItem = -1;
 			mouseOverMenu = 0;
-			displayMessage("Dropping " + inventory.get(actionType).getName(), 4, 0);
+			displayMessage("Dropping " + self.getInventoryItems().get(actionType).getName(), 4, 0);
 		}
 		if (currentMenuID == 3600)
 			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
@@ -2566,7 +2570,7 @@ public class mudclient extends GameWindowMiddleMan
 		npcCount = 0;
 	}
 
-	private static final String method74(int i) {
+	private static final String method74(long i) {
 		String s = String.valueOf(i);
 		for (int j = s.length() - 3; j > 0; j -= 3)
 			s = s.substring(0, j) + "," + s.substring(j);
@@ -4473,9 +4477,9 @@ public class mudclient extends GameWindowMiddleMan
 					for (int i2 = 0; i2 < 8; i2++) {
 						int l2 = 7 + i2 * 49;
 						int l3 = 28 + i1 * 34;
-						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItemsI[k].getID() != -1) {
+						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItems[k].getID() != -1) {
 							selectedShopItemIndex = k;
-							selectedShopItemType = shopItemsI[k].getID();
+							selectedShopItemType = shopItems[k].getID();
 						}
 						k++;
 					}
@@ -4483,20 +4487,20 @@ public class mudclient extends GameWindowMiddleMan
 				}
 
 				if (selectedShopItemIndex >= 0) {
-					int j2 = shopItemsI[selectedShopItemIndex].getID();
+					int j2 = shopItems[selectedShopItemIndex].getID();
 					if (j2 != -1) {
-						if (shopItemsI[selectedShopItemIndex].getAmount() > 0
+						if (shopItems[selectedShopItemIndex].getAmount() > 0
 								&& i > 298 && j >= 204 && i < 408 && j <= 215) {
 							int i4 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
 							super.streamClass.createPacket(128);
-							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].getID());
+							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
 							super.streamClass.add4ByteInt(i4);
 							super.streamClass.writePktSize();
 						}
 						if (inventoryCount(j2) > 0 && i > 2 && j >= 229 && i < 112 && j <= 240) {
 							int j4 = (shopItemSellPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
 							super.streamClass.createPacket(255);
-							super.streamClass.add2ByteInt(shopItemsI[selectedShopItemIndex].getID());
+							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
 							super.streamClass.add4ByteInt(j4);
 							super.streamClass.writePktSize();
 						}
@@ -4536,13 +4540,13 @@ public class mudclient extends GameWindowMiddleMan
 				else
 					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, k2, 160);
 				gameGraphics.drawBoxEdge(j5, i6, 50, 35, 0);
-				if (shopItemsI[k3].getID() != -1) {
+				if (shopItems[k3].getID() != -1) {
 					gameGraphics.spriteClip4(j5, i6, 48, 32,
-							SPRITE_ITEM_START + shopItemsI[k3].getIcon(),
-							shopItemsI[k3].getColor(), 0, 0, false);
-					gameGraphics.drawString(Long.toString(shopItemsI[k3].getAmount()),
+							SPRITE_ITEM_START + shopItems[k3].getIcon(),
+							shopItems[k3].getColor(), 0, 0, false);
+					gameGraphics.drawString(Long.toString(shopItems[k3].getAmount()),
 							j5 + 1, i6 + 10, 1, 65280);
-					gameGraphics.drawBoxTextRight(Integer.toString(inventoryCount(shopItemsI[k3].getID())),
+					gameGraphics.drawBoxTextRight(Integer.toString(inventoryCount(shopItems[k3].getID())),
 							j5 + 47, i6 + 10, 1, 65535);
 				}
 				k3++;
@@ -4555,9 +4559,9 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawText("Select an object to buy or sell", byte0 + 204, byte1 + 214, 3, 0xffff00);
 			return;
 		}
-		int i5 = shopItemsI[selectedShopItemIndex].getID();
+		int i5 = shopItems[selectedShopItemIndex].getID();
 		if (i5 != -1) {
-			if (shopItemsI[selectedShopItemIndex].getAmount() > 0) {
+			if (shopItems[selectedShopItemIndex].getAmount() > 0) {
 				int j6 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
 				gameGraphics.drawString("Buy a new " + EntityHandler.getItemDef(i5).getName() + " for " + j6 + "gp", byte0 + 2, byte1 + 214, 1, 0xffff00);
 				int k1 = 0xffffff;
@@ -5446,7 +5450,7 @@ public class mudclient extends GameWindowMiddleMan
 		for (int j = 0; j < duelConfirmMyItemCount; j++) {
 			String s = duelConfirmMyItems[j].getName();
 			if (duelConfirmMyItems[j].isStackable())
-				s = s + " x " + method74((int) duelConfirmMyItems[j].getAmount());
+				s = s + " x " + method74(duelConfirmMyItems[j].getAmount());
 			gameGraphics.drawText(s, byte0 + 117, byte1 + 42 + j * 12, 1, 0xffffff);
 		}
 
@@ -5456,7 +5460,7 @@ public class mudclient extends GameWindowMiddleMan
 		for (int k = 0; k < duelConfirmOpponentItemCount; k++) {
 			String s1 = duelConfirmOpponentItems[k].getName();
 			if (duelConfirmOpponentItems[k].isStackable())
-				s1 = s1 + " x " + method74((int) duelConfirmOpponentItems[k].getAmount());
+				s1 = s1 + " x " + method74(duelConfirmOpponentItems[k].getAmount());
 			gameGraphics.drawText(s1, byte0 + 351, byte1 + 42 + k * 12, 1, 0xffffff);
 		}
 
@@ -5514,7 +5518,7 @@ public class mudclient extends GameWindowMiddleMan
 		for (int j = 0; j < inventoryCount; j++) {
 			if (bankItemCount >= bankItemsMax)
 				break;
-			int k = inventory.get(j).getID();
+			int k = self.getInventoryItems().get(j).getID();
 			boolean flag = false;
 			for (int l = 0; l < bankItemCount; l++) {
 				if (bankItems[l].getID() != k)
@@ -5524,7 +5528,7 @@ public class mudclient extends GameWindowMiddleMan
 			}
 
 			if (!flag) {
-				bankItems[bankItemCount++] = new Item(k, 0);
+				bankItems[bankItemCount++] = new Item(k, false, 0);
 			}
 		}
 
@@ -5786,19 +5790,20 @@ public class mudclient extends GameWindowMiddleMan
 		super.friendsCount = 0;
 		
 		for (int i = 0; i < rightClickMenu.length; rightClickMenu[i++] = new MenuRightClick());
-		
-		for (int i = 0; i < bankItems.length; bankItems[i++] = new Item(0));
-		for (int i = 0; i < duelMyItems.length; duelMyItems[i++] = new Item(0));
-		for (int i = 0; i < tradeConfirmItemsI.length; tradeConfirmItemsI[i++] = new Item(0));
-		for (int i = 0; i < tradeConfirmOtherItemsI.length; tradeConfirmOtherItemsI[i++] = new Item(0));
+
+		self = new Player();
+		for (int i = 0; i < bankItems.length; bankItems[i++] = new Item(0, true));
+		for (int i = 0; i < newBankItems.length; newBankItems[i++] = new Item(0, true));
+		for (int i = 0; i < duelMyItems.length; duelMyItems[i++] = new Item(0, false));
+		for (int i = 0; i < duelOpponentItems.length; duelOpponentItems[i++] = new Item(0, false));
+		for (int i = 0; i < duelConfirmMyItems.length; duelConfirmMyItems[i++] = new Item(0, true));
+		for (int i = 0; i < duelConfirmOpponentItems.length; duelConfirmOpponentItems[i++] = new Item(0, true));
+		for (int i = 0; i < tradeMyItems.length; tradeMyItems[i++] = new Item(0, false));
+		for (int i = 0; i < tradeConfirmItems.length; tradeConfirmItems[i++] = new Item(0, true));
+		for (int i = 0; i < tradeOtherItems.length; tradeOtherItems[i++] = new Item(0, false));
+		for (int i = 0; i < tradeConfirmOtherItems.length; tradeConfirmOtherItems[i++] = new Item(0, true));
 		for (int i = 0; i < Player.MAX_INVENTORY_SLOTS; ++i)
-			inventory.add(new Item(0));
-		for (int i = 0; i < duelOpponentItems.length; duelOpponentItems[i++] = new Item(0));
-		for (int i = 0; i < duelConfirmOpponentItems.length; duelConfirmOpponentItems[i++] = new Item(0));
-		for (int i = 0; i < newBankItems.length; newBankItems[i++] = new Item(0));
-		for (int i = 0; i < duelConfirmMyItems.length; duelConfirmMyItems[i++] = new Item(0));
-		for (int i = 0; i < tradeOtherItemsI.length; tradeOtherItemsI[i++] = new Item(0));
-		for (int i = 0; i < tradeMyItemsI.length; tradeMyItemsI[i++] = new Item(0));
+			self.getInventoryItems().add(new Item(0, false));
 	}
 
 	private void drawTradePanel()
@@ -5856,18 +5861,18 @@ public class mudclient extends GameWindowMiddleMan
 			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
 			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
-			drawItemBox(invGrid, inventory.get(j).getID(), col, row,
-					false, j < inventoryCount && inventory.get(j).getID() != -1);
-			if (j < inventoryCount && inventory.get(j).getID() != -1
-					&& inventory.get(j).isStackable())
-				drawTradeInvText(col, row, inventory.get(j).getAmount());
+			drawItemBox(invGrid, self.getInventoryItems().get(j).getID(), col, row,
+					false, j < inventoryCount && self.getInventoryItems().get(j).getID() != -1);
+			if (j < inventoryCount && self.getInventoryItems().get(j).getID() != -1
+					&& self.getInventoryItems().get(j).isStackable())
+				drawTradeInvText(col, row, self.getInventoryItems().get(j).getAmount());
 			if (super.mouseX > col &&
 					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
 					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < inventoryCount && inventory.get(j).getID() != -1)
+					&& j < inventoryCount && self.getInventoryItems().get(j).getID() != -1)
 				gameGraphics.drawString(
-						inventory.get(j).getName() + ": @whi@" + inventory.get(j).getDescription(),
+						self.getInventoryItems().get(j).getName() + ": @whi@" + self.getInventoryItems().get(j).getDescription(),
 						tradePan.getX() + 2,
 						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
 						1, 0xffff00);
@@ -5882,18 +5887,18 @@ public class mudclient extends GameWindowMiddleMan
 			int col = myOfferGrid.getX() + (j % myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
 			int row = myOfferGrid.getY() + (j / myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
-			drawItemBox(myOfferGrid, tradeMyItemsI[j].getID(), col, row,
-					false, j < tradeMyItemCount && tradeMyItemsI[j].getID() != -1);
-			if (j < tradeMyItemCount && tradeMyItemsI[j].getID() != -1
-					&& tradeMyItemsI[j].isStackable())
-				drawTradeInvText(col, row, tradeMyItemsI[j].getAmount());
+			drawItemBox(myOfferGrid, tradeMyItems[j].getID(), col, row,
+					false, j < tradeMyItemCount && tradeMyItems[j].getID() != -1);
+			if (j < tradeMyItemCount && tradeMyItems[j].getID() != -1
+					&& tradeMyItems[j].isStackable())
+				drawTradeInvText(col, row, tradeMyItems[j].getAmount());
 			if (super.mouseX > col &&
 					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
 					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < tradeMyItemCount && tradeMyItemsI[j].getID() != -1)
-				gameGraphics.drawString(tradeMyItemsI[j].getName()
-						+ ": @whi@" + tradeMyItemsI[j].getDescription(),
+					&& j < tradeMyItemCount && tradeMyItems[j].getID() != -1)
+				gameGraphics.drawString(tradeMyItems[j].getName()
+						+ ": @whi@" + tradeMyItems[j].getDescription(),
 						tradePan.getX() + 2,
 						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
 						1, 0xffff00);
@@ -5908,18 +5913,18 @@ public class mudclient extends GameWindowMiddleMan
 			int col = otherOfferGrid.getX() + (j % otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
 			int row = otherOfferGrid.getY() + (j / otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
 
-			drawItemBox(otherOfferGrid, tradeOtherItemsI[j].getID(), col, row,
-					false, j < tradeOtherItemCount && tradeOtherItemsI[j].getID() != -1);
-			if (j < tradeOtherItemCount && tradeOtherItemsI[j].getID() != -1
-					&& tradeOtherItemsI[j].isStackable())
-				drawTradeInvText(col, row, tradeOtherItemsI[j].getAmount());
+			drawItemBox(otherOfferGrid, tradeOtherItems[j].getID(), col, row,
+					false, j < tradeOtherItemCount && tradeOtherItems[j].getID() != -1);
+			if (j < tradeOtherItemCount && tradeOtherItems[j].getID() != -1
+					&& tradeOtherItems[j].isStackable())
+				drawTradeInvText(col, row, tradeOtherItems[j].getAmount());
 			if (super.mouseX > col &&
 					super.mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
 					&& super.mouseY > row
 					&& super.mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < tradeOtherItemCount && tradeOtherItemsI[j].getID() != -1)
-				gameGraphics.drawString(tradeOtherItemsI[j].getName()
-						+ ": @whi@" + tradeOtherItemsI[j].getDescription(),
+					&& j < tradeOtherItemCount && tradeOtherItems[j].getID() != -1)
+				gameGraphics.drawString(tradeOtherItems[j].getName()
+						+ ": @whi@" + tradeOtherItems[j].getDescription(),
 						tradePan.getX() + 2,
 						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
 						1, 0xffff00);
@@ -5969,18 +5974,18 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			boolean flag = false;
 			int l1 = 0;
-			int slotItemId = inventory.get(slotIdx).getID();
+			int slotItemId = self.getInventoryItems().get(slotIdx).getID();
 			for (int k3 = 0; k3 < tradeMyItemCount; k3++)
 			{
-				if (tradeMyItemsI[k3].getID() == slotItemId)
+				if (tradeMyItems[k3].getID() == slotItemId)
 				{
 					if (EntityHandler.getItemDef(slotItemId).isStackable())
 					{
 						for (int i4 = 0; i4 < itemIncrement; i4++)
 						{
-							if (tradeMyItemsI[k3].getAmount() < inventory.get(slotIdx).getAmount())
+							if (tradeMyItems[k3].getAmount() < self.getInventoryItems().get(slotIdx).getAmount())
 							{
-								tradeMyItemsI[k3].addAmount(1);
+								tradeMyItems[k3].addAmount(1);
 							}
 							flag = true;
 						}
@@ -5994,7 +5999,7 @@ public class mudclient extends GameWindowMiddleMan
 				flag = true;
 			if (!flag && tradeMyItemCount < 12)
 			{
-				tradeMyItemsI[tradeMyItemCount++] = new Item(slotItemId, 1);
+				tradeMyItems[tradeMyItemCount++] = new Item(slotItemId, false, 1);
 				flag = true;
 			}
 			if (flag)
@@ -6009,20 +6014,20 @@ public class mudclient extends GameWindowMiddleMan
 				+ ((super.mouseY - (myOfferGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * myOfferGrid.getCols();
 		if (l >= 0 && l < tradeMyItemCount)
 		{
-			int j1 = tradeMyItemsI[l].getID();
+			int j1 = tradeMyItems[l].getID();
 			for (int i2 = 0; i2 < itemIncrement; i2++)
 			{
 				if (EntityHandler.getItemDef(j1).isStackable()
-						&& tradeMyItemsI[l].getAmount() > 1)
+						&& tradeMyItems[l].getAmount() > 1)
 				{
-					tradeMyItemsI[l].delAmount(1);
+					tradeMyItems[l].delAmount(1);
 					continue;
 				}
 				tradeMyItemCount--;
 				mouseDownTime = 0;
 				for (int l2 = l; l2 < tradeMyItemCount; l2++)
 				{
-					tradeMyItemsI[l2] = tradeMyItemsI[l2 + 1];
+					tradeMyItems[l2] = tradeMyItems[l2 + 1];
 				}
 
 				break;
@@ -6416,7 +6421,7 @@ public class mudclient extends GameWindowMiddleMan
 				int l5 = 2;
 				for (int i12 = 0; i12 < duelOpponentItemCount; i12++)
 				{
-					duelOpponentItems[i12] = new Item(DataOperations.getUnsigned2Bytes(data, l5));
+					duelOpponentItems[i12] = new Item(DataOperations.getUnsigned2Bytes(data, l5), false);
 					l5 += 2;
 					duelOpponentItems[i12].setAmount(DataOperations.readInt(data, l5));
 					l5 += 4;
@@ -6517,7 +6522,7 @@ public class mudclient extends GameWindowMiddleMan
 				bankItemsMax = data[l4++] & 0xff;
 				for (int k11 = 0; k11 < newBankItemCount; k11++)
 				{
-					newBankItems[k11] = new Item(DataOperations.getUnsigned2Bytes(data, l4));
+					newBankItems[k11] = new Item(DataOperations.getUnsigned2Bytes(data, l4), true);
 					l4 += 2;
 					newBankItems[k11].setAmount(DataOperations.getUnsigned4Bytes(data, l4));
 					l4 += 4;
@@ -6692,15 +6697,15 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					int j15 = DataOperations.getUnsigned2Bytes(data, invOffset);
 					invOffset += 2;
-					inventory.set(invItem, new Item(j15 & 0x7fff));
+					self.getInventoryItems().set(invItem, new Item(j15 & 0x7fff, false));
 					wearing[invItem] = j15 / 32768;
 					if (EntityHandler.getItemDef(j15 & 0x7fff).isStackable())
 					{
-						inventory.get(invItem).setAmount(DataOperations.readInt(data, invOffset));
+						self.getInventoryItems().get(invItem).setAmount(DataOperations.readInt(data, invOffset));
 						invOffset += 4;
 					}
 					else
-						inventory.get(invItem).setAmount(1);
+						self.getInventoryItems().get(invItem).setAmount(1);
 				}
 				break;
 			case 115:
@@ -6818,7 +6823,7 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				else
 				{
-					newBankItems[bankSlot] = new Item(bankItemId, bankItemCount);
+					newBankItems[bankSlot] = new Item(bankItemId, false, bankItemCount);
 					if (bankSlot >= newBankItemCount)
 						newBankItemCount = bankSlot + 1;
 				}
@@ -6952,7 +6957,7 @@ public class mudclient extends GameWindowMiddleMan
 				duelConfirmOpponentItemCount = data[i7++] & 0xff;
 				for (int j13 = 0; j13 < duelConfirmOpponentItemCount; j13++)
 				{
-					duelConfirmOpponentItems[j13] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
+					duelConfirmOpponentItems[j13] = new Item(DataOperations.getUnsigned2Bytes(data, i7), true);
 					i7 += 2;
 					duelConfirmOpponentItems[j13].setAmount(DataOperations.readInt(data, i7));
 					i7 += 4;
@@ -6961,7 +6966,7 @@ public class mudclient extends GameWindowMiddleMan
 				duelConfirmMyItemCount = data[i7++] & 0xff;
 				for (int j18 = 0; j18 < duelConfirmMyItemCount; j18++)
 				{
-					duelConfirmMyItems[j18] = new Item(DataOperations.getUnsigned2Bytes(data, i7));
+					duelConfirmMyItems[j18] = new Item(DataOperations.getUnsigned2Bytes(data, i7), true);
 					i7 += 2;
 					duelConfirmMyItems[j18].setAmount(DataOperations.readInt(data, i7));
 					i7 += 4;
@@ -7072,7 +7077,7 @@ public class mudclient extends GameWindowMiddleMan
 				inventoryCount--;
 				for (int l12 = k6; l12 < inventoryCount; l12++)
 				{
-					inventory.set(l12, inventory.get(l12 + 1));
+					self.getInventoryItems().set(l12, self.getInventoryItems().get(l12 + 1));
 					wearing[l12] = wearing[l12 + 1];
 				}
 				break;
@@ -7147,9 +7152,9 @@ public class mudclient extends GameWindowMiddleMan
 					k12 = DataOperations.readInt(data, j6);
 					j6 += 4;
 				}
-				inventory.set(i18, new Item(k22 & 0x7fff));
+				self.getInventoryItems().set(i18, new Item(k22 & 0x7fff, false));
 				wearing[i18] = k22 / 32768;
-				inventory.get(i18).setAmount(k12);
+				self.getInventoryItems().get(i18).setAmount(k12);
 				if (i18 >= inventoryCount)
 					inventoryCount = i18 + 1;
 				break;
@@ -7182,9 +7187,9 @@ public class mudclient extends GameWindowMiddleMan
 				int l3 = 2;
 				for (int i11 = 0; i11 < tradeOtherItemCount; i11++)
 				{
-					tradeOtherItemsI[i11] = new Item(DataOperations.getUnsigned2Bytes(data, l3));
+					tradeOtherItems[i11] = new Item(DataOperations.getUnsigned2Bytes(data, l3), false);
 					l3 += 2;
-					tradeOtherItemsI[i11].setAmount(DataOperations.readInt(data, l3));
+					tradeOtherItems[i11].setAmount(DataOperations.readInt(data, l3));
 					l3 += 4;
 				}
 				tradeOtherAccepted = false;
@@ -7200,18 +7205,18 @@ public class mudclient extends GameWindowMiddleMan
 				tradeConfirmOtherItemCount = data[k5++] & 0xff;
 				for (int l11 = 0; l11 < tradeConfirmOtherItemCount; l11++)
 				{
-					tradeConfirmOtherItemsI[l11] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
+					tradeConfirmOtherItems[l11] = new Item(DataOperations.getUnsigned2Bytes(data, k5), true);
 					k5 += 2;
-					tradeConfirmOtherItemsI[l11].setAmount(DataOperations.readInt(data, k5));
+					tradeConfirmOtherItems[l11].setAmount(DataOperations.readInt(data, k5));
 					k5 += 4;
 				}
 
 				tradeConfirmItemCount = data[k5++] & 0xff;
 				for (int k17 = 0; k17 < tradeConfirmItemCount; k17++)
 				{
-					tradeConfirmItemsI[k17] = new Item(DataOperations.getUnsigned2Bytes(data, k5));
+					tradeConfirmItems[k17] = new Item(DataOperations.getUnsigned2Bytes(data, k5), true);
 					k5 += 2;
-					tradeConfirmItemsI[k17].setAmount(DataOperations.readInt(data, k5));
+					tradeConfirmItems[k17].setAmount(DataOperations.readInt(data, k5));
 					k5 += 4;
 				}
 				break;
@@ -7223,13 +7228,13 @@ public class mudclient extends GameWindowMiddleMan
 				shopItemSellPriceModifier = data[i4++] & 0xff;
 				shopItemBuyPriceModifier = data[i4++] & 0xff;
 				for (int i22 = 0; i22 < 40; i22++)
-					shopItemsI[i22] = new Item(-1);
+					shopItems[i22] = new Item(-1, true);
 
 				for (int j25 = 0; j25 < j11; j25++)
 				{
-					shopItemsI[j25] = new Item(DataOperations.getUnsigned2Bytes(data, i4));
+					shopItems[j25] = new Item(DataOperations.getUnsigned2Bytes(data, i4), true);
 					i4 += 2;
-					shopItemsI[j25].setAmount(DataOperations.getUnsigned2Bytes(data, i4));
+					shopItems[j25].setAmount(DataOperations.getUnsigned2Bytes(data, i4));
 					i4 += 2;
 				}
 
@@ -7243,15 +7248,15 @@ public class mudclient extends GameWindowMiddleMan
 						boolean flag2 = false;
 						for (int j39 = 0; j39 < 40; j39++)
 						{
-							if (shopItemsI[j39].getID() != inventory.get(k33).getID())
+							if (shopItems[j39].getID() != self.getInventoryItems().get(k33).getID())
 								continue;
 							flag2 = true;
 							break;
 						}
-						if (inventory.get(k33).getID() == 10)
+						if (self.getInventoryItems().get(k33).getID() == 10)
 							flag2 = true;
 						if (!flag2) {
-							shopItemsI[l28] = new Item(inventory.get(k33).getID() & 0x7fff, 0);
+							shopItems[l28] = new Item(self.getInventoryItems().get(k33).getID() & 0x7fff, false, 0);
 							l28--;
 						}
 					}
@@ -7259,7 +7264,7 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				if (selectedShopItemIndex >= 0
 						&& selectedShopItemIndex < 40
-						&& shopItemsI[selectedShopItemIndex].getID() != selectedShopItemType)
+						&& shopItems[selectedShopItemIndex].getID() != selectedShopItemType)
 				{
 					selectedShopItemIndex = -1;
 					selectedShopItemType = -2;
@@ -7477,9 +7482,9 @@ public class mudclient extends GameWindowMiddleMan
 					itemsTitleHeight + 12, 1, 0xffffff);
 		for (int line = 0; line < tradeConfirmItemCount; line++)
 		{
-			String s = tradeConfirmItemsI[line].getName();
-			if (tradeConfirmItemsI[line].isStackable())
-				s = s + " x " + method74((int) tradeConfirmItemsI[line].getAmount());
+			String s = tradeConfirmItems[line].getName();
+			if (tradeConfirmItems[line].isStackable())
+				s = s + " x " + method74(tradeConfirmItems[line].getAmount());
 			gameGraphics.drawText(s, tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
 					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
 		}
@@ -7490,9 +7495,9 @@ public class mudclient extends GameWindowMiddleMan
 					itemsTitleHeight + 12, 1, 0xffffff);
 		for (int line = 0; line < tradeConfirmOtherItemCount; line++)
 		{
-			String s1 = tradeConfirmOtherItemsI[line].getName();
-			if (tradeConfirmOtherItemsI[line].isStackable())
-				s1 = s1 + " x " + method74((int) tradeConfirmOtherItemsI[line].getAmount());
+			String s1 = tradeConfirmOtherItems[line].getName();
+			if (tradeConfirmOtherItems[line].isStackable())
+				s1 = s1 + " x " + method74(tradeConfirmOtherItems[line].getAmount());
 			gameGraphics.drawText(s1, tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
 					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
 		}
@@ -7667,12 +7672,12 @@ public class mudclient extends GameWindowMiddleMan
 					if (k >= 0 && k < inventoryCount) {
 						boolean flag1 = false;
 						int l1 = 0;
-						int k2 = inventory.get(k).getID();
+						int k2 = self.getInventoryItems().get(k).getID();
 						for (int k3 = 0; k3 < duelMyItemCount; k3++)
 							if (duelMyItems[k3].getID() == k2)
-								if (inventory.get(k).isStackable()) {
+								if (self.getInventoryItems().get(k).isStackable()) {
 									for (int i4 = 0; i4 < itemIncrement; i4++) {
-										if (duelMyItems[k3].getAmount() < inventory.get(k).getAmount())
+										if (duelMyItems[k3].getAmount() < self.getInventoryItems().get(k).getAmount())
 											duelMyItems[k3].addAmount(1);
 										flag1 = true;
 									}
@@ -7684,7 +7689,7 @@ public class mudclient extends GameWindowMiddleMan
 						if (inventoryCount(k2) <= l1)
 							flag1 = true;
 						if (!flag1 && duelMyItemCount < 8) {
-							duelMyItems[duelMyItemCount] = new Item(k2, 1);
+							duelMyItems[duelMyItemCount] = new Item(k2, false, 1);
 							duelMyItemCount++;
 							flag1 = true;
 						}
@@ -7852,10 +7857,10 @@ public class mudclient extends GameWindowMiddleMan
 		for (int l4 = 0; l4 < inventoryCount; l4++) {
 			int i5 = 217 + byte0 + (l4 % 5) * 49;
 			int k5 = 31 + byte1 + (l4 / 5) * 34;
-			gameGraphics.spriteClip4(i5, k5, 48, 32, SPRITE_ITEM_START + inventory.get(l4).getIcon(),
-					inventory.get(l4).getColor(), 0, 0, false);
-			if (inventory.get(l4).isStackable())
-				gameGraphics.drawString(Long.toString(inventory.get(l4).getAmount()),
+			gameGraphics.spriteClip4(i5, k5, 48, 32, SPRITE_ITEM_START + self.getInventoryItems().get(l4).getIcon(),
+					self.getInventoryItems().get(l4).getColor(), 0, 0, false);
+			if (self.getInventoryItems().get(l4).isStackable())
+				gameGraphics.drawString(Long.toString(self.getInventoryItems().get(l4).getAmount()),
 						i5 + 1, k5 + 10, 1, 0xffff00);
 		}
 
@@ -8212,7 +8217,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final boolean method117(int i) {
 		for (int j = 0; j < inventoryCount; j++)
-			if (inventory.get(j).getID() == i && wearing[j] == 1)
+			if (self.getInventoryItems().get(j).getID() == i && wearing[j] == 1)
 				return true;
 
 		return false;
@@ -8480,11 +8485,10 @@ public class mudclient extends GameWindowMiddleMan
 		
 		duelOpponentAccepted = false;
 		duelMyAccepted = false;
-		tradeConfirmItemsI = new Item[14];
-		tradeConfirmOtherItemsI = new Item[14];
+		tradeConfirmItems = new Item[14];
+		tradeConfirmOtherItems = new Item[14];
 		serverMessage = "";
 		duelOpponentName = "";
-		self = new Player();
 		inventory = new ArrayList<Item>(35);
 		wearing = new int[35];
 		mobMsg = new String[50];
@@ -8552,7 +8556,7 @@ public class mudclient extends GameWindowMiddleMan
 		selectedBankItemType = -2;
 		aBooleanArray827 = new boolean[1500];
 		playerStatBase = new int[18];
-		shopItemsI = new Item[256];
+		shopItems = new Item[256];
 		anIntArray858 = new int[50];
 		anIntArray859 = new int[50];
 		newBankItems = new Item[256];
@@ -8573,7 +8577,7 @@ public class mudclient extends GameWindowMiddleMan
 		bankItems = new Item[256];
 		notInWilderness = false;
 		selectedSpell = -1;
-		tradeOtherItemsI = new Item[14];
+		tradeOtherItems = new Item[14];
 		zoomCamera = false;
 		playerStatExperience = new int[18];
 		cameraAutoAngleDebug = false;
@@ -8603,7 +8607,7 @@ public class mudclient extends GameWindowMiddleMan
 		selectedShopItemType = -2;
 		showTradeWindow = false;
 		aBooleanArray970 = new boolean[500];
-		tradeMyItemsI = new Item[14];
+		tradeMyItems = new Item[14];
 		/*
         windowWidth = 512;
         windowHeight = 334;
@@ -8638,7 +8642,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	}
 	
-	Player self;
+	protected Player self;
 
 	private int bankItemCount;
 	private Item bankItems[];
@@ -8655,20 +8659,20 @@ public class mudclient extends GameWindowMiddleMan
 	private Item duelConfirmOpponentItems[];
 
 	protected int tradeMyItemCount;
-	private Item tradeMyItemsI[];
+	private Item tradeMyItems[];
 	private int tradeConfirmItemCount;
-	private Item tradeConfirmItemsI[];
+	private Item tradeConfirmItems[];
 	protected int tradeOtherItemCount;
-	private Item tradeOtherItemsI[];
+	private Item tradeOtherItems[];
 	private int tradeConfirmOtherItemCount;
-	private Item tradeConfirmOtherItemsI[];
+	private Item tradeConfirmOtherItems[];
 
 	protected int inventoryCount;
 	protected List<Item> inventory;
 
 	private int groundItemCount;
 
-	private Item shopItemsI[];
+	private Item shopItems[];
 	
 	private MenuRightClick[] rightClickMenu;
 	private int menuLength;

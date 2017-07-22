@@ -19,12 +19,12 @@ public class Item
 	public boolean isStackable() { return stackable; }
 	public boolean isWieldable() { return wieldable; }
 
-	public Item(int id)
+	public Item(int id, boolean forceStackable)
 	{
-		this(id, 0);
+		this(id, forceStackable, 0);
 	}
 	
-	public Item(int id, long amount)
+	public Item(int id, boolean forceStackable, long amount)
 	{
 		this.id = id;
 		this.amount = amount;
@@ -35,19 +35,20 @@ public class Item
 		name = EntityHandler.getItemDef(id).getName();
 		description = EntityHandler.getItemDef(id).getDescription();
 		command = EntityHandler.getItemDef(id).getCommand();
-		stackable = EntityHandler.getItemDef(id).isStackable();
+		stackable = forceStackable ? true : EntityHandler.getItemDef(id).isStackable();
 		wieldable = EntityHandler.getItemDef(id).isWieldable();
 	}
 	
 	@Override
 	public Object clone()
 	{
-		return new Item(id, amount);
+		return new Item(id, false, amount);
 	}
 	
 	public void setAmount(long amt) throws ItemAmountOutOfBoundsException
 	{
-		if (amt < 0 || amt > stackSize)
+		if (amt < 0
+				|| ((!stackable && amt > 1) || amt > stackSize))
 			throw new ItemAmountOutOfBoundsException();
 		amount = amt;
 	}
