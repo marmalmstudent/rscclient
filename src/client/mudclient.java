@@ -523,11 +523,9 @@ public class mudclient extends GameWindowMiddleMan
 					i3 -= (10 * xOffs) / 100;
 				else if (mob.currentSprite == 9)
 					i3 += (10 * xOffs) / 100;
-				int l3 = (mob.hitPointsCurrent * hpBarWidth) / mob.hitPointsBase;
-				mobHPBar[mobHPBarCount] = mob;
-				mobHPBarX[mobHPBarCount] = i3 + wSprite / 2;
-				mobHPBarY[mobHPBarCount] = j;
-				mobHPBarHealthPercent[mobHPBarCount++] = l3;
+				HitpointsBar hpbar = new HitpointsBar(mob, i3 + wSprite / 2, j);
+				hpbar.lifeWidth = (mob.hitPointsCurrent * HitpointsBar.width) / mob.hitPointsBase;
+				hitpoints.add(hpbar);
 			}
 			if (mob.combatTimer > 150) {
 				int xSprite = i;
@@ -1010,11 +1008,9 @@ public class mudclient extends GameWindowMiddleMan
 					xHP -= (10 * xOffs) / 100;
 				else if (plr.currentSprite == 9)
 					xHP += (10 * xOffs) / 100;
-				int healthPercent = (plr.hitPointsCurrent * hpBarWidth) / plr.hitPointsBase;
-				mobHPBar[mobHPBarCount] = plr;
-				mobHPBarX[mobHPBarCount] = xHP + width / 2; //player hitpointsbar x-position
-				mobHPBarY[mobHPBarCount] = y;
-				mobHPBarHealthPercent[mobHPBarCount++] = healthPercent;
+				HitpointsBar hpbar = new HitpointsBar(plr, xHP + width / 2, y);
+				hpbar.lifeWidth = (plr.hitPointsCurrent * HitpointsBar.width) / plr.hitPointsBase;
+				hitpoints.add(hpbar);
 			}
 			if (plr.combatTimer > 150)
 			{
@@ -2694,7 +2690,7 @@ public class mudclient extends GameWindowMiddleMan
 			if (player.anInt176 > 0) {
 				Mob npc = null;
 				if (player.attackingNpcIndex != -1)
-					npc = npcRecordArray[player.attackingNpcIndex];
+					npc = npcRecordArray.get(player.attackingNpcIndex);
 				else if (player.attackingMobIndex != -1)
 					npc = mobArray.get(player.attackingMobIndex);
 				if (npc != null) {
@@ -2773,6 +2769,7 @@ public class mudclient extends GameWindowMiddleMan
 		anInt699 = 0;
 		mobMessageCount = 0;
 		mobHPBarCount = 0;
+		hitpoints.clear();
 		if (freeCamera)
 		{
 			handleCharacterControlBinds();
@@ -5831,14 +5828,15 @@ public class mudclient extends GameWindowMiddleMan
 		groundItemCount = 0;
 		
 		mobArray.clear();
+		npcRecordArray.clear();
 		for (int i = 0; i < 8000; ++i)
+		{
 			mobArray.add(null);
+			npcRecordArray.add(null);
+		}
 
 		playerArray.clear();
 		npcArray.clear();
-
-		for (int i1 = 0; i1 < npcRecordArray.length; i1++)
-			npcRecordArray[i1] = null;
 
 
 		for (int k1 = 0; k1 < prayerOn.length; k1++)
@@ -7087,7 +7085,7 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					int i21 = DataOperations.getUnsigned2Bytes(data, i10);
 					i10 += 2;
-					Mob mob_2 = npcRecordArray[i21];
+					Mob mob_2 = npcRecordArray.get(i21);
 					int j28 = DataOperations.getUnsignedByte(data[i10]);
 					i10++;
 					if (j28 == 1)
@@ -7626,11 +7624,11 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final Mob addNPC(int serverIndex, double x, double y, int nextSprite, int type) {
-		if (npcRecordArray[serverIndex] == null) {
-			npcRecordArray[serverIndex] = new Mob();
-			npcRecordArray[serverIndex].serverIndex = serverIndex;
+		if (npcRecordArray.get(serverIndex) == null) {
+			npcRecordArray.set(serverIndex, new Mob());
+			npcRecordArray.get(serverIndex).serverIndex = serverIndex;
 		}
-		Mob mob = npcRecordArray[serverIndex];
+		Mob mob = npcRecordArray.get(serverIndex);
 		boolean npcAlreadyExists = false;
 		for (Iterator<Mob> itr = lastNpcArray.iterator(); itr.hasNext();)
 		{
@@ -8321,21 +8319,8 @@ public class mudclient extends GameWindowMiddleMan
 					EntityHandler.getItemDef(j3).getPictureMask(), 0, 0, false);
 		}
 
-		for (int i = 0; i < mobHPBarCount; i++) {
-			Mob mob = mobHPBar[i];
-			int xHP = mobHPBarX[i];
-			int yHP = mobHPBarY[i];
-			int hpPercent = mobHPBarHealthPercent[i];
-			gameGraphics.drawBoxEdge(xHP - hpBarWidth/2-1, yHP - hpBarHeight/2-1,
-					hpBarWidth+2, hpBarHeight+2, 0x0);
-			gameGraphics.drawBoxAlpha(xHP - hpBarWidth/2, yHP - hpBarHeight/2,
-					hpPercent, hpBarHeight, 0xff00, 0xff);
-			gameGraphics.drawBoxAlpha(xHP - hpBarWidth/2 + hpPercent, yHP - hpBarHeight/2,
-					hpBarWidth - hpPercent, hpBarHeight, 0xff0000, 0xff);
-			gameGraphics.drawText(
-					Integer.toString(mob.hitPointsCurrent)+"/"+Integer.toString(mob.hitPointsBase),
-					xHP, yHP-3, 1, 0xffff00);
-		}
+		for (Iterator<HitpointsBar> itr = hitpoints.iterator(); itr.hasNext();)
+			itr.next().draw();
 
 	}
 
@@ -8577,12 +8562,7 @@ public class mudclient extends GameWindowMiddleMan
 		duelNoPrayer = false;
 		duelNoWeapons = false;
 		anIntArray782 = new int[50];
-		mobHPBar = new Mob[50];
-		mobHPBarX = new int[50];
-		mobHPBarY = new int[50];
-		mobHPBarHealthPercent = new int[50];
-		hpBarWidth = 50;
-		hpBarHeight = 7;
+		hitpoints = new ArrayList<HitpointsBar>(50);
 		objectModelArray = new Model[1500];
 		cameraZRot = 512;
 		cameraXRot = 912;
@@ -8614,6 +8594,7 @@ public class mudclient extends GameWindowMiddleMan
 		npcArray = new ArrayList<Mob>(500);
 		lastNpcArray = new ArrayList<Mob>(500);
 		mobArray = new ArrayList<Mob>(8000);
+		npcRecordArray = new ArrayList<Mob>(8000);
 		serverMessageBoxTop = false;
 		cameraHeight = 8.59375D;
 		cameraZoom = 1.0;
@@ -8622,7 +8603,6 @@ public class mudclient extends GameWindowMiddleMan
 		zoomCamera = false;
 		playerStatExperience = new int[18];
 		cameraAutoAngleDebug = false;
-		npcRecordArray = new Mob[8000];
 		showDuelWindow = false;
 		anIntArray923 = new int[50];
 		lastLoadedNull = false;
@@ -8728,7 +8708,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int mobMessageCount;
 	String mobMsg[];
 	private boolean showBank;
-	private Model doorModel[];
 	private int mobMsgX[];
 	private int mobMsgY[];
 	private int mobMsgWidth[];
@@ -8758,10 +8737,6 @@ public class mudclient extends GameWindowMiddleMan
 	public boolean loggedIn;
 	private int cameraAutoAngle;
 	private int cameraRotationBaseAddition;
-	private Menu questMenu;
-	int questMenuHandle;
-	private Menu spellMenu;
-	int spellMenuHandle;
 	int menuMagicPrayersSelected;
 	private double screenRotationX;
 	private double screenRotationY;
@@ -8792,31 +8767,21 @@ public class mudclient extends GameWindowMiddleMan
 	private int inputBoxType;
 	private boolean appletMode;
 	private int combatStyle;
-	private Model gameDataModels[];
 	private boolean configMouseButtons;
 	private boolean duelNoRetreating;
 	private boolean duelNoMagic;
 	private boolean duelNoPrayer;
 	private boolean duelNoWeapons;
 	private int anIntArray782[];
-	private int mobHPBarX[];
-	private int mobHPBarY[];
-	private int hpBarWidth;
-	private int hpBarHeight;
-	private int mobHPBarHealthPercent[];
 	private int xMinReloadNextSect;
 	private int yMinReloadNextSect;
 	private int xMaxReloadNextSect;
 	private int yMaxReloadNextSect;
-	private Menu menuLogin;
 	private final int chrHairClrs[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
-	private Model objectModelArray[];
-	private Menu menuWelcome;
 	private int systemUpdate;
 	private int cameraZRot;
 	private int cameraXRot;
 	private int logoutTimeout;
-	private Menu gameMenu;
 	int messagesHandleChatHist;
 	int chatHandlePlayerEntry;
 	int messagesHandleQuestHist;
@@ -8880,7 +8845,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int anIntArray858[];
 	private int anIntArray859[];
 	private int mobArrayIndexes[];
-	private Menu menuNewUser;
 	private double lastAutoCameraRotatePlayerX;
 	private double lastAutoCameraRotatePlayerY;
 	private int questionMenuCount;
@@ -8900,10 +8864,20 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean tradeConfirmAccepted;
 	private int anInt892;
 	private EngineHandle engineHandle;
+
 	private List<Mob> playerArray, lastPlayerArray, mobArray,
-	npcArray, lastNpcArray;
-	private Mob mobHPBar[];
+	npcArray, lastNpcArray, npcRecordArray;
 	private Mob ourPlayer;
+	private List<HitpointsBar> hitpoints;
+	
+	private Menu chrDesignMenu, friendsMenu, menuNewUser, menuLogin,
+	menuWelcome, questMenu, spellMenu, gameMenu;
+	int questMenuHandle, spellMenuHandle;
+
+	private Model objectModelArray[];
+	private Model gameDataModels[];
+	private Model doorModel[];
+	
 	private boolean serverMessageBoxTop;
 	private int referId;
 	private int anInt900;
@@ -8916,7 +8890,6 @@ public class mudclient extends GameWindowMiddleMan
 	private AudioReader audioReader;
 	private int playerStatExperience[];
 	private boolean cameraAutoAngleDebug;
-	private Mob npcRecordArray[];
 	private boolean showDuelWindow;
 	private int anIntArray923[];
 	protected GameImageMiddleMan gameGraphics;
@@ -8938,7 +8911,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean showRightClickMenu;
 	private int attackingInt40;
 	private int anIntArray944[];
-	private Menu chrDesignMenu;
 	private int shopItemSellPriceModifier;
 	private int shopItemBuyPriceModifier;
 	private int modelUpdatingTimer;
@@ -8971,7 +8943,6 @@ public class mudclient extends GameWindowMiddleMan
 	public int windowHalfHeight;
 	private int cameraSizeInt;
 	private double mapClickX, mapClickY;
-	private Menu friendsMenu;
 	int friendsMenuHandle;
 	int friendTabOn;
 	long privateMessageTarget;
@@ -9003,4 +8974,39 @@ public class mudclient extends GameWindowMiddleMan
 			"Murder Mystery (members)", "Digsite (members)", "Gertrude's Cat (members)",
 	"Legend's Quest (members)"};
 	private boolean isTyping;
+	
+	private class HitpointsBar
+	{
+		Mob mob;
+		int x, y;
+		static final int width = 50;
+		static final int height = 7;
+		int lifeWidth;
+		private Mob mobHPBar[];
+		
+		HitpointsBar(Mob mob)
+		{
+			this.mob = mob;
+		}
+		
+		HitpointsBar(Mob mob, int x, int y)
+		{
+			this.mob = mob;
+			this.x = x;
+			this.y = y;
+		}
+		
+		void draw()
+		{
+			gameGraphics.drawBoxEdge(
+					x - width/2-1, y - height/2-1, width+2, height+2, 0x0);
+			gameGraphics.drawBoxAlpha(
+					x - width/2, y - height/2, lifeWidth, height, 0xff00, 0xff);
+			gameGraphics.drawBoxAlpha( x - width/2 + lifeWidth, y - height/2,
+					width - lifeWidth, height, 0xff0000, 0xff);
+			gameGraphics.drawText(String.format("%d/%d",
+					mob.hitPointsCurrent, mob.hitPointsBase),
+					x, y-3, 1, 0xffff00);
+		}
+	}
 }
