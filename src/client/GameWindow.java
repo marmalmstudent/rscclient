@@ -1,129 +1,94 @@
 package client;
 
-import java.applet.Applet;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.IndexColorModel;
-import java.awt.image.MemoryImageSource;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-import java.io.BufferedInputStream;
+
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
+import javax.swing.JApplet;
 
 import client.util.Config;
-import client.util.DataConversions;
-import dbdev.FileOperations;
-import model.Sprite;
 
 public class GameWindow extends JApplet 
 	implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, WindowListener, ComponentListener
 {
 	public static final Color BAR_COLOUR = new Color(132, 132, 132); //144, 192, 64
 	public static final Font LOADING_FONT = new Font("Helvetica", 0, 12);
-	
-	protected void startGame()
-	{
-		
-	}
-	
-	protected synchronized void method2()
-	{
-		
-	}
-	
-	protected void logoutAndStop()
-	{
-		
-	}
-	
-	protected synchronized void method4()
-	{
-		
-	}
+	public static GameFrame gameFrame = null;
+	public static MouseVariables mouse = MouseVariables.get();
 
-	protected final void createWindow(mudclient mc, int width, int height, String title, boolean resizable)
+	public int yOffset;
+	public int lastActionTimeout;
+	public int loadingScreen;
+	public String loadingString;
+	public boolean keyLeftBraceDown;
+	public boolean keyRightBraceDown;
+	public boolean keyLeftDown;
+	public boolean keyRightDown;
+	public boolean keyUpDown;
+	public boolean keyDownDown;
+	public boolean keySpaceDown;
+	public boolean keyNMDown;
+	public boolean[] keyDownCode = new boolean[127];
+	public boolean[] keyDownChar = new boolean[0x10000];
+	public int threadSleepTime;
+	public int mouseX;
+	public int mouseY;
+	public int mouseDownButton;
+	public int lastMouseDownButton;
+	public int keyDown;
+	public int keyDown2;
+	public boolean keyF1Toggle;
+	public String inputText;
+	public String enteredText;
+	public String inputMessage;
+	public String enteredMessage;
+
+	public GameWindow()
 	{
-		appletMode = false;
-		appletWidth = width;
-		appletHeight = height;
-		gameFrame = new GameFrame(this, width, height, title, resizable, true);
+		appletWidth = 512;
+		appletHeight = 384;
+		threadSleepModifier = 20;
+		anInt5 = 1000;
+		currentTimeArray = new long[10];
 		loadingScreen = 1;
-		gameWindowThread = new Thread(this);
-		gameWindowThread.start();
-		gameWindowThread.setPriority(1);
+		loadingBarText = "Loading";
+		keyLeftBraceDown = false;
+		keyRightBraceDown = false;
+		keyLeftDown = false;
+		keyRightDown = false;
+		keyUpDown = false;
+		keyDownDown = false;
+		keySpaceDown = false;
+		keyNMDown = false;
+		threadSleepTime = 1;
+		keyF1Toggle = false;
+		inputText = "";
+		enteredText = "";
+		inputMessage = "";
+		enteredMessage = "";
 	}
-	
-	public void initCreateWindow(int width, int height)
-	{
-		appletMode = true;
-		appletWidth = width;
-		appletHeight = height;
-		graphics = getFrameComponent().getGraphics();
-		loadingScreen = 1;
-		startThread(this);
-	}
-    
-	public void setLogo(Image logo)
-	{
-		loadingLogo = logo; //null to not display background when loading
-	}
-	
-	protected final void changeThreadSleepModifier(int i)
-	{
-		threadSleepModifier = 1000 / i;
-	}
-	
-	protected final void resetCurrentTimeArray()
-	{
-		for (int i = 0; i < 10; i++) {
-			currentTimeArray[i] = 0L;
-		}
-	}
-
-	private final void close()
-	{
-		exitTimeout = -2;
-		System.out.println("Closing program");
-		logoutAndStop();
-		try
-		{
-			Thread.sleep(1000L);
-		} catch(Exception e)
-		{
-			
-		}
-		if (gameFrame != null)
-			gameFrame.dispose();
-		System.exit(0);
-	}
-
-	private void loadFonts()
-	{
-		GameImage.loadFont("Nimbus Sans", 13, Font.PLAIN, false, 0, this); //h11p //??
-		GameImage.loadFont("Nimbus Sans", 12, Font.PLAIN/*Font.BOLD*/, false, 1, this); //h12b spells/stats/character creation/duel interface etc.
-		GameImage.loadFont("Nimbus Sans", 14, Font.PLAIN, false, 2, this); //h12p player names in chat?
-		GameImage.loadFont("Nimbus Sans", 15, Font.PLAIN/*Font.BOLD*/, false, 3, this); //h13b //chat/error text
-		GameImage.loadFont("Nimbus Sans", 16, Font.PLAIN/*Font.BOLD*/, false, 4, this); //used for login screen text
-		GameImage.loadFont("Nimbus Sans", 18, Font.PLAIN/*Font.BOLD*/, false, 5, this); //used for login screen button
-		GameImage.loadFont("Nimbus Sans", 20, Font.PLAIN, false, 6, this); //h20b //right-clicking menu?
-		GameImage.loadFont("Nimbus Sans", 24, Font.PLAIN/*Font.BOLD*/, false, 7, this); //h24b //used on display msg when you die
-	}
-
-    public Component getFrameComponent()
-    {
-        if(gameFrame != null)
-            return gameFrame;
-        else
-            return this;
-    }
 
     public final void run()
     {
@@ -225,42 +190,6 @@ public class GameWindow extends JApplet
         gameWindowThread = null;
     }
 
-	private final void drawLoadingLogo()
-	{
-		graphics.setColor(Color.black);
-		graphics.drawImage(loadingLogo, 5, 0, this);
-		loadFonts();
-	}
-
-    private final void drawLoadingScreen(int i, String s)
-    {
-        try {
-            int j = (appletWidth - 281) / 2;
-            int k = (appletHeight - 148) / 2;
-            graphics.setColor(Color.black);
-            graphics.fillRect(0, 0, appletWidth, appletHeight);
-            graphics.drawImage(loadingLogo, 5, 0, this);
-            j += 2;
-            k += 120;
-            anInt16 = i;
-            loadingBarText = s;
-            graphics.setColor(BAR_COLOUR);
-            graphics.drawRect(j - 2, k - 2, 280, 23);
-            graphics.fillRect(j, k, (277 * i) / 100, 20);
-            graphics.setColor(Color.black);
-            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
-            if (loadingString != null) {
-                graphics.setColor(Color.WHITE);
-                drawString(graphics, loadingString, LOADING_FONT, j + 138, k - 120);
-                return;
-            }
-        }
-        catch (Exception _ex)
-        {
-        	
-        }
-    }
-
     public final void drawLoadingBarText(int i, String s)
     {
         try
@@ -285,76 +214,6 @@ public class GameWindow extends JApplet
             return;
         }
     }
-
-	protected final void drawString(Graphics g, String s, Font font, int i, int j)
-	{
-		FontMetrics fontmetrics = (gameFrame == null ? this : gameFrame).getFontMetrics(font);
-		fontmetrics.stringWidth(s);
-		g.setFont(font);
-		g.drawString(s, i - fontmetrics.stringWidth(s) / 2, j + fontmetrics.getHeight() / 4);
-	}
-
-    protected byte[] load(String filename)
-    {
-        int uncompressedSize = 0;
-        int compressedSize = 0;
-        byte compressedData[] = null;
-        try
-        {
-            java.io.InputStream inputstream = DataOperations.streamFromPath(filename);
-            DataInputStream datainputstream = new DataInputStream(inputstream);
-            byte header[] = new byte[6];
-            datainputstream.readFully(header, 0, 6);
-            uncompressedSize = ((header[0] & 0xff) << 16)
-            		+ ((header[1] & 0xff) << 8)
-            		+ (header[2] & 0xff);
-            compressedSize = ((header[3] & 0xff) << 16)
-            		+ ((header[4] & 0xff) << 8)
-            		+ (header[5] & 0xff);
-            int offset = 0;
-            compressedData = new byte[compressedSize];
-            while (offset < compressedSize)
-            {
-                int bufferSize = compressedSize - offset;
-                if (bufferSize > 1000)
-                {
-                    bufferSize = 1000;
-                }
-                datainputstream.readFully(compressedData, offset, bufferSize);
-                offset += bufferSize;
-            }
-            datainputstream.close();
-        }
-        catch (IOException _ex)
-        {
-        	_ex.printStackTrace();
-        }
-        if (compressedSize != uncompressedSize)
-        {
-            byte uncompressedData[] = new byte[uncompressedSize];
-            DataFileDecrypter.unpackData(uncompressedData, uncompressedSize, compressedData, compressedSize, 0);
-            return uncompressedData;
-        }
-        else
-        {
-            return compressedData;
-        }
-    }
-
- 	protected void handleMenuKeyDown(int keyCode, int keyChar)
-	{
-		
-	}
-
-	protected void handleMouseDown(int button, int x, int y)
-	{
-		
-	}
-
-	protected void handleScrollEvent(int scrollDirection)
-	{
-		
-	}
 	/*
     public final synchronized boolean keyDown(Event event, int key)
     {
@@ -539,90 +398,6 @@ public class GameWindow extends JApplet
 		}
 		return super.createImage(i, j);
 	}
-
-	protected Socket makeSocket(String address, int port) throws IOException
-	{
-		System.out.println(InetAddress.getByName(address)+", "+port);
-		Socket socket = new Socket(InetAddress.getByName(address), port);
-		socket.setSoTimeout(30000);
-		socket.setTcpNoDelay(true);
-		return socket;
-	}
-
-	protected void startThread(Runnable runnable)
-	{
-		Thread thread = new Thread(runnable);
-		thread.setDaemon(true);
-		thread.start();
-	}
-
-	public GameWindow()
-	{
-		appletWidth = 512;
-		appletHeight = 384;
-		threadSleepModifier = 20;
-		anInt5 = 1000;
-		currentTimeArray = new long[10];
-		loadingScreen = 1;
-		loadingBarText = "Loading";
-		keyLeftBraceDown = false;
-		keyRightBraceDown = false;
-		keyLeftDown = false;
-		keyRightDown = false;
-		keyUpDown = false;
-		keyDownDown = false;
-		keySpaceDown = false;
-		keyNMDown = false;
-		threadSleepTime = 1;
-		keyF1Toggle = false;
-		inputText = "";
-		enteredText = "";
-		inputMessage = "";
-		enteredMessage = "";
-	}
-	
-	private Image loadingLogo;
-	private int appletWidth;
-	private int appletHeight;
-	private Thread gameWindowThread;
-	private int threadSleepModifier;
-	private int anInt5;
-	private long currentTimeArray[];
-	public static GameFrame gameFrame = null;
-	private boolean appletMode;
-	private int exitTimeout;
-	private int anInt10;
-	public int yOffset;
-	public int lastActionTimeout;
-	public int loadingScreen;
-	public String loadingString;
-	private int anInt16;
-	private String loadingBarText;
-	private Graphics graphics;
-	private static String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
-	public boolean keyLeftBraceDown;
-	public boolean keyRightBraceDown;
-	public boolean keyLeftDown;
-	public boolean keyRightDown;
-	public boolean keyUpDown;
-	public boolean keyDownDown;
-	public boolean keySpaceDown;
-	public boolean keyNMDown;
-	public boolean[] keyDownCode = new boolean[127];
-	public boolean[] keyDownChar = new boolean[0x10000];
-	public int threadSleepTime;
-	public int mouseX;
-	public int mouseY;
-	public int mouseDownButton;
-	public int lastMouseDownButton;
-	public int keyDown;
-	public int keyDown2;
-	public boolean keyF1Toggle;
-	public String inputText;
-	public String enteredText;
-	public String inputMessage;
-	public String enteredMessage;
-
 	
 	public void windowOpened(WindowEvent e) {
 		// TODO Auto-generated method stub
@@ -759,6 +534,10 @@ public class GameWindow extends JApplet
 
 	public void mouseDragged(MouseEvent e)
 	{
+		mouse.x = e.getX() - GameFrame.offsetX;
+		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.clickModifier = e.getModifiers();
+		
 		mouseX = e.getX() - GameFrame.offsetY;
 		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
@@ -766,11 +545,15 @@ public class GameWindow extends JApplet
 
 	public void mouseMoved(MouseEvent e)
 	{
+		mouse.x = e.getX() - GameFrame.offsetX;
+		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.clickModifier = e.getModifiers();
+		
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
-		lastActionTimeout = 0;
 		
+		lastActionTimeout = 0;
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -785,17 +568,27 @@ public class GameWindow extends JApplet
 
 	public void mousePressed(MouseEvent e)
 	{
+		mouse.x = e.getX() - GameFrame.offsetX;
+		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.clickModifier = e.getModifiers();
+		mouse.lastClickModifier = mouse.clickModifier;
+		
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
+		
 		lastActionTimeout = 0;
-		handleMouseDown(mouseDownButton, mouseX, mouseX);
+		handleMouseDown(mouseDownButton, mouseX, mouseY);
 		
 	}
 
 	public void mouseReleased(MouseEvent e)
 	{
+		mouse.x = e.getX() - GameFrame.offsetX;
+		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.resetButton();
+		
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
@@ -823,7 +616,12 @@ public class GameWindow extends JApplet
 		keyNMDown = false;
 		keyLeftBraceDown = false;
 		keyRightBraceDown = false;
+		
 		// reset mouse
+		mouse.x = e.getX() - GameFrame.offsetX;
+		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.resetButton();
+		
 		mouseX = e.getX() - GameFrame.offsetX;
 		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
@@ -847,5 +645,294 @@ public class GameWindow extends JApplet
 	public void componentHidden(ComponentEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void initCreateWindow(int width, int height)
+	{
+		appletMode = true;
+		appletWidth = width;
+		appletHeight = height;
+		graphics = getFrameComponent().getGraphics();
+		loadingScreen = 1;
+		startThread(this);
+	}
+    
+	public void setLogo(Image logo)
+	{
+		loadingLogo = logo; //null to not display background when loading
+	}
+
+    public Component getFrameComponent()
+    {
+        if(gameFrame != null)
+            return gameFrame;
+        else
+            return this;
+    }
+    
+    /* protected */
+	
+	protected void startGame()
+	{
+		
+	}
+	
+	protected synchronized void method2()
+	{
+		
+	}
+	
+	protected void logoutAndStop()
+	{
+		
+	}
+	
+	protected synchronized void method4()
+	{
+		
+	}
+
+	protected final void createWindow(mudclient mc, int width, int height, String title, boolean resizable)
+	{
+		appletMode = false;
+		appletWidth = width;
+		appletHeight = height;
+		gameFrame = new GameFrame(this, width, height, title, resizable, true);
+		loadingScreen = 1;
+		gameWindowThread = new Thread(this);
+		gameWindowThread.start();
+		gameWindowThread.setPriority(1);
+	}
+	
+	protected final void changeThreadSleepModifier(int i)
+	{
+		threadSleepModifier = 1000 / i;
+	}
+	
+	protected final void resetCurrentTimeArray()
+	{
+		for (int i = 0; i < 10; i++) {
+			currentTimeArray[i] = 0L;
+		}
+	}
+
+	protected final void drawString(Graphics g, String s, Font font, int i, int j)
+	{
+		FontMetrics fontmetrics = (gameFrame == null ? this : gameFrame).getFontMetrics(font);
+		fontmetrics.stringWidth(s);
+		g.setFont(font);
+		g.drawString(s, i - fontmetrics.stringWidth(s) / 2, j + fontmetrics.getHeight() / 4);
+	}
+
+    protected byte[] load(String filename)
+    {
+        int uncompressedSize = 0;
+        int compressedSize = 0;
+        byte compressedData[] = null;
+        try
+        {
+            java.io.InputStream inputstream = DataOperations.streamFromPath(filename);
+            DataInputStream datainputstream = new DataInputStream(inputstream);
+            byte header[] = new byte[6];
+            datainputstream.readFully(header, 0, 6);
+            uncompressedSize = ((header[0] & 0xff) << 16)
+            		+ ((header[1] & 0xff) << 8)
+            		+ (header[2] & 0xff);
+            compressedSize = ((header[3] & 0xff) << 16)
+            		+ ((header[4] & 0xff) << 8)
+            		+ (header[5] & 0xff);
+            int offset = 0;
+            compressedData = new byte[compressedSize];
+            while (offset < compressedSize)
+            {
+                int bufferSize = compressedSize - offset;
+                if (bufferSize > 1000)
+                {
+                    bufferSize = 1000;
+                }
+                datainputstream.readFully(compressedData, offset, bufferSize);
+                offset += bufferSize;
+            }
+            datainputstream.close();
+        }
+        catch (IOException _ex)
+        {
+        	_ex.printStackTrace();
+        }
+        if (compressedSize != uncompressedSize)
+        {
+            byte uncompressedData[] = new byte[uncompressedSize];
+            DataFileDecrypter.unpackData(uncompressedData, uncompressedSize, compressedData, compressedSize, 0);
+            return uncompressedData;
+        }
+        else
+        {
+            return compressedData;
+        }
+    }
+
+ 	protected void handleMenuKeyDown(int keyCode, int keyChar)
+	{
+		
+	}
+
+	protected void handleMouseDown(int button, int x, int y)
+	{
+		
+	}
+
+	protected void handleScrollEvent(int scrollDirection)
+	{
+		
+	}
+
+	protected Socket makeSocket(String address, int port) throws IOException
+	{
+		System.out.println(InetAddress.getByName(address)+", "+port);
+		Socket socket = new Socket(InetAddress.getByName(address), port);
+		socket.setSoTimeout(30000);
+		socket.setTcpNoDelay(true);
+		return socket;
+	}
+
+	protected void startThread(Runnable runnable)
+	{
+		Thread thread = new Thread(runnable);
+		thread.setDaemon(true);
+		thread.start();
+	}
+	
+	/* private */
+
+	private static final long serialVersionUID = 7608266112501280311L;
+	private Image loadingLogo;
+	private int appletWidth;
+	private int appletHeight;
+	private Thread gameWindowThread;
+	private int threadSleepModifier;
+	private int anInt5;
+	private long currentTimeArray[];
+	private boolean appletMode;
+	private int exitTimeout;
+	private int anInt10;
+	private int anInt16;
+	private String loadingBarText;
+	private Graphics graphics;
+	private static String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
+
+	private final void close()
+	{
+		exitTimeout = -2;
+		System.out.println("Closing program");
+		logoutAndStop();
+		try
+		{
+			Thread.sleep(1000L);
+		} catch(Exception e)
+		{
+			
+		}
+		if (gameFrame != null)
+			gameFrame.dispose();
+		System.exit(0);
+	}
+
+	private void loadFonts()
+	{
+		GameImage.loadFont("Nimbus Sans", 13, Font.PLAIN, false, 0, this); //h11p //??
+		GameImage.loadFont("Nimbus Sans", 12, Font.PLAIN/*Font.BOLD*/, false, 1, this); //h12b spells/stats/character creation/duel interface etc.
+		GameImage.loadFont("Nimbus Sans", 14, Font.PLAIN, false, 2, this); //h12p player names in chat?
+		GameImage.loadFont("Nimbus Sans", 15, Font.PLAIN/*Font.BOLD*/, false, 3, this); //h13b //chat/error text
+		GameImage.loadFont("Nimbus Sans", 16, Font.PLAIN/*Font.BOLD*/, false, 4, this); //used for login screen text
+		GameImage.loadFont("Nimbus Sans", 18, Font.PLAIN/*Font.BOLD*/, false, 5, this); //used for login screen button
+		GameImage.loadFont("Nimbus Sans", 20, Font.PLAIN, false, 6, this); //h20b //right-clicking menu?
+		GameImage.loadFont("Nimbus Sans", 24, Font.PLAIN/*Font.BOLD*/, false, 7, this); //h24b //used on display msg when you die
+	}
+
+	private final void drawLoadingLogo()
+	{
+		graphics.setColor(Color.black);
+		graphics.drawImage(loadingLogo, 5, 0, this);
+		loadFonts();
+	}
+
+    private final void drawLoadingScreen(int i, String s)
+    {
+        try {
+            int j = (appletWidth - 281) / 2;
+            int k = (appletHeight - 148) / 2;
+            graphics.setColor(Color.black);
+            graphics.fillRect(0, 0, appletWidth, appletHeight);
+            graphics.drawImage(loadingLogo, 5, 0, this);
+            j += 2;
+            k += 120;
+            anInt16 = i;
+            loadingBarText = s;
+            graphics.setColor(BAR_COLOUR);
+            graphics.drawRect(j - 2, k - 2, 280, 23);
+            graphics.fillRect(j, k, (277 * i) / 100, 20);
+            graphics.setColor(Color.black);
+            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
+            if (loadingString != null) {
+                graphics.setColor(Color.WHITE);
+                drawString(graphics, loadingString, LOADING_FONT, j + 138, k - 120);
+                return;
+            }
+        }
+        catch (Exception _ex)
+        {
+        	
+        }
+    }
+	
+	public static class MouseVariables
+	{
+		/*
+		mouse.click & MouseEvent.BUTTON1_MASK, // left
+		mouse.click & MouseEvent.BUTTON2_MASK, // middle
+		mouse.click & MouseEvent.BUTTON3_MASK, // right
+		mouse.click & MouseEvent.ALT_MASK,     // alt
+		mouse.click & MouseEvent.CTRL_MASK,    // control
+		mouse.click & MouseEvent.SHIFT_MASK,   // shift
+		mouse.click & MouseEvent.META_MASK     // meta
+		*/
+		
+		public int getX() { return x; }
+		public int getY() { return y; }
+		
+		public void leftClick() { clickModifier &= ~MouseEvent.BUTTON1_MASK; }
+		public void middleClick() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public void rightClick() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public boolean leftDown() { return (clickModifier & MouseEvent.BUTTON1_MASK) != 0; }
+		public boolean middleDown() { return (clickModifier & MouseEvent.BUTTON2_MASK) != 0; }
+		public boolean rightDown() { return (clickModifier & MouseEvent.BUTTON3_MASK) != 0; }
+		
+		public static synchronized MouseVariables get()
+		{
+			if (self == null)
+				self = new MouseVariables();
+			return self;
+		}
+		
+		@Override
+		public final Object clone()
+				throws CloneNotSupportedException
+		{
+			throw new CloneNotSupportedException();
+		}
+
+		private static MouseVariables self;
+		private int x, y, clickModifier, lastClickModifier;
+		
+		private MouseVariables()
+		{
+			
+		}
+		
+		private void resetButton()
+		{
+			clickModifier = 0;
+			lastClickModifier = 0;
+		}
 	}
 }

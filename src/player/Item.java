@@ -30,13 +30,26 @@ public class Item
 		this.amount = amount;
 		
 		stackSize = Long.MAX_VALUE;
-		icon = EntityHandler.getItemDef(id).getSprite();
-		color = EntityHandler.getItemDef(id).getPictureMask();
-		name = EntityHandler.getItemDef(id).getName();
-		description = EntityHandler.getItemDef(id).getDescription();
-		command = EntityHandler.getItemDef(id).getCommand();
-		stackable = forceStackable ? true : EntityHandler.getItemDef(id).isStackable();
-		wieldable = EntityHandler.getItemDef(id).isWieldable();
+		if (id > 0)
+		{
+			icon = EntityHandler.getItemDef(id).getSprite();
+			color = EntityHandler.getItemDef(id).getPictureMask();
+			name = EntityHandler.getItemDef(id).getName();
+			description = EntityHandler.getItemDef(id).getDescription();
+			command = EntityHandler.getItemDef(id).getCommand();
+			stackable = forceStackable ? true : EntityHandler.getItemDef(id).isStackable();
+			wieldable = EntityHandler.getItemDef(id).isWieldable();
+		}
+		else
+		{
+			icon = 0;
+			color = 0;
+			name = "";
+			description = "";
+			command = "";
+			stackable = false;
+			wieldable = false;
+		}
 	}
 	
 	@Override

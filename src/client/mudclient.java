@@ -1122,26 +1122,28 @@ public class mudclient extends GameWindowMiddleMan
 		mouseClickX[mouseClickOffset] = x;
 		mouseClickYArray[mouseClickOffset] = y;
 		mouseClickOffset = mouseClickOffset + 1 & 0x1fff;
-		for (int l = 10; l < 4000; l++) {
+		for (int l = 10; l < 4000; l++)
+		{
 			int i1 = mouseClickOffset - l & 0x1fff;
-			if (mouseClickX[i1] == x && mouseClickYArray[i1] == y) {
+			if (mouseClickX[i1] == x && mouseClickYArray[i1] == y)
+			{
 				boolean flag = false;
-				for (int j1 = 1; j1 < l; j1++) {
+				for (int j1 = 1; j1 < l; j1++)
+				{
 					int k1 = mouseClickOffset - j1 & 0x1fff;
 					int l1 = i1 - j1 & 0x1fff;
 					if (mouseClickX[l1] != x || mouseClickYArray[l1] != y)
 						flag = true;
-					if (mouseClickX[k1] != mouseClickX[l1] || mouseClickYArray[k1] != mouseClickYArray[l1])
+					if (mouseClickX[k1] != mouseClickX[l1]
+							|| mouseClickYArray[k1] != mouseClickYArray[l1])
 						break;
 					if (j1 == l - 1 && flag && lastWalkTimeout == 0 && logoutTimeout == 0) {
 						logout();
 						return;
 					}
 				}
-
 			}
 		}
-
 	}
 
 	private final void displayLastLoadedNull()
@@ -7266,18 +7268,18 @@ public class mudclient extends GameWindowMiddleMan
 			case 253:
 				showShop = true;
 				int i4 = 1;
-				int j11 = data[i4++] & 0xff;
+				int nShopItems = data[i4++] & 0xff;
 				byte byte4 = data[i4++];
 				shopItemSellPriceModifier = data[i4++] & 0xff;
 				shopItemBuyPriceModifier = data[i4++] & 0xff;
 				for (int i22 = 0; i22 < 40; i22++)
 					shopItems[i22] = new Item(-1, true);
 
-				for (int j25 = 0; j25 < j11; j25++)
+				for (int j = 0; j < nShopItems; j++)
 				{
-					shopItems[j25] = new Item(DataOperations.getUnsigned2Bytes(data, i4), true);
+					shopItems[j] = new Item(DataOperations.getUnsigned2Bytes(data, i4), true);
 					i4 += 2;
-					shopItems[j25].setAmount(DataOperations.getUnsigned2Bytes(data, i4));
+					shopItems[j].setAmount(DataOperations.getUnsigned2Bytes(data, i4));
 					i4 += 2;
 				}
 
@@ -7286,7 +7288,7 @@ public class mudclient extends GameWindowMiddleMan
 					int l28 = 39;
 					for (int k33 = 0; k33 < inventoryCount; k33++)
 					{
-						if (l28 < j11)
+						if (l28 < nShopItems)
 							break;
 						boolean flag2 = false;
 						for (int j39 = 0; j39 < 40; j39++)
@@ -8999,29 +9001,6 @@ public class mudclient extends GameWindowMiddleMan
 		GameObject()
 		{
 			
-		}
-		
-		GameObject(Model model)
-		{
-			this.model = model;
-		}
-		
-		GameObject(Model model, double x, double y, int type, int id)
-		{
-			this.model = model;
-			this.x = x;
-			this.y = y;
-			this.type = type;
-			this.id = id;
-		}
-		
-		void copy(GameObject newObject)
-		{
-			model = newObject.model;
-			x = newObject.x;
-			y = newObject.y;
-			type = newObject.type;
-			id = newObject.id;
 		}
 	}
 }
