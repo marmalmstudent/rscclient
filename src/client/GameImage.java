@@ -1296,7 +1296,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     		int length, int spriteWidth)
     {
         for (int i = length; i < 0; i++) {
-        	imagePixels[offset++] = spritePixels[(int)(x + 0.5) + (int)(y + 0.5) * spriteWidth];
+        	imagePixels[offset++] = spritePixels[((int) x) + ((int) y) * spriteWidth];
             x += xStep;
             y += yStep;
         }
@@ -1309,14 +1309,20 @@ public class GameImage implements ImageProducer, ImageObserver {
     		double xStep, double yStep,
     		int length, int spriteWidth)
     {
+    	try {
     	int pixelVal;
         for (int i = length; i < 0; i++)
         {
-            if ((pixelVal = spritePixels[(int)(x) + (int)(y) * spriteWidth]) != 0)
+            if ((pixelVal = spritePixels[((int) x) + ((int) y) * spriteWidth]) != 0)
             	imagePixels[offset] = pixelVal;
             offset++;
             x += xStep;
             y += yStep;
+        }
+    	} catch (ArrayIndexOutOfBoundsException oob)
+        {
+        	System.out.printf("Draw error in minimap: array index out of bounds\n\tx: %4.1f; y: %4.1f xStep: %4.1f yStep: %4.1f; nSpritePixels: %6d\n",
+        			x, y, xStep, yStep, spritePixels.length);
         }
     }
 

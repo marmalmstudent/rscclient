@@ -2,17 +2,22 @@ package player;
 
 import java.util.List;
 
+import client.Mob;
+
 public class Player
 {
 	public static final int MAX_INVENTORY_SLOTS = 35;
 	public static final int MAX_BANK_SLOTS = 256;
 	public static final int MAX_OFFER_SLOTS = 8;
 	
-	private ItemContainer inventory, bank, newBank;
-	private ItemContainer duelMyOffer, duelOpponentOffer, duelMyConfirm, duelOpponentConfirm;
-	private ItemContainer tradeMyOffer, tradeOpponentOffer, tradeMyConfirm, tradeOpponentConfirm;
+	public Mob me;
 	
-	public Player()
+	public Player(Mob me)
+	{
+		this.me = me;
+	}
+	
+	public void initContainers()
 	{
 		inventory = new ItemContainer(MAX_INVENTORY_SLOTS, false);
 		bank = new ItemContainer(MAX_BANK_SLOTS, true);
@@ -42,4 +47,9 @@ public class Player
 	public List<Item> getTradeOtherItems() { return tradeOpponentOffer.getItems(); }
 	public List<Item> getTradeConfirmMyItems() { return tradeMyConfirm.getItems(); }
 	public List<Item> getTradeConfirmOtherItems() { return tradeOpponentConfirm.getItems(); }
+
+	
+	private ItemContainer inventory, bank, newBank;
+	private ItemContainer duelMyOffer, duelOpponentOffer, duelMyConfirm, duelOpponentConfirm;
+	private ItemContainer tradeMyOffer, tradeOpponentOffer, tradeMyConfirm, tradeOpponentConfirm;
 }

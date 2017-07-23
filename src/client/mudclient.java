@@ -523,9 +523,8 @@ public class mudclient extends GameWindowMiddleMan
 					i3 -= (10 * xOffs) / 100;
 				else if (mob.currentSprite == 9)
 					i3 += (10 * xOffs) / 100;
-				HitpointsBar hpbar = new HitpointsBar(mob, i3 + wSprite / 2, j);
-				hpbar.lifeWidth = (mob.hitPointsCurrent * HitpointsBar.width) / mob.hitPointsBase;
-				hitpoints.add(hpbar);
+				
+				hitpoints.add(new HitpointsBar(mob, i3 + wSprite / 2, j));
 			}
 			if (mob.combatTimer > 150) {
 				int xSprite = i;
@@ -1008,9 +1007,8 @@ public class mudclient extends GameWindowMiddleMan
 					xHP -= (10 * xOffs) / 100;
 				else if (plr.currentSprite == 9)
 					xHP += (10 * xOffs) / 100;
-				HitpointsBar hpbar = new HitpointsBar(plr, xHP + width / 2, y);
-				hpbar.lifeWidth = (plr.hitPointsCurrent * HitpointsBar.width) / plr.hitPointsBase;
-				hitpoints.add(hpbar);
+				
+				hitpoints.add(new HitpointsBar(plr, xHP + width / 2, y));
 			}
 			if (plr.combatTimer > 150)
 			{
@@ -1520,7 +1518,7 @@ public class mudclient extends GameWindowMiddleMan
 				mrc = new MenuRightClick();
 				mrc.text1 = "Examine";
 				mrc.text2 = "@lre@" + item.getName() +
-						(ourPlayer.admin >= 2 ? " @or1@(" + item.getID() + ")" : "");
+						(self.me.admin >= 2 ? " @or1@(" + item.getID() + ")" : "");
 				mrc.id = 3600;
 				mrc.actionType = item.getID();
 				rightClickMenu.add(mrc);
@@ -1822,7 +1820,7 @@ public class mudclient extends GameWindowMiddleMan
 			i1 += 12;
 			gameGraphics.drawString("Total xp: " + expTotal, plrPan.getX() + 5, i1, 1, 0xffffff);
 			i1 += 12;
-			gameGraphics.drawString("Combat level: " + ourPlayer.level, plrPan.getX() + 5, i1, 1, 0xffffff);
+			gameGraphics.drawString("Combat level: " + self.me.level, plrPan.getX() + 5, i1, 1, 0xffffff);
 		}
 	}
 
@@ -2034,18 +2032,18 @@ public class mudclient extends GameWindowMiddleMan
                 i1 += 12;
                 gameGraphics.drawString("Total xp: " + expTotal, i + 5, i1, 1, 0xffffff);
                 i1 += 12;
-                gameGraphics.drawString("Combat level: " + ourPlayer.level, i + 5, i1, 1, 0xffffff);
+                gameGraphics.drawString("Combat level: " + self.me.level, i + 5, i1, 1, 0xffffff);
             }
         }
         if (anInt826 == 1) {
             int i1 = 72; // Player Info
             gameGraphics.drawString("Player Info", i + 5, i1, 3, 0xffff00);
             i1 += 13;
-            gameGraphics.drawString("Username:@yel@ " + ourPlayer.name, i + 5, i1, 1, 0xffffff);
+            gameGraphics.drawString("Username:@yel@ " + self.me.name, i + 5, i1, 1, 0xffffff);
             i1 += 13;
             gameGraphics.drawString("Coords:@yel@ (" + (sectionX + areaX) + ", " + (sectionY + areaY) + ")", i + 5, i1, 1, 0xffffff);
             i1 += 13;
-            gameGraphics.drawString("Server Index:@yel@ " + ourPlayer.serverIndex, i + 5, i1, 1, 0xffffff);
+            gameGraphics.drawString("Server Index:@yel@ " + self.me.serverIndex, i + 5, i1, 1, 0xffffff);
             i1 += 13;
             gameGraphics.drawString("Exp Gained:@yel@ " + (expGained > 1000 ? (expGained / 1000) + "k" : expGained), i + 5, i1, 1, 0xffffff);
             if (!lastLoggedInAddress.equals("0.0.0.0")) {
@@ -2558,7 +2556,7 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			gameCamera.addModel(model);
 		}
-		model.anInt257 = i1 + 10000;
+		model.index = i1 + 10000;
 		return model;
 	}
 
@@ -2618,7 +2616,7 @@ public class mudclient extends GameWindowMiddleMan
 				gameCamera.removeModel(engineHandle.roofs[2][i]);
 			}
 			zoomCamera = true;
-			if (sectorHeight == 0 && (engineHandle.walkableValue[(int)ourPlayer.currentX][(int)ourPlayer.currentY] & EngineHandle.WALKABLE_INDOORS) == 0)
+			if (sectorHeight == 0 && (engineHandle.walkableValue[(int)self.me.currentX][(int)self.me.currentY] & EngineHandle.WALKABLE_INDOORS) == 0)
 			{
 				if (showRoof) {
 					gameCamera.addModel(engineHandle.roofs[sectorHeight][i]);
@@ -2635,33 +2633,42 @@ public class mudclient extends GameWindowMiddleMan
 
 		if (modelFireLightningSpellNumber != anInt742) {
 			anInt742 = modelFireLightningSpellNumber;
-			for (int j = 0; j < objectCount; j++) {
-				if (objectType[j] == 97)
+			int j = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); j++)
+			{
+				GameObject gObj = itr.next();
+				if (gObj.type == 97)
 					animateObject(j, "firea" + (modelFireLightningSpellNumber + 1));
-				if (objectType[j] == 274)
+				if (gObj.type == 274)
 					animateObject(j, "fireplacea" + (modelFireLightningSpellNumber + 1));
-				if (objectType[j] == 1031)
+				if (gObj.type == 1031)
 					animateObject(j, "lightning" + (modelFireLightningSpellNumber + 1));
-				if (objectType[j] == 1036)
+				if (gObj.type == 1036)
 					animateObject(j, "firespell" + (modelFireLightningSpellNumber + 1));
-				if (objectType[j] == 1147)
+				if (gObj.type == 1147)
 					animateObject(j, "spellcharge" + (modelFireLightningSpellNumber + 1));
 			}
 		}
 		if (modelTorchNumber != anInt743) {
 			anInt743 = modelTorchNumber;
-			for (int k = 0; k < objectCount; k++) {
-				if (objectType[k] == 51)
+			int k = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); k++)
+			{
+				GameObject gObj = itr.next();
+				if (gObj.type == 51)
 					animateObject(k, "torcha" + (modelTorchNumber + 1));
-				if (objectType[k] == 143)
+				if (gObj.type == 143)
 					animateObject(k, "skulltorcha" + (modelTorchNumber + 1));
 			}
 		}
 		if (modelClawSpellNumber != anInt744) {
 			anInt744 = modelClawSpellNumber;
-			for (int l = 0; l < objectCount; l++)
-				if (objectType[l] == 1142)
+			int l = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); l++)
+			{
+				if (itr.next().type == 1142)
 					animateObject(l, "clawspell" + (modelClawSpellNumber + 1));
+			}
 		}
 		gameCamera.updateFightCount(fightCount);
 		fightCount = 0;
@@ -2676,7 +2683,7 @@ public class mudclient extends GameWindowMiddleMan
 				double mobHeight = 1.71875D;
 				int l3 = gameCamera.add2DModel(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
 				fightCount++;
-				if (mob == ourPlayer)
+				if (mob == self.me)
 					gameCamera.setOurPlayer(l3);
 				if (mob.currentSprite == 8)
 					gameCamera.setCombat(l3, -30);
@@ -2779,8 +2786,8 @@ public class mudclient extends GameWindowMiddleMan
 				int lastCameraAutoAngle = cameraAutoAngle;
 				autoRotateCamera();
 				if (cameraAutoAngle != lastCameraAutoAngle) {
-					lastAutoCameraRotatePlayerX = ourPlayer.currentX;
-					lastAutoCameraRotatePlayerY = ourPlayer.currentY;
+					lastAutoCameraRotatePlayerX = self.me.currentX;
+					lastAutoCameraRotatePlayerY = self.me.currentY;
 				}
 			}
 			cameraZRot = cameraAutoAngle * 128;
@@ -2800,10 +2807,10 @@ public class mudclient extends GameWindowMiddleMan
 					plrY, cameraXRot, cameraZRot, 0,
 					cameraHeight, cameraZoom);
 			/*
-			gameCamera.setCamera(ourPlayer.currentX,
+			gameCamera.setCamera(self.me.currentX,
 					-engineHandle.getAveragedElevation(
-							ourPlayer.currentX, ourPlayer.currentY),
-					ourPlayer.currentY, cameraXRot, cameraZRot, 0,
+							self.me.currentX, self.me.currentY),
+					self.me.currentY, cameraXRot, cameraZRot, 0,
 					cameraHeight, cameraZoom);*/
 		}
 		gameCamera.finishCamera();
@@ -2978,13 +2985,13 @@ public class mudclient extends GameWindowMiddleMan
 				gameCamera = null;
 			}
 			gameDataModels = null;
-			objectModelArray = null;
+			objects = null;
 			doorModel = null;
 			mobArray = null;
 			playerArray = null;
 			npcRecordArray = null;
 			npcArray = null;
-			ourPlayer = null;
+			self.me = null;
 			if (engineHandle != null) {
 				engineHandle.aModelArray596 = null;
 				engineHandle.walls = null;
@@ -3071,11 +3078,12 @@ public class mudclient extends GameWindowMiddleMan
 		if (sectionX + wildX + areaX >= 2640)
 			i = -50;
 		int j = -1;
-		for (int k = 0; k < objectCount; k++)
-			aBooleanArray827[k] = false;
+		int k = 0;
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); itr.next())
+			objectRelated[k++] = false;
 
-		for (int l = 0; l < doorCount; l++)
-			aBooleanArray970[l] = false;
+		for (k = 0; k < doorCount;)
+			doorRelated[k++] = false;
 
 		SpellDef spellDef = EntityHandler.getSpellDef(selectedSpell);
 
@@ -3100,8 +3108,8 @@ public class mudclient extends GameWindowMiddleMan
 					{ /* another player */
 						Mob otherPlr = playerArray.get(modelIdx);
 						int k3 = 0;
-						if (ourPlayer.level > 0 && otherPlr.level > 0)
-							k3 = ourPlayer.level - otherPlr.level;
+						if (self.me.level > 0 && otherPlr.level > 0)
+							k3 = self.me.level - otherPlr.level;
 						String levelText = String.format("%s(level-%d)",
 								getLevelDiffColor(k3), otherPlr.level);
 						if (selectedSpell >= 0)
@@ -3189,7 +3197,7 @@ public class mudclient extends GameWindowMiddleMan
 							rightClickMenu.add(mrc);
 
 							String adminText = "";
-							if (ourPlayer.admin >= 2)
+							if (self.me.admin >= 2)
 								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
 										groundItemType[modelIdx],
 										groundItemX[modelIdx] + areaX,
@@ -3264,7 +3272,7 @@ public class mudclient extends GameWindowMiddleMan
 							}
 
 							String adminText = "";
-							if (ourPlayer.admin >= 2)
+							if (self.me.admin >= 2)
 								adminText = String.format(" @or1@(%d)", theNPC.type);
 							mrc = addExamine("Examine", "@yel@" + npcDef.getName(),
 									adminText, 3700, theNPC.type);
@@ -3272,12 +3280,12 @@ public class mudclient extends GameWindowMiddleMan
 						}
 					}
 				}
-				else if (model != null && model.anInt257 >= 10000)
+				else if (model != null && model.index >= 10000)
 				{ /* Doors */
-					int j2 = model.anInt257 - 10000;
+					int j2 = model.index - 10000;
 					int i3 = doorType[j2];
 					DoorDef dDef = EntityHandler.getDoorDef(i3);
-					if (!aBooleanArray970[j2])
+					if (!doorRelated[j2])
 					{
 						if (selectedSpell >= 0)
 						{
@@ -3320,7 +3328,7 @@ public class mudclient extends GameWindowMiddleMan
 							}
 
 							String adminText = "";
-							if (ourPlayer.admin >= 2)
+							if (self.me.admin >= 2)
 								adminText = String.format(" @or1@(%d: %d,%d)",
 										i3, doorX[j2] + areaX, doorY[j2] + areaY);
 							MenuRightClick mrc = addExamine("Examine",
@@ -3328,15 +3336,16 @@ public class mudclient extends GameWindowMiddleMan
 									adminText, 3300, i3);
 							rightClickMenu.add(mrc);
 						}
-						aBooleanArray970[j2] = true;
+						doorRelated[j2] = true;
 					}
 				}
-				else if (model != null && model.anInt257 >= 0)
+				else if (model != null && model.index >= 0)
 				{ /* Game objects */
-					int k2 = model.anInt257;
-					int j3 = objectType[k2];
-					GameObjectDef gobjDef = EntityHandler.getObjectDef(j3);
-					if (!aBooleanArray827[k2])
+					int k2 = model.index;
+					GameObject gObj = objects.get(k2);
+					//int j3 = objectType[k2];
+					GameObjectDef gobjDef = EntityHandler.getObjectDef(gObj.type);
+					if (!objectRelated[k2])
 					{
 						if (selectedSpell >= 0)
 						{
@@ -3344,9 +3353,8 @@ public class mudclient extends GameWindowMiddleMan
 							{
 								MenuRightClick mrc = addCommand(
 										String.format("Cast %s on", spellDef.getName()),
-										String.format("@cya@%s", gobjDef.getName()),
-										400, objectX[k2], objectY[k2],
-										objectID[k2], objectType[k2], selectedSpell);
+										String.format("@cya@%s", gobjDef.getName()), 400,
+										gObj.x, gObj.y, gObj.id, gObj.type, selectedSpell);
 								rightClickMenu.add(mrc);
 							}
 						}
@@ -3354,9 +3362,8 @@ public class mudclient extends GameWindowMiddleMan
 						{
 							MenuRightClick mrc = addCommand(
 									String.format("Use %s with", selectedItemName),
-									String.format("@cya@%s", gobjDef.getName()),
-									410, objectX[k2], objectY[k2],
-									objectID[k2], objectType[k2], selectedItem);
+									String.format("@cya@%s", gobjDef.getName()), 410,
+									gObj.x, gObj.y, gObj.id, gObj.type, selectedItem);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3365,30 +3372,27 @@ public class mudclient extends GameWindowMiddleMan
 							{
 								MenuRightClick mrc = addCommand(gobjDef.getCommand1(),
 										String.format("@cya@%s", gobjDef.getName()),
-										420, objectX[k2], objectY[k2],
-										 objectID[k2], objectType[k2], null);
+										420, gObj.x, gObj.y, gObj.id, gObj.type, null);
 								rightClickMenu.add(mrc);
 							}
 							if (!gobjDef.getCommand2().equalsIgnoreCase("Examine"))
 							{
 								MenuRightClick mrc = addCommand(gobjDef.getCommand2(),
 										String.format("@cya@%s", gobjDef.getName()),
-										2400,  objectX[k2], objectY[k2],
-										objectID[k2], objectType[k2], null);
+										2400, gObj.x, gObj.y, gObj.id, gObj.type, null);
 								rightClickMenu.add(mrc);
 							}
 
 							String adminText = "";
-							if (ourPlayer.admin >= 2)
+							if (self.me.admin >= 2)
 								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
-										j3, objectX[k2] + areaX,
-										objectY[k2] + areaY);
+										gObj.type, gObj.x + areaX, gObj.y + areaY);
 							MenuRightClick mrc = addExamine("Examine",
 									"@cya@" + gobjDef.getName(),
-									adminText, 3400, j3);
+									adminText, 3400, gObj.type);
 							rightClickMenu.add(mrc);
 						}
-						aBooleanArray827[k2] = true;
+						objectRelated[k2] = true;
 					}
 				}
 				else
@@ -3994,49 +3998,44 @@ public class mudclient extends GameWindowMiddleMan
 		areaY -= wildY;
 		int areaXDiff = areaX - oldAreaX;
 		int areaYDiff = areaY - oldAreaY;
-		for (int objIdx = 0; objIdx < objectCount; objIdx++)
+		int objIdx = 0;
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); objIdx++)
 		{
-			objectX[objIdx] -= areaXDiff;
-			objectY[objIdx] -= areaYDiff;
-			double currObjX = objectX[objIdx];
-			double currObjY = objectY[objIdx];
-			int currObjType = objectType[objIdx];
-			int currObjId = objectID[objIdx];
-			Model model = objectModelArray[objIdx];
+			GameObject gObj = itr.next();
+			gObj.x -= areaXDiff;
+			gObj.y -= areaYDiff;
 			try
 			{
-				int currObjId2 = objectID[objIdx];
-				int currObjWidth;
-				int currObjeHeight;
-				if (currObjId2 == 0 || currObjId2 == 4)
+				double currObjWidth, currObjeHeight;
+				if (gObj.id == 0 || gObj.id == 4)
 				{
-					currObjWidth = EntityHandler.getObjectDef(currObjType).getWidth();
-					currObjeHeight = EntityHandler.getObjectDef(currObjType).getHeight();
+					currObjWidth = EntityHandler.getObjectDef(gObj.type).getWidth();
+					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getHeight();
 				}
 				else
 				{
-					currObjeHeight = EntityHandler.getObjectDef(currObjType).getWidth();
-					currObjWidth = EntityHandler.getObjectDef(currObjType).getHeight();
+					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getWidth();
+					currObjWidth = EntityHandler.getObjectDef(gObj.type).getHeight();
 				}
-				double x = (currObjX + currObjX + currObjWidth) / 2;
-				double y = (currObjY + currObjY + currObjeHeight) / 2;
-				if (currObjX >= 0 && currObjY >= 0
-						&& currObjX < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-						&& currObjY < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+				double x = gObj.x + currObjWidth/2;
+				double y = gObj.y + currObjeHeight/2;
+				if (gObj.x >= 0 && gObj.y >= 0
+						&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+						&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
 				{
-					gameCamera.addModel(model); // objects
-					model.setTranslate(x,
+					gameCamera.addModel(gObj.model); // objects
+					gObj.model.setTranslate(x,
 							-engineHandle.getAveragedElevation(x, y),
 							y);
-					engineHandle.method412((int)currObjX, (int)currObjY, currObjType, currObjId); // shadows
-					if (currObjType == 74)
-						model.addTranslate(0, -480, 0);
+					engineHandle.method412((int)gObj.x, (int)gObj.y, gObj.type, gObj.id); // shadows
+					if (gObj.type == 74)
+						gObj.model.addTranslate(0, -480, 0);
 				}
 			}
 			catch (RuntimeException runtimeexception)
 			{
 				System.out.println("Loc Error: " + runtimeexception.getMessage());
-				System.out.println("i:" + objIdx + " obj:" + model);
+				System.out.println("i:" + objIdx + " obj:" + gObj.model);
 				runtimeexception.printStackTrace();
 			}
 		}
@@ -5117,29 +5116,29 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		if (cameraAutoAngleDebug)
 		{
-			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 3.90625)
+			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
 			{
-				lastAutoCameraRotatePlayerX = ourPlayer.currentX;
-				lastAutoCameraRotatePlayerY = ourPlayer.currentY;
+				lastAutoCameraRotatePlayerX = self.me.currentX;
+				lastAutoCameraRotatePlayerY = self.me.currentY;
 			}
 		}
 		else
 		{
-			if (lastAutoCameraRotatePlayerX - ourPlayer.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - ourPlayer.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - ourPlayer.currentY > 3.90625)
+			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
 			{
-				lastAutoCameraRotatePlayerX = ourPlayer.currentX;
-				lastAutoCameraRotatePlayerY = ourPlayer.currentY;
+				lastAutoCameraRotatePlayerX = self.me.currentX;
+				lastAutoCameraRotatePlayerY = self.me.currentY;
 			}
-			if (lastAutoCameraRotatePlayerX != ourPlayer.currentX)
-				lastAutoCameraRotatePlayerX += (ourPlayer.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
-			if (lastAutoCameraRotatePlayerY != ourPlayer.currentY)
-				lastAutoCameraRotatePlayerY += (ourPlayer.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
+			if (lastAutoCameraRotatePlayerX != self.me.currentX)
+				lastAutoCameraRotatePlayerX += (self.me.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
+			if (lastAutoCameraRotatePlayerY != self.me.currentY)
+				lastAutoCameraRotatePlayerY += (self.me.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
 			if (configAutoCameraAngle)
 			{
 				int autoAngle = cameraAutoAngle * 128;
@@ -5250,9 +5249,9 @@ public class mudclient extends GameWindowMiddleMan
 				byte[] chatMessage = DataConversions.stringToByteArray(s);
 				sendChatMessage(chatMessage, chatMessage.length);
 				s = DataConversions.byteToString(chatMessage, 0, chatMessage.length);
-				ourPlayer.lastMessageTimeout = 150;
-				ourPlayer.lastMessage = s;
-				displayMessage(ourPlayer.name + ": " + s, 2, ourPlayer.admin);
+				self.me.lastMessageTimeout = 150;
+				self.me.lastMessage = s;
+				displayMessage(self.me.name + ": " + s, 2, self.me.admin);
 			}
 		}
 		if (messagesTab == 0)
@@ -5356,8 +5355,8 @@ public class mudclient extends GameWindowMiddleMan
 		sendPingPacketReadPacketData();
 		if (logoutTimeout > 0)
 			logoutTimeout--;
-		if (ourPlayer.currentSprite == 8
-				|| ourPlayer.currentSprite == 9)
+		if (self.me.currentSprite == 8
+				|| self.me.currentSprite == 9)
 			lastWalkTimeout = 500;
 		if (lastWalkTimeout > 0)
 			lastWalkTimeout--;
@@ -5416,16 +5415,15 @@ public class mudclient extends GameWindowMiddleMan
 			modelTorchNumber = (modelTorchNumber + 1) % 4;
 			modelClawSpellNumber = (modelClawSpellNumber + 1) % 5;
 		}
-		/* updating models blow it seems */
-		for (int k2 = 0; k2 < objectCount; k2++)
-		{
-			double xObj = objectX[k2];
-			double yObj = objectY[k2];
-			if (xObj >= 0 && yObj >= 0
-					&& xObj < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-					&& yObj < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT
-					&& objectType[k2] == 74)
-				objectModelArray[k2].addRotation(1, 0, 0);
+		
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
+		{ /* updating models it seems */
+			GameObject gObj = itr.next();
+			if (gObj.x >= 0 && gObj.y >= 0
+					&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+					&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT
+					&& gObj.type == 74)
+				gObj.model.addRotation(1, 0, 0);
 		}
 
 		for (int i4 = 0; i4 < anInt892; i4++)
@@ -5775,26 +5773,26 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void animateObject(int i, String s) {
-		double x = objectX[i];
-		double y = objectY[i];
-		double tileXDist = x - ourPlayer.currentX;
-		double tileYDist = y - ourPlayer.currentY;
+	private final void animateObject(int i, String s)
+	{
+		GameObject gObj = objects.get(i);
+		double tileXDist = gObj.x - self.me.currentX;
+		double tileYDist = gObj.y - self.me.currentY;
 		double maxAnimateDist = gameCamera.drawModelMaxDist;
 		boolean animate = Math.sqrt(tileXDist*tileXDist + tileYDist*tileYDist) < maxAnimateDist;
-		if (animate && x >= 0 && y >= 0
-				&& x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-				&& y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+		if (animate && gObj.x >= 0 && gObj.y >= 0
+				&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+				&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
 		{
-			gameCamera.removeModel(objectModelArray[i]);
+			gameCamera.removeModel(gObj.model);
 			int newMdlIdx = EntityHandler.storeModel(s);
 			try {
 				Model model = gameDataModels[newMdlIdx].newModel();
 				gameCamera.addModel(model);
 				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-				model.copyRotTrans(objectModelArray[i]);
-				model.anInt257 = i;
-				objectModelArray[i] = model;
+				model.copyRotTrans(gObj.model);
+				model.index = i;
+				gObj.model = model;
 			}
 			catch (Exception e) {
 			}
@@ -5811,19 +5809,21 @@ public class mudclient extends GameWindowMiddleMan
 		resetPrivateMessageStrings();
 		gameGraphics.resetImagePixels(0);
 		gameGraphics.drawImage(aGraphics936, 0, 0);
-		for (int i = 0; i < objectCount; i++) {
-			gameCamera.removeModel(objectModelArray[i]);
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
+		{
+			GameObject gObj = itr.next();
+			gameCamera.removeModel(gObj.model);
 			engineHandle.updateObject(
-					(int)objectX[i], (int)objectY[i],
-					objectType[i], objectID[i]);
+					(int)gObj.x, (int)gObj.y,
+					gObj.type, gObj.id);
 		}
+		objects.clear();
 
 		for (int j = 0; j < doorCount; j++) {
 			gameCamera.removeModel(doorModel[j]);
 			engineHandle.updateDoor(doorX[j], doorY[j], doorDirection[j], doorType[j]);
 		}
 
-		objectCount = 0;
 		doorCount = 0;
 		groundItemCount = 0;
 		
@@ -5849,8 +5849,7 @@ public class mudclient extends GameWindowMiddleMan
 		showBank = false;
 		super.friendsCount = 0;
 		
-
-		self = new Player();
+		self.initContainers();
 	}
 
 	private void drawTradePanel()
@@ -6131,8 +6130,8 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final boolean enginePlayerVisible(int i) {
-		int x = (int) ourPlayer.currentX;
-		int y = (int) ourPlayer.currentY;
+		int x = (int) self.me.currentX;
+		int y = (int) self.me.currentY;
 		for (int l = 2; l >= 1; l--) {
 			if (i == 1 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
 					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
@@ -6228,109 +6227,104 @@ public class mudclient extends GameWindowMiddleMan
 					anInt892++;
 				}
 				break;
-			case 27:
+			case 27: /* load new objects from server */
 				for (int offset = 1; offset < dataLength;)
 					if (DataOperations.getUnsignedByte(data[offset]) == 255)
 					{
-						int j8 = 0;
 						int l14 = sectionX + data[offset + 1] >> 3;
 						int k19 = sectionY + data[offset + 2] >> 3;
 						offset += 3;
-						for (int i24 = 0; i24 < objectCount; i24++)
+						
+						int newObjIdx = 0;
+						List<GameObject> newObjects = new ArrayList<GameObject>();
+						int objIdx = 0;
+						for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); objIdx++)
 						{
-							double l26 = objectX[i24] / 8 - l14;
-							double k29 = objectY[i24] / 8 - k19;
+							GameObject gObj = itr.next();
+							double l26 = gObj.x / 8 - l14;
+							double k29 = gObj.y / 8 - k19;
 							if (l26 != 0 || k29 != 0)
 							{
-								if (i24 != j8)
-								{
-									objectModelArray[j8] = objectModelArray[i24];
-									objectModelArray[j8].anInt257 = j8;
-									objectX[j8] = objectX[i24];
-									objectY[j8] = objectY[i24];
-									objectType[j8] = objectType[i24];
-									objectID[j8] = objectID[i24];
-								}
-								j8++;
+								if (objIdx != newObjIdx)
+									gObj.model.index = newObjIdx;
+								newObjects.add(gObj);
+								newObjIdx++;
 							}
 							else
 							{
-								gameCamera.removeModel(objectModelArray[i24]);
-								engineHandle.updateObject(
-										(int)objectX[i24], (int)objectY[i24],
-										objectType[i24], objectID[i24]);
+								gameCamera.removeModel(gObj.model);
+								engineHandle.updateObject((int)gObj.x, (int)gObj.y,
+										gObj.type, gObj.id);
 							}
 						}
-
-						objectCount = j8;
+						objects.clear();
+						objects = newObjects;
 					}
 					else
 					{
-						int model_id = DataOperations.getUnsigned2Bytes(data, offset);
+						GameObject _GObj = new GameObject();
+						_GObj.type = DataOperations.getUnsigned2Bytes(data, offset);
 						offset += 2;
-						double obj_x = sectionX + data[offset++];
-						double obj_y = sectionY + data[offset++];
-						int obj_id = data[offset++];
+						_GObj.x = sectionX + data[offset++];
+						_GObj.y = sectionY + data[offset++];
+						_GObj.id = data[offset++];
+						
 						int k = 0;
-						for (int j = 0; j < objectCount; j++)
-							if (objectX[j] != obj_x
-									|| objectY[j] != obj_y
-									|| objectID[j] != obj_id)
+						List<GameObject> newObjects = new ArrayList<GameObject>();
+						int j = 0;
+						for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); j++)
+						{
+							GameObject gObj = itr.next();
+							if (gObj.x != _GObj.x
+									|| gObj.y != _GObj.y
+									|| gObj.id != _GObj.id)
 							{
 								if (j != k)
-								{
-									objectModelArray[k] = objectModelArray[j];
-									objectModelArray[k].anInt257 = k;
-									objectX[k] = objectX[j];
-									objectY[k] = objectY[j];
-									objectType[k] = objectType[j];
-									objectID[k] = objectID[j];
-								}
+									gObj.model.index = k;
+								newObjects.add(gObj);
 								k++;
 							}
 							else
 							{
-								gameCamera.removeModel(objectModelArray[j]);
-								engineHandle.updateObject(
-										(int)objectX[j], (int)objectY[j],
-										objectType[j], objectID[j]);
+								gameCamera.removeModel(gObj.model);
+								engineHandle.updateObject((int)gObj.x, (int)gObj.y,
+										gObj.type, gObj.id);
 							}
-
-						objectCount = k;
-						if (model_id != 60000)
+						}
+						objects.clear();
+						objects = newObjects;
+						
+						if (_GObj.type != 60000)
 						{
-							engineHandle.registerObjectDir((int)obj_x, (int)obj_y, obj_id);
+							engineHandle.registerObjectDir((int)_GObj.x, (int)_GObj.y, _GObj.id);
 							int i34;
 							int j37;
-							if (obj_id == 0 || obj_id == 4)
+							if (_GObj.id == 0 || _GObj.id == 4)
 							{
-								i34 = EntityHandler.getObjectDef(model_id).getWidth();
-								j37 = EntityHandler.getObjectDef(model_id).getHeight();
+								i34 = EntityHandler.getObjectDef(_GObj.type).getWidth();
+								j37 = EntityHandler.getObjectDef(_GObj.type).getHeight();
 							}
 							else
 							{
-								j37 = EntityHandler.getObjectDef(model_id).getWidth();
-								i34 = EntityHandler.getObjectDef(model_id).getHeight();
+								j37 = EntityHandler.getObjectDef(_GObj.type).getWidth();
+								i34 = EntityHandler.getObjectDef(_GObj.type).getHeight();
 							}
-							double x_transl = (obj_x + obj_x + i34) / 2;
-							double y_transl = (obj_y + obj_y + j37) / 2;
-							int modelID = EntityHandler.getObjectDef(model_id).modelID;
-							System.out.printf("Loading requested model from server: %d, %d\n", model_id, modelID);
-							Model model_1 = gameDataModels[modelID].newModel();
+							double x_transl = (_GObj.x + _GObj.x + i34) / 2;
+							double y_transl = (_GObj.y + _GObj.y + j37) / 2;
+							int modelID = EntityHandler.getObjectDef(_GObj.type).modelID;
+							System.out.printf("Loading requested model from server: %d, %d\n", _GObj.type, modelID);
+							_GObj.model = gameDataModels[modelID].newModel();
 							// TODO: make the server send objects that are further away
-							gameCamera.addModel(model_1);
-							model_1.anInt257 = objectCount;
-							model_1.addRotation(0, obj_id * 32, 0);
-							model_1.addTranslate(x_transl, -engineHandle.getAveragedElevation(x_transl, y_transl), y_transl);
-							model_1.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-							engineHandle.method412((int)obj_x, (int)obj_y, model_id, obj_id);
-							if (model_id == 74)
-								model_1.addTranslate(0, -480, 0);
-							objectX[objectCount] = obj_x;
-							objectY[objectCount] = obj_y;
-							objectType[objectCount] = model_id;
-							objectID[objectCount] = obj_id;
-							objectModelArray[objectCount++] = model_1;
+							gameCamera.addModel(_GObj.model);
+							_GObj.model.addRotation(0, _GObj.id * 32, 0);
+							_GObj.model.addTranslate(x_transl, -engineHandle.getAveragedElevation(x_transl, y_transl), y_transl);
+							_GObj.model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
+							engineHandle.method412((int)_GObj.x, (int)_GObj.y, _GObj.type, _GObj.id);
+							if (_GObj.type == 74)
+								_GObj.model.addTranslate(0, -480, 0);
+							
+							objects.add(_GObj);
+							_GObj.model.index = objects.indexOf(_GObj);
 						}
 					}
 				break;
@@ -6379,7 +6373,7 @@ public class mudclient extends GameWindowMiddleMan
 							mob.hitPointsCurrent = hits;
 							mob.hitPointsBase = hitsBase;
 							mob.combatTimer = 200;
-							if (mob == ourPlayer) {
+							if (mob == self.me) {
 								playerStatCurrent[3] = hits;
 								playerStatBase[3] = hitsBase;
 								showWelcomeBox = false;
@@ -6458,7 +6452,7 @@ public class mudclient extends GameWindowMiddleMan
 							String s3 = DataConversions.byteToString(data, mobUpdateOffset, byte8);
 							mob.lastMessageTimeout = 150;
 							mob.lastMessage = s3;
-							if (mob == ourPlayer)
+							if (mob == self.me)
 								displayMessage(mob.name + ": " + mob.lastMessage, 5, mob.admin);
 						}
 						mobUpdateOffset += byte8;
@@ -6595,7 +6589,7 @@ public class mudclient extends GameWindowMiddleMan
 								if (currentDoor != j9)
 								{
 									doorModel[j9] = doorModel[currentDoor];
-									doorModel[j9].anInt257 = j9 + 10000;
+									doorModel[j9].index = j9 + 10000;
 									doorX[j9] = doorX[currentDoor];
 									doorY[j9] = doorY[currentDoor];
 									doorDirection[j9] = doorDirection[currentDoor];
@@ -6628,7 +6622,7 @@ public class mudclient extends GameWindowMiddleMan
 								if (l31 != k27)
 								{
 									doorModel[k27] = doorModel[l31];
-									doorModel[k27].anInt257 = k27 + 10000;
+									doorModel[k27].index = k27 + 10000;
 									doorX[k27] = doorX[l31];
 									doorY[k27] = doorY[l31];
 									doorDirection[k27] = doorDirection[l31];
@@ -6694,11 +6688,12 @@ public class mudclient extends GameWindowMiddleMan
 							groundItemY[groundItemCount] = j19;
 							groundItemType[groundItemCount] = i8;
 							groundItemZ[groundItemCount] = 0;
-							for (int k23 = 0; k23 < objectCount; k23++)
+							for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
 							{
-								if (objectX[k23] != k14 || objectY[k23] != j19)
+								GameObject gObj = itr.next();
+								if (gObj.x != k14 || gObj.y != j19)
 									continue;
-								groundItemZ[groundItemCount] = EntityHandler.getObjectDef(objectType[k23]).getGroundItemZ();
+								groundItemZ[groundItemCount] = EntityHandler.getObjectDef(gObj.type).getGroundItemZ();
 								break;
 							}
 
@@ -6783,33 +6778,31 @@ public class mudclient extends GameWindowMiddleMan
 
 					groundItemCount = currentCount;
 					currentCount = 0;
-					for (int j33 = 0; j33 < objectCount; j33++)
+					List<GameObject> newObjects = new ArrayList<GameObject>();
+					int objIdx = 0;
+					for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); objIdx++)
 					{
-						double k36 = objectX[j33] / 8 - currentItemSectionX;
-						double l38 = objectY[j33] / 8 - currentItemSectionY;
+						GameObject gObj = itr.next();
+						double k36 = gObj.x / 8 - currentItemSectionX;
+						double l38 = gObj.y / 8 - currentItemSectionY;
 						if (k36 != 0 || l38 != 0)
 						{
-							if (j33 != currentCount)
-							{
-								objectModelArray[currentCount] = objectModelArray[j33];
-								objectModelArray[currentCount].anInt257 = currentCount;
-								objectX[currentCount] = objectX[j33];
-								objectY[currentCount] = objectY[j33];
-								objectType[currentCount] = objectType[j33];
-								objectID[currentCount] = objectID[j33];
-							}
+							if (objIdx != currentCount)
+								gObj.model.index = currentCount;
+							newObjects.add(gObj);
 							currentCount++;
 						}
 						else
 						{
-							gameCamera.removeModel(objectModelArray[j33]);
+							gameCamera.removeModel(gObj.model);
 							engineHandle.updateObject(
-									(int)objectX[j33], (int)objectY[j33],
-									objectType[j33], objectID[j33]);
+									(int)gObj.x, (int)gObj.y,
+									gObj.type, gObj.id);
 						}
 					}
-
-					objectCount = currentCount;
+					objects.clear();
+					objects = newObjects;
+					
 					currentCount = 0;
 					for (int l36 = 0; l36 < doorCount; l36++)
 					{
@@ -6820,7 +6813,7 @@ public class mudclient extends GameWindowMiddleMan
 							if (l36 != currentCount)
 							{
 								doorModel[currentCount] = doorModel[l36];
-								doorModel[currentCount].anInt257 = currentCount + 10000;
+								doorModel[currentCount].index = currentCount + 10000;
 								doorX[currentCount] = doorX[l36];
 								doorY[currentCount] = doorY[l36];
 								doorDirection[currentCount] = doorDirection[l36];
@@ -6900,13 +6893,13 @@ public class mudclient extends GameWindowMiddleMan
 				double mapEnterY = sectionY + 0.5;
 				if (sectionLoaded)
 				{
-					ourPlayer.waypointCurrent = 0;
-					ourPlayer.waypointEndSprite = 0;
-					ourPlayer.currentX = ourPlayer.waypointsX[0] = mapEnterX;
-					ourPlayer.currentY = ourPlayer.waypointsY[0] = mapEnterY;
+					self.me.waypointCurrent = 0;
+					self.me.waypointEndSprite = 0;
+					self.me.currentX = self.me.waypointsX[0] = mapEnterX;
+					self.me.currentY = self.me.waypointsY[0] = mapEnterY;
 				}
 				playerArray.clear();
-				ourPlayer = makePlayer(serverIndex, mapEnterX, mapEnterY, mobSprite);
+				self.me = makePlayer(serverIndex, mapEnterX, mapEnterY, mobSprite);
 				int newPlayerCount = DataOperations.getIntFromByteArray(data, currentOffset, 8);
 				currentOffset += 8;
 				for (int currentNewPlayer = 0; currentNewPlayer < newPlayerCount; currentNewPlayer++)
@@ -7099,7 +7092,7 @@ public class mudclient extends GameWindowMiddleMan
 							String s4 = DataConversions.byteToString(data, i10, byte9);
 							mob_2.lastMessageTimeout = 150;
 							mob_2.lastMessage = s4;
-							if (k32 == ourPlayer.serverIndex)
+							if (k32 == self.me.serverIndex)
 								displayMessage("@yel@" + EntityHandler.getNpcDef(mob_2.type).getName() + ": " + mob_2.lastMessage, 5, 0);
 						}
 						i10 += byte9;
@@ -8112,8 +8105,8 @@ public class mudclient extends GameWindowMiddleMan
 		} else {
 			if (showQuestionMenu)
 				drawQuestionMenu();
-			if (ourPlayer.currentSprite == 8
-					|| ourPlayer.currentSprite == 9
+			if (self.me.currentSprite == 8
+					|| self.me.currentSprite == 9
 					|| combatWindow)
 				drawCombatStyleWindow();
 			checkMouseOverMenus();
@@ -8198,7 +8191,7 @@ public class mudclient extends GameWindowMiddleMan
 				super.inputText = "";
 				super.enteredText = "";
 				inputBoxType = 0;
-				if (s.length() > 0 && DataOperations.stringLength12ToLong(s) != ourPlayer.nameLong)
+				if (s.length() > 0 && DataOperations.stringLength12ToLong(s) != self.me.nameLong)
 					addToFriendsList(s);
 			}
 		}
@@ -8232,7 +8225,7 @@ public class mudclient extends GameWindowMiddleMan
 				super.inputText = "";
 				super.enteredText = "";
 				inputBoxType = 0;
-				if (s2.length() > 0 && DataOperations.stringLength12ToLong(s2) != ourPlayer.nameLong)
+				if (s2.length() > 0 && DataOperations.stringLength12ToLong(s2) != self.me.nameLong)
 					addToIgnoreList(s2);
 			}
 		}
@@ -8335,8 +8328,8 @@ public class mudclient extends GameWindowMiddleMan
 		double cos = Trig.cos1024[0x400 - zRot & 0x3ff];
 
 		/* minimap tiles */
-		double x = (ourPlayer.currentX - 47.1875) * 4.5;
-		double y = (ourPlayer.currentY - 47.1875) * 4.5;
+		double x = (self.me.currentX - 47.1875) * 4.5;
+		double y = (self.me.currentY - 47.1875) * 4.5;
 		double tmp = y * sin + x * cos;
 		y = y * cos - x * sin;
 		x = tmp;
@@ -8344,22 +8337,23 @@ public class mudclient extends GameWindowMiddleMan
 				miniMapY + miniMapHeight / 2 + (int)y, SPRITE_MEDIA_START - 1,
 				zRot + 256 & 0x3ff, 192);
 
-		for (int i = 0; i < objectCount; i++)
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
 		{
-			x = ((objectX[i] + 0.5) - ourPlayer.currentX) * 4.5;
-			y = ((objectY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			GameObject gObj = itr.next();
+			x = ((gObj.x + 0.5) - self.me.currentX) * 4.5;
+			y = ((gObj.y + 0.5) - self.me.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
-			if (!EntityHandler.getObjectDef(objectType[i]).getCommand1().equalsIgnoreCase("WalkTo"))
+			if (!EntityHandler.getObjectDef(gObj.type).getCommand1().equalsIgnoreCase("WalkTo"))
 				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
 						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x00ffff, 0xff);
 		}
 
 		for (int i = 0; i < groundItemCount; i++)
 		{
-			x = ((groundItemX[i] + 0.5) - ourPlayer.currentX) * 4.5;
-			y = ((groundItemY[i] + 0.5) - ourPlayer.currentY) * 4.5;
+			x = ((groundItemX[i] + 0.5) - self.me.currentX) * 4.5;
+			y = ((groundItemY[i] + 0.5) - self.me.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8370,8 +8364,8 @@ public class mudclient extends GameWindowMiddleMan
 		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
 		{
 			Mob mob = itr.next();
-			x = (mob.currentX - ourPlayer.currentX) * 4.5;
-			y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			x = (mob.currentX - self.me.currentX) * 4.5;
+			y = (mob.currentY - self.me.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8388,10 +8382,10 @@ public class mudclient extends GameWindowMiddleMan
 		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
 			Mob mob = itr.next();
-			if (mob == ourPlayer)
+			if (mob == self.me)
 				continue;
-			x = (mob.currentX - ourPlayer.currentX) * 4.5;
-			y = (mob.currentY - ourPlayer.currentY) * 4.5;
+			x = (mob.currentX - self.me.currentX) * 4.5;
+			y = (mob.currentY - self.me.currentY) * 4.5;
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
@@ -8409,13 +8403,13 @@ public class mudclient extends GameWindowMiddleMan
 
 		Sprite sprite;
 		/* Waypoint target */
-		if (Math.abs(mapClickX - ourPlayer.currentX) > 1D
-				|| Math.abs(mapClickY - ourPlayer.currentY) > 1D)
+		if (Math.abs(mapClickX - self.me.currentX) > 1D
+				|| Math.abs(mapClickY - self.me.currentY) > 1D)
 		{
 			if (mapClickX >= 0 && mapClickY >= 0)
 			{
-				x = (mapClickX - ourPlayer.currentX) * 4.5;
-				y = (mapClickY - ourPlayer.currentY) * 4.5;
+				x = (mapClickX - self.me.currentX) * 4.5;
+				y = (mapClickY - self.me.currentY) * 4.5;
 				tmp = y * sin + x * cos;
 				y = y * cos - x * sin;
 				x = tmp;
@@ -8457,8 +8451,8 @@ public class mudclient extends GameWindowMiddleMan
 			tmp = y * sin + x * cos;
 			y = y * cos - x * sin;
 			x = tmp;
-			x += ourPlayer.currentX;
-			y = ourPlayer.currentY - y;
+			x += self.me.currentX;
+			y = self.me.currentY - y;
 			if (mouseButtonClick == 1)
 			{
 				walkTo(sectionX, sectionY, (int)x, (int)y, false);
@@ -8514,6 +8508,7 @@ public class mudclient extends GameWindowMiddleMan
 		questionMenuAnswer = new String[10];
 		currentUser = "";
 		currentPass = "";
+		self = new Player(new Mob());
 		
 		rightClickMenu = new ArrayList<MenuRightClick>();
 		
@@ -8563,7 +8558,6 @@ public class mudclient extends GameWindowMiddleMan
 		duelNoWeapons = false;
 		anIntArray782 = new int[50];
 		hitpoints = new ArrayList<HitpointsBar>(50);
-		objectModelArray = new Model[1500];
 		cameraZRot = 512;
 		cameraXRot = 912;
 		showWelcomeBox = false;
@@ -8575,17 +8569,12 @@ public class mudclient extends GameWindowMiddleMan
 		chrHeadGender = 1;
 		selectedBankItem = -1;
 		selectedBankItemType = -2;
-		aBooleanArray827 = new boolean[1500];
+		objectRelated = new boolean[1500];
 		playerStatBase = new int[18];
 		shopItems = new Item[256];
 		anIntArray858 = new int[50];
 		anIntArray859 = new int[50];
 		mobArrayIndexes = new int[500];
-		objectX = new double[1500];
-		objectY = new double[1500];
-		objectType = new int[1500];
-		objectID = new int[1500];
-		ourPlayer = new Mob();
 		serverIndex = -1;
 		showTradeConfirmWindow = false;
 		tradeConfirmAccepted = false;
@@ -8595,6 +8584,8 @@ public class mudclient extends GameWindowMiddleMan
 		lastNpcArray = new ArrayList<Mob>(500);
 		mobArray = new ArrayList<Mob>(8000);
 		npcRecordArray = new ArrayList<Mob>(8000);
+
+		objects = new ArrayList<GameObject>();
 		serverMessageBoxTop = false;
 		cameraHeight = 8.59375D;
 		cameraZoom = 1.0;
@@ -8627,7 +8618,7 @@ public class mudclient extends GameWindowMiddleMan
 		selectedShopItemIndex = -1;
 		selectedShopItemType = -2;
 		showTradeWindow = false;
-		aBooleanArray970 = new boolean[500];
+		doorRelated = new boolean[500];
 		/*
         windowWidth = 512;
         windowHeight = 334;
@@ -8804,7 +8795,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int selectedBankItem;
 	private int selectedBankItemType;
 	int anInt826;
-	private boolean aBooleanArray827[];
+	private boolean objectRelated[];
 	private int playerStatBase[];
 	private AbuseWindow abWin;
 	private BankPanel bankPan;
@@ -8848,10 +8839,7 @@ public class mudclient extends GameWindowMiddleMan
 	private double lastAutoCameraRotatePlayerX;
 	private double lastAutoCameraRotatePlayerY;
 	private int questionMenuCount;
-	private double objectX[];
-	private double objectY[];
-	private int objectType[];
-	private int objectID[];
+	private List<GameObject> objects;
 	int sectionX;
 	int sectionY;
 	int serverIndex;
@@ -8867,14 +8855,12 @@ public class mudclient extends GameWindowMiddleMan
 
 	private List<Mob> playerArray, lastPlayerArray, mobArray,
 	npcArray, lastNpcArray, npcRecordArray;
-	private Mob ourPlayer;
 	private List<HitpointsBar> hitpoints;
 	
 	private Menu chrDesignMenu, friendsMenu, menuNewUser, menuLogin,
 	menuWelcome, questMenu, spellMenu, gameMenu;
 	int questMenuHandle, spellMenuHandle;
 
-	private Model objectModelArray[];
 	private Model gameDataModels[];
 	private Model doorModel[];
 	
@@ -8935,8 +8921,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int playerAliveTimeout;
 	private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
 	private byte sounds[];
-	private boolean aBooleanArray970[];
-	private int objectCount;
+	private boolean doorRelated[];
 	public int windowWidth;
 	public int windowHeight;
 	public int windowHalfWidth;
@@ -8982,18 +8967,13 @@ public class mudclient extends GameWindowMiddleMan
 		static final int width = 50;
 		static final int height = 7;
 		int lifeWidth;
-		private Mob mobHPBar[];
-		
-		HitpointsBar(Mob mob)
-		{
-			this.mob = mob;
-		}
 		
 		HitpointsBar(Mob mob, int x, int y)
 		{
 			this.mob = mob;
 			this.x = x;
 			this.y = y;
+			lifeWidth = (mob.hitPointsCurrent * HitpointsBar.width) / mob.hitPointsBase;
 		}
 		
 		void draw()
@@ -9007,6 +8987,41 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawText(String.format("%d/%d",
 					mob.hitPointsCurrent, mob.hitPointsBase),
 					x, y-3, 1, 0xffff00);
+		}
+	}
+	
+	private class GameObject
+	{
+		Model model;
+		double x, y;
+		int type, id;
+		
+		GameObject()
+		{
+			
+		}
+		
+		GameObject(Model model)
+		{
+			this.model = model;
+		}
+		
+		GameObject(Model model, double x, double y, int type, int id)
+		{
+			this.model = model;
+			this.x = x;
+			this.y = y;
+			this.type = type;
+			this.id = id;
+		}
+		
+		void copy(GameObject newObject)
+		{
+			model = newObject.model;
+			x = newObject.x;
+			y = newObject.y;
+			type = newObject.type;
+			id = newObject.id;
 		}
 	}
 }

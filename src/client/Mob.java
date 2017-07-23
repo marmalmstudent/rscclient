@@ -1,9 +1,9 @@
 package client;
 
 
-final class Mob {
+public final class Mob {
 
-	Mob() {
+	protected Mob() {
 		waypointsX = new double[10];
 		waypointsY = new double[10];
 		animationCount = new int[12];

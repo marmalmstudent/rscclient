@@ -13,7 +13,7 @@ public class Model
 		aBoolean254 = true;
 		transparentTexture = false;
 		transparent = false;
-		anInt257 = -1;
+		index = -1;
 		aBoolean260 = false;
 		aBoolean261 = false;
 		aBoolean262 = false;
@@ -40,7 +40,7 @@ public class Model
 		aBoolean254 = true;
 		transparentTexture = false;
 		transparent = false;
-		anInt257 = -1;
+		index = -1;
 		invisible = INVISIBLE;
 		longestLength = BIG_NUMBER;
 		lightSourceX = 180;
@@ -141,7 +141,7 @@ public class Model
 		aBoolean254 = true;
 		transparentTexture = false;
 		transparent = false;
-		anInt257 = -1;
+		index = -1;
 		aBoolean260 = false;
 		aBoolean261 = false;
 		aBoolean262 = false;
@@ -250,7 +250,7 @@ public class Model
         aBoolean254 = true;
         transparentTexture = false;
         transparent = false;
-        anInt257 = -1;
+        index = -1;
         aBoolean260 = false;
         aBoolean261 = false;
         aBoolean262 = false;
@@ -330,7 +330,7 @@ public class Model
         aBoolean254 = true;
         transparentTexture = false;
         transparent = false;
-        anInt257 = -1;
+        index = -1;
         aBoolean264 = false;
         invisible = INVISIBLE;
         longestLength = BIG_NUMBER;
@@ -353,7 +353,7 @@ public class Model
         aBoolean254 = true;
         transparentTexture = false;
         transparent = false;
-        anInt257 = -1;
+        index = -1;
         aBoolean260 = false;
         aBoolean261 = false;
         aBoolean262 = false;
@@ -1048,7 +1048,7 @@ public class Model
     public boolean aBoolean254;
     public boolean transparentTexture;
     public boolean transparent;
-    public int anInt257;
+    public int index;
     public int entityType[];
     public byte aByteArray259[];
     private boolean aBoolean260;
