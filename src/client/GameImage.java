@@ -1312,7 +1312,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     	int pixelVal;
         for (int i = length; i < 0; i++)
         {
-            if ((pixelVal = spritePixels[(int)(x + 0.5) + (int)(y + 0.5) * spriteWidth]) != 0)
+            if ((pixelVal = spritePixels[(int)(x) + (int)(y) * spriteWidth]) != 0)
             	imagePixels[offset] = pixelVal;
             offset++;
             x += xStep;

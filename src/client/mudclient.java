@@ -439,7 +439,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	final void method45(int i, int j, int wSprite, int l, int id, int j1, int xOffs)
 	{
-		Mob mob = npcArray[id];
+		Mob mob = npcArray.get(id);
 		int l1 = mob.currentSprite + (cameraZRot + 64) / 128 & 7;
 		boolean flag = false;
 		int i2 = l1;
@@ -2573,7 +2573,7 @@ public class mudclient extends GameWindowMiddleMan
 		currentUser = "";
 		currentPass = "";
 		playerArray.clear();
-		npcCount = 0;
+		npcArray.clear();
 	}
 
 	private static final String method74(long i) {
@@ -2716,8 +2716,9 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		for (int l1 = 0; l1 < npcCount; l1++) {
-			Mob npc = npcArray[l1];
+		int l1 = 0;
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext(); l1++) {
+			Mob npc = itr.next();
 			double mobx = npc.currentX;
 			double moby = npc.currentY;
 			double mobz = -engineHandle.getAveragedElevation(mobx, moby);
@@ -3203,7 +3204,7 @@ public class mudclient extends GameWindowMiddleMan
 					}
 					else if (modelType == 3)
 					{ /* NPC */
-						Mob theNPC = npcArray[modelIdx];
+						Mob theNPC = npcArray.get(modelIdx);
 						String s1 = "";
 						int l3 = -1;
 						NPCDef npcDef = EntityHandler.getNpcDef(theNPC.type);
@@ -3267,8 +3268,7 @@ public class mudclient extends GameWindowMiddleMan
 
 							String adminText = "";
 							if (ourPlayer.admin >= 2)
-								adminText = String.format(" @or1@(%d)",
-										npcArray[modelIdx].type);
+								adminText = String.format(" @or1@(%d)", theNPC.type);
 							mrc = addExamine("Examine", "@yel@" + npcDef.getName(),
 									adminText, 3700, theNPC.type);
 							rightClickMenu.add(mrc);
@@ -4086,8 +4086,8 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		for (int k4 = 0; k4 < npcCount; k4++) {
-			Mob mob_1 = npcArray[k4];
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();) {
+			Mob mob_1 = itr.next();
 			mob_1.currentX -= areaXDiff;
 			mob_1.currentY -= areaYDiff;
 			for (int l5 = 0; l5 <= mob_1.waypointCurrent; l5++) {
@@ -5028,9 +5028,9 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void updateNPCs()
 	{
-		for (int j = 0; j < npcCount; j++)
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
 		{
-			Mob mob_1 = npcArray[j];
+			Mob mob_1 = itr.next();
 			int j1 = (mob_1.waypointCurrent + 1) % 10;
 			if (mob_1.waypointEndSprite != j1)
 			{
@@ -5835,13 +5835,11 @@ public class mudclient extends GameWindowMiddleMan
 			mobArray.add(null);
 
 		playerArray.clear();
+		npcArray.clear();
 
-		npcCount = 0;
 		for (int i1 = 0; i1 < npcRecordArray.length; i1++)
 			npcRecordArray[i1] = null;
 
-		for (int j1 = 0; j1 < npcArray.length; j1++)
-			npcArray[j1] = null;
 
 		for (int k1 = 0; k1 < prayerOn.length; k1++)
 			prayerOn[k1] = false;
@@ -6178,9 +6176,11 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private Mob getLastNpc(int serverIndex) {
-		for (int i1 = 0; i1 < lastNpcCount; i1++) {
-			if (lastNpcArray[i1].serverIndex == serverIndex) {
-				return lastNpcArray[i1];
+		for (Iterator<Mob> itr = lastNpcArray.iterator(); itr.hasNext();)
+		{
+			Mob tmp = itr.next();
+			if (tmp.serverIndex == serverIndex) {
+				return tmp;
 			}
 		}
 		return null;
@@ -6489,29 +6489,29 @@ public class mudclient extends GameWindowMiddleMan
 			case 65:
 				duelOpponentAccepted = data[1] == 1;
 				break;
-			case 77:
-				lastNpcCount = npcCount;
-				npcCount = 0;
-				for (int lastNpcIndex = 0; lastNpcIndex < lastNpcCount; lastNpcIndex++)
-					lastNpcArray[lastNpcIndex] = npcArray[lastNpcIndex];
+			case 77: /* (re-)load npc */
+				lastNpcArray.clear();
+				for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
+					lastNpcArray.add(itr.next());
+				npcArray.clear();
 
-				int newNpcOffset = 8;
-				int newNpcCount = DataOperations.getIntFromByteArray(data, newNpcOffset, 8);
-				newNpcOffset += 8;
-				for (int newNpcIndex = 0; newNpcIndex < newNpcCount; newNpcIndex++)
+				int readOffset = 8;
+				int npcCount = DataOperations.getIntFromByteArray(data, readOffset, 8);
+				readOffset += 8;
+				for (int i = 0; i < npcCount; i++)
 				{
-					Mob newNPC = getLastNpc(DataOperations.getIntFromByteArray(data, newNpcOffset, 16));
-					newNpcOffset += 16;
-					int npcNeedsUpdate = DataOperations.getIntFromByteArray(data, newNpcOffset, 1);
-					newNpcOffset++;
+					Mob newNPC = getLastNpc(DataOperations.getIntFromByteArray(data, readOffset, 16));
+					readOffset += 16;
+					int npcNeedsUpdate = DataOperations.getIntFromByteArray(data, readOffset, 1);
+					readOffset++;
 					if (npcNeedsUpdate != 0)
 					{
-						int i32 = DataOperations.getIntFromByteArray(data, newNpcOffset, 1);
-						newNpcOffset++;
+						int i32 = DataOperations.getIntFromByteArray(data, readOffset, 1);
+						readOffset++;
 						if (i32 == 0)
 						{
-							int nextSprite = DataOperations.getIntFromByteArray(data, newNpcOffset, 3);
-							newNpcOffset += 3;
+							int nextSprite = DataOperations.getIntFromByteArray(data, readOffset, 3);
+							readOffset += 3;
 							int waypointCurrent = newNPC.waypointCurrent;
 							double waypointX = newNPC.waypointsX[waypointCurrent];
 							double waypointY = newNPC.waypointsY[waypointCurrent];
@@ -6530,34 +6530,34 @@ public class mudclient extends GameWindowMiddleMan
 						}
 						else
 						{
-							int nextSpriteOffset = DataOperations.getIntFromByteArray(data, newNpcOffset, 4);
-							newNpcOffset += 4;
+							int nextSpriteOffset = DataOperations.getIntFromByteArray(data, readOffset, 4);
+							readOffset += 4;
 							if ((nextSpriteOffset & 0xc) == 12)
 								continue;
 							newNPC.nextSprite = nextSpriteOffset;
 						}
 					}
-					npcArray[npcCount++] = newNPC;
+					npcArray.add(newNPC);
 				}
 
-				while (newNpcOffset + 34 < dataLength * 8)
+				while (readOffset + 34 < dataLength * 8)
 				{
-					int serverIndex = DataOperations.getIntFromByteArray(data, newNpcOffset, 16);
-					newNpcOffset += 16;
-					int i28 = DataOperations.getIntFromByteArray(data, newNpcOffset, 5);
-					newNpcOffset += 5;
+					int serverIndex = DataOperations.getIntFromByteArray(data, readOffset, 16);
+					readOffset += 16;
+					int i28 = DataOperations.getIntFromByteArray(data, readOffset, 5);
+					readOffset += 5;
 					if (i28 > 15)
 						i28 -= 32;
-					int j32 = DataOperations.getIntFromByteArray(data, newNpcOffset, 5);
-					newNpcOffset += 5;
+					int j32 = DataOperations.getIntFromByteArray(data, readOffset, 5);
+					readOffset += 5;
 					if (j32 > 15)
 						j32 -= 32;
-					int nextSprite = DataOperations.getIntFromByteArray(data, newNpcOffset, 4);
-					newNpcOffset += 4;
+					int nextSprite = DataOperations.getIntFromByteArray(data, readOffset, 4);
+					readOffset += 4;
 					double x = (sectionX + i28) + 0.5;
 					double y = (sectionY + j32) + 0.5;
-					int type = DataOperations.getIntFromByteArray(data, newNpcOffset, 10);
-					newNpcOffset += 10;
+					int type = DataOperations.getIntFromByteArray(data, readOffset, 10);
+					readOffset += 10;
 					if (type >= EntityHandler.npcCount())
 						type = 24;
 					addNPC(serverIndex, x, y, nextSprite, type);
@@ -7632,8 +7632,9 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		Mob mob = npcRecordArray[serverIndex];
 		boolean npcAlreadyExists = false;
-		for (int lastNpcIndex = 0; lastNpcIndex < lastNpcCount; lastNpcIndex++) {
-			if (lastNpcArray[lastNpcIndex].serverIndex != serverIndex)
+		for (Iterator<Mob> itr = lastNpcArray.iterator(); itr.hasNext();)
+		{
+			if (itr.next().serverIndex != serverIndex)
 				continue;
 			npcAlreadyExists = true;
 			break;
@@ -7658,7 +7659,7 @@ public class mudclient extends GameWindowMiddleMan
 			mob.nextSprite = mob.currentSprite = nextSprite;
 			mob.stepCount = 0;
 		}
-		npcArray[npcCount++] = mob;
+		npcArray.add(mob);
 		return mob;
 	}
 
@@ -8381,9 +8382,9 @@ public class mudclient extends GameWindowMiddleMan
 					miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
 		}
 
-		for (int i = 0; i < npcCount; i++)
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
 		{
-			Mob mob = npcArray[i];
+			Mob mob = itr.next();
 			x = (mob.currentX - ourPlayer.currentX) * 4.5;
 			y = (mob.currentY - ourPlayer.currentY) * 4.5;
 			tmp = y * sin + x * cos;
@@ -8526,7 +8527,6 @@ public class mudclient extends GameWindowMiddleMan
 		startTime = System.currentTimeMillis();
 		configAutoCameraAngle = true;
 		questionMenuAnswer = new String[10];
-		lastNpcArray = new Mob[500];
 		currentUser = "";
 		currentPass = "";
 		
@@ -8544,7 +8544,6 @@ public class mudclient extends GameWindowMiddleMan
 		mobMsgY = new int[50];
 		mobMsgWidth = new int[50];
 		mobMsgHeight = new int[50];
-		npcArray = new Mob[500];
 		equipmentStatus = new int[6];
 		prayerOn = new boolean[50];
 		tradeOtherAccepted = false;
@@ -8612,6 +8611,8 @@ public class mudclient extends GameWindowMiddleMan
 		tradeConfirmAccepted = false;
 		playerArray = new ArrayList<Mob>(500);
 		lastPlayerArray = new ArrayList<Mob>(500);
+		npcArray = new ArrayList<Mob>(500);
+		lastNpcArray = new ArrayList<Mob>(500);
 		mobArray = new ArrayList<Mob>(8000);
 		serverMessageBoxTop = false;
 		cameraHeight = 8.59375D;
@@ -8712,7 +8713,6 @@ public class mudclient extends GameWindowMiddleMan
 	private String questionMenuAnswer[];
 	private int anInt658;
 	private int handlePacketErrorCount;
-	private Mob lastNpcArray[];
 	private int loginButtonNewUser;
 	private int loginButtonExistingUser;
 	private String currentUser;
@@ -8733,7 +8733,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int mobMsgY[];
 	private int mobMsgWidth[];
 	private int mobMsgHeight[];
-	private Mob npcArray[];
 	private int equipmentStatus[];
 	private final int chrTopBottomClrs[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
 	private int loginScreenNumber;
@@ -8744,8 +8743,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int npcCombatModelArray1[] = {0, 1, 2, 1, 0, 0, 0, 0};
 	private int anIntArray705[];
 	private int anIntArray706[];
-	private int npcCount;
-	private int lastNpcCount;
 	private int wildX;
 	private int wildY;
 	private int wildYMultiplier;
@@ -8802,7 +8799,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean duelNoPrayer;
 	private boolean duelNoWeapons;
 	private int anIntArray782[];
-	private Mob mobHPBar[];
 	private int mobHPBarX[];
 	private int mobHPBarY[];
 	private int hpBarWidth;
@@ -8904,7 +8900,9 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean tradeConfirmAccepted;
 	private int anInt892;
 	private EngineHandle engineHandle;
-	private List<Mob> playerArray, lastPlayerArray, mobArray;
+	private List<Mob> playerArray, lastPlayerArray, mobArray,
+	npcArray, lastNpcArray;
+	private Mob mobHPBar[];
 	private Mob ourPlayer;
 	private boolean serverMessageBoxTop;
 	private int referId;
