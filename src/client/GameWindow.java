@@ -53,8 +53,6 @@ public class GameWindow extends JApplet
 	public boolean[] keyDownCode = new boolean[127];
 	public boolean[] keyDownChar = new boolean[0x10000];
 	public int threadSleepTime;
-	public int mouseX;
-	public int mouseY;
 	public int mouseDownButton;
 	public int lastMouseDownButton;
 	public int keyDown;
@@ -214,117 +212,6 @@ public class GameWindow extends JApplet
             return;
         }
     }
-	/*
-    public final synchronized boolean keyDown(Event event, int key)
-    {
-        handleMenuKeyDown(key);
-        keyDown = key;
-        keyDown2 = key;
-        lastActionTimeout = 0;
-        if (key == 1006)
-            keyLeftDown = true;
-        if (key == 1007)
-            keyRightDown = true;
-        if (key == 1004)
-            keyUpDown = true;
-        if (key == 1005)
-            keyDownDown = true;
-        if ((char) key == ' ')
-            keySpaceDown = true;
-        if ((char) key == 'n' || (char) key == 'm')
-            keyNMDown = true;
-        if ((char) key == 'N' || (char) key == 'M')
-            keyNMDown = true;
-        if ((char) key == '{')
-            keyLeftBraceDown = true;
-        if ((char) key == '}')
-            keyRightBraceDown = true;
-        if ((char) key == '\u03F0') // 1008 or F1
-            keyF1Toggle = !keyF1Toggle;
-        boolean validKeyDown = false;
-        for (int j = 0; j < charSet.length(); j++)
-        {
-            if (key != charSet.charAt(j))
-                continue;
-            validKeyDown = true;
-            break;
-        }
-
-        if (validKeyDown && inputText.length() < 20)
-            inputText += (char) key;
-        if (validKeyDown && inputMessage.length() < 80)
-            inputMessage += (char) key;
-        if (key == 8 && inputText.length() > 0) // backspace
-            inputText = inputText.substring(0, inputText.length() - 1);
-        if (key == 8 && inputMessage.length() > 0) // backspace
-            inputMessage = inputMessage.substring(0, inputMessage.length() - 1);
-        if (key == 10 || key == 13)
-        { // enter/return
-            enteredText = inputText;
-            enteredMessage = inputMessage;
-        }
-        return true;
-    }
-    
-    public final synchronized boolean keyUp(Event event, int i)
-    {
-        keyDown = 0;
-        if (i == 1006)
-            keyLeftDown = false;
-        if (i == 1007)
-            keyRightDown = false;
-        if (i == 1004)
-            keyUpDown = false;
-        if (i == 1005)
-            keyDownDown = false;
-        if ((char) i == ' ')
-            keySpaceDown = false;
-        if ((char) i == 'n' || (char) i == 'm')
-            keyNMDown = false;
-        if ((char) i == 'N' || (char) i == 'M')
-            keyNMDown = false;
-        if ((char) i == '{')
-            keyLeftBraceDown = false;
-        if ((char) i == '}')
-            keyRightBraceDown = false;
-        return true;
-    }
-
-	public final synchronized boolean mouseMove(Event event, int i, int j)
-	{
-		mouseX = i;
-		mouseY = j + yOffset;
-		mouseDownButton = 0;
-		lastActionTimeout = 0;
-		return true;
-	}
-	
-	public final synchronized boolean mouseUp(Event event, int i, int j)
-	{
-		mouseX = i;
-		mouseY = j + yOffset;
-		mouseDownButton = 0;
-		return true;
-	}
-	
-	public final synchronized boolean mouseDown(Event event, int i, int j)
-	{
-		mouseX = i;
-		mouseY = j + yOffset;
-		mouseDownButton = event.metaDown() ? 2 : 1;
-		lastMouseDownButton = mouseDownButton;
-		lastActionTimeout = 0;
-		handleMouseDown(mouseDownButton, i, j);
-		return true;
-	}
-
-	public final synchronized boolean mouseDrag(Event event, int i, int j)
-	{
-		mouseX = i;
-		mouseY = j + yOffset;
-		mouseDownButton = event.metaDown() ? 2 : 1;
-		return true;
-	}*/
 
 	public final void init()
 	{
@@ -538,8 +425,6 @@ public class GameWindow extends JApplet
 		mouse.y = e.getY() - GameFrame.offsetY;
 		mouse.clickModifier = e.getModifiers();
 		
-		mouseX = e.getX() - GameFrame.offsetY;
-		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 	}
 
@@ -547,10 +432,8 @@ public class GameWindow extends JApplet
 	{
 		mouse.x = e.getX() - GameFrame.offsetX;
 		mouse.y = e.getY() - GameFrame.offsetY;
-		mouse.clickModifier = e.getModifiers();
+		mouse.resetButton();
 		
-		mouseX = e.getX() - GameFrame.offsetX;
-		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
 		
 		lastActionTimeout = 0;
@@ -573,13 +456,11 @@ public class GameWindow extends JApplet
 		mouse.clickModifier = e.getModifiers();
 		mouse.lastClickModifier = mouse.clickModifier;
 		
-		mouseX = e.getX() - GameFrame.offsetX;
-		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = e.isMetaDown() ? 2 : 1;
 		lastMouseDownButton = mouseDownButton;
 		
 		lastActionTimeout = 0;
-		handleMouseDown(mouseDownButton, mouseX, mouseY);
+		handleMouseDown(mouseDownButton);
 		
 	}
 
@@ -589,8 +470,6 @@ public class GameWindow extends JApplet
 		mouse.y = e.getY() - GameFrame.offsetY;
 		mouse.resetButton();
 		
-		mouseX = e.getX() - GameFrame.offsetX;
-		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
 	}
 
@@ -622,8 +501,6 @@ public class GameWindow extends JApplet
 		mouse.y = e.getY() - GameFrame.offsetY;
 		mouse.resetButton();
 		
-		mouseX = e.getX() - GameFrame.offsetX;
-		mouseY = e.getY() - GameFrame.offsetY;
 		mouseDownButton = 0;
 	}
 
@@ -776,7 +653,7 @@ public class GameWindow extends JApplet
 		
 	}
 
-	protected void handleMouseDown(int button, int x, int y)
+	protected void handleMouseDown(int button)
 	{
 		
 	}
@@ -900,9 +777,9 @@ public class GameWindow extends JApplet
 		public int getX() { return x; }
 		public int getY() { return y; }
 		
-		public void leftClick() { clickModifier &= ~MouseEvent.BUTTON1_MASK; }
-		public void middleClick() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
-		public void rightClick() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public void leftRelease() { clickModifier &= ~MouseEvent.BUTTON1_MASK; }
+		public void middleRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public void rightRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
 		public boolean leftDown() { return (clickModifier & MouseEvent.BUTTON1_MASK) != 0; }
 		public boolean middleDown() { return (clickModifier & MouseEvent.BUTTON2_MASK) != 0; }
 		public boolean rightDown() { return (clickModifier & MouseEvent.BUTTON3_MASK) != 0; }

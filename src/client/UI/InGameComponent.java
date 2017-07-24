@@ -1,11 +1,14 @@
 package client.UI;
 
 import client.GameImageMiddleMan;
+import client.GameWindow.MouseVariables;
 
 public abstract class InGameComponent
 {
 	protected GameImageMiddleMan graphics;
     protected int x, y, width, height;
+    
+    private static MouseVariables mv = MouseVariables.get();
     
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
@@ -18,11 +21,11 @@ public abstract class InGameComponent
 	public void setY(int y) { this.y = y; }
 
     
-    public boolean isMouseOver(int mouseX, int mouseY)
+    public boolean isMouseOver()
     {
-    	return (!(mouseX < x
-        		|| mouseY < y
-        		|| mouseX > x + width
-        		|| mouseY > y + height));
+    	return (!(mv.getX() < x
+        		|| mv.getY() < y
+        		|| mv.getX() > x + width
+        		|| mv.getY() > y + height));
     }
 }

@@ -1,5 +1,6 @@
 package client.UI;
 
+import client.GameWindow.MouseVariables;
 import model.Sprite;
 
 public class InGameButton extends InGameComponent {
@@ -9,6 +10,8 @@ public class InGameButton extends InGameComponent {
 	protected String buttonText;
 	protected Sprite sprite;
 	protected int spriteIdx;
+	
+	private static MouseVariables mv = MouseVariables.get();
 	
 	public InGameButton(int x, int y, int width, int height, String text)
 	{
@@ -32,12 +35,12 @@ public class InGameButton extends InGameComponent {
 		spriteIdx = index;
 	}
 	
-	public boolean isMouseOverButton(int mouseX, int mouseY)
+	public boolean isMouseOverButton()
 	{
-		return (mouseX >= x
-				&& mouseY >= y
-				&& mouseX < x + width
-				&& mouseY < y + height);
+		return (mv.getX() >= x
+				&& mv.getY() >= y
+				&& mv.getX() < x + width
+				&& mv.getY() < y + height);
 	}
 	
 	public void setButtonText(String text) {

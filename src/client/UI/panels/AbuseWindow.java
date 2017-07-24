@@ -2,6 +2,7 @@ package client.UI.panels;
 import client.DataOperations;
 import client.GameImageMiddleMan;
 import client.mudclient;
+import client.GameWindow.MouseVariables;
 
 public class AbuseWindow
 {
@@ -35,6 +36,8 @@ public class AbuseWindow
 	private final String[] close = {
 			"Click here to cancel"
 	};
+	
+	private static MouseVariables mv = MouseVariables.get();
     
 	public AbuseWindow(int xCenter, int yCenter)
 	{
@@ -160,12 +163,12 @@ public class AbuseWindow
 	
 	/**
 	 * What rule is being mouseoveered.
-	 * @param mouseX
-	 * @param mouseY
 	 * @return The rule that is mouseovered. First rule will be 0, second 1 etc.
 	 */
-	public int getSelectedType(int mouseX, int mouseY)
+	public int getSelectedType()
 	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
 		int i = mouseX - x + selectedTypeInline;
 		int j = mouseY - (getFirstRuleY() + getRowYOffset());
 		if (j < 0 || j >= (rules.length-1)*getRowSeparation()
@@ -174,14 +177,18 @@ public class AbuseWindow
 		return j/getRowSeparation();
 	}
 	
-	public boolean insideWindow(int mouseX, int mouseY)
+	public boolean insideWindow()
 	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
 		return !(mouseX < getX() || mouseX > getXUpperBnd()
 				|| mouseY < getY() || mouseY > getYUpperBnd());
 	}
 	
-	public boolean insideCloseBtn(int mouseX, int mouseY)
+	public boolean insideCloseBtn()
 	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
 		return !(mouseY < getCloseY() - 4*getRowSeparation()/5
 				|| mouseY > getCloseY() + getRowSeparation()/5
 				|| mouseX < getBoxX()

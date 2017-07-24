@@ -3,6 +3,7 @@ package client.UI;
 import java.util.List;
 
 import client.GameImageMiddleMan;
+import client.GameWindow.MouseVariables;
 import client.mudclient;
 import player.Item;
 
@@ -27,6 +28,8 @@ public class InGameGrid extends InGamePanel
     public int getGridBGAlpha() { return gridBGAlpha; }
     public int getGridLineColor() { return gridLineColor; }
     public int getGridLineAlpha() { return gridLineAlpha; }
+    
+    private static MouseVariables mv = MouseVariables.get();
 	
 	public InGameGrid(int rows, int cols, GameImageMiddleMan g)
 	{
@@ -43,12 +46,12 @@ public class InGameGrid extends InGamePanel
 		this.y = y;
 	}
 	
-	public boolean isMouseOverGrid(int mouseX, int mouseY)
+	public boolean isMouseOverGrid()
 	{
-    	return (!(mouseX < x
-        		|| mouseY < y
-        		|| mouseX > x + width
-        		|| mouseY > y + height));
+    	return (!(mv.getX() < x
+        		|| mv.getY() < y
+        		|| mv.getX() > x + width
+        		|| mv.getY() > y + height));
 	}
 
 	public void drawStorableGrid(

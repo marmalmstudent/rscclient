@@ -3,6 +3,7 @@ package client.UI;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
+import client.GameWindow.MouseVariables;
 
 public class InGameFrame extends InGameComponent
 {
@@ -25,6 +26,8 @@ public class InGameFrame extends InGameComponent
     protected final int textRightOffset = -2;
     protected final int textYOffset = 10;
     protected InGameButton closeButton;
+    
+    private static MouseVariables mv = MouseVariables.get();
     
     public InGameFrame(String title, GameImageMiddleMan g)
     {
@@ -51,9 +54,9 @@ public class InGameFrame extends InGameComponent
     }
     
     public InGameButton getCloseButton() { return closeButton; }
-    public int getCloseButtonColor(int mouseX, int mouseY)
+    public int getCloseButtonColor()
     {
-    	if (closeButton.isMouseOverButton(mouseX, mouseY))
+    	if (closeButton.isMouseOverButton())
     		return closeButton.getMouseOverColor();
     	return closeButton.getMouseNotOverColor();
     }
@@ -114,7 +117,7 @@ public class InGameFrame extends InGameComponent
     
 
 
-	public void drawComponent(int mouseX, int mouseY)
+	public void drawComponent()
 	{
 		graphics.drawBoxAlpha(
 				getTitleBarX(), getTitleBarY(),
@@ -128,7 +131,7 @@ public class InGameFrame extends InGameComponent
 				(getCloseButton().getX() + getCloseButton().getWidth()
 						+ getTextRightOffset()),
 				getCloseButton().getY() + getTextYOffset(), 1,
-				getCloseButtonColor(mouseX, mouseY));
+				getCloseButtonColor());
 		graphics.drawBoxAlpha(
 				getTopMarginX(), getTopMarginY(),
 				getTopMarginWidth(), getTopMarginHeight(),

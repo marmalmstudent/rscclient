@@ -1,5 +1,6 @@
 package client;
 
+import client.GameWindow.MouseVariables;
 
 public class Menu {
     public static final int COLOUR_BOX_GRADIENT_TOP = 0xB29287;//0x8792B3;
@@ -49,10 +50,10 @@ public class Menu {
         		(greeModifier * green) / 114, (blueModifier * blue) / 176);
     }
 
-    public void updateActions(int x, int y, int lastMouseDownButton, int mouseDownButton)
+    public void updateActions(int lastMouseDownButton, int mouseDownButton)
     {
-        mouseX = x;
-        mouseY = y;
+        int mouseX = mv.getX();
+        int mouseY = mv.getY();
         mouseButton = mouseDownButton;
         if (lastMouseDownButton != 0)
             lastMouseButton = lastMouseDownButton;
@@ -350,6 +351,8 @@ public class Menu {
     protected void method145(int menuObject, int objectX, int objectY,
     		int objectWidth, int objectHeight, String text, int type)
     {
+    	int mouseX = mv.getX();
+    	int mouseY = mv.getY();
         if (aBooleanArray185[menuObject]) {
             int k1 = text.length();
             text = "";
@@ -434,6 +437,8 @@ public class Menu {
     		int objectWidth, int objectHeight, int objectTextType,
     		String menuListText[], int menuListTextCount, int l1)
     {
+    	int mouseX = mv.getX();
+    	int mouseY = mv.getY();
         gameImage.drawBoxAlpha(objectX, objectY, objectWidth, objectHeight, 0x232323, 0xc0);
         gameImage.drawBoxEdge(objectX, objectY, objectWidth, objectHeight, 0x000000);
         int nRows = 7;//objectHeight / gameImage.messageFontHeight(objectTextType);
@@ -524,7 +529,10 @@ public class Menu {
         //gameImage.drawLineY(xCorr + 2 + 8, i1 + y + 14, j1, anInt211);
     }
 
-    protected void method152(int i, int j, int k, int l, String as[]) {
+    protected void method152(int i, int j, int k, int l, String as[])
+    {
+    	int mouseX = mv.getX();
+    	int mouseY = mv.getY();
         int i1 = 0;
         int j1 = as.length;
         for (int k1 = 0; k1 < j1; k1++) {
@@ -562,7 +570,10 @@ public class Menu {
 
     }
 
-    protected void method153(int i, int j, int k, int l, String as[]) {
+    protected void method153(int i, int j, int k, int l, String as[])
+    {
+    	int mouseX = mv.getX();
+    	int mouseY = mv.getY();
         int i1 = as.length;
         int j1 = k - (gameImage.messageFontHeight(l) * (i1 - 1)) / 2;
         for (int k1 = 0; k1 < i1; k1++) {
@@ -594,7 +605,10 @@ public class Menu {
     }
 
     protected void method154(int i, int x, int y, int width, int height, int j1, String as[],
-                             int k1, int l1) {
+                             int k1, int l1)
+    {
+    	int mouseX = mv.getX();
+    	int mouseY = mv.getY();
         int i2 = height / gameImage.messageFontHeight(j1);
         if (i2 < k1) {
             int j2 = (x + width) - 12;
@@ -896,8 +910,7 @@ public class Menu {
     int menuObjectTextType[];
     String menuObjectText[];
     String menuListText[][];
-    int mouseX;
-    int mouseY;
+    private MouseVariables mv = MouseVariables.get();
     int lastMouseButton;
     int mouseButton;
     int currentFocusHandle;

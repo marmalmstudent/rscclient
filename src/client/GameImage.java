@@ -1321,8 +1321,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     	} catch (ArrayIndexOutOfBoundsException oob)
         {
-        	System.out.printf("Draw error in minimap: array index out of bounds\n\tx: %4.1f; y: %4.1f xStep: %4.1f yStep: %4.1f; nSpritePixels: %6d\n",
-        			x, y, xStep, yStep, spritePixels.length);
+        	System.out.printf("Draw error in minimap: array index out of bounds\n\tx: %4.1f; y: %4.1f xStep: %4.1f yStep: %4.1f; nSpritePixels: %6d; spriteWidth: %6d\n",
+        			x, y, xStep, yStep, spritePixels.length, spriteWidth);
         }
     }
 

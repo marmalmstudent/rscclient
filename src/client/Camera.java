@@ -1,5 +1,7 @@
 package client;
 
+import client.GameWindow.MouseVariables;
+
 public class Camera {
 	public static int light_x = 0, light_z = -50, light_y = 50;
 	private mudclient mc;
@@ -131,9 +133,11 @@ public class Camera {
 		attackAnimXOffset[id] = xOffs;
 	}
 
-	public void updateMouseCoords(int x, int y) {
-		mouseX = x - halfWidth2;
-		mouseY = y;
+	public void updateMouseCoords()
+	{
+		MouseVariables mv = MouseVariables.get();
+		mouseX = mv.getX() - halfWidth2;
+		mouseY = mv.getY();
 		currentVisibleModelCount = 0;
 		aBoolean = true;
 	}
