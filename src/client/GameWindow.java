@@ -415,7 +415,6 @@ public class GameWindow extends JApplet
 	{
 		mouse.x = e.getX() - bounds.x;
 		mouse.y = e.getY() - bounds.y;
-		mouse.clickModifier = e.getModifiers();
 	}
 
 	public void mouseMoved(MouseEvent e)
@@ -427,8 +426,8 @@ public class GameWindow extends JApplet
 		lastActionTimeout = 0;
 	}
 
-	public void mouseClicked(MouseEvent e) {
-		
+	public void mouseClicked(MouseEvent e)
+	{
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent e)
@@ -456,8 +455,8 @@ public class GameWindow extends JApplet
 		mouse.releaseButton();
 	}
 
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
+	public void mouseEntered(MouseEvent e)
+	{
 		
 	}
 

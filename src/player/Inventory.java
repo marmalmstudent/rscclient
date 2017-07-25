@@ -65,6 +65,9 @@ public class Inventory
 		if (currentInventorySlot < invGrid.getCols()*invGrid.getRows())
 		{
 			Item item = getItems().get(currentInventorySlot);
+			if (item.getID() == Item.NONE)
+				return lmrc;
+			
 			if (selSpell != null) {
 				if (selSpell.getSpell().getSpellType() == 3)
 				{

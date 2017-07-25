@@ -2960,21 +2960,27 @@ public class mudclient extends GameWindowMiddleMan
 	private String getLevelDiffColor(int levelDiff)
 	{
 		if (levelDiff < 0)
-			return "@or1@";
-		else if (levelDiff < -3)
-			return "@or2@";
-		else if (levelDiff < -6)
-			return "@or3@";
-		else if (levelDiff < -9)
-			return "@red@";
+		{
+			if (levelDiff < -9)
+				return "@red@";
+			else if (levelDiff < -6)
+				return "@or3@";
+			else if (levelDiff < -3)
+				return "@or2@";
+			else
+				return "@or1@";
+		}
 		else if (levelDiff > 0)
-			return "@gr1@";
-		else if (levelDiff > 3)
-			return "@gr2@";
-		else if (levelDiff > 6)
-			return "@gr3@";
-		else if (levelDiff > 9)
-			return "@gre@";
+		{
+			if (levelDiff > 9)
+				return "@gre@";
+			else if (levelDiff > 6)
+				return "@gr3@";
+			else if (levelDiff > 3)
+				return "@gr2@";
+			else
+				return "@gr1@";
+		}
 		else
 			return "@yel@";
 	}
@@ -3014,7 +3020,7 @@ public class mudclient extends GameWindowMiddleMan
 		int i = 2203 - (sectionY + wildY + areaY);
 		if (sectionX + wildX + areaX >= 2640)
 			i = -50;
-		int j = -1;
+		int ground = -1;
 		int k = 0;
 		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); itr.next())
 			objectRelated[k++] = false;
@@ -3149,13 +3155,13 @@ public class mudclient extends GameWindowMiddleMan
 					{ /* NPC */
 						Mob theNPC = npcArray.get(modelIdx);
 						String s1 = "";
-						int l3 = -1;
+						int levelDiff = -1;
 						NPCDef npcDef = EntityHandler.getNpcDef(theNPC.type);
 						if (npcDef.isAttackable())
 						{
 							int npcLevel = (npcDef.getAtt() + npcDef.getDef() + npcDef.getStr() + npcDef.getHits()) / 4;
 							int plrLevel = (playerStatBase[0] + playerStatBase[1] + playerStatBase[2] + playerStatBase[3] + 27) / 4;
-							l3 = plrLevel - npcLevel;
+							levelDiff = plrLevel - npcLevel;
 
 							s1 = String.format("%s(level-%d)",
 									getLevelDiffColor(plrLevel - npcLevel), npcLevel);
@@ -3188,7 +3194,7 @@ public class mudclient extends GameWindowMiddleMan
 								MenuRightClick mrc = addCommand("Attack",
 										String.format("@yel@%s %s",
 												npcDef.getName(), s1),
-										(l3 >= 0 ? 715 : 2715),
+										(levelDiff >= 0 ? 715 : 2715),
 										theNPC.currentX, theNPC.currentY,
 										theNPC.serverIndex, null, null);
 								rightClickMenu.add(mrc);
@@ -3338,7 +3344,7 @@ public class mudclient extends GameWindowMiddleMan
 					if (k1 >= 0)
 						k1 = model.entityType[k1] - 0x30d40;
 					if (k1 >= 0)
-						j = k1;
+						ground = k1;
 				}
 			}
 		}
@@ -3350,9 +3356,9 @@ public class mudclient extends GameWindowMiddleMan
 					"", "", 1000, selSpell.id);
 			rightClickMenu.add(mrc);
 		}
-		if (j != -1)
+		if (ground != -1)
 		{
-			int l1 = j;
+			int l1 = ground;
 			if (selSpell != null)
 			{
 				if (spellDef.getSpellType() == 6)
@@ -3636,7 +3642,7 @@ public class mudclient extends GameWindowMiddleMan
 					s = String.format("%s@whi@ / %d more options", s, menuLength-1);
 				gameGraphics.drawString(s, 6, 14, 1, 0xffff00);
 			}
-			
+
 			if (!configMouseButtons && mv.leftDown()
 					|| configMouseButtons && mv.leftDown()
 					&& menuLength == 1)
@@ -8083,10 +8089,8 @@ public class mudclient extends GameWindowMiddleMan
 			boolean noMenusShown = !showQuestionMenu && !showRightClickMenu;
 			if (noMenusShown)
 				rightClickMenu.clear();
-			if (om.anyOpen() && noMenusShown)
-			{ // since we no longer need to mouseover the menu to keep them open
+			if (noMenusShown) // click in the world
 				drawInventoryRightClickMenu();
-			}
 			if (om.isOpen(OpenMenu.INVENTORY))
 			{
 				List<MenuRightClick> result = self.getInventory().draw(

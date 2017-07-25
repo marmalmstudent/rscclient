@@ -6,6 +6,7 @@ import exceptions.ItemNotFoundException;
 
 public class Item
 {
+	public static final int NONE = -1;
 	
 	public int getID() { return id; }
 	public long getAmount() { return amount; }
