@@ -50,14 +50,11 @@ public class Menu {
         		(greeModifier * green) / 114, (blueModifier * blue) / 176);
     }
 
-    public void updateActions(int lastMouseDownButton, int mouseDownButton)
+    public void updateActions()
     {
         int mouseX = mv.getX();
         int mouseY = mv.getY();
-        mouseButton = mouseDownButton;
-        if (lastMouseDownButton != 0)
-            lastMouseButton = lastMouseDownButton;
-        if (lastMouseDownButton == 1)
+        if (mv.lastLeftDown())
         {
             for (int menuObject = 0; menuObject < menuObjectCount; menuObject++)
             {
@@ -77,11 +74,11 @@ public class Menu {
                     anIntArray189[menuObject] = 1 - anIntArray189[menuObject]; // no idea what this is, there is no object of type 14
             }
         }
-        if (mouseDownButton == 1)
+        if (mv.leftDown())
             mouseClicksConsecutive++;
         else
             mouseClicksConsecutive = 0;
-        if (lastMouseDownButton == 1 || mouseClicksConsecutive > 20)
+        if (mv.lastLeftDown() || mouseClicksConsecutive > 20)
         {
             for (int j1 = 0; j1 < menuObjectCount; j1++)
                 if (menuObjectCanAcceptActions[j1]
@@ -255,7 +252,7 @@ public class Menu {
             	}
             }
         }
-        lastMouseButton = 0;
+        mv.releaseLastButton();
     }
 
     protected void method142(int i, int j, int k, int l, int i1) {
@@ -361,12 +358,12 @@ public class Menu {
 
         }
         if (menuObjectType[menuObject] == 5) {
-            if (lastMouseButton == 1
+            if (mv.lastLeftDown()
             		&& mouseX >= objectX && mouseY >= objectY - objectHeight / 2
             		&& mouseX <= objectX + objectWidth && mouseY <= objectY + objectHeight / 2)
                 currentFocusHandle = menuObject;
         } else if (menuObjectType[menuObject] == 6) {
-            if (lastMouseButton == 1
+            if (mv.lastLeftDown()
             		&& mouseX >= objectX && mouseY >= objectY
             		&& mouseX <= objectX + objectWidth && mouseY <= objectY + objectHeight)
                 currentFocusHandle = menuObject;
@@ -454,7 +451,7 @@ public class Menu {
             if (sliderMaxSize < 6)
                 sliderMaxSize = 6;
             int sliderSize = ((objectHeight - 27 - sliderMaxSize) * l1) / (menuListTextCount - nRows);
-            if (mouseButton == 1
+            if (mv.leftDown()
             		&& mouseX >= startX && mouseX <= startX + 12)
             {
                 if (mouseY > objectY && mouseY < objectY + 12 && l1 > 0)
@@ -469,7 +466,7 @@ public class Menu {
                 }
                 anIntArray187[menuObject] = l1;
             }
-            if (mouseButton == 1
+            if (mv.leftDown()
             		&& (mouseX >= startX && mouseX <= startX + 12
             		|| mouseX >= startX - 12 && mouseX <= startX + 24
             		&& aBooleanArray184[menuObject]))
@@ -554,7 +551,7 @@ public class Menu {
                     k2 = 0x808080;
                 else
                     k2 = 0xffffff;
-                if (lastMouseButton == 1) {
+                if (mv.lastLeftDown()) {
                     anIntArray189[i] = j2;
                     menuObjectHasAction[i] = true;
                 }
@@ -588,7 +585,7 @@ public class Menu {
                     l1 = 0x808080;
                 else
                     l1 = 0xffffff;
-                if (lastMouseButton == 1) {
+                if (mv.lastLeftDown()) {
                     anIntArray189[i] = k1;
                     menuObjectHasAction[i] = true;
                 }
@@ -616,14 +613,14 @@ public class Menu {
             if (l2 < 6)
                 l2 = 6;
             int j3 = ((height - 27 - l2) * l1) / (k1 - i2);
-            if (mouseButton == 1 && mouseX >= j2 && mouseX <= j2 + 12) {
+            if (mv.leftDown() && mouseX >= j2 && mouseX <= j2 + 12) {
                 if (mouseY > y && mouseY < y + 12 && l1 > 0)
                     l1--;
                 if (mouseY > (y + height) - 12 && mouseY < y + height && l1 < k1 - i2)
                     l1++;
                 anIntArray187[i] = l1;
             }
-            if (mouseButton == 1 && (mouseX >= j2 && mouseX <= j2 + 12 || mouseX >= j2 - 12 && mouseX <= j2 + 24 && aBooleanArray184[i])) {
+            if (mv.leftDown() && (mouseX >= j2 && mouseX <= j2 + 12 || mouseX >= j2 - 12 && mouseX <= j2 + 24 && aBooleanArray184[i])) {
                 if (mouseY > y + 12 && mouseY < (y + height) - 12) {
                     aBooleanArray184[i] = true;
                     int l3 = mouseY - y - 12 - l2 / 2;
@@ -658,7 +655,7 @@ public class Menu {
                 else
                     i4 = 0xffffff;
                 anIntArray190[i] = k3;
-                if (lastMouseButton == 1) {
+                if (mv.lastLeftDown()) {
                     anIntArray189[i] = k3;
                     menuObjectHasAction[i] = true;
                 }
@@ -912,7 +909,6 @@ public class Menu {
     String menuListText[][];
     private MouseVariables mv = MouseVariables.get();
     int lastMouseButton;
-    int mouseButton;
     int currentFocusHandle;
     int mouseClicksConsecutive;
     int anInt207;

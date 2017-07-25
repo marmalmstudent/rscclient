@@ -53,8 +53,6 @@ public class GameWindow extends JApplet
 	public boolean[] keyDownCode = new boolean[127];
 	public boolean[] keyDownChar = new boolean[0x10000];
 	public int threadSleepTime;
-	public int mouseDownButton;
-	public int lastMouseDownButton;
 	public int keyDown;
 	public int keyDown2;
 	public boolean keyF1Toggle;
@@ -424,17 +422,13 @@ public class GameWindow extends JApplet
 		mouse.x = e.getX() - GameFrame.offsetX;
 		mouse.y = e.getY() - GameFrame.offsetY;
 		mouse.clickModifier = e.getModifiers();
-		
-		mouseDownButton = e.isMetaDown() ? 2 : 1;
 	}
 
 	public void mouseMoved(MouseEvent e)
 	{
 		mouse.x = e.getX() - GameFrame.offsetX;
 		mouse.y = e.getY() - GameFrame.offsetY;
-		mouse.resetButton();
-		
-		mouseDownButton = 0;
+		mouse.releaseButton();
 		
 		lastActionTimeout = 0;
 	}
@@ -456,11 +450,8 @@ public class GameWindow extends JApplet
 		mouse.clickModifier = e.getModifiers();
 		mouse.lastClickModifier = mouse.clickModifier;
 		
-		mouseDownButton = e.isMetaDown() ? 2 : 1;
-		lastMouseDownButton = mouseDownButton;
-		
 		lastActionTimeout = 0;
-		handleMouseDown(mouseDownButton);
+		handleMouseDown();
 		
 	}
 
@@ -468,9 +459,7 @@ public class GameWindow extends JApplet
 	{
 		mouse.x = e.getX() - GameFrame.offsetX;
 		mouse.y = e.getY() - GameFrame.offsetY;
-		mouse.resetButton();
-		
-		mouseDownButton = 0;
+		mouse.releaseButton();
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -499,9 +488,7 @@ public class GameWindow extends JApplet
 		// reset mouse
 		mouse.x = e.getX() - GameFrame.offsetX;
 		mouse.y = e.getY() - GameFrame.offsetY;
-		mouse.resetButton();
-		
-		mouseDownButton = 0;
+		mouse.releaseButton();
 	}
 
 	public void componentResized(ComponentEvent e) {
@@ -653,7 +640,7 @@ public class GameWindow extends JApplet
 		
 	}
 
-	protected void handleMouseDown(int button)
+	protected void handleMouseDown()
 	{
 		
 	}
@@ -778,11 +765,21 @@ public class GameWindow extends JApplet
 		public int getY() { return y; }
 		
 		public void leftRelease() { clickModifier &= ~MouseEvent.BUTTON1_MASK; }
+		public void lastLeftRelease() { lastClickModifier &= ~MouseEvent.BUTTON1_MASK; }
 		public void middleRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public void lastMiddleRelease() { lastClickModifier &= ~MouseEvent.BUTTON3_MASK; }
 		public void rightRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		public void lastRightRelease() { lastClickModifier &= ~MouseEvent.BUTTON3_MASK; }
+		
+		public boolean buttonDown() { return clickModifier != 0; }
+		public boolean lastButtonDown() {return lastClickModifier != 0; }
+		
 		public boolean leftDown() { return (clickModifier & MouseEvent.BUTTON1_MASK) != 0; }
+		public boolean lastLeftDown() { return (lastClickModifier & MouseEvent.BUTTON1_MASK) != 0; }
 		public boolean middleDown() { return (clickModifier & MouseEvent.BUTTON2_MASK) != 0; }
+		public boolean lastMiddleDown() { return (lastClickModifier & MouseEvent.BUTTON2_MASK) != 0; }
 		public boolean rightDown() { return (clickModifier & MouseEvent.BUTTON3_MASK) != 0; }
+		public boolean lastRightDown() { return (lastClickModifier & MouseEvent.BUTTON3_MASK) != 0; }
 		
 		public static synchronized MouseVariables get()
 		{
@@ -806,7 +803,17 @@ public class GameWindow extends JApplet
 			
 		}
 		
-		private void resetButton()
+		public void releaseButton()
+		{
+			clickModifier = 0;
+		}
+		
+		public void releaseLastButton()
+		{
+			lastClickModifier = 0;
+		}
+		
+		protected void releaseBoth()
 		{
 			clickModifier = 0;
 			lastClickModifier = 0;
