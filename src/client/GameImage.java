@@ -131,7 +131,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight,
         		colourModel, imagePixelArray, 0, gameWindowWidth);
-        imageConsumer.imageComplete(2);
+        imageConsumer.imageComplete(ImageConsumer.TOPDOWNLEFTRIGHT);
     }
 
     public void setDimensions(int x, int y, int width, int height) {
@@ -1098,7 +1098,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         double y_bnd_sprite;
         double x_bnd_sprite;
 
-        if (Math.abs(p_y_rot[1] - p_y_rot[0]) > 0.25)
+        if (Math.abs(p_y_rot[1] - p_y_rot[0]) > 1)
         {
             slope_1 = (p_x_rot[1] - p_x_rot[0]) / (p_y_rot[1] - p_y_rot[0]);
             slope_2 = (p_y[1] - p_y[0]) / (p_y_rot[1]- p_y_rot[0]);
@@ -1130,7 +1130,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             y_bnd_sprite += slope_2;
         }
 
-        if (Math.abs(p_y_rot[2] - p_y_rot[1]) > 0.25) {
+        if (Math.abs(p_y_rot[2] - p_y_rot[1]) > 1) {
             slope_1 = (p_x_rot[2] - p_x_rot[1]) / (p_y_rot[2] - p_y_rot[1]);
             slope_3 = (p_x[2] - p_x[1]) / (p_y_rot[2] - p_y_rot[1]);
         }
@@ -1169,7 +1169,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             x_bnd_sprite += slope_3;
         }
 
-        if (Math.abs(p_y_rot[3] - p_y_rot[2]) > 0.25)
+        if (Math.abs(p_y_rot[3] - p_y_rot[2]) > 1)
         {
             slope_1 = (p_x_rot[3] - p_x_rot[2]) / (p_y_rot[3] - p_y_rot[2]);
             slope_2 = (p_y[3] - p_y[2]) / (p_y_rot[3] - p_y_rot[2]);
@@ -1209,7 +1209,7 @@ public class GameImage implements ImageProducer, ImageObserver {
             y_bnd_sprite += slope_2;
         }
 
-        if (Math.abs(p_y_rot[0] - p_y_rot[3]) > 0.25) {
+        if (Math.abs(p_y_rot[0] - p_y_rot[3]) > 1) {
             slope_1 = (p_x_rot[0] - p_x_rot[3]) / (p_y_rot[0] - p_y_rot[3]);
             slope_3 = (p_x[0] - p_x[3]) / (p_y_rot[0] - p_y_rot[3]);
         }
@@ -1323,6 +1323,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         {
         	System.out.printf("Draw error in minimap: array index out of bounds\n\tx: %4.1f; y: %4.1f xStep: %4.1f yStep: %4.1f; nSpritePixels: %6d; spriteWidth: %6d\n",
         			x, y, xStep, yStep, spritePixels.length, spriteWidth);
+        	oob.printStackTrace();
+        	System.exit(1);
         }
     }
 

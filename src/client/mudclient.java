@@ -8429,13 +8429,13 @@ public class mudclient extends GameWindowMiddleMan
 			y = y * cos - x * sin;
 			x = tmp;
 			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
-					miniMapY + miniMapHeight / 2 - (int)y, 3, 0xffff00, 0xff);
+					miniMapY + miniMapHeight / 2 - (int)y, 5, 0xffff00, 0xff);
 			if (EntityHandler.getNpcDef(mob.type).attackable)
 				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
-						miniMapY + miniMapHeight / 2 - (int)y, 2, 0xff0000, 0xff);
+						miniMapY + miniMapHeight / 2 - (int)y, 4, 0xff0000, 0xff);
 			else
 				gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
-						miniMapY + miniMapHeight / 2 - (int)y, 2, 0x0000ff, 0xff);
+						miniMapY + miniMapHeight / 2 - (int)y, 4, 0x0000ff, 0xff);
 		}
 
 		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
@@ -8457,7 +8457,7 @@ public class mudclient extends GameWindowMiddleMan
 				break;
 			}
 			gameGraphics.drawCircle(miniMapX + miniMapWidth / 2 + (int)x,
-					miniMapY + miniMapHeight / 2 - (int)y, 3, color, 0xff);
+					miniMapY + miniMapHeight / 2 - (int)y, 5, color, 0xff);
 		}
 
 		Sprite sprite;
