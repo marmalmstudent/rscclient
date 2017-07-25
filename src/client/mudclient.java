@@ -25,7 +25,7 @@ import entityhandling.defs.ItemDef;
 import entityhandling.defs.NPCDef;
 import entityhandling.defs.SpellDef;
 import model.Sprite;
-
+import player.Inventory;
 import player.Item;
 import player.Player;
 
@@ -36,6 +36,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import java.io.DataInputStream;
@@ -111,9 +113,19 @@ public class mudclient extends GameWindowMiddleMan
 		Config.initConfig();
 		GameWindowMiddleMan.clientVersion = 25;
 		mc = new mudclient();
-		mc.appletMode = false;
-		mc.createWindow(mc, mc.windowWidth + 4, mc.windowHeight + 32,
+		Rectangle rect = mc.getBounds();
+		mc.createWindow(mc, new Rectangle(rect.x, rect.y, rect.width + 4, rect.height + 32),
 				"TestServer v" + GameWindowMiddleMan.clientVersion, false);
+	}
+	
+	public Rectangle getBounds()
+	{
+		return bounds;
+	}
+	
+	public Point getCenter()
+	{
+		return center;
 	}
 
 	/**
@@ -1390,7 +1402,7 @@ public class mudclient extends GameWindowMiddleMan
 			else if (bankPan.getTabButtonPanel().isMouseOver())
 				mouseOverBankPageText = bankPan.switchBankTab(bankItemCount, mouseOverBankPageText);
 			else if (!bankPan.getFrame().isMouseOver()
-					|| (bankPan.getFrame().getCloseButton().isMouseOverButton()))
+					|| (bankPan.getFrame().getCloseButton().isMouseOver()))
 			{
 				formatPacket(48, -1, -1);
 				return;
@@ -1441,116 +1453,6 @@ public class mudclient extends GameWindowMiddleMan
 				windowHalfHeight - 30, 260, 60, 0xffffff);
 		gameGraphics.drawText("Logging out...", windowHalfWidth,
 				windowHalfHeight + 6, 5, 0xffffff);
-	}
-
-	private void handleInventoryMouseover()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid invGrid = invPan.getInvGrid();
-		int xInInv = mouseX - invGrid.getX();
-		int yInInv = mouseY - invGrid.getY();
-		int currentInventorySlot = xInInv / InGameGrid.ITEM_SLOT_WIDTH
-				+ (yInInv / InGameGrid.ITEM_SLOT_HEIGHT) * invGrid.getCols();
-		if (currentInventorySlot < invGrid.getCols()*invGrid.getRows())
-		{
-			Item item = self.getInventoryItems().get(currentInventorySlot);
-			if (selectedSpell >= 0) {
-				if (EntityHandler.getSpellDef(selectedSpell).getSpellType() == 3)
-				{
-					MenuRightClick mrc = new MenuRightClick();
-					mrc.text1 = String.format("Cast %s on",
-							EntityHandler.getSpellDef(selectedSpell).getName());
-					mrc.text2 = "@lre@" + item.getName();
-					mrc.id = 600;
-					mrc.actionType = currentInventorySlot;
-					mrc.actionVariable = selectedSpell;
-					rightClickMenu.add(mrc);
-					return;
-				}
-			} else {
-				if (selectedItem >= 0) {
-					MenuRightClick mrc = new MenuRightClick();
-					mrc.text1 = String.format("Use %s with", selectedItemName);
-					mrc.text2 = "@lre@" + item.getName();
-					mrc.id = 610;
-					mrc.actionType = currentInventorySlot;
-					mrc.actionVariable = selectedItem;
-					rightClickMenu.add(mrc);
-					return;
-				}
-				if (item.isWearing()) {
-					MenuRightClick mrc = new MenuRightClick();
-					mrc.text1 = "Remove";
-					mrc.text2 = "@lre@" + item.getName();
-					mrc.id = 620;
-					mrc.actionType = currentInventorySlot;
-					rightClickMenu.add(mrc);
-				} else if (item.isWieldable()) {
-					MenuRightClick mrc = new MenuRightClick();
-					mrc.text1 = "Wear";
-					mrc.text2 = "@lre@" + item.getName();
-					mrc.id = 630;
-					mrc.actionType = currentInventorySlot;
-					rightClickMenu.add(mrc);
-				}
-				if (!item.getCommand().equals("")) {
-					MenuRightClick mrc = new MenuRightClick();
-					mrc.text1 = item.getCommand();
-					mrc.text2 = "@lre@" + item.getName();
-					mrc.id = 640;
-					mrc.actionType = currentInventorySlot;
-					rightClickMenu.add(mrc);
-				}
-				MenuRightClick mrc = new MenuRightClick();
-				mrc.text1 = "Use";
-				mrc.text2 = "@lre@" + item.getName();
-				mrc.id = 650;
-				mrc.actionType = currentInventorySlot;
-				rightClickMenu.add(mrc);
-				
-				mrc = new MenuRightClick();
-				mrc.text1 = "Drop";
-				mrc.text2 = "@lre@" + item.getName();
-				mrc.id = 660;
-				mrc.actionType = currentInventorySlot;
-				rightClickMenu.add(mrc);
-				
-				mrc = new MenuRightClick();
-				mrc.text1 = "Examine";
-				mrc.text2 = "@lre@" + item.getName() +
-						(self.me.admin >= 2 ? " @or1@(" + item.getID() + ")" : "");
-				mrc.id = 3600;
-				mrc.actionType = item.getID();
-				rightClickMenu.add(mrc);
-			}
-		}
-	}
-
-	private final void drawInventoryMenu(boolean flag)
-	{
-		invPan.getFrame().drawComponent();
-		invPan.getInvGrid().drawStaticGrid(self.getInventoryItems(),
-				inventoryCount, invPan.getInvCountTextColor());
-		if (!flag)
-			return;
-		if (invPan.getInvGrid().isMouseOver())
-		{
-			handleInventoryMouseover();
-		}
-		else if (invPan.getFrame().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				mouseOverMenu = 0;
-				mv.releaseButton();
-			}
-		}
-		else if (invPan.getFrame().isMouseOver())
-		{ // click inside inventory but not on the grid or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
 	}
 
 	private final void drawChatMessageTabs()
@@ -1769,8 +1671,8 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawString(button.getButtonText() + ":@yel@"
 					+ playerStatCurrent[i] + "/" + playerStatBase[i],
 					button.getX() + 5, button.getY() + 10, 1,
-					button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			if (button.isMouseOverButton())
+					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			if (button.isMouseOver())
 				k1 = plrPan.getCorrectedSkillIndex(i);
 			++i;
 		}
@@ -1784,7 +1686,7 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawString(button.getButtonText()
 					+ ":@yel@" + equipmentStatus[i],
 					button.getX() + 5, button.getY() + 10, 1,
-					button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 			++i;
 		}
 		i1 += plrPan.getEquipmentButtonPanel().getHeight() + 1;
@@ -1940,11 +1842,11 @@ public class mudclient extends GameWindowMiddleMan
 				mv.releaseButton();
 			}
 		}
-		else if (plrPan.getFrame().getCloseButton().isMouseOverButton())
+		else if (plrPan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
-				mouseOverMenu = 0;
+				om.close(OpenMenu.STATS);
 				mv.releaseButton();
 			}
 		}
@@ -2150,12 +2052,32 @@ public class mudclient extends GameWindowMiddleMan
 		int mouseX = mv.getX();
 		int mouseY = mv.getY();
 		if (mv.leftDown()
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{
+			mv.releaseButton();
+			switch((mouseX - gameWindowMenuBarX) / gameWindowMenuBarItemWidth)
+			{
+			case 5: om.toggle(OpenMenu.INVENTORY);
+				break;
+			case 3: om.toggle(OpenMenu.STATS);
+				break;
+			case 2: om.toggle(OpenMenu.SPELLS);
+				break;
+			case 1: om.toggle(OpenMenu.FRIENDS);
+				break;
+			case 0: om.toggle(OpenMenu.SETTINGS);
+				break;
+			}
+		}
+		/*
+		if (mv.leftDown()
 				&& mouseX >= gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
 				&& mouseY >= gameWindowMenuBarY
 				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // iventory
-			mouseOverMenu = mouseOverMenu != 1 ? 1 : 0;
+			om.toggle(OpenMenu.INVENTORY);
 			mv.releaseButton();
 		}
 		if (mouseX >= gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
@@ -2163,10 +2085,6 @@ public class mudclient extends GameWindowMiddleMan
 				&& mouseX < gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // map
-			// we want to always show the minimap
-			/*
-        	mouseOverMenu = (mouseOverMenu != 2) ? 2 : 0;
-			 */
 			mv.releaseButton();
 		}
 		if (mv.leftDown()
@@ -2175,7 +2093,7 @@ public class mudclient extends GameWindowMiddleMan
 				&& mouseX < gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // stats
-			mouseOverMenu = mouseOverMenu != 3 ? 3 : 0;
+			om.toggle(OpenMenu.STATS);
 			mv.releaseButton();
 		}
 		if (mv.leftDown()
@@ -2184,7 +2102,7 @@ public class mudclient extends GameWindowMiddleMan
 				&& mouseX < gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // spells
-			mouseOverMenu = mouseOverMenu != 4 ? 4 : 0;
+			om.toggle(OpenMenu.SPELLS);
 			mv.releaseButton();
 		}
 		if (mv.leftDown()
@@ -2193,7 +2111,7 @@ public class mudclient extends GameWindowMiddleMan
 				&& mouseX < gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // friends
-			mouseOverMenu = mouseOverMenu != 5 ? 5 : 0;
+			om.toggle(OpenMenu.FRIENDS);
 			mv.releaseButton();
 		}
 		if (mv.leftDown()
@@ -2202,9 +2120,10 @@ public class mudclient extends GameWindowMiddleMan
 				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarItemWidth
 				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
 		{ // settings when some menu is open
-			mouseOverMenu = mouseOverMenu != 6 ? 6 : 0;
+			om.toggle(OpenMenu.SETTINGS);
 			mv.releaseButton();
 		}
+		*/
 	}
 
 	private final void menuClick(MenuRightClick clickedItem)
@@ -2223,7 +2142,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 210) {
 			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
@@ -2233,7 +2152,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 220) {
 			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
@@ -2254,7 +2173,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.addByte(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 310) {
 			walkToAction(actionX, actionY, actionType);
@@ -2264,7 +2183,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.addByte(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 320) {
 			walkToAction(actionX, actionY, actionType);
@@ -2291,7 +2210,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 410) {
 			walkToObject(actionX, actionY, actionType, actionVariable);
@@ -2300,7 +2219,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.add2ByteInt(actionVariable2);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 420) {
 			walkToObject(actionX, actionY, actionType, actionVariable);
@@ -2323,14 +2242,14 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 610) {
 			super.streamClass.createPacket(27);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 620) {
 			super.streamClass.createPacket(92);
@@ -2347,21 +2266,23 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
 		}
-		if (currentMenuID == 650) {
-			selectedItem = actionType;
-			mouseOverMenu = 0;
-			selectedItemName = self.getInventoryItems().get(selectedItem).getName();
+		if (currentMenuID == 650)
+		{ /* selecting item it seems */
+			selItem = new SelectedItem(actionType,
+					self.getInventoryItems().get(actionType));
 		}
-		if (currentMenuID == 660) {
+		if (currentMenuID == 660)
+		{ /* dropping an item */
 			super.streamClass.createPacket(147);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
-			mouseOverMenu = 0;
+			selItem = null;
 			displayMessage("Dropping " + self.getInventoryItems().get(actionType).getName(), 4, 0);
 		}
 		if (currentMenuID == 3600)
+		{ /* examine */
 			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
+		}
 		if (currentMenuID == 700) {
 			walkTo(sectionX, sectionY, actionX, actionX, true);
 			mapClickX = -1;
@@ -2370,7 +2291,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 710) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2380,7 +2301,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 720) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2416,7 +2337,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 810) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2426,7 +2347,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.add2ByteInt(actionVariable);
 			super.streamClass.writePktSize();
-			selectedItem = -1;
+			selItem = null;
 		}
 		if (currentMenuID == 805 || currentMenuID == 2805) {
 			walkTo(sectionX, sectionY, actionX, actionY, true);
@@ -2460,7 +2381,7 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.add2ByteInt(actionX + areaX);
 			super.streamClass.add2ByteInt(actionY + areaY);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 920) {
 			walkTo(sectionX, sectionY, actionX, actionY, false);
@@ -2473,11 +2394,11 @@ public class mudclient extends GameWindowMiddleMan
 			super.streamClass.createPacket(206);
 			super.streamClass.add2ByteInt(actionType);
 			super.streamClass.writePktSize();
-			selectedSpell = -1;
+			selSpell = null;
 		}
 		if (currentMenuID == 4000) {
-			selectedItem = -1;
-			selectedSpell = -1;
+			selItem = null;
+			selSpell = null;
 		}
 	}
 
@@ -2783,7 +2704,6 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		anInt699 = 0;
 		mobMessageCount = 0;
-		mobHPBarCount = 0;
 		hitpoints.clear();
 		if (freeCamera)
 		{
@@ -2892,7 +2812,8 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		int mouseX = mv.getX();
 		int mouseY = mv.getY();
-		if (mv.buttonDown()) {
+		if (mv.buttonDown())
+		{
 			int i = 0;
 			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
 			{
@@ -3101,7 +3022,8 @@ public class mudclient extends GameWindowMiddleMan
 		for (k = 0; k < doorCount;)
 			doorRelated[k++] = false;
 
-		SpellDef spellDef = EntityHandler.getSpellDef(selectedSpell);
+		
+		final SpellDef spellDef = selSpell != null ? selSpell.spell : null;
 
 		int nVisMdl = gameCamera.getVisibleModelCount();
 		Model models[] = gameCamera.getVisibleModels();
@@ -3128,7 +3050,7 @@ public class mudclient extends GameWindowMiddleMan
 							k3 = self.me.level - otherPlr.level;
 						String levelText = String.format("%s(level-%d)",
 								getLevelDiffColor(k3), otherPlr.level);
-						if (selectedSpell >= 0)
+						if (selSpell != null)
 						{
 							if (spellDef.getSpellType() == 1
 									|| spellDef.getSpellType() == 2)
@@ -3137,17 +3059,17 @@ public class mudclient extends GameWindowMiddleMan
 										String.format("Cast %s on", spellDef.getName()),
 										String.format("@whi@%s %s", otherPlr.name, levelText),
 										800, otherPlr.currentX, otherPlr.currentY,
-										otherPlr.serverIndex, selectedSpell, null);
+										otherPlr.serverIndex, selSpell.id, null);
 								rightClickMenu.add(mrc);
 							}
 						}
-						else if (selectedItem >= 0)
+						else if (selItem != null)
 						{
 							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selectedItemName),
+									String.format("Use %s with", selItem.item.getName()),
 									String.format("@whi@%s %s", otherPlr.name, levelText),
 									810, otherPlr.currentX, otherPlr.currentY,
-									otherPlr.serverIndex, selectedItem, null);
+									otherPlr.serverIndex, selItem.index, null);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3183,7 +3105,7 @@ public class mudclient extends GameWindowMiddleMan
 					else if (modelType == 2)
 					{ /* item on gound */
 						ItemDef itemDef = EntityHandler.getItemDef(groundItemType[modelIdx]);
-						if (selectedSpell >= 0)
+						if (selSpell != null)
 						{
 							if (spellDef.getSpellType() == 3)
 							{
@@ -3191,17 +3113,17 @@ public class mudclient extends GameWindowMiddleMan
 										String.format("Cast %s on", spellDef.getName()),
 										String.format("@lre@%s", itemDef.getName()),
 										200, groundItemX[modelIdx], groundItemY[modelIdx],
-										groundItemType[modelIdx], selectedSpell, null);
+										groundItemType[modelIdx], selSpell.id, null);
 								rightClickMenu.add(mrc);
 							}
 						}
-						else if (selectedItem >= 0)
+						else if (selItem != null)
 						{
 							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selectedItemName),
+									String.format("Use %s with", selItem.item.getName()),
 									String.format("@lre@%s", itemDef.getName()),
 									210, groundItemX[modelIdx], groundItemY[modelIdx],
-									groundItemType[modelIdx], selectedItem, null);
+									groundItemType[modelIdx], selItem.index, null);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3238,7 +3160,7 @@ public class mudclient extends GameWindowMiddleMan
 							s1 = String.format("%s(level-%d)",
 									getLevelDiffColor(plrLevel - npcLevel), npcLevel);
 						}
-						if (selectedSpell >= 0)
+						if (selSpell != null)
 						{
 							if (spellDef.getSpellType() == 2)
 							{
@@ -3246,17 +3168,17 @@ public class mudclient extends GameWindowMiddleMan
 										String.format("Cast %s on", spellDef.getName()),
 										String.format("@yel@%s", npcDef.getName()),
 										700, theNPC.currentX, theNPC.currentY,
-										theNPC.serverIndex, selectedSpell, null);
+										theNPC.serverIndex, selSpell.id, null);
 								rightClickMenu.add(mrc);
 							}
 						}
-						else if (selectedItem >= 0)
+						else if (selItem != null)
 						{
 							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selectedItemName),
+									String.format("Use %s with", selItem.item.getName()),
 									String.format("@yel@%s", npcDef.getName()),
 									710, theNPC.currentX, theNPC.currentY,
-									theNPC.serverIndex, selectedItem, null);
+									theNPC.serverIndex, selItem.index, null);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3303,7 +3225,7 @@ public class mudclient extends GameWindowMiddleMan
 					DoorDef dDef = EntityHandler.getDoorDef(i3);
 					if (!doorRelated[j2])
 					{
-						if (selectedSpell >= 0)
+						if (selSpell != null)
 						{
 							if (spellDef.getSpellType() == 4)
 							{
@@ -3311,17 +3233,17 @@ public class mudclient extends GameWindowMiddleMan
 										String.format("Cast %s on", spellDef.getName()),
 										String.format("@cya@%s", dDef.getName()),
 										300, doorX[j2], doorY[j2],
-										doorDirection[j2], selectedSpell, null);
+										doorDirection[j2], selSpell.id, null);
 								rightClickMenu.add(mrc);
 							}
 						}
-						else if (selectedItem >= 0)
+						else if (selItem != null)
 						{
 							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selectedItemName),
+									String.format("Use %s with", selItem.item.getName()),
 									String.format("@cya@%s", dDef.getName()),
 									310, doorX[j2], doorY[j2],
-									doorDirection[j2], selectedItem, null);
+									doorDirection[j2], selItem.index, null);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3363,23 +3285,23 @@ public class mudclient extends GameWindowMiddleMan
 					GameObjectDef gobjDef = EntityHandler.getObjectDef(gObj.type);
 					if (!objectRelated[k2])
 					{
-						if (selectedSpell >= 0)
+						if (selSpell != null)
 						{
 							if (spellDef.getSpellType() == 5)
 							{
 								MenuRightClick mrc = addCommand(
 										String.format("Cast %s on", spellDef.getName()),
 										String.format("@cya@%s", gobjDef.getName()), 400,
-										gObj.x, gObj.y, gObj.id, gObj.type, selectedSpell);
+										gObj.x, gObj.y, gObj.id, gObj.type, selSpell.id);
 								rightClickMenu.add(mrc);
 							}
 						}
-						else if (selectedItem >= 0)
+						else if (selItem != null)
 						{
 							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selectedItemName),
+									String.format("Use %s with", selItem.item.getName()),
 									String.format("@cya@%s", gobjDef.getName()), 410,
-									gObj.x, gObj.y, gObj.id, gObj.type, selectedItem);
+									gObj.x, gObj.y, gObj.id, gObj.type, selItem.index);
 							rightClickMenu.add(mrc);
 						}
 						else
@@ -3421,17 +3343,17 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		if (selectedSpell >= 0 && spellDef.getSpellType() <= 1)
+		if (selSpell != null && spellDef.getSpellType() <= 1)
 		{
 			MenuRightClick mrc = addExamine(
 					String.format("Cast %s on self", spellDef.getName()),
-					"", "", 1000, selectedSpell);
+					"", "", 1000, selSpell.id);
 			rightClickMenu.add(mrc);
 		}
 		if (j != -1)
 		{
 			int l1 = j;
-			if (selectedSpell >= 0)
+			if (selSpell != null)
 			{
 				if (spellDef.getSpellType() == 6)
 				{
@@ -3439,12 +3361,12 @@ public class mudclient extends GameWindowMiddleMan
 							String.format("Cast %s on ground", spellDef.getName()),
 							"", 900, engineHandle.selectedX[l1],
 							engineHandle.selectedY[l1],
-							selectedSpell, null, null);
+							selSpell.id, null, null);
 					rightClickMenu.add(mrc);
 					return;
 				}
 			}
-			else if (selectedItem < 0)
+			else if (selItem == null)
 			{
 				MenuRightClick mrc = addCommand("Walk here",
 						"", 920, engineHandle.selectedX[l1],
@@ -3455,34 +3377,35 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	protected final void startGame() {
+	protected final void startGame()
+	{
 		int i = 0;
-		for (int j = 0; j < 99; j++) {
+		for (int j = 0; j < 99; j++)
+		{
 			int k = j + 1;
 			int i1 = (int) ((double) k + 300D * Math.pow(2D, (double) k / 7D));
 			i += i1;
 			experienceArray[j] = (i & 0xffffffc) / 4;
 		}
-		super.yOffset = 0;
 		GameWindowMiddleMan.maxPacketReadCount = 1000;
 		loadConfigFilter(); // 15%
-		if (lastLoadedNull) {
+		if (lastLoadedNull)
 			return;
-		}
 		aGraphics936 = getGraphics();
 		changeThreadSleepModifier(50);
 		gameGraphics = new GameImageMiddleMan(windowWidth, windowHeight + 12, 4000, this);
-		gameGraphics._mudclient = this;
-		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
-		abWin = new AbuseWindow(windowHalfWidth, windowHalfHeight);
-		bankPan = new BankPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		tradePan = new TradePanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		tradeCfrmPan = new TradeConfirmPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		invPan = new InventoryPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		plrPan = new PlayerInfoPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		magicPan = new MagicPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		friendPan = new FriendsPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
-		optPan = new OptionsPanel(windowHalfWidth, windowHalfHeight, gameGraphics);
+		
+		abWin = new AbuseWindow(center);
+		bankPan = new BankPanel(center, gameGraphics);
+		tradePan = new TradePanel(center, gameGraphics);
+		tradeCfrmPan = new TradeConfirmPanel(center, gameGraphics);
+		
+		invPan = new InventoryPanel(center, gameGraphics);
+		plrPan = new PlayerInfoPanel(center, gameGraphics);
+		magicPan = new MagicPanel(center, gameGraphics);
+		friendPan = new FriendsPanel(center, gameGraphics);
+		optPan = new OptionsPanel(center, gameGraphics);
+		
 		Menu.aBoolean220 = false;
 		spellMenu = new Menu(gameGraphics, 5);
 		spellMenuHandle = spellMenu.method162(magicPan.getX(),
@@ -3507,8 +3430,8 @@ public class mudclient extends GameWindowMiddleMan
 		if (lastLoadedNull)
 			return;
 		gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
-		gameCamera.setCameraSize(windowWidth / 2, windowHeight / 2, windowWidth / 2,
-				windowHeight / 2, windowWidth, cameraSizeInt);
+		gameCamera.setCameraSize(center, windowWidth/2, windowHeight/2,
+				windowWidth, cameraSizeInt);
 		gameCamera.drawModelMaxDist = viewDistance;
 		gameCamera.drawSpriteMaxDist = viewDistance;
 		gameCamera.fadeFactor = 0.0078125;
@@ -3666,7 +3589,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final void checkMouseStatus()
 	{
-		if (selectedSpell >= 0 || selectedItem >= 0)
+		if (selSpell != null || selItem != null)
 		{
 			MenuRightClick rmc = new MenuRightClick();
 			rmc.text1 = "Cancel";
@@ -3698,20 +3621,22 @@ public class mudclient extends GameWindowMiddleMan
 			}
 
 			String s = null;
-			if ((selectedItem >= 0 || selectedSpell >= 0)
+			if ((selItem != null || selSpell != null)
 					&& menuLength == 1)
 				s = "Choose a target";
-			else if ((selectedItem >= 0 || selectedSpell >= 0)
+			else if ((selItem != null || selSpell != null)
 					&& menuLength > 1)
 				s = "@whi@" + rightClickMenu.get(0).text1 + " " + rightClickMenu.get(0).text2;
 			else if (leftClickOption != null)
 				s = leftClickOption.text2 + ": @whi@" + rightClickMenu.get(0).text1;
 			
-			if (menuLength == 2 && s != null)
-				s = s + "@whi@ / 1 more option";
-			if (menuLength > 2 && s != null)
-				if (s != null)
-					gameGraphics.drawString(s, 6, 14, 1, 0xffff00);
+			if (s != null)
+			{
+				if (menuLength > 1 && (selItem != null || selSpell != null))
+					s = String.format("%s@whi@ / %d more options", s, menuLength-1);
+				gameGraphics.drawString(s, 6, 14, 1, 0xffff00);
+			}
+			
 			if (!configMouseButtons && mv.leftDown()
 					|| configMouseButtons && mv.leftDown()
 					&& menuLength == 1)
@@ -3845,7 +3770,7 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawText(button.getButtonText(),
 				button.getX() + button.getWidth() / 2,
 				(button.getY() + button.getHeight()) - 3, 1,
-				button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 	}
 
 	private void handleMouseOverIgnore()
@@ -3868,7 +3793,7 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawText(button.getButtonText(),
 				button.getX() + button.getWidth() / 2,
 				(button.getY() + button.getHeight()) - 3, 1,
-				button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 	}
 
 	private void handleFriendsTabClicks()
@@ -3943,10 +3868,10 @@ public class mudclient extends GameWindowMiddleMan
 			handleClickOnFriends();
 		if (mv.leftDown() && friendTabOn == 1)
 			handleClickOnIgnore();
-		if (friendPan.getFriendsAddButton().isMouseOverButton()
+		if (friendPan.getFriendsAddButton().isMouseOver()
 				&& mv.leftDown() && friendTabOn == 0)
 			handleClickAddFriend();
-		if (friendPan.getIgnoreAddButton().isMouseOverButton()
+		if (friendPan.getIgnoreAddButton().isMouseOver()
 				&& mv.leftDown() && friendTabOn == 1)
 			handleClickAddIgnore();
 		mv.releaseButton();
@@ -3970,11 +3895,11 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		if (friendPan.isMouseOver())
 			handleFriendsPanelClicks();
-		else if (friendPan.getFrame().getCloseButton().isMouseOverButton())
+		else if (friendPan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
-				mouseOverMenu = 0;
+				om.close(OpenMenu.FRIENDS);
 				mv.releaseButton();
 			}
 		}
@@ -4301,8 +4226,9 @@ public class mudclient extends GameWindowMiddleMan
 				}
 				if (k3 == EntityHandler.getSpellDef(spellIdx).getRuneCount())
 				{
-					selectedSpell = spellIdx;
-					selectedItem = -1;
+					selSpell = new SelectedSpell(spellIdx,
+							EntityHandler.getSpellDef(spellIdx));
+					selItem = null;
 				}
 			}
 		}
@@ -4352,11 +4278,11 @@ public class mudclient extends GameWindowMiddleMan
 
 		if (magicPan.isMouseOver())
 			handleMagicPanelClicks();
-		else if (magicPan.getFrame().getCloseButton().isMouseOverButton())
+		else if (magicPan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
-				mouseOverMenu = 0;
+				om.close(OpenMenu.SPELLS);
 				mv.releaseButton();
 			}
 		}
@@ -4724,7 +4650,7 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			optPan.setGameOptionState(i, condition[i]);
 			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 			gameGraphics.drawString(info[i] + " - " + color
 					+ button.getButtonText(), button.getX() + xOffset,
 					button.getY() + 10, 1, clr);
@@ -4752,7 +4678,7 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			optPan.setClientAssistState(i, condition[i]);
 			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 			gameGraphics.drawString(info[i] + " - " + color
 					+ button.getButtonText(), button.getX() + xOffset,
 					button.getY() + 10, 1, clr);
@@ -4788,7 +4714,7 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			optPan.setPrivacySettingsState(i, condition[i]);
 			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOverButton() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
 			gameGraphics.drawString(info[i] + ": " + color
 					+ button.getButtonText(), button.getX() + xOffset,
 					button.getY() + 10, 1, clr);
@@ -4804,7 +4730,7 @@ public class mudclient extends GameWindowMiddleMan
 				optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight()
 				+ optPan.getHeaderHeight() - 3, 1, 0);
 		int k1 = 0xffffff;
-		if (optPan.getLogoutButton().isMouseOverButton())
+		if (optPan.getLogoutButton().isMouseOver())
 		{
 			k1 = 0xffff00;
 		}
@@ -4819,17 +4745,17 @@ public class mudclient extends GameWindowMiddleMan
 		if (mv.leftDown())
 		{
 			InGameButton buttons[] = optPan.getGameOptions().getButtons();
-			if (buttons[0].isMouseOverButton())
+			if (buttons[0].isMouseOver())
 			{
 				configAutoCameraAngle = !configAutoCameraAngle;
 				formatPacket(157, 0, configAutoCameraAngle ? 1 : 0);
 			}
-			else if (buttons[1].isMouseOverButton())
+			else if (buttons[1].isMouseOver())
 			{
 				configMouseButtons = !configMouseButtons;
 				formatPacket(157, 2, configMouseButtons ? 1 : 0);
 			}
-			else if (buttons[2].isMouseOverButton())
+			else if (buttons[2].isMouseOver())
 			{
 				configSoundEffects = !configSoundEffects;
 				formatPacket(157, 3, configSoundEffects ? 1 : 0);
@@ -4842,27 +4768,27 @@ public class mudclient extends GameWindowMiddleMan
 		if (mv.leftDown())
 		{
 			InGameButton buttons[] = optPan.getClientAssists().getButtons();
-			if (buttons[0].isMouseOverButton())
+			if (buttons[0].isMouseOver())
 			{
 				showRoof = !showRoof;
 				formatPacket(157, 4, showRoof ? 1 : 0);
 			}
-			else if (buttons[1].isMouseOverButton())
+			else if (buttons[1].isMouseOver())
 			{
 				autoScreenshot = !autoScreenshot;
 				formatPacket(157, 5, autoScreenshot ? 1 : 0);
 			}
-			else if (buttons[2].isMouseOverButton())
+			else if (buttons[2].isMouseOver())
 			{
 				combatWindow = !combatWindow;
 				formatPacket(157, 6, combatWindow ? 1 : 0);
 			}
-			else if (buttons[3].isMouseOverButton())
+			else if (buttons[3].isMouseOver())
 			{
 				engineHandle.setTextureUse(!engineHandle.getTextureUse());
 				//TODO: send this toggle to server, also should reload the map
 			}
-			else if (buttons[4].isMouseOverButton())
+			else if (buttons[4].isMouseOver())
 			{
 				freeCamera = !freeCamera;
 				//TODO: send this toggle to server, also should reload the map
@@ -4876,22 +4802,22 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			boolean flag1 = false;
 			InGameButton buttons[] = optPan.getPrivacySettings().getButtons();
-			if (buttons[0].isMouseOverButton())
+			if (buttons[0].isMouseOver())
 			{
 				super.blockChatMessages = 1 - super.blockChatMessages;
 				flag1 = true;
 			}
-			else if (buttons[1].isMouseOverButton())
+			else if (buttons[1].isMouseOver())
 			{
 				super.blockPrivateMessages = 1 - super.blockPrivateMessages;
 				flag1 = true;
 			}
-			else if (buttons[2].isMouseOverButton())
+			else if (buttons[2].isMouseOver())
 			{
 				super.blockTradeRequests = 1 - super.blockTradeRequests;
 				flag1 = true;
 			}
-			else if (buttons[3].isMouseOverButton())
+			else if (buttons[3].isMouseOver())
 			{
 				super.blockDuelRequests = 1 - super.blockDuelRequests;
 				flag1 = true;
@@ -4919,7 +4845,7 @@ public class mudclient extends GameWindowMiddleMan
 			handleClientAssistClicks();
 		else if (optPan.getPrivacySettings().isMouseOver())
 			handlePrivacySettingsClicks();
-		else if (optPan.getLogoutButton().isMouseOverButton())
+		else if (optPan.getLogoutButton().isMouseOver())
 			handleLogoutClick();
 		mv.releaseButton();
 	}
@@ -4936,11 +4862,11 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		if (optPan.isMouseOver())
 			handleOptionsPanelClicks();
-		else if (optPan.getFrame().getCloseButton().isMouseOverButton())
+		else if (optPan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
-				mouseOverMenu = 0;
+				om.close(OpenMenu.SETTINGS);
 				mv.releaseButton();
 			}
 		}
@@ -5394,7 +5320,7 @@ public class mudclient extends GameWindowMiddleMan
 		updatePlayers(); // player walking animations
 		updateNPCs(); // npc walking animations
 
-		if (mouseOverMenu != 2)
+		if (!om.isOpen(OpenMenu.MINIMAP))
 		{
 			if (GameImage.anInt346 > 0)
 				anInt658++;
@@ -5884,6 +5810,7 @@ public class mudclient extends GameWindowMiddleMan
 		super.friendsCount = 0;
 		
 		self.initContainers();
+		self.initPanels(center, gameGraphics);
 	}
 
 	private void drawTradePanel()
@@ -5926,9 +5853,9 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		if (mv.leftDown())
 		{
-			if (tradePan.getAcceptButton().isMouseOverButton())
+			if (tradePan.getAcceptButton().isMouseOver())
 				this.formatPacket(211, -1, -1);
-			if (tradePan.getDeclineButton().isMouseOverButton())
+			if (tradePan.getDeclineButton().isMouseOver())
 				this.formatPacket(216, -1, -1);
 		}
 	}
@@ -6151,7 +6078,7 @@ public class mudclient extends GameWindowMiddleMan
 
 		if (tradePan.isMouseOver())
 			handleTradePanelClicks();
-		else if (tradePan.getFrame().getCloseButton().isMouseOverButton())
+		else if (tradePan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
@@ -7606,11 +7533,11 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void handleTradeCfrmPanelClicks()
 	{
-		if (tradeCfrmPan.getAcceptButton().isMouseOverButton())
+		if (tradeCfrmPan.getAcceptButton().isMouseOver())
 			formatPacket(53, -1, -1);
 		if (!tradeCfrmPan.getFrame().isMouseOver()
-				|| tradeCfrmPan.getDeclineButton().isMouseOverButton()
-				|| tradeCfrmPan.getFrame().getCloseButton().isMouseOverButton())
+				|| tradeCfrmPan.getDeclineButton().isMouseOver()
+				|| tradeCfrmPan.getFrame().getCloseButton().isMouseOver())
 			formatPacket(216, -1, -1);
 		mv.releaseButton();
 	}
@@ -7622,7 +7549,7 @@ public class mudclient extends GameWindowMiddleMan
 			if (mv.leftDown())
 				handleTradeCfrmPanelClicks();
 		}
-		else if (tradePan.getFrame().getCloseButton().isMouseOverButton())
+		else if (tradePan.getFrame().getCloseButton().isMouseOver())
 		{ // close button
 			if (mv.leftDown())
 			{
@@ -8143,42 +8070,37 @@ public class mudclient extends GameWindowMiddleMan
 			drawAbuseWindow1();
 		else if (showAbuseWindow == 2)
 			drawAbuseWindow2();
-		else if (inputBoxType != 0) {
+		else if (inputBoxType != 0)
 			drawInputBox();
-		} else {
+		else
+		{
 			if (showQuestionMenu)
 				drawQuestionMenu();
-			if (self.me.currentSprite == 8
-					|| self.me.currentSprite == 9
+			if (self.me.currentSprite == 8 || self.me.currentSprite == 9
 					|| combatWindow)
 				drawCombatStyleWindow();
 			checkMouseOverMenus();
 			boolean noMenusShown = !showQuestionMenu && !showRightClickMenu;
 			if (noMenusShown)
 				rightClickMenu.clear();
-			if ((mouseOverMenu == 0
-					|| mouseOverMenu == 1
-					|| mouseOverMenu == 2
-					|| mouseOverMenu == 3
-					|| mouseOverMenu == 4
-					|| mouseOverMenu == 5
-					|| mouseOverMenu == 6) && noMenusShown)
+			if (om.anyOpen() && noMenusShown)
 			{ // since we no longer need to mouseover the menu to keep them open
 				drawInventoryRightClickMenu();
 			}
-			if (mouseOverMenu == 1)
-				drawInventoryMenu(noMenusShown);
-			/* We always show the minimap now
-            if (mouseOverMenu == 2)
-                drawMapMenu(noMenusShown);
-			 */
-			if (mouseOverMenu == 3)
+			if (om.isOpen(OpenMenu.INVENTORY))
+			{
+				List<MenuRightClick> result = self.getInventory().draw(
+						noMenusShown, selItem, selSpell, inventoryCount);
+				for (Iterator<MenuRightClick> itr = result.iterator(); itr.hasNext();)
+					rightClickMenu.add(itr.next());
+			}
+			if (om.isOpen(OpenMenu.STATS))
 				drawPlayerInfoMenu(noMenusShown);
-			if (mouseOverMenu == 4)
+			if (om.isOpen(OpenMenu.SPELLS))
 				drawMagicWindow(noMenusShown);
-			if (mouseOverMenu == 5)
+			if (om.isOpen(OpenMenu.FRIENDS))
 				drawFriendsWindow(noMenusShown);
-			if (mouseOverMenu == 6)
+			if (om.isOpen(OpenMenu.SETTINGS))
 				drawOptionsMenu(noMenusShown);
 			if (!showRightClickMenu && !showQuestionMenu)
 				checkMouseStatus();
@@ -8593,11 +8515,11 @@ public class mudclient extends GameWindowMiddleMan
 		anInt744 = -1;
 		sectionXArray = new int[8000];
 		sectionYArray = new int[8000];
-		selectedItem = -1;
-		selectedItemName = "";
+		
+		selItem = null;
+		
 		anIntArray757 = new int[50];
 		showCharacterLookScreen = false;
-		appletMode = true;
 		gameDataModels = new Model[1000];
 		configMouseButtons = false;
 		duelNoRetreating = false;
@@ -8638,7 +8560,6 @@ public class mudclient extends GameWindowMiddleMan
 		cameraHeight = 8.59375D;
 		cameraZoom = 1.0;
 		notInWilderness = false;
-		selectedSpell = -1;
 		zoomCamera = false;
 		playerStatExperience = new int[18];
 		cameraAutoAngleDebug = false;
@@ -8671,10 +8592,13 @@ public class mudclient extends GameWindowMiddleMan
         windowWidth = 512;
         windowHeight = 334;
 		 */
+		bounds = new Rectangle(0, 0, 1120, 630);
+		center = new Point(bounds.width/2, bounds.height/2);
 		windowWidth = 1120;
 		windowHeight = 630;
 		windowHalfWidth = windowWidth/2;
 		windowHalfHeight = windowHeight/2;
+		
 		cameraSizeInt = 9;
 		tradeOtherPlayerName = "";
 		chatBoxVisRows = 7;
@@ -8767,10 +8691,8 @@ public class mudclient extends GameWindowMiddleMan
 	private int sectorHeight;
 	private boolean memoryError;
 	private int bankItemsMax;
-	private int mouseOverMenu;
 	private int walkModel[] = {0, 1, 2, 1};
 	private boolean showQuestionMenu;
-	private int mobHPBarCount;
 	private double viewDistance;
 	private double cameraZoom;
 	public boolean loggedIn;
@@ -8798,13 +8720,14 @@ public class mudclient extends GameWindowMiddleMan
 	private int anInt744;
 	private int sectionXArray[];
 	private int sectionYArray[];
-	private int selectedItem;
-	String selectedItemName;
+	
+	private SelectedItem selItem;
+	private SelectedSpell selSpell;
+	
 	private int anIntArray757[];
 	private boolean showCharacterLookScreen;
 	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
 	private int inputBoxType;
-	private boolean appletMode;
 	private int combatStyle;
 	private boolean configMouseButtons;
 	private boolean duelNoRetreating;
@@ -8918,7 +8841,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int newUserOkButton;
 	private double cameraHeight;
 	private boolean notInWilderness;
-	private int selectedSpell;
 	private boolean zoomCamera;
 	private AudioReader audioReader;
 	private int playerStatExperience[];
@@ -8969,10 +8891,14 @@ public class mudclient extends GameWindowMiddleMan
 	private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
 	private byte sounds[];
 	private boolean doorRelated[];
+	
+	private Rectangle bounds;
+	private Point center;
 	public int windowWidth;
 	public int windowHeight;
 	public int windowHalfWidth;
 	public int windowHalfHeight;
+	
 	private int cameraSizeInt;
 	private double mapClickX, mapClickY;
 	int friendsMenuHandle;
@@ -9006,6 +8932,40 @@ public class mudclient extends GameWindowMiddleMan
 			"Murder Mystery (members)", "Digsite (members)", "Gertrude's Cat (members)",
 	"Legend's Quest (members)"};
 	private boolean isTyping;
+	
+	public static OpenMenu om = OpenMenu.get();
+	
+	public class SelectedItem
+	{
+		private final int index;
+		private final Item item;
+		
+		private SelectedItem(int index, Item item)
+		{
+			if (index < 0 || item == null)
+				throw new NullPointerException();
+			this.index = index;
+			this.item = item;
+		}
+		
+		public int getIndex() { return index; }
+		public Item getItem() { return item; }
+	}
+	
+	public class SelectedSpell
+	{
+		private final int id;
+		private final SpellDef spell;
+		
+		private SelectedSpell(int id, SpellDef spell)
+		{
+			this.id = id;
+			this.spell = spell;
+		}
+		
+		public int getID() { return id; }
+		public SpellDef getSpell() { return spell; }
+	}
 	
 	private class HitpointsBar
 	{
@@ -9047,5 +9007,72 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			
 		}
+	}
+	
+	public static class OpenMenu
+	{
+		public static final int NONE = 0;
+		public static final int INVENTORY = 1;
+		public static final int MINIMAP = 2;
+		public static final int STATS = 3;
+		public static final int SPELLS = 4;
+		public static final int FRIENDS = 5;
+		public static final int SETTINGS = 6;
+		
+		private static OpenMenu self;
+
+		public static synchronized OpenMenu get()
+		{
+			if (self == null)
+				self = new OpenMenu();
+			return self;
+		}
+		
+		@Override
+		public final Object clone()
+				throws CloneNotSupportedException
+		{
+			throw new CloneNotSupportedException();
+		}
+		
+		public void close(int menu)
+		{
+			if (menu == open)
+				open = NONE;
+		}
+		
+		public boolean isOpen(int menu)
+		{
+			return open == menu;
+		}
+		
+		public boolean anyOpen()
+		{
+			return open != NONE;
+		}
+		
+		private void setOpen(int menu)
+		{
+			if (valid(menu))
+				open = menu;
+		}
+		
+		private void toggle(int menu)
+		{
+			if (valid(menu))
+				open = (menu == open ? NONE : menu);
+		}
+		
+		private OpenMenu()
+		{
+			open = NONE;
+		}
+		
+		private boolean valid(int menu)
+		{
+			return menu >= NONE && menu <= SETTINGS;
+		}
+		
+		private int open;
 	}
 }

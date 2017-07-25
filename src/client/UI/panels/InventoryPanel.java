@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
@@ -13,7 +14,7 @@ public class InventoryPanel extends InGamePanel
     private final int invCountTextColor = 0xffff00;
     private InGameGrid invGrid;
     
-    public InventoryPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+    public InventoryPanel(Point center, GameImageMiddleMan g)
     {
     	graphics = g;
 		frame = new InGameFrame("Inventory", g);
@@ -21,8 +22,8 @@ public class InventoryPanel extends InGamePanel
 	    setHeight(invGrid.getHeight());
 	    setWidth(invGrid.getWidth());
 	    // TODO: revise these when the bottom menu is done.
-	    setX(xCenter*2 - width - 3);
-	    setY(yCenter*2 - height - 35);
+	    setX(center.x*2 - width - 3);
+	    setY(center.y*2 - height - 35);
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	    invGrid.setLocation(getX(), getY());
     }

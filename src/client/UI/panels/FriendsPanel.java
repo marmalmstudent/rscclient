@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
@@ -15,7 +16,7 @@ public class FriendsPanel extends InGameTabPanel
     public static final int MAX_FRIENDS = 400;
     public static final int MAX_IGNORE = 200;
     
-	public FriendsPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+	public FriendsPanel(Point center, GameImageMiddleMan g)
 	{
 		graphics = g;
 		frame = new InGameFrame("Friends", g);
@@ -24,8 +25,8 @@ public class FriendsPanel extends InGameTabPanel
         scrollBoxTitleHeight = 16;
         setWidth(198);
         setHeight(276);
-        setX(xCenter*2 - width - 3);
-        setY(yCenter*2 - height - 35);
+        setX(center.x*2 - width - 3);
+        setY(center.y*2 - height - 35);
     	scrollBoxHeight = height - tabHeight - scrollBoxTitleHeight;
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	    friendsTab = new InGameButton(x, y, width/2, tabHeight, "Friends");

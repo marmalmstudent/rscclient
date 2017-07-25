@@ -23,9 +23,7 @@ public abstract class InGameComponent
     
     public boolean isMouseOver()
     {
-    	return (!(mv.getX() < x
-        		|| mv.getY() < y
-        		|| mv.getX() > x + width
-        		|| mv.getY() > y + height));
+    	return (mv.getX() >= x && mv.getY() >= y
+    			&& mv.getX() < x + width && mv.getY() < y + height);
     }
 }

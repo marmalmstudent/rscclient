@@ -35,14 +35,6 @@ public class InGameButton extends InGameComponent {
 		spriteIdx = index;
 	}
 	
-	public boolean isMouseOverButton()
-	{
-		return (mv.getX() >= x
-				&& mv.getY() >= y
-				&& mv.getX() < x + width
-				&& mv.getY() < y + height);
-	}
-	
 	public void setButtonText(String text) {
 		buttonText = text;
 	}

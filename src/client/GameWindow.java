@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -38,7 +39,6 @@ public class GameWindow extends JApplet
 	public static GameFrame gameFrame = null;
 	public static MouseVariables mouse = MouseVariables.get();
 
-	public int yOffset;
 	public int lastActionTimeout;
 	public int loadingScreen;
 	public String loadingString;
@@ -63,8 +63,6 @@ public class GameWindow extends JApplet
 
 	public GameWindow()
 	{
-		appletWidth = 512;
-		appletHeight = 384;
 		threadSleepModifier = 20;
 		anInt5 = 1000;
 		currentTimeArray = new long[10];
@@ -190,19 +188,19 @@ public class GameWindow extends JApplet
     {
         try
         {
-            int j = (appletWidth - 281) / 2;
-            int k = (appletHeight - 148) / 2;
-            j += 2;
-            k += 120;
+            int xLoadbar = (bounds.width - 281) / 2;
+            int yLoadBar = (bounds.height - 148) / 2;
+            xLoadbar += 2;
+            yLoadBar += 120;
             anInt16 = i;
             loadingBarText = s;
-            int l = (277 * i) / 100;
+            int loadWidth = (277 * i) / 100;
             graphics.setColor(BAR_COLOUR);
-            graphics.fillRect(j, k, l, 20);
+            graphics.fillRect(xLoadbar, yLoadBar, loadWidth, 20);
             graphics.setColor(Color.black);
-            graphics.fillRect(j + l, k, 277 - l, 20);
+            graphics.fillRect(xLoadbar + loadWidth, yLoadBar, 277 - loadWidth, 20);
             graphics.setColor(Color.WHITE);
-            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
+            drawString(graphics, s, LOADING_FONT, xLoadbar + 138, yLoadBar + 10);
             return;
         }
         catch (Exception _ex)
@@ -213,10 +211,6 @@ public class GameWindow extends JApplet
 
 	public final void init()
 	{
-        Config.initConfig();
-        GameWindowMiddleMan.clientVersion = 25;
-        //setLogo(Toolkit.getDefaultToolkit().getImage(Config.CONF_DIR + File.separator + "Loading.rscd"));
-        initCreateWindow(512, 344);
 	}
 	
 	public final void start()
@@ -419,15 +413,15 @@ public class GameWindow extends JApplet
 
 	public void mouseDragged(MouseEvent e)
 	{
-		mouse.x = e.getX() - GameFrame.offsetX;
-		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.x = e.getX() - bounds.x;
+		mouse.y = e.getY() - bounds.y;
 		mouse.clickModifier = e.getModifiers();
 	}
 
 	public void mouseMoved(MouseEvent e)
 	{
-		mouse.x = e.getX() - GameFrame.offsetX;
-		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.x = e.getX() - bounds.x;
+		mouse.y = e.getY() - bounds.y;
 		mouse.releaseButton();
 		
 		lastActionTimeout = 0;
@@ -445,8 +439,8 @@ public class GameWindow extends JApplet
 
 	public void mousePressed(MouseEvent e)
 	{
-		mouse.x = e.getX() - GameFrame.offsetX;
-		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.x = e.getX() - bounds.x;
+		mouse.y = e.getY() - bounds.y;
 		mouse.clickModifier = e.getModifiers();
 		mouse.lastClickModifier = mouse.clickModifier;
 		
@@ -457,8 +451,8 @@ public class GameWindow extends JApplet
 
 	public void mouseReleased(MouseEvent e)
 	{
-		mouse.x = e.getX() - GameFrame.offsetX;
-		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.x = e.getX() - bounds.x;
+		mouse.y = e.getY() - bounds.y;
 		mouse.releaseButton();
 	}
 
@@ -486,8 +480,8 @@ public class GameWindow extends JApplet
 		keyRightBraceDown = false;
 		
 		// reset mouse
-		mouse.x = e.getX() - GameFrame.offsetX;
-		mouse.y = e.getY() - GameFrame.offsetY;
+		mouse.x = e.getX() - bounds.x;
+		mouse.y = e.getY() - bounds.y;
 		mouse.releaseButton();
 	}
 
@@ -510,17 +504,7 @@ public class GameWindow extends JApplet
 		// TODO Auto-generated method stub
 		
 	}
-	
-	public void initCreateWindow(int width, int height)
-	{
-		appletMode = true;
-		appletWidth = width;
-		appletHeight = height;
-		graphics = getFrameComponent().getGraphics();
-		loadingScreen = 1;
-		startThread(this);
-	}
-    
+
 	public void setLogo(Image logo)
 	{
 		loadingLogo = logo; //null to not display background when loading
@@ -556,12 +540,11 @@ public class GameWindow extends JApplet
 		
 	}
 
-	protected final void createWindow(mudclient mc, int width, int height, String title, boolean resizable)
+	protected final void createWindow(mudclient mc, Rectangle bounds, String title, boolean resizable)
 	{
 		appletMode = false;
-		appletWidth = width;
-		appletHeight = height;
-		gameFrame = new GameFrame(this, width, height, title, resizable, true);
+		this.bounds = bounds;
+		gameFrame = new GameFrame(this, bounds, title, resizable, true);
 		loadingScreen = 1;
 		gameWindowThread = new Thread(this);
 		gameWindowThread.start();
@@ -670,8 +653,8 @@ public class GameWindow extends JApplet
 
 	private static final long serialVersionUID = 7608266112501280311L;
 	private Image loadingLogo;
-	private int appletWidth;
-	private int appletHeight;
+	
+	private Rectangle bounds;
 	private Thread gameWindowThread;
 	private int threadSleepModifier;
 	private int anInt5;
@@ -715,7 +698,7 @@ public class GameWindow extends JApplet
 
 	private final void drawLoadingLogo()
 	{
-		graphics.setColor(Color.black);
+		graphics.setColor(Color.BLUE);
 		graphics.drawImage(loadingLogo, 5, 0, this);
 		loadFonts();
 	}
@@ -723,23 +706,24 @@ public class GameWindow extends JApplet
     private final void drawLoadingScreen(int i, String s)
     {
         try {
-            int j = (appletWidth - 281) / 2;
-            int k = (appletHeight - 148) / 2;
+            int xLoadbar = (bounds.width - 281) / 2;
+            int yLoadbar = (bounds.height - 148) / 2;
             graphics.setColor(Color.black);
-            graphics.fillRect(0, 0, appletWidth, appletHeight);
+            graphics.fillRect(0, 0, bounds.width, bounds.height);
             graphics.drawImage(loadingLogo, 5, 0, this);
-            j += 2;
-            k += 120;
+            xLoadbar += 2;
+            yLoadbar += 120;
             anInt16 = i;
             loadingBarText = s;
             graphics.setColor(BAR_COLOUR);
-            graphics.drawRect(j - 2, k - 2, 280, 23);
-            graphics.fillRect(j, k, (277 * i) / 100, 20);
+            graphics.drawRect(xLoadbar - 2, yLoadbar - 2, 280, 23);
+            graphics.fillRect(xLoadbar, yLoadbar, (277 * i) / 100, 20);
             graphics.setColor(Color.black);
-            drawString(graphics, s, LOADING_FONT, j + 138, k + 10);
-            if (loadingString != null) {
+            drawString(graphics, s, LOADING_FONT, xLoadbar + 138, yLoadbar + 10);
+            if (loadingString != null)
+            {
                 graphics.setColor(Color.WHITE);
-                drawString(graphics, loadingString, LOADING_FONT, j + 138, k - 120);
+                drawString(graphics, loadingString, LOADING_FONT, xLoadbar + 138, yLoadbar - 120);
                 return;
             }
         }

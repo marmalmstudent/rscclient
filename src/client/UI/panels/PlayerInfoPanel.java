@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
@@ -31,7 +32,7 @@ public class PlayerInfoPanel extends InGameTabPanel
     private int headerHeight;
     private final int nbrSkillCols = 2;
     
-    public PlayerInfoPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+    public PlayerInfoPanel(Point center, GameImageMiddleMan g)
     {
     	graphics = g;
 		frame = new InGameFrame("Info", g);
@@ -41,8 +42,8 @@ public class PlayerInfoPanel extends InGameTabPanel
 	    setWidth(198+30);
 	    setHeight(276+6);
 	    // TODO: revise these when the bottom menu is done.
-	    setX(xCenter*2 - width - 3);
-	    setY(yCenter*2 - height - 35);
+	    setX(center.x*2 - width - 3);
+	    setY(center.y*2 - height - 35);
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	    headerHeight = 26;
 	    statTab = new InGameButton(x, y, width/2, tabHeight, "Stats");

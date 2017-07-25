@@ -1,5 +1,7 @@
 package client;
 
+import java.awt.Point;
+
 import client.GameWindow.MouseVariables;
 
 public class Camera {
@@ -28,8 +30,8 @@ public class Camera {
 		zCoordCamDist = new double[40];
 		lowDef = false;
 		this.gameImage = gameImage;
-		halfWidth = gameImage.gameWindowWidth / 2;
-		halfHeight = gameImage.gameWindowHeight / 2;
+		halfVPWidth = gameImage.gameWindowWidth / 2;
+		halfVPHeight = gameImage.gameWindowHeight / 2;
 		imagePixelArray = gameImage.imagePixelArray;
 		modelCount = 0;
 		maxModelCount = maxModels;
@@ -136,7 +138,7 @@ public class Camera {
 	public void updateMouseCoords()
 	{
 		MouseVariables mv = MouseVariables.get();
-		mouseX = mv.getX() - halfWidth2;
+		mouseX = mv.getX() - xCenter;
 		mouseY = mv.getY();
 		currentVisibleModelCount = 0;
 		aBoolean = true;
@@ -154,15 +156,17 @@ public class Camera {
 		return visibleModelsArray;
 	}
 
-	public void setCameraSize(int halfWindowWidth, int halfWindowHeight, int halfWindowWidth2, int halfWindowHeight2, int windowWidth, int camSizeInt) {
-		halfWidth = halfWindowWidth2;
-		halfHeight = halfWindowHeight2;
-		halfWidth2 = halfWindowWidth;
-		halfHeight2 = halfWindowHeight;
+	public void setCameraSize(Point center, int halfViewportWidth,
+			int halfViewportHeight, int windowWidth, int camSizeInt)
+	{
+		halfVPWidth = halfViewportWidth;
+		halfVPHeight = halfViewportHeight;
+		xCenter = center.x;
+		yCenter = center.y;
 		width = windowWidth;
 		cameraSizeInt = camSizeInt;
-		cameraVariables = new CameraVariables[halfWindowHeight2 + halfWindowHeight];
-		for (int k1 = 0; k1 < halfWindowHeight2 + halfWindowHeight; k1++)
+		cameraVariables = new CameraVariables[halfViewportHeight + center.y];
+		for (int k1 = 0; k1 < halfViewportHeight + center.y; k1++)
 			cameraVariables[k1] = new CameraVariables();
 
 	}
@@ -326,8 +330,8 @@ public class Camera {
 	public void finishCamera() {
 		lowDef = gameImage.lowDef;
 		int fctr = 1 << cameraSizeInt;
-		double xBounds = halfWidth * drawModelMaxDist / fctr;
-		double yBounds = halfHeight * drawModelMaxDist / fctr;
+		double xBounds = halfVPWidth * drawModelMaxDist / fctr;
+		double yBounds = halfVPHeight * drawModelMaxDist / fctr;
 		xMinHide = 0;
 		xMaxHide = 0;
 		yMinHide = 0;
@@ -338,10 +342,10 @@ public class Camera {
 		method279(-xBounds, yBounds, drawModelMaxDist);
 		method279(xBounds, -yBounds, drawModelMaxDist);
 		method279(xBounds, yBounds, drawModelMaxDist);
-		method279(-halfWidth, -halfHeight, 0);
-		method279(-halfWidth, halfHeight, 0);
-		method279(halfWidth, -halfHeight, 0);
-		method279(halfWidth, halfHeight, 0);
+		method279(-halfVPWidth, -halfVPHeight, 0);
+		method279(-halfVPWidth, halfVPHeight, 0);
+		method279(halfVPWidth, -halfVPHeight, 0);
+		method279(halfVPWidth, halfVPHeight, 0);
 		xMinHide += cameraXPos;
 		xMaxHide += cameraXPos;
 		yMinHide += cameraZPos;
@@ -385,9 +389,9 @@ public class Camera {
 						for (int k = 0; k < pointsInCell; k++)
 						{
 							double x = model.xProjected[surface[k]];
-							if (x > -halfWidth)
+							if (x > -halfVPWidth)
 								visibleXMask |= 1;
-							if (x < halfWidth)
+							if (x < halfVPWidth)
 								visibleXMask |= 2;
 							if (visibleXMask == 3)
 								break;
@@ -399,9 +403,9 @@ public class Camera {
 							for (int k = 0; k < pointsInCell; k++)
 							{
 								int k1 = (int)model.yProjected[surface[k]];
-								if (k1 > -halfHeight)
+								if (k1 > -halfVPHeight)
 									visibleYMask |= 1;
-								if (k1 < halfHeight)
+								if (k1 < halfVPHeight)
 									visibleYMask |= 2;
 								if (visibleYMask == 3)
 									break;
@@ -449,10 +453,10 @@ public class Camera {
 				{
 					double modelWidth = mobWidth[k] * fctr / distToCam;
 					double modelHeight = mobHeight[k] * fctr / distToCam;
-					if (x - modelWidth / 2 <= halfWidth
-							&& x + modelWidth / 2 >= -halfWidth
-							&& y - modelHeight <= halfHeight
-							&& y >= -halfHeight)
+					if (x - modelWidth / 2 <= halfVPWidth
+							&& x + modelWidth / 2 >= -halfVPWidth
+							&& y - modelHeight <= halfVPHeight
+							&& y >= -halfVPHeight)
 					{
 						CameraModel camMdl = cameraModels[cameraModelCount];
 						camMdl.model = model_1;
@@ -489,9 +493,9 @@ public class Camera {
 				double length_x10 = model.xProjected[p1] - x;
 				double j11 = length_x10 * length_y01 / modelHeight;
 				double modelX = x - modelWidth / 2;
-				double modelY = (halfHeight2 + y) - modelHeight;
+				double modelY = (yCenter + y) - modelHeight;
 				
-				gameImage.doSpriteClip1((int)modelX + halfWidth2, (int)modelY,
+				gameImage.doSpriteClip1((int)modelX + xCenter, (int)modelY,
 						(int)modelWidth, (int)modelHeight, anIntArray416[l],
 						(int)j11, (int) ((4D * fctr) / modelDist));
 				if (aBoolean && currentVisibleModelCount < maxVisibleModelCount)
@@ -602,14 +606,14 @@ public class Camera {
 		int i, j;
 		int[] p_y = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
-			p_y[i] = triangleY[i] + halfHeight2;
+			p_y[i] = triangleY[i] + yCenter;
 		int[] p_x = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
 			p_x[i] = triangleX[i];
 		int[] p_b = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
 			p_b[i] = brightness[i];
-		int drawYMax = (halfHeight2 + halfHeight) - 1;
+		int drawYMax = (yCenter + halfVPHeight) - 1;
 		int[] min_x = new int[pointsInSurface];
 		int[] min_b = new int[pointsInSurface];
 		int[] slope_x = new int[pointsInSurface];
@@ -689,8 +693,8 @@ public class Camera {
 			cameraVariables_6.rightXBright = xMaxBright;
 		}
 
-		if (modelYMin < halfHeight2 - halfHeight)
-			modelYMin = halfHeight2 - halfHeight;
+		if (modelYMin < yCenter - halfVPHeight)
+			modelYMin = yCenter - halfVPHeight;
 
 		if (aBoolean && currentVisibleModelCount < maxVisibleModelCount
 				&& mouseY >= modelYMin && mouseY < modelYMax)
@@ -745,9 +749,9 @@ public class Camera {
 			double k14 = nk_x / 16;
 			double i15 = n1_x / 16;
 			double k15 = n_x / 16;
-			int i16 = modelYMin - halfHeight2;
+			int i16 = modelYMin - yCenter;
 			int imgPixSkip = width;
-			int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
+			int imgPixRow = xCenter + modelYMin * imgPixSkip;
 			byte rowStep = 1;
 			nk_y += nk_z * i16;
 			n1_y += n1_z * i16;
@@ -788,14 +792,14 @@ public class Camera {
 				{
 					int gradStart = camVar.leftXBright;
 					int gradStep = (camVar.rightXBright - gradStart) / lineLength;
-					if (imgPixXStart < -halfWidth)
+					if (imgPixXStart < -halfVPWidth)
 					{
-						gradStart += (-halfWidth - imgPixXStart) * gradStep;
-						imgPixXStart = -halfWidth;
+						gradStart += (-halfVPWidth - imgPixXStart) * gradStep;
+						imgPixXStart = -halfVPWidth;
 						lineLength = imgPixXEnd - imgPixXStart;
 					}
-					if (imgPixXEnd > halfWidth)
-						lineLength = halfWidth - imgPixXStart;
+					if (imgPixXEnd > halfVPWidth)
+						lineLength = halfVPWidth - imgPixXStart;
 					drawTexture(
 							imagePixelArray, texturePixels[color], 0, 0,
 							nk_y + k14 * imgPixXStart,
@@ -841,7 +845,7 @@ public class Camera {
 		}
 
 		int imgPixSkip = width;
-		int imgPixRow = halfWidth2 + modelYMin * imgPixSkip;
+		int imgPixRow = xCenter + modelYMin * imgPixSkip;
 		byte yStep = 1;
 		if (lowDef)
 		{
@@ -868,14 +872,14 @@ public class Camera {
 			{
 				int gradStart = camVar.leftXBright;
 				int gradEnd = (camVar.rightXBright - gradStart) / lineLength;
-				if (imgPixXStart < -halfWidth)
+				if (imgPixXStart < -halfVPWidth)
 				{
-					gradStart += (-halfWidth - imgPixXStart) * gradEnd;
-					imgPixXStart = -halfWidth;
+					gradStart += (-halfVPWidth - imgPixXStart) * gradEnd;
+					imgPixXStart = -halfVPWidth;
 					lineLength = imgPixXEnd - imgPixXStart;
 				}
-				if (imgPixXEnd > halfWidth)
-					lineLength = halfWidth - imgPixXStart;
+				if (imgPixXEnd > halfVPWidth)
+					lineLength = halfVPWidth - imgPixXStart;
 				drawColorLine(
 						imagePixelArray, -lineLength,
 						imgPixRow + imgPixXStart, 0,
@@ -2151,10 +2155,10 @@ public class Camera {
 	private Model visibleModelsArray[];
 	private int visibleModelIntArray[];
 	private int width;
-	private int halfWidth;
-	private int halfHeight;
-	private int halfWidth2;
-	private int halfHeight2;
+	private int halfVPWidth;
+	private int halfVPHeight;
+	private int xCenter;
+	private int yCenter;
 	private int cameraSizeInt;
 	private int anInt402;
 	private double cameraXPos;

@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class BankPanel extends InGamePanel
     
     private static MouseVariables mv = MouseVariables.get();
     
-	public BankPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+	public BankPanel(Point center, GameImageMiddleMan g)
 	{
 		graphics = g;
 		frame = new InGameFrame("Bank", g);
@@ -39,8 +40,8 @@ public class BankPanel extends InGamePanel
 	    bottomInfoBoxHeight = 47;
 	    setHeight(getTopInfoBoxHeight() + bankGrid.getHeight() + getBottomInfoBoxHeight());
 	    setWidth(bankGrid.getWidth());
-	    setX(xCenter - width / 2);
-	    setY(yCenter - height / 2);
+	    setX(center.x - width / 2);
+	    setY(center.y - height / 2);
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	    bankGrid.setLocation(getX(), getTopInfoBoxY() + getTopInfoBoxHeight());
 	    int buttonWidth = 65;
@@ -78,11 +79,11 @@ public class BankPanel extends InGamePanel
 		int count = 1;
 		for (int i = 0; i < withBtnPanel.getNbrButtons()-1; ++i)
 		{
-	        if (withBtnPanel.getButton(i).isMouseOverButton())
+	        if (withBtnPanel.getButton(i).isMouseOver())
 	        	return itemCount >= count ? count : 0;
 	        count *= 10;
 		}
-		if (withBtnPanel.getButton(withBtnPanel.getNbrButtons()-1).isMouseOverButton())
+		if (withBtnPanel.getButton(withBtnPanel.getNbrButtons()-1).isMouseOver())
         	return itemCount;
         return 0;
 	}
@@ -92,11 +93,11 @@ public class BankPanel extends InGamePanel
 		int count = 1;
 		for (int i = 0; i < depBtnPanel.getNbrButtons()-1; ++i)
 		{
-	        if (depBtnPanel.getButton(i).isMouseOverButton())
+	        if (depBtnPanel.getButton(i).isMouseOver())
 	        	return itemCount >= count ? count : 0;
 	        count *= 10;
 		}
-		if (depBtnPanel.getButton(depBtnPanel.getNbrButtons()-1).isMouseOverButton())
+		if (depBtnPanel.getButton(depBtnPanel.getNbrButtons()-1).isMouseOver())
         	return itemCount;
         return 0;
 	}
@@ -107,7 +108,7 @@ public class BankPanel extends InGamePanel
 			return 0;
 		if (nTabs > 1)
 			for (int i = 0; i < nTabs; ++i)
-				if (tabBtnPanel.getButton(i).isMouseOverButton())
+				if (tabBtnPanel.getButton(i).isMouseOver())
 					return i+1;
 		return 0;
 	}
@@ -198,7 +199,7 @@ public class BankPanel extends InGamePanel
 				graphics.drawString(
 						button.getButtonText(), button.getX() + 2,
 						button.getY() + yOffset, 1,
-						button.isMouseOverButton() ?
+						button.isMouseOver() ?
 								button.getMouseOverColor() :
 									button.getMouseNotOverColor());
 			}
@@ -210,7 +211,7 @@ public class BankPanel extends InGamePanel
 		graphics.drawString(
 				button.getButtonText(), button.getX() + 2,
 				button.getY() + yOffset, 1,
-				button.isMouseOverButton() ?
+				button.isMouseOver() ?
 						button.getMouseOverColor() :
 							button.getMouseNotOverColor());
 	}
@@ -231,7 +232,7 @@ public class BankPanel extends InGamePanel
 				graphics.drawString(
 						button.getButtonText(), button.getX() + 2,
 						button.getY() + yOffset, 1,
-						button.isMouseOverButton() ?
+						button.isMouseOver() ?
 								button.getMouseOverColor() :
 									button.getMouseNotOverColor());
 			}
@@ -241,7 +242,7 @@ public class BankPanel extends InGamePanel
 		graphics.drawString(
 				button.getButtonText(), button.getX() + 2,
 				button.getY() + yOffset, 1,
-				button.isMouseOverButton() ?
+				button.isMouseOver() ?
 						button.getMouseOverColor() :
 							button.getMouseNotOverColor());
 	}

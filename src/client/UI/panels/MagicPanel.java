@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import client.GameImageMiddleMan;
@@ -12,7 +13,7 @@ public class MagicPanel extends InGameTabPanel
     public int infoBoxHeight;
     private InGameButton magicTab, prayerTab;
     
-	public MagicPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+	public MagicPanel(Point center, GameImageMiddleMan g)
 	{
 		graphics = g;
 		frame = new InGameFrame("Spells", g);
@@ -20,8 +21,8 @@ public class MagicPanel extends InGameTabPanel
         infoBoxHeight = 70;
         setWidth(198+30);
         setHeight(276);
-        setX(xCenter*2 - width - 3);
-        setY(yCenter*2 - height - 35);
+        setX(center.x*2 - width - 3);
+        setY(center.y*2 - height - 35);
     	scrollBoxHeight = height - tabHeight - infoBoxHeight;
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	    magicTab = new InGameButton(x, y, width/2, tabHeight, "Magic");

@@ -4,8 +4,11 @@ import java.awt.*;
 
 public final class GameImageMiddleMan extends GameImage {
 
-    public GameImageMiddleMan(int width, int height, int k, Component component) {
-        super(width, height, k, component);
+    public GameImageMiddleMan(int width, int height, int maxSprites, mudclient mc)
+    {
+        super(width, height, maxSprites, (Component) mc);
+        _mudclient = mc;
+		setDimensions(0, 0, width, height);
     }
     
     /**
@@ -32,5 +35,5 @@ public final class GameImageMiddleMan extends GameImage {
         super.spriteClip1(i, j, k, l, i1);
     }
 
-    public mudclient _mudclient;
+    private mudclient _mudclient;
 }

@@ -1,4 +1,6 @@
 package client.UI.panels;
+import java.awt.Point;
+
 import client.DataOperations;
 import client.GameImageMiddleMan;
 import client.mudclient;
@@ -39,7 +41,7 @@ public class AbuseWindow
 	
 	private static MouseVariables mv = MouseVariables.get();
     
-	public AbuseWindow(int xCenter, int yCenter)
+	public AbuseWindow(Point center)
 	{
 		fontSize = 14;
 		width = 400;
@@ -49,8 +51,8 @@ public class AbuseWindow
 				+ 2*getRowSeparation()/5;
 		//height = 290;
 		halfHeight = height/2;
-		x = xCenter - halfWidth;
-		y = yCenter - halfHeight;
+		x = center.x - halfWidth;
+		y = center.y - halfHeight;
 		selectedTypeInline = 10;  // space between window edge and selected rule box
 		
 	}

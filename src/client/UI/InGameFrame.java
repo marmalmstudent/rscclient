@@ -54,7 +54,7 @@ public class InGameFrame extends InGameComponent
     public InGameButton getCloseButton() { return closeButton; }
     public int getCloseButtonColor()
     {
-    	if (closeButton.isMouseOverButton())
+    	if (closeButton.isMouseOver())
     		return closeButton.getMouseOverColor();
     	return closeButton.getMouseNotOverColor();
     }

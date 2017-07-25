@@ -1,5 +1,6 @@
 package client.UI.panels;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import client.GameImage;
@@ -17,7 +18,7 @@ public class TradeConfirmPanel extends InGamePanel
 	private int plrTextBoxHeight, opntTextBoxHeight, itemInfoBarHeight;
     private InGameButton acceptBtn, declineBtn;
     
-	public TradeConfirmPanel(int xCenter, int yCenter, GameImageMiddleMan g)
+	public TradeConfirmPanel(Point center, GameImageMiddleMan g)
 	{
 		graphics = g;
 		frame = new InGameFrame("", g);
@@ -32,8 +33,8 @@ public class TradeConfirmPanel extends InGamePanel
         		+ opntTextBoxHeight + itemInfoBarHeight);
         setWidth(invGrid.getWidth()
         		+ middleMarginWidth + myOfferGrid.getWidth());
-        setX(xCenter - width/2);
-        setY(yCenter - height/2);
+        setX(center.x - width/2);
+        setY(center.y - height/2);
 	    frame.setBounds(new Rectangle(x, y, width, height));
 	}
 	

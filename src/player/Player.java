@@ -1,12 +1,13 @@
 package player;
 
+import java.awt.Point;
 import java.util.List;
 
+import client.GameImageMiddleMan;
 import client.Mob;
 
 public class Player
 {
-	public static final int MAX_INVENTORY_SLOTS = 35;
 	public static final int MAX_BANK_SLOTS = 256;
 	public static final int MAX_OFFER_SLOTS = 8;
 	
@@ -17,9 +18,14 @@ public class Player
 		this.me = me;
 	}
 	
+	public Inventory getInventory()
+	{
+		return inventory;
+	}
+	
 	public void initContainers()
 	{
-		inventory = new ItemContainer(MAX_INVENTORY_SLOTS, false);
+		inventory = new Inventory(me.admin);
 		bank = new ItemContainer(MAX_BANK_SLOTS, true);
 		newBank = new ItemContainer(MAX_BANK_SLOTS, true);
 		
@@ -34,7 +40,13 @@ public class Player
 		tradeOpponentConfirm = new ItemContainer(MAX_OFFER_SLOTS, true);
 	}
 	
+	public void initPanels(Point center, GameImageMiddleMan graphics)
+	{
+		inventory.initGraphics(center, graphics);
+	}
+	
 	public List<Item> getInventoryItems() { return inventory.getItems(); }
+	
 	public List<Item> getBankItems() { return bank.getItems(); }
 	public List<Item> getNewBankItems() { return newBank.getItems(); }
 	
@@ -49,7 +61,8 @@ public class Player
 	public List<Item> getTradeConfirmOtherItems() { return tradeOpponentConfirm.getItems(); }
 
 	
-	private ItemContainer inventory, bank, newBank;
+	private Inventory inventory;
+	private ItemContainer bank, newBank;
 	private ItemContainer duelMyOffer, duelOpponentOffer, duelMyConfirm, duelOpponentConfirm;
 	private ItemContainer tradeMyOffer, tradeOpponentOffer, tradeMyConfirm, tradeOpponentConfirm;
 }

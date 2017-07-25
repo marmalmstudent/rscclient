@@ -23,7 +23,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     public BufferedImage loginScreen;
     public static final int BACKGROUND = 0;//0x349ed8;
 
-    public GameImage(int width, int height, int k, Component component)
+    public GameImage(int width, int height, int maxSprites, Component component)
     {
         lowDef = false;
         drawStringShadows = false;
@@ -32,7 +32,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         gameWindowWidthUnused = gameWindowWidth = width;
         gameWindowHeightUnused = gameWindowHeight = height;
         imagePixelArray = new int[width * height];
-        sprites = new Sprite[k];
+        sprites = new Sprite[maxSprites];
         if (width > 1 && height > 1 && component != null) {
             colourModel = new DirectColorModel(32, 0xff0000, 0xff00, 0xff);
             image = component.createImage(this);
@@ -1309,22 +1309,15 @@ public class GameImage implements ImageProducer, ImageObserver {
     		double xStep, double yStep,
     		int length, int spriteWidth)
     {
-    	try {
-    	int pixelVal;
+    	int pixelVal, pixIdx;
         for (int i = length; i < 0; i++)
         {
-            if ((pixelVal = spritePixels[((int) x) + ((int) y) * spriteWidth]) != 0)
+        	pixIdx = ((int) x) + ((int) y) * spriteWidth;
+            if (pixIdx > 0 && (pixelVal = spritePixels[pixIdx]) != 0)
             	imagePixels[offset] = pixelVal;
             offset++;
             x += xStep;
             y += yStep;
-        }
-    	} catch (ArrayIndexOutOfBoundsException oob)
-        {
-        	System.out.printf("Draw error in minimap: array index out of bounds\n\tx: %4.1f; y: %4.1f xStep: %4.1f yStep: %4.1f; nSpritePixels: %6d; spriteWidth: %6d\n",
-        			x, y, xStep, yStep, spritePixels.length, spriteWidth);
-        	oob.printStackTrace();
-        	System.exit(1);
         }
     }
 
