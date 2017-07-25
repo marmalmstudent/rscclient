@@ -82,20 +82,20 @@ public class InGameGrid extends InGamePanel
 		}
 	}
 
-	public void drawStaticGrid(List<Item> items, int itemCount, int[] selected,
-			int textColor)
+	public void drawStaticGrid(List<Item> items, int itemCount, int textColor)
 	{
 		for (int j = 0; j < getSlots(); j++)
 		{
+			Item item = items.get(j);
 			int col = x + (j % nCols) * ITEM_SLOT_WIDTH;
 			int row = y + (j / nCols) * ITEM_SLOT_HEIGHT;
 
-			drawItemBox(items.get(j), col, row,
-					j < itemCount && selected[j] == 1,
-					j < itemCount && items.get(j).getID() != -1);
-			if (j < itemCount && items.get(j).getID() != -1
-					&& items.get(j).isStackable())
-				drawDepositedText(col, row, items.get(j).getAmount(), textColor);
+			drawItemBox(item, col, row,
+					j < itemCount && item.isWearing(),
+					j < itemCount && item.getID() != -1);
+			if (j < itemCount && item.getID() != -1
+					&& item.isStackable())
+				drawDepositedText(col, row, item.getAmount(), textColor);
 		}
 	}
 

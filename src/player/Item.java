@@ -18,6 +18,7 @@ public class Item
 	public String getCommand() { return command; }
 	public boolean isStackable() { return stackable; }
 	public boolean isWieldable() { return wieldable; }
+	public boolean isWearing() { return wearing; }
 
 	public Item(int id, boolean forceStackable)
 	{
@@ -28,6 +29,7 @@ public class Item
 	{
 		this.id = id;
 		this.amount = amount;
+		wearing = false;
 		
 		stackSize = Long.MAX_VALUE;
 		if (id > 0)
@@ -83,6 +85,11 @@ public class Item
 		amount += amt;
 	}
 	
+	public void wear(boolean wear)
+	{
+		wearing = wieldable ? wear : false;
+	}
+	
 	/**
 	 * Deletes {@code amt} from this item.
 	 * 
@@ -118,6 +125,7 @@ public class Item
 	}
 	
 	private long amount;
+	private boolean wearing;
 	private final int id;
 	
 	private final long stackSize;

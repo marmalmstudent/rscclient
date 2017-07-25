@@ -1479,7 +1479,7 @@ public class mudclient extends GameWindowMiddleMan
 					rightClickMenu.add(mrc);
 					return;
 				}
-				if (wearing[currentInventorySlot] == 1) {
+				if (item.isWearing()) {
 					MenuRightClick mrc = new MenuRightClick();
 					mrc.text1 = "Remove";
 					mrc.text2 = "@lre@" + item.getName();
@@ -1531,8 +1531,7 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		invPan.getFrame().drawComponent();
 		invPan.getInvGrid().drawStaticGrid(self.getInventoryItems(),
-				inventoryCount, wearing,
-				invPan.getInvCountTextColor());
+				inventoryCount, invPan.getInvCountTextColor());
 		if (!flag)
 			return;
 		if (invPan.getInvGrid().isMouseOver())
@@ -6779,15 +6778,16 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					int j15 = DataOperations.getUnsigned2Bytes(data, invOffset);
 					invOffset += 2;
-					self.getInventoryItems().set(invItem, new Item(j15 & 0x7fff, false));
-					wearing[invItem] = j15 / 32768;
+					Item item = new Item(j15 & 0x7fff, false);
+					item.wear(j15 / 32768 > 0);
 					if (EntityHandler.getItemDef(j15 & 0x7fff).isStackable())
 					{
-						self.getInventoryItems().get(invItem).setAmount(DataOperations.readInt(data, invOffset));
+						item.setAmount(DataOperations.readInt(data, invOffset));
 						invOffset += 4;
 					}
 					else
-						self.getInventoryItems().get(invItem).setAmount(1);
+						item.setAmount(1);
+					self.getInventoryItems().set(invItem, item);
 				}
 				break;
 			case 115:
@@ -7157,10 +7157,7 @@ public class mudclient extends GameWindowMiddleMan
 				int k6 = data[1] & 0xff;
 				inventoryCount--;
 				for (int l12 = k6; l12 < inventoryCount; l12++)
-				{
 					self.getInventoryItems().set(l12, self.getInventoryItems().get(l12 + 1));
-					wearing[l12] = wearing[l12 + 1];
-				}
 				break;
 			case 197:
 				duelMyAccepted = data[1] == 1;
@@ -7233,9 +7230,9 @@ public class mudclient extends GameWindowMiddleMan
 					k12 = DataOperations.readInt(data, j6);
 					j6 += 4;
 				}
-				self.getInventoryItems().set(i18, new Item(k22 & 0x7fff, false));
-				wearing[i18] = k22 / 32768;
-				self.getInventoryItems().get(i18).setAmount(k12);
+				Item item = new Item(k22 & 0x7fff, false, k12);
+				item.wear(k22 / 32768 > 0);
+				self.getInventoryItems().set(i18, item);
 				if (i18 >= inventoryCount)
 					inventoryCount = i18 + 1;
 				break;
@@ -8307,7 +8304,8 @@ public class mudclient extends GameWindowMiddleMan
 
 	private final boolean method117(int i) {
 		for (int j = 0; j < inventoryCount; j++)
-			if (self.getInventoryItems().get(j).getID() == i && wearing[j] == 1)
+			if (self.getInventoryItems().get(j).getID() == i
+			&& self.getInventoryItems().get(j).isWearing())
 				return true;
 
 		return false;
@@ -8567,7 +8565,6 @@ public class mudclient extends GameWindowMiddleMan
 		duelMyAccepted = false;
 		serverMessage = "";
 		duelOpponentName = "";
-		wearing = new int[35];
 		mobMsg = new String[50];
 		showBank = false;
 		doorModel = new Model[500];
@@ -8747,7 +8744,6 @@ public class mudclient extends GameWindowMiddleMan
 	private String duelOpponentName;
 	private int mouseOverBankPageText;
 	private int fightCount;
-	private int wearing[];
 	private int mobMessageCount;
 	String mobMsg[];
 	private boolean showBank;
