@@ -764,13 +764,6 @@ public class GameWindow extends JApplet
 		public int getX() { return x; }
 		public int getY() { return y; }
 		
-		public void leftRelease() { clickModifier &= ~MouseEvent.BUTTON1_MASK; }
-		public void lastLeftRelease() { lastClickModifier &= ~MouseEvent.BUTTON1_MASK; }
-		public void middleRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
-		public void lastMiddleRelease() { lastClickModifier &= ~MouseEvent.BUTTON3_MASK; }
-		public void rightRelease() { clickModifier &= ~MouseEvent.BUTTON3_MASK; }
-		public void lastRightRelease() { lastClickModifier &= ~MouseEvent.BUTTON3_MASK; }
-		
 		public boolean buttonDown() { return clickModifier != 0; }
 		public boolean lastButtonDown() {return lastClickModifier != 0; }
 		

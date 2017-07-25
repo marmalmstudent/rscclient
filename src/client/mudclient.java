@@ -1450,8 +1450,8 @@ public class mudclient extends GameWindowMiddleMan
 		InGameGrid invGrid = invPan.getInvGrid();
 		int xInInv = mouseX - invGrid.getX();
 		int yInInv = mouseY - invGrid.getY();
-		int currentInventorySlot = xInInv / itemSlotWidth
-				+ (yInInv / itemSlotHeight) * invGrid.getCols();
+		int currentInventorySlot = xInInv / InGameGrid.ITEM_SLOT_WIDTH
+				+ (yInInv / InGameGrid.ITEM_SLOT_HEIGHT) * invGrid.getCols();
 		if (currentInventorySlot < invGrid.getCols()*invGrid.getRows())
 		{
 			Item item = self.getInventoryItems().get(currentInventorySlot);

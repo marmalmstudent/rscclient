@@ -27,8 +27,6 @@ public class InGameFrame extends InGameComponent
     protected final int textYOffset = 10;
     protected InGameButton closeButton;
     
-    private static MouseVariables mv = MouseVariables.get();
-    
     public InGameFrame(String title, GameImageMiddleMan g)
     {
     	graphics = g;
