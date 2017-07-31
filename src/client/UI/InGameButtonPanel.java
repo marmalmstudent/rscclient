@@ -1,8 +1,12 @@
 package client.UI;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class InGameButtonPanel extends InGamePanel
 {
-    private InGameButton[] buttons;
+    private List<InGameButton> buttons;
     private int btnHeight, btnWidth, nbrCols;
     
     public InGameButtonPanel(int x, int y, int btnWidth,
@@ -15,29 +19,20 @@ public class InGameButtonPanel extends InGamePanel
     	this.nbrCols = nbrCols;
     	width = btnWidth*nbrButtons;
     	height = btnHeight*(nbrButtons/nbrCols + (nbrButtons % nbrCols == 0 ? 0 : 1));
-    	buttons = new InGameButton[nbrButtons];
+    	buttons = new ArrayList<InGameButton>(nbrButtons);
     }
     
-    public InGameButton[] getButtons() { return buttons; }
-    public InGameButton getButton(int idx) { return buttons[idx]; }
-    public int getNbrButtons() { return buttons.length; }
+    public List<InGameButton> getButtons() { return buttons; }
+    public InGameButton getButton(int idx) { return buttons.get(idx); }
+    public int getNbrButtons() { return buttons.size(); }
     
     public int addButton(String text)
     {
-    	int row, col;
-    	for (int i = 0; i < buttons.length; ++i)
-    	{
-    		if (buttons[i] != null)
-    			continue;
-    		row = i / nbrCols;
-    		col = i % nbrCols;
-    		buttons[i] = new InGameButton(
-    				(col != 0) ? (buttons[row*nbrCols+(col-1)].getX() + buttons[row*nbrCols+(col-1)].getWidth()) : x,
-    				(row != 0) ? (buttons[(row-1)*nbrCols+col].getY() + buttons[(row-1)*nbrCols+col].getHeight()) : y,
-    				btnWidth, btnHeight, text);
-    		return i;
-    	}
-    	// button array is full;
-    	return -1;
+    	int btnid = buttons.size();
+    	int row = btnid / nbrCols;
+    	int col = btnid % nbrCols;
+    	buttons.add(new InGameButton(x + col*btnWidth, y + row*btnHeight,
+				btnWidth, btnHeight, text));
+    	return btnid;
     }
 }

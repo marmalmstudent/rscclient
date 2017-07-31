@@ -61,7 +61,6 @@ import java.util.zip.ZipFile;
  */
 public class mudclient extends GameWindowMiddleMan
 {
-	private static final long serialVersionUID = 1L;
 	public static final int SPRITE_MEDIA_START = 2000;
 	public static final int SPRITE_UTIL_START = 2100;
 	public static final int SPRITE_ITEM_START = 2150;
@@ -72,27 +71,29 @@ public class mudclient extends GameWindowMiddleMan
 	/* Custom variables */
 	public static int itemSlotWidth = 49;
 	public static int itemSlotHeight = 34;
-
-	private long startTime = 0;
-	private long serverStartTime = 0;
-	private String lastMessage = "";
-	private int fatigue;
-	private String serverLocation = "";
-	private String localhost;
-	private int prayerMenuIndex = 0;
-	private int magicMenuIndex = 0;
-	private boolean showRoof = true;
-	private boolean autoScreenshot = true;
-	private boolean freeCamera = false;
-	private long expGained = 0;
-	private boolean hasWorldInfo = false;
-	private boolean recording = false;
-	private LinkedList<BufferedImage> frames = new LinkedList<BufferedImage>();
-	private long lastFrame = 0;
-
-	/* Here are some variable that are added to make the rsc client work with
-	 * the mopar wrapper */
-	public boolean graphicsEnabled;
+	
+	public static OpenMenu om = OpenMenu.get();
+	public static String quests[] = new String[]{
+			"Black Knights' Fortress", "Cook's Assistant", "Demon slayer",
+			"Doric's quest", "The restless ghost", "Goblin diplomacy",
+			"Ernes the chicken", "Imp catcher", "Pirate's treasure",
+			"Romeo & Juliet", "Prince Ali rescue", "Sheep shearer",
+			"Shield of Arrav", "The knight's sword", "Vampire slayer", "Wich's potion",
+			"Dragon slayer", "Witch's house (members)", "Lost City (members)",
+			"Hero's quest (members)", "Druidic ritual (members)", "Merlin's crystal(members)",
+			"Scorpion catcher (members)", "Family crest (members)", "Tribal totem (members)",
+			"Fishing contest (members)", "Monk's friend (members)", "Temple of Ikov(members)",
+			"Clock tower (members)", "The Holy Grail (members)", "Fight Arena (members)",
+			"Tree Gnome Village (members)", "The Hazel Cult (members)", "Sheep Herder (members)",
+			"Plague City (members)", "Sea Slug (members)", "Waterfall quest (members)",
+			"Biohazard (members)", "Jungle potion (members)", "Grand tree (members)",
+			"Shilo village (members)", "Underground pass (members)", "Observatory quest (members)",
+			"Tourist trap (members)", "Watchtower (members)", "Dwarf Cannon (members)",
+			"Murder Mystery (members)", "Digsite (members)", "Gertrude's Cat (members)",
+	"Legend's Quest (members)"};
+	public static int SCROLL_BAR_WIDTH = 11;
+	public static int SCROLL_BAR_HEIGHT = 12;
+	
 	public static boolean showhp;
 	public static boolean pkingmap;
 	public static boolean cameratoggle;
@@ -103,9 +104,21 @@ public class mudclient extends GameWindowMiddleMan
 	public static int zoom;
 	public static int fwdbwd;
 	public static int lftrit;
+	public static mudclient mc;
+	
+	public boolean loggedIn;
+	public int chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, chatBoxVisRows,
+	chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight;
+	public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
+	gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
+	public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
+
+
+	/* Here are some variable that are added to make the rsc client work with
+	 * the mopar wrapper */
+	public boolean graphicsEnabled;
 	public String loginMessage1;
 	public String loginMessage2;
-	public static mudclient mc;
 	/* EOF */
 
 	public static void main(String[] args) throws Exception
@@ -113,12 +126,242 @@ public class mudclient extends GameWindowMiddleMan
 		Config.initConfig();
 		GameWindowMiddleMan.clientVersion = 25;
 		mc = new mudclient();
-		Rectangle rect = mc.getBounds();
+		Rectangle rect = mc.getVPBounds();
 		mc.createWindow(mc, new Rectangle(rect.x, rect.y, rect.width + 4, rect.height + 32),
 				"TestServer v" + GameWindowMiddleMan.clientVersion, false);
 	}
 	
-	public Rectangle getBounds()
+	public mudclient()
+	{
+		combatWindow = false;
+		threadSleepTime = 10;
+		try {
+			localhost = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException uhe)
+		{
+			localhost = "unknown";
+		}
+		startTime = System.currentTimeMillis();
+		configAutoCameraAngle = true;
+		questionMenuAnswer = new String[10];
+		currentUser = "";
+		currentPass = "";
+		self = new Player(new Mob());
+		
+		rightClickMenu = new ArrayList<MenuRightClick>();
+		
+		duelOpponentAccepted = false;
+		duelMyAccepted = false;
+		serverMessage = "";
+		duelOpponentName = "";
+		mobMsg = new String[50];
+		showBank = false;
+		doorModel = new Model[500];
+		mobMsgX = new int[50];
+		mobMsgY = new int[50];
+		mobMsgWidth = new int[50];
+		mobMsgHeight = new int[50];
+		equipmentStatus = new int[6];
+		prayerOn = new boolean[50];
+		tradeOtherAccepted = false;
+		tradeWeAccepted = false;
+		anIntArray705 = new int[50];
+		anIntArray706 = new int[50];
+		sectorHeight = -1;
+		memoryError = false;
+		bankItemsMax = 48;
+		showQuestionMenu = false;
+		viewDistance = 37.5;
+		cameraAutoAngle = 1;
+		showServerMessageBox = false;
+		hasReceivedWelcomeBoxDetails = false;
+		playerStatCurrent = new int[18];
+		wildYSubtract = -1;
+		anInt742 = -1;
+		anInt743 = -1;
+		anInt744 = -1;
+		sectionXArray = new int[8000];
+		sectionYArray = new int[8000];
+		
+		selItem = null;
+		
+		anIntArray757 = new int[50];
+		showCharacterLookScreen = false;
+		gameDataModels = new Model[1000];
+		configMouseButtons = false;
+		duelNoRetreating = false;
+		duelNoMagic = false;
+		duelNoPrayer = false;
+		duelNoWeapons = false;
+		anIntArray782 = new int[50];
+		hitpoints = new ArrayList<HitpointsBar>(50);
+		cameraZRot = 512;
+		cameraXRot = 912;
+		showWelcomeBox = false;
+		chrBodyGender = 1;
+		character2Colour = 2;
+		chrHairClr = 2;
+		chrTopClr = 8;
+		chrBottomClr = 14;
+		chrHeadGender = 1;
+		selectedBankItem = -1;
+		selectedBankItemType = -2;
+		objectRelated = new boolean[1500];
+		playerStatBase = new int[18];
+		shopItems = new Item[256];
+		anIntArray858 = new int[50];
+		anIntArray859 = new int[50];
+		mobArrayIndexes = new int[500];
+		serverIndex = -1;
+		showTradeConfirmWindow = false;
+		tradeConfirmAccepted = false;
+		playerArray = new ArrayList<Mob>(500);
+		lastPlayerArray = new ArrayList<Mob>(500);
+		npcArray = new ArrayList<Mob>(500);
+		lastNpcArray = new ArrayList<Mob>(500);
+		mobArray = new ArrayList<Mob>(8000);
+		npcRecordArray = new ArrayList<Mob>(8000);
+
+		objects = new ArrayList<GameObject>();
+		serverMessageBoxTop = false;
+		cameraHeight = 8.59375D;
+		cameraZoom = 1.0;
+		notInWilderness = false;
+		zoomCamera = false;
+		playerStatExperience = new int[18];
+		cameraAutoAngleDebug = false;
+		showDuelWindow = false;
+		anIntArray923 = new int[50];
+		lastLoadedNull = false;
+		experienceArray = new int[99];
+		showShop = false;
+		mouseClickX = new int[8192];
+		mouseClickYArray = new int[8192];
+		showDuelConfirmWindow = false;
+		duelWeAccept = false;
+		doorX = new int[500];
+		doorY = new int[500];
+		configSoundEffects = false;
+		showRightClickMenu = false;
+		attackingInt40 = 40;
+		anIntArray944 = new int[50];
+		doorDirection = new int[500];
+		doorType = new int[500];
+		groundItemX = new double[8000];
+		groundItemY = new double[8000];
+		groundItemType = new int[8000];
+		groundItemZ = new double[8000];
+		selectedShopItemIndex = -1;
+		selectedShopItemType = -2;
+		showTradeWindow = false;
+		doorRelated = new boolean[500];
+		/*
+        windowWidth = 512;
+        windowHeight = 334;
+		 */
+		bounds = new Rectangle(0, 0, 1120, 630);
+		center = new Point(bounds.width/2, bounds.height/2);
+		cameraSizeInt = 9;
+		
+		mapClick = new DPoint();
+		
+		tradeOtherPlayerName = "";
+		chatBoxVisRows = 7;
+		messagesArray = new String[chatBoxVisRows];
+		messagesTimeout = new int[chatBoxVisRows];
+		chatPlayerEntryHeight = 14;
+		chatBoxHeight = chatPlayerEntryHeight*chatBoxVisRows;
+		chatBoxWidth = 502;
+		chatBoxX = 5;
+		chatBoxY = bounds.height - chatBoxHeight - chatPlayerEntryHeight-10;
+		chatPlayerEntryX = chatBoxX;
+		chatPlayerEntryY = chatBoxY + chatBoxHeight;
+		chatPlayerEntryWidth = chatBoxWidth - (chatPlayerEntryX - chatBoxX);
+		gameWindowMenuBarWidth = 197;
+		gameWindowMenuBarHeight = 32;
+		gameWindowMenuBarX = bounds.width - gameWindowMenuBarWidth-3;
+		gameWindowMenuBarY = bounds.height - gameWindowMenuBarHeight-3;
+		gameWindowMenuBarItemWidth = 33;
+		gameWindowMenuBarItemHeight = 32;
+		miniMapWidth = 156+40;
+		miniMapHeight = 152+40;
+		miniMapX = bounds.width-miniMapWidth-3;
+		miniMapY = 3;
+
+	}
+
+	public static final String getAbbreviatedValue(long amount)
+	{
+		String abbrevVal = String.valueOf(amount);
+		if (amount >= 10000000)
+			abbrevVal = String.valueOf(amount/1000000) + "M";
+		else if (amount >= 100000)
+			abbrevVal = String.valueOf(amount/1000) + "K";
+		return abbrevVal;
+	}
+	
+	public static int itemCount(Item item, List<Item> items, int nItems)
+	{
+		int amount = 0;
+		for (int index = 0; index < nItems; index++)
+		{
+			if (items.get(index).getID() == item.getID())
+				if (!item.isStackable())
+					++amount;
+				else
+					amount += items.get(index).getAmount();
+		}
+		/*
+		System.out.printf("%s, %b, %d, %d\n", item.getName(), item.isStackable(),
+				item.getAmount(), amount);
+				*/
+		return amount;
+	}
+
+	@Override
+	public final Image createImage(int i, int j) {
+		if (GameWindow.gameFrame != null) {
+			return GameWindow.gameFrame.createImage(i, j);
+		}
+		return super.createImage(i, j);
+	}
+
+	@Override
+	public final Graphics getGraphics()
+	{
+		/*
+        if (GameWindow.gameFrame != null) {
+            return GameWindow.gameFrame.getGraphics();
+        }*/
+		return super.getGraphics();
+	}
+
+	/**
+	 * Draws a box on the screen with text in it.
+	 * @param x X-position.
+	 * @param y Y-position.
+	 * @param width Box width.
+	 * @param height Box height.
+	 * @param color Box color, e.g. 0xffffff.
+	 * @param border true if a border should be drawn.
+	 * @param borderThick Border thickness.
+	 * @param borderColor Border Color, e.g. 0xffffff.
+	 * @param textType The type of text. Defined in GameWindow.loadFonts()
+	 * @param textColor Text color, e.g. 0xffffff.
+	 * @param text The text to be displayed in the box.
+	 */
+	public final void drawInfoBox(
+			int x, int y, int width, int height, int color,
+			boolean border, int borderThick, int borderColor,
+			int textType, int textColor, String text)
+	{
+		gameGraphics.drawBox(x, y, width, height, color);
+		gameGraphics.drawBoxEdge(x, y, width, height, borderColor);
+		gameGraphics.drawText(text, x+width/2, y+height/2 + 6,
+				textType, textColor);
+	}
+	
+	public Rectangle getVPBounds()
 	{
 		return bounds;
 	}
@@ -128,327 +371,30 @@ public class mudclient extends GameWindowMiddleMan
 		return center;
 	}
 
-	/**
-	 * Not a very good way to get the dimensions of the window but it works
-	 * @return
-	 */
-	public static int getWindowHeight()
-	{
-		return mc.windowHeight;
-	}
-
-	/**
-	 * Not a very good way to get the dimensions of the window but it works
-	 * @return
-	 */
-	public static int getWindowWidth()
-	{
-		return mc.windowWidth;
-	}
-
 	public boolean getFreeCamera()
 	{
 		return freeCamera;
 	}
 
-	/**
-	 * Formats a packet and cleans up necessary variables.
-	 * @param packetID The id of the packet.
-	 */
-	private void formatPacket(int packetID, int id, int amount)
-	{
-		switch(packetID)
-		{
-		case 42:
-			super.streamClass.createPacket(42);
-			super.streamClass.addByte(id);
-			super.streamClass.writePktSize();
-			break;
-		case 48: // close bank
-		super.streamClass.createPacket(48);
-		super.streamClass.writePktSize();
-		showBank = false;
-		break;
-		case 53: // confirm trade
-			tradeConfirmAccepted = true;
-			super.streamClass.createPacket(53);
-			super.streamClass.writePktSize();
-			break;
-		case 56:
-			super.streamClass.createPacket(56);
-			super.streamClass.addByte(id);
-			super.streamClass.writePktSize();
-			prayerOn[id] = true;
-			playSound("prayeron");
-			break;
-		case 70:
-			super.streamClass.createPacket(70);
-			super.streamClass.addByte(tradeMyItemCount);
-			for (int i = 0; i < tradeMyItemCount; i++)
-			{
-				super.streamClass.add2ByteInt(self.getTradeMyItems().get(i).getID());
-				super.streamClass.add4ByteInt((int) self.getTradeMyItems().get(i).getAmount());
-			}
-			super.streamClass.writePktSize();
-			tradeOtherAccepted = false;
-			tradeWeAccepted = false;
-			break;
-		case 123:
-			super.streamClass.createPacket(123);
-			super.streamClass.addByte(duelMyItemCount);
-			for (int i = 0; i < duelMyItemCount; i++)
-			{
-				super.streamClass.add2ByteInt(self.getDuelMyItems().get(i).getID());
-				super.streamClass.add4ByteInt((int) self.getDuelMyItems().get(i).getAmount());
-			}
-			super.streamClass.writePktSize();
-			duelOpponentAccepted = false;
-			duelMyAccepted = false;
-			break;
-		case 157: // change settings in settings menu
-			super.streamClass.createPacket(157);
-			super.streamClass.addByte(id);
-			super.streamClass.addByte(amount);
-			super.streamClass.writePktSize();
-			break;
-		case 183: // bank withdraw
-			super.streamClass.createPacket(183);
-			super.streamClass.add2ByteInt(id);
-			super.streamClass.add4ByteInt(amount);
-			super.streamClass.writePktSize();
-			break;
-		case 198: // bank deposit
-			super.streamClass.createPacket(198);
-			super.streamClass.add2ByteInt(id);
-			super.streamClass.add4ByteInt(amount);
-			super.streamClass.writePktSize();
-			break;
-		case 211: // trade accept button
-			tradeWeAccepted = true;
-			super.streamClass.createPacket(211);
-			super.streamClass.writePktSize();
-			break;
-		case 216: // trade decline
-			showTradeWindow = false;
-			super.streamClass.createPacket(216);
-			super.streamClass.writePktSize();
-			break;
-		case 218: // accept character remake?
-			super.streamClass.createPacket(218);
-			super.streamClass.addByte(chrHeadGender);
-			super.streamClass.addByte(chrHeadType);
-			super.streamClass.addByte(chrBodyGender);
-			super.streamClass.addByte(character2Colour);
-			super.streamClass.addByte(chrHairClr);
-			super.streamClass.addByte(chrTopClr);
-			super.streamClass.addByte(chrBottomClr);
-			super.streamClass.addByte(chrSkinClr);
-			super.streamClass.writePktSize();
-			gameGraphics.resetImagePixels(0);
-			showCharacterLookScreen = false;
-			break;
-		case 248:  // switch prayer off
-			super.streamClass.createPacket(248);
-			super.streamClass.addByte(id);
-			super.streamClass.writePktSize();
-			prayerOn[id] = false;
-			playSound("prayeroff");
-			break;
-		}
-
-	}
-
-	/**
-	 * Checks for any errors when requesting to add items to the trade.
-	 * @param id Item id
-	 * @param amount Item amount
-	 * @param offerType Type of offer being made; 0 for trade, 1 for duel.
-	 * @return True if no errors were found. False if errors were found.
-	 */
-	private boolean anyOfferErrors(int id, int amount, int offerType)
-	{
-		if (offerType == 0 && tradeMyItemCount >= 12)
-		{
-			displayMessage("@cya@Your trade offer is currently full", 3, 0);
-			return false;
-		}
-		if (offerType == 1 && duelMyItemCount >= 12)
-		{
-			displayMessage("@cya@Your duel offer is currently full", 3, 0);
-			return false;
-		}
-		if (inventoryCount(id) < amount)
-		{
-			displayMessage("@cya@You do not have that many"
-					+ EntityHandler.getItemDef(id).getName()
-					+ " to offer", 3, 0);
-			return false;
-		}
-		if (!EntityHandler.getItemDef(id).isStackable()
-				&& amount > 1)
-		{
-			displayMessage("@cya@You can only offer 1 non stackable at a time",
-					3, 0);
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Handles adding an item to the trade list of the player items currently offered.
-	 * If an error occurs (such as invalid amount or id) no items are added.
-	 * @param id Item id.
-	 * @param amount Item amount.
-	 */
-	private void handleTradeOfferCommand(int id, int amount)
-	{
-		if (anyOfferErrors(id, amount, 0))
-			return;
-		boolean addNewItem = true;
-		for (int i = 0; i < tradeMyItemCount; ++i)
-		{
-			if (self.getTradeMyItems().get(i).getID() != id)
-				continue;
-			if (!EntityHandler.getItemDef(id).isStackable())
-				break;
-			if (inventoryCount(id) < (self.getTradeMyItems().get(i).getAmount() + amount))
-			{
-				displayMessage("@cya@You do not have that many"
-						+ EntityHandler.getItemDef(id).getName()
-						+ " to offer", 3, 0);
-				return;
-			}
-			self.getTradeMyItems().get(i).addAmount(amount);
-			addNewItem = false;
-			break;
-		}
-		if (addNewItem)
-		{
-			self.getTradeMyItems().set(tradeMyItemCount++, new Item(id, false, amount));
-		}
-		formatPacket(70, -1, -1);
-	}
-
-	/**
-	 * Handles adding an item to the duel list of the player items currently offered.
-	 * If an error occurs (such as invalid amount or id) no items are added.
-	 * @param id Item id.
-	 * @param amount Item amount.
-	 */
-	private void handleDuelOfferCommand(int id, int amount)
-	{
-		if (anyOfferErrors(id, amount, 1))
-			return;
-		boolean addNewItem = true;
-		for (int i = 0; i < duelMyItemCount; i++)
-		{
-			if (self.getDuelMyItems().get(i).getID() != id)
-				continue;
-			if (!EntityHandler.getItemDef(id).isStackable())
-				break;
-			if (inventoryCount(id) < (self.getDuelMyItems().get(i).getAmount() + amount))
-			{
-				displayMessage("@cya@You do not have that many"
-						+ EntityHandler.getItemDef(id).getName()
-						+ " to offer", 3, 0);
-				return;
-			}
-			self.getDuelMyItems().get(i).addAmount(amount);
-			addNewItem = false;
-			break;
-		}
-		if (addNewItem)
-			self.getDuelMyItems().set(duelMyItemCount++, new Item(id, false, amount));
-		formatPacket(123, -1, -1);
-	}
-
-	/**
-	 * Passes an offer command to the relevant function depending on what offer window
-	 * is open.
-	 * @param id Item id.
-	 * @param amount Item amount.
-	 * @return
-	 */
-	private boolean handleOfferCommand(int id, int amount)
-	{
-		if (showTradeWindow)
-			handleTradeOfferCommand(id, amount);
-		else if (showDuelWindow)
-			handleDuelOfferCommand(id, amount);
-		else {
-			displayMessage("@cya@There is nothing to offer to.", 3, 0);
-		}
-		return false;
-	}
-
-	/**
-	 * Takes a command, formats it and passes it to the relevant function.
-	 * The command must be on the form:
-	 * 
-	 * command args0 args1 args2 ... argsN
-	 * 
-	 * @param s The command.
-	 * @return true if the input string matches a valid command
-	 */
-	private boolean handleCommand(String s)
-	{
-		String[] cmd = s.split(" ");
-		if (cmd[0].equalsIgnoreCase("offer") && cmd.length > 3)
-		{
-			int id, amount;
-			try
-			{
-				id = Integer.parseInt(cmd[1]);
-				amount = Integer.parseInt(cmd[2]);
-			} catch (NumberFormatException nfe)
-			{
-				displayMessage("@cya@Arguments must be integers!", 3, 0);
-				return true;
-			}
-			return handleOfferCommand(id, amount);
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the game image. Used to present the game on the screen and take
-	 * creenshots.
-	 * @return
-	 * @throws IOException
-	 */
-	private BufferedImage getImage() throws IOException
-	{
-		BufferedImage bufferedImage = new BufferedImage(windowWidth,
-				windowHeight + 11, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2d = bufferedImage.createGraphics();
-		g2d.drawImage(gameGraphics.image, 0, 0, this);
-		g2d.dispose();
-		return bufferedImage;
-	}
-
-	/**
-	 * Takes a screenshot and saves it.
-	 * @param verbose True if additional information about the process should be
-	 * printed.
-	 * @return True if a screenshot was successfully taken.
-	 */
-	private boolean takeScreenshot(boolean verbose)
-	{
-		try
-		{
-			File file = misc.getEmptyFile(false, currentUser);
-			ImageIO.write(getImage(), "png", file);
-			if (verbose)
-				handleServerMessage("Screenshot saved as " + file.getName() + ".");
-			return true;
-		}
-		catch (IOException e)
-		{
-			if (verbose)
-				handleServerMessage("Error saving screenshot.");
-			return false;
-		}
-	}
+	String mobMsg[];
+	int menuMagicPrayersSelected;
+	int messagesHandleChatHist;
+	int chatHandlePlayerEntry;
+	int messagesHandleQuestHist;
+	int messagesHandlePrivHist;
+	int messagesTab;
+	int anInt826;
+	int actionPictureX;
+	int actionPictureY;
+	int sectionX;
+	int sectionY;
+	int serverIndex;
+	int questMenuHandle, spellMenuHandle;
+	int mouseClickX[];
+	int mouseClickYArray[];
+	int friendsMenuHandle;
+	int friendTabOn;
+	long privateMessageTarget;
 
 	final void method45(int i, int j, int wSprite, int l, int id, int j1, int xOffs)
 	{
@@ -551,351 +497,6 @@ public class mudclient extends GameWindowMiddleMan
 				gameGraphics.drawText( Integer.toString(mob.dmgRcv), (xSprite + wSprite / 2) - 1, j + l / 2 + 5, 3, 0xffffff);
 			}
 		}
-	}
-
-	/**
-	 * Draws the character creation/look screen
-	 */
-	private final void drawCharacterLookScreen()
-	{
-		chrDesignMenu.updateActions();
-		if (chrDesignMenu.hasActivated(chrDesignHeadBtnLeft))
-			do {
-				chrHeadType = ((chrHeadType - 1) + EntityHandler.animationCount())
-						% EntityHandler.animationCount();
-			} while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
-					|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
-		else if (chrDesignMenu.hasActivated(chrDesignHeadBtnRight))
-			do {
-				chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount();
-			} while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
-					|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
-		if (chrDesignMenu.hasActivated(chrDesignGenderBtnLeft)
-				|| chrDesignMenu.hasActivated(chrDesignGenderBtnRight))
-		{
-			for (chrHeadGender = 3 - chrHeadGender;
-					(EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
-							|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0;
-					chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount());
-			for (; (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 3) != 2
-					|| (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 4 * chrHeadGender) == 0;
-					chrBodyGender = (chrBodyGender + 1) % EntityHandler.animationCount());
-		}
-		if (chrDesignMenu.hasActivated(chrDesignHairClrBtnLeft))
-			chrHairClr = (chrHairClr-1 + chrHairClrs.length)
-			% chrHairClrs.length;
-		else if (chrDesignMenu.hasActivated(chrDesignHairClrBtnRight))
-			chrHairClr = (chrHairClr + 1) % chrHairClrs.length;
-		if (chrDesignMenu.hasActivated(chrDesignTopClrBtnLeft))
-			chrTopClr = ((chrTopClr - 1) + chrTopBottomClrs.length)
-			% chrTopBottomClrs.length;
-		else if (chrDesignMenu.hasActivated(chrDesignTopClrBtnRight))
-			chrTopClr = (chrTopClr + 1) % chrTopBottomClrs.length;
-		if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnLeft))
-			chrSkinClr = ((chrSkinClr - 1) + chrSkinClrs.length)
-			% chrSkinClrs.length;
-		else if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnRight))
-			chrSkinClr = (chrSkinClr + 1) % chrSkinClrs.length;
-		if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnLeft))
-			chrBottomClr = ((chrBottomClr - 1) + chrTopBottomClrs.length)
-			% chrTopBottomClrs.length;
-		else if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnRight))
-			chrBottomClr = (chrBottomClr + 1) % chrTopBottomClrs.length;
-		if (chrDesignMenu.hasActivated(characterDesignAcceptButton))
-			formatPacket(218, -1, -1);
-	}
-
-	/**
-	 * Finds the number of occurences of an item id in the player's inventory.
-	 * Note: A stack of N items counts as N occurences.
-	 * @param reqID Item id.
-	 * @return The number of occurences of the item in the player's inventory.
-	 */
-	protected final int inventoryCount(int reqID)
-	{
-		int amount = 0;
-		for (int index = 0; index < inventoryCount; index++)
-		{
-			if (self.getInventoryItems().get(index).getID() == reqID)
-				if (!EntityHandler.getItemDef(reqID).isStackable())
-					++amount;
-				else
-					amount += self.getInventoryItems().get(index).getAmount();
-		}
-		return amount;
-	}
-	
-	public static int itemCount(Item item, List<Item> items, int nItems)
-	{
-		int amount = 0;
-		for (int index = 0; index < nItems; index++)
-		{
-			if (items.get(index).getID() == item.getID())
-				if (!item.isStackable())
-					++amount;
-				else
-					amount += items.get(index).getAmount();
-		}
-		/*
-		System.out.printf("%s, %b, %d, %d\n", item.getName(), item.isStackable(),
-				item.getAmount(), amount);
-				*/
-		return amount;
-	}
-
-	/**
-	 * Handles updating the welcome login screen, displaying the option to
-	 * create a new account or login to an existing account.
-	 * @return true if the user have clicked on the existing user button.
-	 * false if not.
-	 */
-	private final boolean updateLoginWelcomeScreen()
-	{
-		menuWelcome.updateActions();
-		if (menuWelcome.hasActivated(loginButtonNewUser))
-			loginScreenNumber = 1;
-		if (menuWelcome.hasActivated(loginButtonExistingUser))
-		{
-			loginScreenNumber = 2;
-			menuLogin.updateText(loginStatusText,
-					"Please enter your username and password");
-			menuLogin.updateText(loginUsernameTextBox, currentUser);
-			menuLogin.updateText(loginPasswordTextBox, currentPass);
-			menuLogin.setFocus(loginUsernameTextBox);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Handles updating the new user login screen, displaying information about how
-	 * to create a new account.
-	 * @return true if the user clicked on the 'OK' button in the new user menu.
-	 * false if not.
-	 */
-	private final boolean updateLoginNewScreen()
-	{
-		menuNewUser.updateActions();
-		if (menuNewUser.hasActivated(newUserOkButton))
-		{
-			//loginScreenNumber = 0; // menuWelcome
-			loginScreenNumber = 2;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Handles updating the exising user login screen, displaying the text fields
-	 * where the username and password should be enterd.
-	 * @return false.
-	 */
-	private final boolean updateExistingScreen()
-	{
-		menuLogin.updateActions();
-		if (menuLogin.hasActivated(loginCancelButton))
-		{
-			//loginScreenNumber = 0; // menuwelcome
-			loginScreenNumber = 1;
-		}
-		if (menuLogin.hasActivated(loginUsernameTextBox))
-			menuLogin.setFocus(loginPasswordTextBox);
-		if (menuLogin.hasActivated(loginPasswordTextBox)
-				|| menuLogin.hasActivated(loginOkButton))
-		{
-			currentUser = menuLogin.getText(loginUsernameTextBox);
-			currentPass = menuLogin.getText(loginPasswordTextBox);
-			login(currentUser, currentPass, false);
-		}
-		return false;
-	}
-
-	/**
-	 * Invokes the method that handles the current login scren.
-	 */
-	private final void updateLoginScreen()
-	{
-		if (super.socketTimeout > 0)
-			super.socketTimeout--;
-		if (loginScreenNumber == 0)
-		{
-			if (updateLoginWelcomeScreen())
-				return;
-		} else if (loginScreenNumber == 1)
-		{
-			if (updateLoginNewScreen())
-				return;
-		} else if (loginScreenNumber == 2)
-		{
-			if (updateExistingScreen())
-				return;
-		}
-	}
-
-	/**
-	 * Draws relevant sprites on the login screens. This includes the background
-	 * image itself.
-	 */
-	private final void drawLoginScreenSprites()
-	{
-		if (loginScreenNumber >= 0 && loginScreenNumber <= 3)
-		{
-			// background image
-			/*
-			gameGraphics.imageToPixArray(gameGraphics.loginScreen, 0, 0,
-					windowWidth, windowHeight, true);*/
-			gameGraphics.imageToPixArray(
-					FileOperations.readImage(
-							gameGraphics.sprites[3151].getPixels(),
-							gameGraphics.sprites[3151].getWidth(),
-							gameGraphics.sprites[3151].getHeight()),
-					0, 0, windowWidth, windowHeight, true);
-			// bottom right sprite
-			gameGraphics.drawPicture(0, 20, 2010);
-		}
-		// blue bar at the bottom
-		Sprite sprite;
-		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
-		int nSprites = windowWidth / sprite.getWidth();
-		int currentOffset = 0;
-		for (int i=0; i < nSprites; i++)
-		{
-			gameGraphics.drawPicture(currentOffset, windowHeight, SPRITE_MEDIA_START + 22);
-			currentOffset += sprite.getWidth();
-		}
-		if (windowWidth-nSprites*sprite.getWidth() != 0)
-		{
-			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), windowHeight,
-					windowWidth-nSprites*sprite.getWidth(),
-					sprite.getHeight(), SPRITE_MEDIA_START + 22);
-		}
-	}
-
-	/**
-	 * Draws the login screen background as well as the appropriate login menu.
-	 */
-	private final void drawLoginScreen()
-	{
-		hasReceivedWelcomeBoxDetails = false;
-		gameGraphics.lowDef = false;
-		gameGraphics.resetImagePixels(0);
-		drawLoginScreenSprites();
-		if (loginScreenNumber == 0)
-			menuWelcome.drawMenu(true);
-		if (loginScreenNumber == 1)
-			menuNewUser.drawMenu(true);
-		if (loginScreenNumber == 2)
-			menuLogin.drawMenu(true);
-		gameGraphics.drawImage(aGraphics936, 0, 0);
-	}
-
-	/**
-	 * Draws the main report abuse window.
-	 */
-	private final void drawAbuseWindow1()
-	{
-		abuseSelectedType = 1 + abWin.getSelectedType();
-
-		if (mv.buttonDown() && abuseSelectedType != 0) {
-			mv.releaseButton();
-			showAbuseWindow = 2;
-			super.inputText = "";
-			super.enteredText = "";
-			return;
-		}
-		if (mv.buttonDown()) {
-			mv.releaseButton();
-			if (!abWin.insideWindow()
-					|| abWin.insideCloseBtn())
-			{
-				showAbuseWindow = 0;
-				return;
-			}
-		}
-		gameGraphics.drawBox(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0);
-		gameGraphics.drawBoxEdge(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0xffffff);
-		String[] info = abWin.getInfo();
-		int rowY = abWin.getFirstLineY();
-		for (String str : info)
-		{
-			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffffff);
-			rowY += abWin.getRowSeparation();
-		}
-		String[] reportInfo = abWin.getReportInfo();
-		for (String str : reportInfo)
-		{
-			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffff00);
-			rowY += abWin.getRowSeparation();
-		}
-		String[] rules = abWin.getRules();
-		int i = 0;
-		for (String str : rules)
-		{
-			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
-					abWin.getSelectedType() == i ? 0xff8000 : 0xffffff);
-			++i;
-			rowY += abWin.getRowSeparation();
-		}
-		int selectedType = abWin.getSelectedType();
-		if (selectedType != -1)
-		{
-			gameGraphics.drawBoxEdge(abWin.getBoxX(),
-					abWin.getFirstRuleY() + abWin.getRowYOffset()
-					+ abWin.getSelectedType()*abWin.getRowSeparation(),
-					abWin.getBoxWidth(), abWin.getRowSeparation(), 0xffffff);
-		}
-		String [] closeText = abWin.getCloseText();
-		for (String str : closeText)
-		{
-			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
-					abWin.insideCloseBtn() ? 0xffff00 : 0xffffff);
-			rowY += abWin.getRowSeparation();
-		}
-	}
-
-	private final void autoRotateCamera()
-	{
-		if ((cameraAutoAngle & 1) == 1 && enginePlayerVisible(cameraAutoAngle))
-			return;
-		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
-		{
-			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
-			{
-				cameraAutoAngle = cameraAutoAngle + 1 & 7;
-				return;
-			}
-			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
-				cameraAutoAngle = cameraAutoAngle + 7 & 7;
-			return;
-		}
-		int ai[] = {1, -1, 2, -2, 3, -3, 4};
-		for (int i = 0; i < ai.length; ++i)
-		{
-			if (!enginePlayerVisible(cameraAutoAngle + ai[i] + 8 & 7))
-				continue;
-			cameraAutoAngle = cameraAutoAngle + ai[i] + 8 & 7;
-			break;
-		}
-
-		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
-		{
-			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
-			{
-				cameraAutoAngle = cameraAutoAngle + 1 & 7;
-				return;
-			}
-			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
-				cameraAutoAngle = cameraAutoAngle + 7 & 7;
-		}
-	}
-
-	public final Graphics getGraphics()
-	{
-		/*
-        if (GameWindow.gameFrame != null) {
-            return GameWindow.gameFrame.getGraphics();
-        }*/
-		return super.getGraphics();
 	}
 
 	final void method52(int x, int y, int width, int height, int playerID, int j1, int xOffs)
@@ -1049,83 +650,38 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void loadConfigFilter()
-	{
-		drawLoadingBarText(15, "Unpacking Configuration");
-		EntityHandler.load();
+	final void drawItems(int i, int j, int k, int l, int id, int j1, int k1) {
+		int l1 = EntityHandler.getItemDef(id).getSprite() + SPRITE_ITEM_START;
+		int i2 = EntityHandler.getItemDef(id).getPictureMask();
+		gameGraphics.spriteClip4(i, j, k, l, l1, i2, 0, 0, false);
 	}
 
-	private final void loadModel() throws IOException
-	{
-		ZipFile objectArchive = new ZipFile(new File(Config.DATABASE_DIR + "models.zip"));
-		try {
-			for (int j = 0; j < EntityHandler.getModelCount(); j++)
-			{
-				ZipEntry e = objectArchive.getEntry(String.valueOf(j));
-				if (e == null)
-				{
-					System.err.printf("Model %d missing!", j);
-					continue;
-				}
-
-				DataInputStream datainputstream = new DataInputStream(objectArchive.getInputStream(e));
-				byte entrySize[] = new byte[4];
-				datainputstream.readFully(entrySize, 0, 4);
-				int dataSize = ((entrySize[0] & 0xff) << 24)
-						+ ((entrySize[1] & 0xff) << 16)
-						+ ((entrySize[2] & 0xff) << 8)
-						+ (entrySize[3] & 0xff);
-				int offset = 0;
-				byte model[] = new byte[dataSize];
-				while (offset < dataSize)
-				{
-					int bufferSize = dataSize - offset;
-					if (bufferSize > 1000)
-					{
-						bufferSize = 1000;
-					}
-					datainputstream.readFully(model, offset, bufferSize);
-					offset += bufferSize;
-				}
-				datainputstream.close();
-				gameDataModels[j] = new Model(model, 0, true);
-				gameDataModels[j].transparent = EntityHandler.getModelName(j).equals("giantcrystal");
-			}
+	final void method71(int i, int j, int k, int l, int i1, int j1, int k1) {
+		int l1 = anIntArray782[i1];
+		int i2 = anIntArray923[i1];
+		if (l1 == 0) {
+			int j2 = 255 + i2 * 5 * 256;
+			gameGraphics.drawCircle(i + k / 2, j + l / 2, 20 + i2 * 2, j2, 255 - i2 * 5);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally
-		{
-			objectArchive.close();
+		if (l1 == 1) {
+			int k2 = 0xff0000 + i2 * 5 * 256;
+			gameGraphics.drawCircle(i + k / 2, j + l / 2, 10 + i2, k2, 255 - i2 * 5);
 		}
 	}
+	
+	protected Player self;
+	protected int tradeMyItemCount;
+	protected int tradeOtherItemCount;
+	protected int inventoryCount;
+	protected boolean tradeOtherAccepted;
+	protected boolean tradeWeAccepted;
+	protected int mouseDownTime;
+	protected int itemIncrement;
+	protected GameImageMiddleMan gameGraphics;
+	protected boolean showTradeWindow;
+	protected String tradeOtherPlayerName;
 
-	/**
-	 * Loads 3D models
-	 */
-	private final void loadModels()
-	{
-		drawLoadingBarText(75, "Loading 3d models");
-
-		String[] modelNames = {
-				"torcha2", "torcha3", "torcha4",
-				"skulltorcha2", "skulltorcha3", "skulltorcha4",
-				"firea2", "firea3",
-				"fireplacea2", "fireplacea3",
-				"firespell2", "firespell3",
-				"lightning2", "lightning3",
-				"clawspell2", "clawspell3", "clawspell4", "clawspell5",
-				"spellcharge2", "spellcharge3"
-		};
-		for (String name : modelNames)
-			EntityHandler.storeModel(name);
-		try
-		{
-			loadModel();
-		} catch (IOException ioe) { ioe.printStackTrace(); }
-	}
-
+	@Override
 	protected final void handleMouseDown()
 	{
 		int mouseX = mv.getX();
@@ -1157,49 +713,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void displayLastLoadedNull()
-	{
-		Graphics g = getGraphics();
-		g.setColor(Color.black);
-		g.fillRect(0, 0, 512, 356);
-		g.setFont(new Font("Helvetica", 1, 16));
-		g.setColor(Color.yellow);
-		int i = 35;
-		g.drawString("Sorry, an error has occured whilst loading TestServer", 30, i);
-		i += 50;
-		g.setColor(Color.white);
-		g.drawString("To fix this try the following (in order):", 30, i);
-		i += 50;
-		g.setColor(Color.white);
-		g.setFont(new Font("Helvetica", 1, 12));
-		g.drawString("1: Try closing ALL open web-browser windows, and reloading", 30, i);
-		i += 30;
-		g.drawString("2: Try clearing your web-browsers cache from tools->internet options", 30, i);
-		i += 30;
-		g.drawString("3: Try using a different game-world", 30, i);
-		i += 30;
-		g.drawString("4: Try rebooting your computer", 30, i);
-		i += 30;
-		g.drawString("5: Try selecting a different version of Java from the play-game menu", 30, i);
-		changeThreadSleepModifier(1);
-		return;
-	}
-
-	private void displayMemoryError()
-	{
-		Graphics g2 = getGraphics();
-		g2.setColor(Color.black);
-		g2.fillRect(0, 0, 512, 356);
-		g2.setFont(new Font("Helvetica", 1, 20));
-		g2.setColor(Color.white);
-		g2.drawString("Error - out of memory!", 50, 50);
-		g2.drawString("Close ALL unnecessary programs", 50, 100);
-		g2.drawString("and windows before loading the game", 50, 150);
-		g2.drawString("TestServer needs about 100mb of spare RAM", 50, 200);
-		changeThreadSleepModifier(1);
-		return;
-	}
-
+	@Override
 	protected final void method4()
 	{
 		if (lastLoadedNull)
@@ -1232,805 +746,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void walkToObject(int x, int y, int id, int type)
-	{
-		int i1;
-		int j1;
-		if (id == 0 || id == 4)
-		{
-			i1 = EntityHandler.getObjectDef(type).getWidth();
-			j1 = EntityHandler.getObjectDef(type).getHeight();
-		}
-		else
-		{
-			j1 = EntityHandler.getObjectDef(type).getWidth();
-			i1 = EntityHandler.getObjectDef(type).getHeight();
-		}
-		if (EntityHandler.getObjectDef(type).getType() == 2
-				|| EntityHandler.getObjectDef(type).getType() == 3)
-		{
-			if (id == 0)
-			{
-				x--;
-				i1++;
-			}
-			if (id == 2)
-				j1++;
-			if (id == 4)
-				i1++;
-			if (id == 6)
-			{
-				y--;
-				j1++;
-			}
-			sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
-					(y + j1) - 1, false, true);
-			return;
-		}
-		else
-		{
-			sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
-					(y + j1) - 1, true, true);
-			return;
-		}
-	}
-
-	private void drawItemBox(InGameGrid panel, int itemID,
-			int slotX, int slotY, boolean selected, boolean drawSprite)
-	{
-		if (selected)
-			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
-					InGameGrid.ITEM_SLOT_WIDTH-1,
-					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					panel.getGridBGSelectColor(),
-					panel.getGridBGAlpha());
-		else
-			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
-					InGameGrid.ITEM_SLOT_WIDTH-1,
-					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					panel.getGridBGNotSelectColor(),
-					panel.getGridBGAlpha());
-		gameGraphics.drawBoxEdge(slotX, slotY,
-				InGameGrid.ITEM_SLOT_WIDTH+1,
-				InGameGrid.ITEM_SLOT_HEIGHT+1, panel.getGridLineColor());
-		if (drawSprite)
-			gameGraphics.spriteClip4(slotX+1, slotY+1,
-					InGameGrid.ITEM_SLOT_WIDTH-1,
-					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					SPRITE_ITEM_START + EntityHandler.getItemDef(
-							itemID).getSprite(),
-					EntityHandler.getItemDef(itemID).getPictureMask(),
-					0, 0, false);
-	}
-
-	/**
-	 * Handles what happens when you click on an item in the bank.
-	 */
-	private void clickBankItem()
-	{
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
-		int mouseXGrid = mv.getX() - bankGrid.getX();
-		int mouseYGrid = mv.getY() - bankGrid.getY();
-		for (int row = 0; row < bankGrid.getRows(); row++)
-		{
-			for (int col = 0; col < bankGrid.getCols(); col++)
-			{
-				int slotXMin = col * itemSlotWidth - 1;
-				int slotYMin = row * itemSlotHeight - 1;
-				if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + itemSlotWidth
-						&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + itemSlotHeight
-						&& itemIdx < bankItemCount && self.getBankItems().get(itemIdx).getID() != -1)
-				{
-					selectedBankItemType = self.getBankItems().get(itemIdx).getID();
-					selectedBankItem = itemIdx;
-				}
-				itemIdx++;
-			}
-
-		}
-	}
-
-	/**
-	 * Handles what happens when you withdraw/deposit an item from/to the bank. 
-	 */
-	private void clickBankItemMove()
-	{
-		int selectedBankItemId;
-		if (selectedBankItem < 0)
-			selectedBankItemId = -1;
-		else
-			selectedBankItemId = self.getBankItems().get(selectedBankItem).getID();
-		if (selectedBankItemId != -1)
-		{
-			long selectedBankItemCount = self.getBankItems().get(selectedBankItem).getAmount();
-			int depAmt = bankPan.getDepAmt(inventoryCount(selectedBankItemId));
-			if (depAmt != 0)
-				formatPacket(198, selectedBankItemId, depAmt);
-			long withAmt = bankPan.getWithAmt(selectedBankItemCount);
-			if (withAmt != 0)
-				formatPacket(183, selectedBankItemId, (int)withAmt);
-		}
-	}
-
-	/**
-	 * Checks if an invalid item is selected. If so it will clear the reference.
-	 */
-	private void checkSelectedBankItem()
-	{
-		if (selectedBankItem >= bankItemCount || selectedBankItem < 0)
-			selectedBankItem = -1;
-		if (selectedBankItem != -1
-				&& self.getBankItems().get(selectedBankItem).getID() != selectedBankItemType)
-		{
-			selectedBankItem = -1;
-			selectedBankItemType = -2;
-		}
-	}
-
-	public static final String getAbbreviatedValue(long amount)
-	{
-		String abbrevVal = String.valueOf(amount);
-		if (amount >= 10000000)
-			abbrevVal = String.valueOf(amount/1000000) + "M";
-		else if (amount >= 100000)
-			abbrevVal = String.valueOf(amount/1000) + "K";
-		return abbrevVal;
-	}
-
-	/**
-	 * Presents the bank on the screen and handles clicking in the bank.
-	 */
-	private final void drawBankBox()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		mouseOverBankPageText = bankPan.updateVisibleBankTabs(mouseOverBankPageText, bankItemCount);
-		checkSelectedBankItem();
-		if (mv.buttonDown())
-		{
-			mv.releaseButton();
-			if (bankPan.getBankGrid().isMouseOverGrid())
-				clickBankItem();
-			else if (mouseX > bankPan.getBottomInfoBoxX()
-					&& mouseY > bankPan.getBottomInfoBoxY()
-					&& mouseX < (bankPan.getBottomInfoBoxX()
-							+ bankPan.getBottomInfoBoxWidth())
-					&& mouseY < (bankPan.getBottomInfoBoxY()
-							+ bankPan.getBottomInfoBoxHeight()))
-				clickBankItemMove();
-			else if (bankPan.getTabButtonPanel().isMouseOver())
-				mouseOverBankPageText = bankPan.switchBankTab(bankItemCount, mouseOverBankPageText);
-			else if (!bankPan.getFrame().isMouseOver()
-					|| (bankPan.getFrame().getCloseButton().isMouseOver()))
-			{
-				formatPacket(48, -1, -1);
-				return;
-			}
-		}
-		bankPan.getFrame().drawComponent();
-		bankPan.drawBankTabs(bankItemCount, mouseOverBankPageText);
-		bankPan.drawBankInfo();
-		InGameGrid bankGrid = bankPan.getBankGrid();
-		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
-		bankGrid.drawStorableGrid(self.getBankItems(), itemIdx, bankItemCount, bankPan.getBankCountTextColor(), selectedBankItem, self.getInventoryItems(), inventoryCount, 0x00ffff);
-		bankPan.drawBankDepWithPanel(self.getBankItems(), selectedBankItem, self.getInventoryItems(), inventoryCount);
-	}
-
-	/**
-	 * Draws a box on the screen with text in it.
-	 * @param x X-position.
-	 * @param y Y-position.
-	 * @param width Box width.
-	 * @param height Box height.
-	 * @param color Box color, e.g. 0xffffff.
-	 * @param border true if a border should be drawn.
-	 * @param borderThick Border thickness.
-	 * @param borderColor Border Color, e.g. 0xffffff.
-	 * @param textType The type of text. Defined in GameWindow.loadFonts()
-	 * @param textColor Text color, e.g. 0xffffff.
-	 * @param text The text to be displayed in the box.
-	 */
-	public final void drawInfoBox(
-			int x, int y, int width, int height, int color,
-			boolean border, int borderThick, int borderColor,
-			int textType, int textColor, String text)
-	{
-		gameGraphics.drawBox(x, y, width, height, color);
-		gameGraphics.drawBoxEdge(x, y, width, height, borderColor);
-		gameGraphics.drawText(text, x+width/2, y+height/2 + 6,
-				textType, textColor);
-	}
-
-	/**
-	 * Displays a message that the player is logging out.
-	 */
-	private final void drawLoggingOutBox()
-	{
-		gameGraphics.drawBox(windowHalfWidth - 130,
-				windowHalfHeight - 30, 260, 60, 0);
-		gameGraphics.drawBoxEdge(windowHalfWidth - 130,
-				windowHalfHeight - 30, 260, 60, 0xffffff);
-		gameGraphics.drawText("Logging out...", windowHalfWidth,
-				windowHalfHeight + 6, 5, 0xffffff);
-	}
-
-	private final void drawChatMessageTabs()
-	{
-		// blue bar at the botom
-		Sprite sprite;
-		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
-		int nSprites = windowWidth / sprite.getWidth();
-		int currentOffset = 0;
-		for (int i=0; i < nSprites; i++)
-		{
-			gameGraphics.drawPicture(currentOffset, windowHeight, SPRITE_MEDIA_START + 22);
-			currentOffset += sprite.getWidth();
-		}
-		if (windowWidth-nSprites*sprite.getWidth() != 0)
-		{
-			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), windowHeight,
-					windowWidth-nSprites*sprite.getWidth(),
-					sprite.getHeight(), SPRITE_MEDIA_START + 22);
-		}
-		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 23];
-		gameGraphics.drawPicture(0, windowHeight - 4, SPRITE_MEDIA_START + 23);
-
-		int i = GameImage.convertRGBToLong(200, 200, 255);
-		if (messagesTab == 0)
-			i = GameImage.convertRGBToLong(255, 200, 50);
-		if (anInt952 % 30 > 15)
-			i = GameImage.convertRGBToLong(255, 50, 50);
-		int buttonWidth = 82;
-		int j = 14 + buttonWidth/2;
-		gameGraphics.drawText("All messages", j, windowHeight + 6, 0, i);
-		i = GameImage.convertRGBToLong(200, 200, 255);
-		if (messagesTab == 1)
-			i = GameImage.convertRGBToLong(255, 200, 50);
-		if (anInt953 % 30 > 15)
-			i = GameImage.convertRGBToLong(255, 50, 50);
-		j += 99;
-		gameGraphics.drawText("Chat history", j, windowHeight + 6, 0, i);
-		i = GameImage.convertRGBToLong(200, 200, 255);
-		if (messagesTab == 2)
-			i = GameImage.convertRGBToLong(255, 200, 50);
-		if (anInt954 % 30 > 15)
-			i = GameImage.convertRGBToLong(255, 50, 50);
-		j += 101;
-		gameGraphics.drawText("Quest history", j, windowHeight + 6, 0, i);
-		i = GameImage.convertRGBToLong(200, 200, 255);
-		if (messagesTab == 3)
-			i = GameImage.convertRGBToLong(255, 200, 50);
-		if (anInt955 % 30 > 15)
-			i = GameImage.convertRGBToLong(255, 50, 50);
-		j += 101;
-		gameGraphics.drawText("Private history", j, windowHeight + 6, 0, i);
-		j += 101;
-		gameGraphics.drawText("Report abuse", j, windowHeight + 6, 0, 0xffffff);
-	}
-
-	/**
-	 * draw the sprites for character design menu
-	 */
-	private final void method62()
-	{
-		gameGraphics.lowDef = false;
-		gameGraphics.resetImagePixels(0);
-		chrDesignMenu.drawMenu(true);
-		int i = windowHalfWidth - 116;
-		int j = this.windowHalfHeight - 117;
-		i += 116;
-		j -= 25;
-		gameGraphics.spriteClip3(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber(), chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber(), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber(), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip3(i - 32, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 6, chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 6, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 6, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip3((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 12, chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 12, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 12, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
-
-		// blue bar at the botom
-		Sprite sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
-		int nSprites = windowWidth / sprite.getWidth();
-		int currentOffset = 0;
-		for (int n=0; n < nSprites; n++)
-		{
-			gameGraphics.drawPicture(currentOffset, windowHeight, SPRITE_MEDIA_START + 22);
-			currentOffset += sprite.getWidth();
-		}
-		if (windowWidth-nSprites*sprite.getWidth() != 0)
-		{
-			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), windowHeight,
-					windowWidth-nSprites*sprite.getWidth(),
-					sprite.getHeight(), SPRITE_MEDIA_START + 22);
-		}
-		gameGraphics.drawPicture(0, windowHeight, SPRITE_MEDIA_START + 22);
-		gameGraphics.drawImage(aGraphics936, 0, 0);
-	}
-
-	private final Mob makePlayer(int mobArrayIndex, double x, double y, int sprite) {
-		
-		if (mobArray.get(mobArrayIndex) == null) {
-			mobArray.set(mobArrayIndex, new Mob());
-			mobArray.get(mobArrayIndex).serverIndex = mobArrayIndex;
-			mobArray.get(mobArrayIndex).mobIntUnknown = 0;
-		}
-		Mob mob = mobArray.get(mobArrayIndex);
-		boolean flag = false;
-		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
-			if (itr.next().serverIndex != mobArrayIndex)
-				continue;
-			flag = true;
-			break;
-		}
-
-		if (flag) {
-			mob.nextSprite = sprite;
-			int j1 = mob.waypointCurrent;
-			if (x != mob.waypointsX[j1] || y != mob.waypointsY[j1]) {
-				mob.waypointCurrent = j1 = (j1 + 1) % 10;
-				mob.waypointsX[j1] = x;
-				mob.waypointsY[j1] = y;
-			}
-		} else {
-			mob.serverIndex = mobArrayIndex;
-			mob.waypointEndSprite = 0;
-			mob.waypointCurrent = 0;
-			mob.waypointsX[0] = mob.currentX = x;
-			mob.waypointsY[0] = mob.currentY = y;
-			mob.nextSprite = mob.currentSprite = sprite;
-			mob.stepCount = 0;
-		}
-		playerArray.add(mob);
-		return mob;
-	}
-
-	private final void drawWelcomeBox()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		int boxHeight = 65;
-		if (!lastLoggedInAddress.equals("0.0.0.0"))
-			boxHeight += 30;
-		if (subscriptionLeftDays > 0)
-			boxHeight += 15;
-		int j = windowHalfHeight - boxHeight / 2;
-		gameGraphics.drawBox(windowHalfWidth - 200, windowHalfHeight - boxHeight / 2, 400, boxHeight, 0);
-		gameGraphics.drawBoxEdge(windowHalfWidth - 200, windowHalfHeight - boxHeight / 2, 400, boxHeight, 0xffffff);
-		j += 20;
-		gameGraphics.drawText("Welcome to TestServer " + currentUser, windowHalfWidth, j, 4, 0xffff00);
-		j += 30;
-		String s;
-		if (lastLoggedInDays == 0)
-			s = "earlier today";
-		else if (lastLoggedInDays == 1)
-			s = "yesterday";
-		else
-			s = lastLoggedInDays + " days ago";
-		if (!lastLoggedInAddress.equals("0.0.0.0")) {
-			gameGraphics.drawText("You last logged in " + s, windowHalfWidth, j, 1, 0xffffff);
-			j += 15;
-			gameGraphics.drawText("from: " + lastLoggedInAddress, windowHalfWidth, j, 1, 0xffffff);
-			j += 15;
-		}
-		if (subscriptionLeftDays > 0) {
-			gameGraphics.drawText("Subscription Left: " + subscriptionLeftDays + " days", windowHalfWidth, j, 1, 0xffffff);
-			j += 15;
-		}
-		int l = 0xffffff;
-		if (mouseY > j - 12 && mouseY <= j
-				&& mouseX > windowHalfWidth - 150
-				&& mouseX < windowHalfWidth + 150)
-			l = 0xff0000;
-		gameGraphics.drawText("Click here to close window", windowHalfWidth, j, 1, l);
-		if (mv.leftDown()) {
-			if (l == 0xff0000)
-				showWelcomeBox = false;
-			if ((mouseX < windowHalfWidth - 170
-					|| mouseX > windowHalfWidth + 170)
-					&& (mouseY < windowHalfHeight - boxHeight / 2
-							|| mouseY > windowHalfHeight + boxHeight / 2))
-				showWelcomeBox = false;
-		}
-		mv.releaseButton();
-	}
-
-	private final void logout() {
-		if (!loggedIn) {
-			return;
-		}
-		if (lastWalkTimeout > 450) {
-			displayMessage("@cya@You can't logout during combat!", 3, 0);
-			return;
-		}
-		if (lastWalkTimeout > 0) {
-			displayMessage("@cya@You can't logout for 10 seconds after combat", 3, 0);
-			return;
-		}
-		super.streamClass.createPacket(129);
-		super.streamClass.writePktSize();
-		logoutTimeout = 1000;
-	}
-
-	private void drawStatsTab()
-	{
-		int i1 = plrPan.getY() + plrPan.getTabHeight() + plrPan.getHeaderHeight()/*13*/;
-		int k1 = -1;
-		int yOffset = -5;
-		gameGraphics.drawString("Skills", plrPan.getX() + 5, i1 + yOffset,
-				3, 0xffff00);
-		gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%",
-				(plrPan.getX() + plrPan.getWidth() / 2) + 5, i1 + yOffset,
-				1, 0xffffff);
-		i1 += plrPan.getStatButtonPanel().getHeight() + plrPan.getHeaderHeight();
-		int i = 0;
-		for (InGameButton button : plrPan.getStatButtonPanel().getButtons())
-		{
-			gameGraphics.drawString(button.getButtonText() + ":@yel@"
-					+ playerStatCurrent[i] + "/" + playerStatBase[i],
-					button.getX() + 5, button.getY() + 10, 1,
-					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			if (button.isMouseOver())
-				k1 = plrPan.getCorrectedSkillIndex(i);
-			++i;
-		}
-
-		gameGraphics.drawString("Equipment Status", plrPan.getX() + 5,
-				i1 + yOffset, 3, 0xffff00);
-
-		i = 0;
-		for (InGameButton button : plrPan.getEquipmentButtonPanel().getButtons())
-		{
-			gameGraphics.drawString(button.getButtonText()
-					+ ":@yel@" + equipmentStatus[i],
-					button.getX() + 5, button.getY() + 10, 1,
-					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			++i;
-		}
-		i1 += plrPan.getEquipmentButtonPanel().getHeight() + 1;
-
-		gameGraphics.drawLineX(plrPan.getX(), i1 /*- 15*/, plrPan.getWidth(),
-				plrPan.getLineColor());
-		i1 += 11;
-		if (k1 != -1) {
-			gameGraphics.drawString(skillArrayLong[k1] + " skill",
-					plrPan.getX() + 5, i1, 1, 0xffff00);
-			i1 += 12;
-			int k2 = experienceArray[0];
-			for (int i3 = 0; i3 < 98; i3++)
-				if (playerStatExperience[k1] >= experienceArray[i3])
-					k2 = experienceArray[i3 + 1];
-
-			gameGraphics.drawString("Total xp: " + playerStatExperience[k1],
-					plrPan.getX() + 5, i1, 1, 0xffffff);
-			i1 += 12;
-			gameGraphics.drawString("Next level at: " + k2, plrPan.getX() + 5,
-					i1, 1, 0xffffff);
-			i1 += 12;
-			gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]),
-					plrPan.getX() + 5, i1, 1, 0xffffff);
-		} else {
-			gameGraphics.drawString("Overall levels", plrPan.getX() + 5, i1, 1, 0xffff00);
-			i1 += 12;
-			int skillTotal = 0;
-			long expTotal = 0;
-			for (int j3 = 0; j3 < 18; j3++) {
-				skillTotal += playerStatBase[j3];
-				expTotal += playerStatExperience[j3];
-			}
-			gameGraphics.drawString("Skill total: " + skillTotal, plrPan.getX() + 5, i1, 1, 0xffffff);
-			i1 += 12;
-			gameGraphics.drawString("Total xp: " + expTotal, plrPan.getX() + 5, i1, 1, 0xffffff);
-			i1 += 12;
-			gameGraphics.drawString("Combat level: " + self.me.level, plrPan.getX() + 5, i1, 1, 0xffffff);
-		}
-	}
-
-	private void drawQuestsTab()
-	{
-		/* TODO: if player completed quest; set 0x00ff00,
-		 * if player started quest, set 0xffff00, else set 0xff0000
-		 */
-		int i1 = plrPan.getY() + plrPan.getTabHeight() + 12;
-		gameGraphics.drawString("Quest-list (green=completed)",
-				plrPan.getX() + 5, i1, 2, 0xffffff);
-		questMenu.resetListTextCount(questMenuHandle);
-		i1 = 0;
-		String s1;
-		for (int idx = 1; idx < quests.length; idx++)
-		{
-			if (true)
-			{ // quest complete
-				s1 = "@gre@";
-			}/*
-        	else if (true || false)
-        	{ // quest started
-        		s1 = "@yel@";
-        	}
-        	else
-        	{ // quest not started
-        		s1 = "@red@";
-        	}*/
-			questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
-		}
-		questMenu.drawMenu(true);
-	}
-
-	private void drawInfoPanel()
-	{
-		int questTabColor = (anInt826 == 1) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
-		int statsTabColor = (anInt826 == 0) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
-		gameGraphics.drawBoxAlpha(plrPan.getX(), plrPan.getY(),
-				plrPan.getWidth() / 2, plrPan.getTabHeight(),
-				statsTabColor, plrPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(plrPan.getX() + plrPan.getWidth() / 2,
-				plrPan.getY(), plrPan.getWidth() / 2,
-				plrPan.getTabHeight(), questTabColor, plrPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(plrPan.getX(),
-				plrPan.getY() + plrPan.getTabHeight(), plrPan.getWidth(),
-				plrPan.getHeight() - plrPan.getTabHeight(),
-				plrPan.getBGColor(), plrPan.getBGAlpha());
-
-		gameGraphics.drawLineX(plrPan.getX(), plrPan.getY(),
-				plrPan.getWidth(), plrPan.getLineColor());
-		gameGraphics.drawLineY(plrPan.getX(),
-				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
-		gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth(),
-				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
-
-		gameGraphics.drawLineX(plrPan.getX(),
-				plrPan.getY() + plrPan.getTabHeight(),
-				plrPan.getWidth(), plrPan.getLineColor());
-		gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth() / 2,
-				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
-		InGameButton button = plrPan.getStatButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-		button = plrPan.getQuestButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-	}
-
-	private final void drawPlayerInfoMenu(boolean flag)
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		plrPan.getFrame().drawComponent();
-		drawInfoPanel();
-		if (anInt826 == 0)
-			drawStatsTab();
-		if (anInt826 == 1)
-			drawQuestsTab();
-		if (!flag)
-		{
-			return;
-		}
-		if (plrPan.isMouseOver())
-		{
-			if (mouseY <= plrPan.getY() + plrPan.getTabHeight() && mv.leftDown())
-			{
-				mv.releaseButton();
-				if (mouseX < plrPan.getX() + plrPan.getWidth()/2)
-				{
-					anInt826 = 0;
-					return;
-				}
-				if (mouseX > plrPan.getX() + plrPan.getWidth()/2)
-				{
-					anInt826 = 1;
-				}
-			}
-			else if (mouseY > plrPan.getY() + plrPan.getTabHeight())
-			{
-				if (anInt826 == 0)
-				{
-					//handle clicking on skills and combat stats
-				}
-				else if (anInt826 == 1)
-				{
-					/* TODO: Find out why the scroll bar does not work for quest menu
-					 * but it does for magic menu. I fixed it now by increasing the
-					 * visible scroll area to twice the width of the scroll bar.
-					 */ 
-					questMenu.updateActions();
-					mv.releaseButton();
-				}
-				mv.releaseButton();
-			}
-		}
-		else if (plrPan.getFrame().getCloseButton().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				om.close(OpenMenu.STATS);
-				mv.releaseButton();
-			}
-		}
-		else if (plrPan.getFrame().isMouseOver())
-		{ // click inside info panel but not on the content or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
-	}
-	/*
-    private final void drawPlayerInfoMenu(boolean flag) {
-        int i = ((GameImage) (gameGraphics)).menuDefaultWidth - 199;
-        int j = 36;
-        gameGraphics.drawPicture(i - 49, 3, SPRITE_MEDIA_START + 3);
-        char c = '\304';
-        char c1 = '\u0113';
-        int l;
-        int k = l = GameImage.convertRGBToLong(160, 160, 160);
-        if (anInt826 == 0)
-            k = GameImage.convertRGBToLong(220, 220, 220);
-        else
-            l = GameImage.convertRGBToLong(220, 220, 220);
-        gameGraphics.drawBoxAlpha(i, j, c / 2, 24, k, 128);
-        gameGraphics.drawBoxAlpha(i + c / 2, j, c / 2, 24, l, 128);
-        gameGraphics.drawBoxAlpha(i, j + 24, c, c1 - 24, GameImage.convertRGBToLong(220, 220, 220), 128);
-        gameGraphics.drawLineX(i, j + 24, c, 0);
-        gameGraphics.drawLineY(i + c / 2, j, 24, 0);
-        gameGraphics.drawText("Stats", i + c / 4, j + 16, 4, 0);
-        gameGraphics.drawText("Info", i + c / 4 + c / 2, j + 16, 4, 0);
-        if (anInt826 == 0) {
-            int i1 = 72;
-            int k1 = -1;
-            gameGraphics.drawString("Skills", i + 5, i1, 3, 0xffff00);
-            i1 += 13;
-            gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%", (i + c / 2) - 5, i1 - 13, 1, 0xffffff);
-            for (int l1 = 0; l1 < 9; l1++) {
-                int i2 = 0xffffff;
-                if (super.mouseX > i + 3 && super.mouseY >= i1 - 11 && super.mouseY < i1 + 2 && super.mouseX < i + 90) {
-                    i2 = 0xff0000;
-                    k1 = l1;
-                }
-                gameGraphics.drawString(skillArray[l1] + ":@yel@" + playerStatCurrent[l1] + "/" + playerStatBase[l1], i + 5, i1, 1, i2);
-                i2 = 0xffffff;
-                if (super.mouseX >= i + 90 && super.mouseY >= i1 - 11 && super.mouseY < i1 + 2 && super.mouseX < i + 196) {
-                    i2 = 0xff0000;
-                    k1 = l1 + 9;
-                }
-                gameGraphics.drawString(skillArray[l1 + 9] + ":@yel@" + playerStatCurrent[l1 + 9] + "/" + playerStatBase[l1 + 9], (i + c / 2) - 5, i1, 1, i2);
-                i1 += 13;
-            }
-
-            i1 += 8;
-            gameGraphics.drawString("Equipment Status", i + 5, i1, 3, 0xffff00);
-            i1 += 12;
-            for (int j2 = 0; j2 < 3; j2++) {
-                gameGraphics.drawString(equipmentStatusName[j2] + ":@yel@" + equipmentStatus[j2], i + 5, i1, 1, 0xffffff);
-                gameGraphics.drawString(equipmentStatusName[j2 + 3] + ":@yel@" + equipmentStatus[j2 + 3], i + c / 2 + 25, i1, 1, 0xffffff);
-                i1 += 13;
-            }
-
-            i1 += 6;
-            gameGraphics.drawLineX(i, i1 - 15, c, 0);
-            if (k1 != -1) {
-                gameGraphics.drawString(skillArrayLong[k1] + " skill", i + 5, i1, 1, 0xffff00);
-                i1 += 12;
-                int k2 = experienceArray[0];
-                for (int i3 = 0; i3 < 98; i3++)
-                    if (playerStatExperience[k1] >= experienceArray[i3])
-                        k2 = experienceArray[i3 + 1];
-
-                gameGraphics.drawString("Total xp: " + playerStatExperience[k1], i + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Next level at: " + k2, i + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]), i + 5, i1, 1, 0xffffff);
-            } else {
-                gameGraphics.drawString("Overall levels", i + 5, i1, 1, 0xffff00);
-                i1 += 12;
-                int skillTotal = 0;
-                long expTotal = 0;
-                for (int j3 = 0; j3 < 18; j3++) {
-                    skillTotal += playerStatBase[j3];
-                    expTotal += playerStatExperience[j3];
-                }
-                gameGraphics.drawString("Skill total: " + skillTotal, i + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Total xp: " + expTotal, i + 5, i1, 1, 0xffffff);
-                i1 += 12;
-                gameGraphics.drawString("Combat level: " + self.me.level, i + 5, i1, 1, 0xffffff);
-            }
-        }
-        if (anInt826 == 1) {
-            int i1 = 72; // Player Info
-            gameGraphics.drawString("Player Info", i + 5, i1, 3, 0xffff00);
-            i1 += 13;
-            gameGraphics.drawString("Username:@yel@ " + self.me.name, i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Coords:@yel@ (" + (sectionX + areaX) + ", " + (sectionY + areaY) + ")", i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Server Index:@yel@ " + self.me.serverIndex, i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Exp Gained:@yel@ " + (expGained > 1000 ? (expGained / 1000) + "k" : expGained), i + 5, i1, 1, 0xffffff);
-            if (!lastLoggedInAddress.equals("0.0.0.0")) {
-                i1 += 13;
-                gameGraphics.drawString("Last IP:@yel@ " + lastLoggedInAddress, i + 5, i1, 1, 0xffffff);
-            }
-            i1 += 21; // Client Info
-            gameGraphics.drawString("Client Info", i + 5, i1, 3, 0xffff00);
-            i1 += 13;
-            gameGraphics.drawString("Hostname:@yel@ " + localhost, i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Uptime:@yel@ " + timeSince(startTime), i + 5, i1, 1, 0xffffff);
-            i1 += 21; // Server Info
-            gameGraphics.drawString("Server Info", i + 5, i1, 3, 0xffff00);
-            i1 += 13;
-            gameGraphics.drawString("Hostname:@yel@ " + Config.SERVER_IP, i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Uptime:@yel@ " + timeSince(serverStartTime), i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-            gameGraphics.drawString("Location:@yel@ " + serverLocation, i + 5, i1, 1, 0xffffff);
-            i1 += 13;
-        }
-        if (!flag) {
-            return;
-        }
-        i = super.mouseX - (((GameImage) (gameGraphics)).menuDefaultWidth - 199);
-        j = super.mouseY - 36;
-        if (i >= 0 && j >= 0 && i < c && j < c1) {
-            if (j <= 24 && mouseButtonClick == 1) {
-                if (i < 98) {
-                    anInt826 = 0;
-                    return;
-                }
-                if (i > 98) {
-                    anInt826 = 1;
-                }
-            }
-        }
-    }
-	 */
-	private final void drawWildernessWarningBox()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		int i = 97;
-		gameGraphics.drawBox(86, 77, 340, 180, 0);
-		gameGraphics.drawBoxEdge(86, 77, 340, 180, 0xffffff);
-		gameGraphics.drawText("Warning! Proceed with caution", 256, i, 4, 0xff0000);
-		i += 26;
-		gameGraphics.drawText("If you go much further north you will enter the", 256, i, 1, 0xffffff);
-		i += 13;
-		gameGraphics.drawText("wilderness. This a very dangerous area where", 256, i, 1, 0xffffff);
-		i += 13;
-		gameGraphics.drawText("other players can attack you!", 256, i, 1, 0xffffff);
-		i += 22;
-		gameGraphics.drawText("The further north you go the more dangerous it", 256, i, 1, 0xffffff);
-		i += 13;
-		gameGraphics.drawText("becomes, but the more treasure you will find.", 256, i, 1, 0xffffff);
-		i += 22;
-		gameGraphics.drawText("In the wilderness an indicator at the bottom-right", 256, i, 1, 0xffffff);
-		i += 13;
-		gameGraphics.drawText("of the screen will show the current level of danger", 256, i, 1, 0xffffff);
-		i += 22;
-		int j = 0xffffff;
-		if (mouseY > i - 12 && mouseY <= i
-				&& mouseX > 181 && mouseX < 331)
-			j = 0xff0000;
-		gameGraphics.drawText("Click here to close window", 256, i, 1, j);
-		if (mv.buttonDown()) {
-			if (mouseY > i - 12 && mouseY <= i
-					&& mouseX > 181 && mouseX < 331)
-				wildernessType = 2;
-			if (mouseX < 86 || mouseX > 426 || mouseY < 77 || mouseY > 257)
-				wildernessType = 2;
-			mv.releaseButton();
-		}
-	}
-
-	final void drawItems(int i, int j, int k, int l, int id, int j1, int k1) {
-		int l1 = EntityHandler.getItemDef(id).getSprite() + SPRITE_ITEM_START;
-		int i2 = EntityHandler.getItemDef(id).getPictureMask();
-		gameGraphics.spriteClip4(i, j, k, l, l1, i2, 0, 0, false);
-	}
-
+	@Override
 	protected final void handleServerMessage(String s) {
 		if (s.startsWith("@bor@")) {
 			displayMessage(s, 4, 0);
@@ -2047,374 +763,7 @@ public class mudclient extends GameWindowMiddleMan
 		displayMessage(s, 3, 0);
 	}
 
-	private final void checkMouseOverMenus()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		if (mv.leftDown()
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{
-			mv.releaseButton();
-			switch((mouseX - gameWindowMenuBarX) / gameWindowMenuBarItemWidth)
-			{
-			case 5: om.toggle(OpenMenu.INVENTORY);
-				break;
-			case 3: om.toggle(OpenMenu.STATS);
-				break;
-			case 2: om.toggle(OpenMenu.SPELLS);
-				break;
-			case 1: om.toggle(OpenMenu.FRIENDS);
-				break;
-			case 0: om.toggle(OpenMenu.SETTINGS);
-				break;
-			}
-		}
-		/*
-		if (mv.leftDown()
-				&& mouseX >= gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // iventory
-			om.toggle(OpenMenu.INVENTORY);
-			mv.releaseButton();
-		}
-		if (mouseX >= gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // map
-			mv.releaseButton();
-		}
-		if (mv.leftDown()
-				&& mouseX >= gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // stats
-			om.toggle(OpenMenu.STATS);
-			mv.releaseButton();
-		}
-		if (mv.leftDown()
-				&& mouseX >= gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // spells
-			om.toggle(OpenMenu.SPELLS);
-			mv.releaseButton();
-		}
-		if (mv.leftDown()
-				&& mouseX >= gameWindowMenuBarX + gameWindowMenuBarItemWidth
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // friends
-			om.toggle(OpenMenu.FRIENDS);
-			mv.releaseButton();
-		}
-		if (mv.leftDown()
-				&& mouseX >= gameWindowMenuBarX
-				&& mouseY >= gameWindowMenuBarY
-				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarItemWidth
-				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
-		{ // settings when some menu is open
-			om.toggle(OpenMenu.SETTINGS);
-			mv.releaseButton();
-		}
-		*/
-	}
-
-	private final void menuClick(MenuRightClick clickedItem)
-	{
-		int actionX = (int) clickedItem.actionX;
-		int actionY = (int) clickedItem.actionY;
-		int actionType = clickedItem.actionType;
-		int actionVariable = clickedItem.actionVariable;
-		int actionVariable2 = clickedItem.actionVariable2;
-		int currentMenuID = clickedItem.id;
-		if (currentMenuID == 200) {
-			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
-			super.streamClass.createPacket(104);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 210) {
-			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
-			super.streamClass.createPacket(34);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 220) {
-			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
-			super.streamClass.createPacket(245);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 3200)
-			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
-		if (currentMenuID == 300) {
-			walkToAction(actionX, actionY, actionType);
-			super.streamClass.createPacket(67);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.addByte(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 310) {
-			walkToAction(actionX, actionY, actionType);
-			super.streamClass.createPacket(36);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.addByte(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 320) {
-			walkToAction(actionX, actionY, actionType);
-			super.streamClass.createPacket(126);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.addByte(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 2300) {
-			walkToAction(actionX, actionY, actionType);
-			super.streamClass.createPacket(235);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.addByte(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 3300)
-			displayMessage(EntityHandler.getDoorDef(actionType).getDescription(), 3, 0);
-		if (currentMenuID == 400) {
-			walkToObject(actionX, actionY, actionType, actionVariable);
-			super.streamClass.createPacket(17);
-			super.streamClass.add2ByteInt(actionVariable2);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 410) {
-			walkToObject(actionX, actionY, actionType, actionVariable);
-			super.streamClass.createPacket(94);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.add2ByteInt(actionVariable2);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 420) {
-			walkToObject(actionX, actionY, actionType, actionVariable);
-			super.streamClass.createPacket(51);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 2400) {
-			walkToObject(actionX, actionY, actionType, actionVariable);
-			super.streamClass.createPacket(40);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 3400)
-			displayMessage(EntityHandler.getObjectDef(actionType).getDescription(), 3, 0);
-		if (currentMenuID == 600) {
-			super.streamClass.createPacket(49);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 610) {
-			super.streamClass.createPacket(27);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 620) {
-			super.streamClass.createPacket(92);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 630) {
-			super.streamClass.createPacket(181);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 640) {
-			super.streamClass.createPacket(89);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 650)
-		{ /* selecting item it seems */
-			selItem = new SelectedItem(actionType,
-					self.getInventoryItems().get(actionType));
-		}
-		if (currentMenuID == 660)
-		{ /* dropping an item */
-			super.streamClass.createPacket(147);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selItem = null;
-			displayMessage("Dropping " + self.getInventoryItems().get(actionType).getName(), 4, 0);
-		}
-		if (currentMenuID == 3600)
-		{ /* examine */
-			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
-		}
-		if (currentMenuID == 700) {
-			walkTo(sectionX, sectionY, actionX, actionX, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(71);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 710) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(142);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 720) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(177);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 725) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(74);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 715 || currentMenuID == 2715) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(73);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 3700)
-			displayMessage(EntityHandler.getNpcDef(actionType).getDescription(), 3, 0);
-		if (currentMenuID == 800) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(55);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 810) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(16);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionVariable);
-			super.streamClass.writePktSize();
-			selItem = null;
-		}
-		if (currentMenuID == 805 || currentMenuID == 2805) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(57);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 2806) {
-			super.streamClass.createPacket(222);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 2810) {
-			super.streamClass.createPacket(166);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 2820) {
-			super.streamClass.createPacket(68);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-		}
-		if (currentMenuID == 900) {
-			walkTo(sectionX, sectionY, actionX, actionY, true);
-			mapClickX = -1;
-			mapClickX = -1;
-			super.streamClass.createPacket(232);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.add2ByteInt(actionX + areaX);
-			super.streamClass.add2ByteInt(actionY + areaY);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 920) {
-			walkTo(sectionX, sectionY, actionX, actionY, false);
-			mapClickX = -1;
-			mapClickX = -1;
-			if (actionPictureType == -24)
-				actionPictureType = 24;
-		}
-		if (currentMenuID == 1000) {
-			super.streamClass.createPacket(206);
-			super.streamClass.add2ByteInt(actionType);
-			super.streamClass.writePktSize();
-			selSpell = null;
-		}
-		if (currentMenuID == 4000) {
-			selItem = null;
-			selSpell = null;
-		}
-	}
-
-	final void method71(int i, int j, int k, int l, int i1, int j1, int k1) {
-		int l1 = anIntArray782[i1];
-		int i2 = anIntArray923[i1];
-		if (l1 == 0) {
-			int j2 = 255 + i2 * 5 * 256;
-			gameGraphics.drawCircle(i + k / 2, j + l / 2, 20 + i2 * 2, j2, 255 - i2 * 5);
-		}
-		if (l1 == 1) {
-			int k2 = 0xff0000 + i2 * 5 * 256;
-			gameGraphics.drawCircle(i + k / 2, j + l / 2, 10 + i2, k2, 255 - i2 * 5);
-		}
-	}
-
+	@Override
 	protected final void method2() {
 		if (memoryError)
 			return;
@@ -2449,416 +798,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final Model makeModel(int x, int y, int k, int l, int i1) {
-		int modelX = x;
-		int modelY = y;
-		int modelX1 = x;
-		int modelX2 = y;
-		int texture1 = EntityHandler.getDoorDef(l).getTexture1();
-		int texture2 = EntityHandler.getDoorDef(l).getTexture2();
-		double height = EntityHandler.getDoorDef(l).getHeight();
-		Model model = new Model(4, 1);
-		if (k == 0)
-			modelX1 = x + 1;
-		if (k == 1)
-			modelX2 = y + 1;
-		if (k == 2) {
-			modelX = x + 1;
-			modelX2 = y + 1;
-		}
-		if (k == 3) {
-			modelX1 = x + 1;
-			modelX2 = y + 1;
-		}
-		int p0 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
-		int p1 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - height, modelY);
-		int p2 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - height, modelX2);
-		int p3 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
-		int surface[] = {
-				p0, p1, p2, p3
-		};
-		model.addSurface(4, surface, texture1, texture2);
-		model.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
-		if (x >= 0 && y >= 0
-				&& x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-				&& y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
-		{
-			gameCamera.addModel(model);
-		}
-		model.index = i1 + 10000;
-		return model;
-	}
-
-	private final void resetLoginVars() {
-		loggedIn = false;
-		//loginScreenNumber = 0; // menuwelcome
-		loginScreenNumber = 2;
-		currentUser = "";
-		currentPass = "";
-		playerArray.clear();
-		npcArray.clear();
-	}
-
-	private static final String method74(long i) {
-		String s = String.valueOf(i);
-		for (int j = s.length() - 3; j > 0; j -= 3)
-			s = s.substring(0, j) + "," + s.substring(j);
-
-		if (s.length() > 8)
-			s = "@gre@" + s.substring(0, s.length() - 8) + " million @whi@(" + s + ")";
-		else if (s.length() > 4)
-			s = "@cya@" + s.substring(0, s.length() - 4) + "K @whi@(" + s + ")";
-		return s;
-	}
-
-	private final void drawGame() {
-		long now = System.currentTimeMillis();
-		if (recording && now - lastFrame > (1000 / Config.MOVIE_FPS)) {
-			try {
-				lastFrame = now;
-				frames.add(getImage());
-			}
-			catch (Exception e) {
-			}
-		}
-		if (playerAliveTimeout != 0) {
-			gameGraphics.fadePixels();
-			gameGraphics.drawText("Oh dear! You are dead...", windowWidth / 2, windowHeight / 2, 7, 0xff0000);
-			drawChatMessageTabs();
-			gameGraphics.drawImage(aGraphics936, 0, 0);
-			return;
-		}
-		if (showCharacterLookScreen) {
-			method62();
-			return;
-		}
-		if (!engineHandle.playerIsAlive) {
-			return;
-		}
-		for (int i = 0; i < 64; i++)
-		{ // draw other height sectors
-			gameCamera.removeModel(engineHandle.roofs[sectorHeight][i]);
-			if (sectorHeight == 0) {
-				gameCamera.removeModel(engineHandle.walls[1][i]);
-				gameCamera.removeModel(engineHandle.roofs[1][i]);
-				gameCamera.removeModel(engineHandle.walls[2][i]);
-				gameCamera.removeModel(engineHandle.roofs[2][i]);
-			}
-			zoomCamera = true;
-			if (sectorHeight == 0 && (engineHandle.walkableValue[(int)self.me.currentX][(int)self.me.currentY] & EngineHandle.WALKABLE_INDOORS) == 0)
-			{
-				if (showRoof) {
-					gameCamera.addModel(engineHandle.roofs[sectorHeight][i]);
-					if (sectorHeight == 0) {
-						gameCamera.addModel(engineHandle.walls[1][i]);
-						gameCamera.addModel(engineHandle.roofs[1][i]);
-						gameCamera.addModel(engineHandle.walls[2][i]);
-						gameCamera.addModel(engineHandle.roofs[2][i]);
-					}
-				}
-				zoomCamera = false;
-			}
-		}
-
-		if (modelFireLightningSpellNumber != anInt742) {
-			anInt742 = modelFireLightningSpellNumber;
-			int j = 0;
-			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); j++)
-			{
-				GameObject gObj = itr.next();
-				if (gObj.type == 97)
-					animateObject(j, "firea" + (modelFireLightningSpellNumber + 1));
-				if (gObj.type == 274)
-					animateObject(j, "fireplacea" + (modelFireLightningSpellNumber + 1));
-				if (gObj.type == 1031)
-					animateObject(j, "lightning" + (modelFireLightningSpellNumber + 1));
-				if (gObj.type == 1036)
-					animateObject(j, "firespell" + (modelFireLightningSpellNumber + 1));
-				if (gObj.type == 1147)
-					animateObject(j, "spellcharge" + (modelFireLightningSpellNumber + 1));
-			}
-		}
-		if (modelTorchNumber != anInt743) {
-			anInt743 = modelTorchNumber;
-			int k = 0;
-			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); k++)
-			{
-				GameObject gObj = itr.next();
-				if (gObj.type == 51)
-					animateObject(k, "torcha" + (modelTorchNumber + 1));
-				if (gObj.type == 143)
-					animateObject(k, "skulltorcha" + (modelTorchNumber + 1));
-			}
-		}
-		if (modelClawSpellNumber != anInt744) {
-			anInt744 = modelClawSpellNumber;
-			int l = 0;
-			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); l++)
-			{
-				if (itr.next().type == 1142)
-					animateObject(l, "clawspell" + (modelClawSpellNumber + 1));
-			}
-		}
-		gameCamera.updateFightCount(fightCount);
-		fightCount = 0;
-		int i1 = 0;
-		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext(); i1++) {
-			Mob mob = itr.next();
-			if (mob.colourBottomType != 255) {
-				double x = mob.currentX;
-				double y = mob.currentY;
-				double z = -engineHandle.getAveragedElevation(x, y);
-				double mobWidth = 1.1328125D;
-				double mobHeight = 1.71875D;
-				int l3 = gameCamera.add2DModel(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
-				fightCount++;
-				if (mob == self.me)
-					gameCamera.setOurPlayer(l3);
-				if (mob.currentSprite == 8)
-					gameCamera.setCombat(l3, -30);
-				if (mob.currentSprite == 9)
-					gameCamera.setCombat(l3, 30);
-			}
-		}
-
-		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();) {
-			Mob player = itr.next();
-			if (player.anInt176 > 0) {
-				Mob npc = null;
-				if (player.attackingNpcIndex != -1)
-					npc = npcRecordArray.get(player.attackingNpcIndex);
-				else if (player.attackingMobIndex != -1)
-					npc = mobArray.get(player.attackingMobIndex);
-				if (npc != null) {
-					double px = player.currentX;
-					double py = player.currentY;
-					double pz = -engineHandle.getAveragedElevation(px, py) - 0.859375D;
-					double nx = npc.currentX;
-					double ny = npc.currentY;
-					double nz = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getHeight() / 2;
-					double i10 = (px * player.anInt176 + nx * (attackingInt40 - player.anInt176)) / attackingInt40;
-					double j10 = (pz * player.anInt176 + nz * (attackingInt40 - player.anInt176)) / attackingInt40;
-					double k10 = (py * player.anInt176 + ny * (attackingInt40 - player.anInt176)) / attackingInt40;
-					double mobWidth = 0.25D;
-					double mobHeight = 0.25D;
-					gameCamera.add2DModel(SPRITE_PROJECTILE_START + player.attackingCameraInt,
-							i10, j10, k10, mobWidth, mobHeight, 0);
-					fightCount++;
-				}
-			}
-		}
-
-		int l1 = 0;
-		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext(); l1++) {
-			Mob npc = itr.next();
-			double mobx = npc.currentX;
-			double moby = npc.currentY;
-			double mobz = -engineHandle.getAveragedElevation(mobx, moby);
-			double mobWidth = EntityHandler.getNpcDef(npc.type).getWidth();
-			double mobHeight = EntityHandler.getNpcDef(npc.type).getHeight();
-			int i9 = gameCamera.add2DModel(20000 + l1, mobx, mobz, moby,
-					mobWidth, mobHeight, l1 + 30000);
-			fightCount++;
-			if (npc.currentSprite == 8)
-				gameCamera.setCombat(i9, -30);
-			if (npc.currentSprite == 9)
-				gameCamera.setCombat(i9, 30);
-		}
-		for (int j2 = 0; j2 < groundItemCount; j2++) {
-			double x = groundItemX[j2] + 0.5;
-			double y = groundItemY[j2] + 0.5;
-			double mobWidth = 0.75D;
-			double mobHeight = 0.5D;
-			gameCamera.add2DModel(40000 + groundItemType[j2], x,
-					-engineHandle.getAveragedElevation(x, y) - groundItemZ[j2],
-					y, mobWidth, mobHeight, j2 + 20000);
-			fightCount++;
-		}
-
-		for (int k3 = 0; k3 < anInt892; k3++) {
-			double x = anIntArray944[k3] + 0.5;
-			double y = anIntArray757[k3] + 0.5;
-			int j9 = anIntArray782[k3];
-			double mobWidth = 1D;
-			double mobHeight = 0D;
-			if (j9 == 0)
-				mobHeight = 2D;
-			if (j9 == 1)
-				mobHeight = 0.5D;
-			gameCamera.add2DModel(50000 + k3, x, -engineHandle.getAveragedElevation(x, y),
-					y, mobWidth, mobHeight, k3 + 50000);
-			fightCount++;
-		}
-
-		gameGraphics.lowDef = false;
-		if (sectorHeight == 3)
-			gameGraphics.resetImagePixels(0);
-		else
-			gameGraphics.resetImagePixels(GameImage.BACKGROUND);
-		gameGraphics.lowDef = super.keyF1Toggle;
-		if (sectorHeight == 3)
-		{ // underground, flickering light
-			int globalLight = 40 + (int) (Math.random() * 3D);
-			int featureLight = 40 + (int) (Math.random() * 7D);
-			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
-		}
-		anInt699 = 0;
-		mobMessageCount = 0;
-		hitpoints.clear();
-		if (freeCamera)
-		{
-			handleCharacterControlBinds();
-		}
-		if (cameraAutoAngleDebug) {
-			if (configAutoCameraAngle && !zoomCamera) {
-				int lastCameraAutoAngle = cameraAutoAngle;
-				autoRotateCamera();
-				if (cameraAutoAngle != lastCameraAutoAngle) {
-					lastAutoCameraRotatePlayerX = self.me.currentX;
-					lastAutoCameraRotatePlayerY = self.me.currentY;
-				}
-			}
-			cameraZRot = cameraAutoAngle * 128;
-			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
-			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(plrX,
-					-engineHandle.getAveragedElevation(plrX, plrY),
-					plrY, cameraXRot, cameraZRot, 0,
-					15.625D, cameraZoom);
-		} else {
-			if (configAutoCameraAngle && !zoomCamera)
-				autoRotateCamera();
-			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
-			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(plrX,
-					-engineHandle.getAveragedElevation(plrX, plrY),
-					plrY, cameraXRot, cameraZRot, 0,
-					cameraHeight, cameraZoom);
-			/*
-			gameCamera.setCamera(self.me.currentX,
-					-engineHandle.getAveragedElevation(
-							self.me.currentX, self.me.currentY),
-					self.me.currentY, cameraXRot, cameraZRot, 0,
-					cameraHeight, cameraZoom);*/
-		}
-		gameCamera.finishCamera();
-		method119();
-		if (actionPictureType > 0)
-			gameGraphics.drawPicture(actionPictureX - 8, actionPictureY - 8, SPRITE_MEDIA_START + 14 + (24 - actionPictureType) / 6);
-		if (actionPictureType < 0)
-			gameGraphics.drawPicture(actionPictureX - 8, actionPictureY - 8, SPRITE_MEDIA_START + 18 + (24 + actionPictureType) / 6);
-		if (systemUpdate != 0) {
-			int i6 = systemUpdate / 50;
-			int j8 = i6 / 60;
-			i6 %= 60;
-			if (i6 < 10)
-				gameGraphics.drawText("System update in: " + j8 + ":0" + i6, 256, windowHeight - 7, 1, 0xffff00);
-			else
-				gameGraphics.drawText("System update in: " + j8 + ":" + i6, 256, windowHeight - 7, 1, 0xffff00);
-		}
-		if (!notInWilderness) {
-			int j6 = 2203 - (sectionY + wildY + areaY);
-			if (sectionX + wildX + areaX >= 2640)
-				j6 = -50;
-			if (j6 > 0) {
-				int k8 = 1 + j6 / 6;
-				int wildysignX = windowWidth - 50;
-				int wildysignY = miniMapY + miniMapHeight + 3;
-				gameGraphics.drawPicture(wildysignX, wildysignY, SPRITE_MEDIA_START + 13);
-				gameGraphics.drawText("Wilderness", wildysignX + 12, wildysignY + 36, 1, 0xffff00);
-				gameGraphics.drawText("Level: " + k8, wildysignX + 12, wildysignY + 49, 1, 0xffff00);
-				if (wildernessType == 0)
-					wildernessType = 2;
-			}
-			if (wildernessType == 0 && j6 > -10 && j6 <= 0)
-				wildernessType = 1;
-		}
-		if (messagesTab == 0)
-		{
-			gameGraphics.drawBoxAlpha(chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, 0x232323, 0xc0);
-			gameGraphics.drawBoxEdge(chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, 0x000000);
-			for (int k6 = 0; k6 < chatBoxVisRows; k6++)
-				if (messagesTimeout[k6] > 0) {
-					String s = messagesArray[k6];
-					gameGraphics.drawString(s, 7, chatBoxY + chatBoxHeight-4 - k6 * 14, 1, 0xffff00);
-				}
-
-		}
-		gameGraphics.drawBoxAlpha(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x232323, 0xc0);
-		gameGraphics.drawBoxEdge(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x000000);
-
-		gameMenu.method171(messagesHandleChatHist);
-		gameMenu.method171(messagesHandleQuestHist);
-		gameMenu.method171(messagesHandlePrivHist);
-		if (messagesTab == 1)
-			gameMenu.method170(messagesHandleChatHist);
-		else if (messagesTab == 2)
-			gameMenu.method170(messagesHandleQuestHist);
-		else if (messagesTab == 3)
-			gameMenu.method170(messagesHandlePrivHist);
-		Menu.anInt225 = 2;
-		gameMenu.drawMenu(isTyping);
-		drawMapMenu(true);
-		Menu.anInt225 = 0;
-		gameGraphics.method232(gameWindowMenuBarX, gameWindowMenuBarY,
-				SPRITE_MEDIA_START, 0x80);
-		drawGameWindowsMenus();
-		gameGraphics.drawStringShadows = false;
-		drawChatMessageTabs();
-		gameGraphics.drawImage(aGraphics936, 0, 0);
-	}
-
-	private final void drawRightClickMenu()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		if (mv.buttonDown())
-		{
-			int i = 0;
-			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
-			{
-				MenuRightClick tmp = itr.next();
-				int xMenu = MenuRightClick.menuX + 2;
-				int yMenu = MenuRightClick.menuY + 27 + i * 15;
-				if (mouseX <= xMenu - 2
-						|| mouseY <= yMenu - 12
-						|| mouseY >= yMenu + 4 
-						|| mouseX >= (xMenu - 3) + MenuRightClick.menuWidth)
-					continue;
-				menuClick(tmp);
-				break;
-			}
-			mv.releaseButton();
-			showRightClickMenu = false;
-			return;
-		}
-		if (mouseX < MenuRightClick.menuX - 10
-				|| mouseY < MenuRightClick.menuY - 10
-				|| mouseX > MenuRightClick.menuX + MenuRightClick.menuWidth + 10 
-				|| mouseY > MenuRightClick.menuY + MenuRightClick.menuHeight + 10) {
-			showRightClickMenu = false;
-			return;
-		}
-		gameGraphics.drawBoxAlpha(MenuRightClick.menuX, MenuRightClick.menuY, MenuRightClick.menuWidth, MenuRightClick.menuHeight, 0xd0d0d0, 160);
-		gameGraphics.drawString("Choose option", MenuRightClick.menuX + 2, MenuRightClick.menuY + 12, 1, 65535);
-		
-		int i = 0;
-		for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
-		{
-			MenuRightClick tmp = itr.next();
-			int xMenu = MenuRightClick.menuX + 2;
-			int yMenu = MenuRightClick.menuY + 27 + i * 15;
-			int color = 0xffffff;
-			if (mouseX > xMenu - 2
-					&& mouseY > yMenu - 12
-					&& mouseY < yMenu + 4
-					&& mouseX < (xMenu - 3) + MenuRightClick.menuWidth)
-				color = 0xffff00;
-			gameGraphics.drawString(tmp.text1 + " " + tmp.text2, xMenu, yMenu, 1, color);
-		}
-
-	}
-
+	@Override
 	protected final void resetIntVars() {
 		systemUpdate = 0;
 		//loginScreenNumber = 0; // menuwelcome
@@ -2867,83 +807,7 @@ public class mudclient extends GameWindowMiddleMan
 		logoutTimeout = 0;
 	}
 
-	private final void drawQuestionMenu()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		if (mv.buttonDown()) {
-			for (int i = 0; i < questionMenuCount; i++) {
-				if (mouseX >= gameGraphics.textWidth(questionMenuAnswer[i], 1)
-						|| mouseY <= i * 12 || mouseY >= 12 + i * 12)
-					continue;
-				super.streamClass.createPacket(154);
-				super.streamClass.addByte(i);
-				super.streamClass.writePktSize();
-				break;
-			}
-
-			mv.releaseButton();
-			showQuestionMenu = false;
-			return;
-		}
-		for (int j = 0; j < questionMenuCount; j++) {
-			int k = 65535;
-			if (mouseX < gameGraphics.textWidth(questionMenuAnswer[j], 1)
-					&& mouseY > j * 12 && mouseY < 12 + j * 12)
-				k = 0xff0000;
-			gameGraphics.drawString(questionMenuAnswer[j], 6, 12 + j * 12, 1, k);
-		}
-
-	}
-
-	private final void walkToAction(int actionX, int actionY, int actionType) {
-		if (actionType == 0) {
-			sendWalkCommand(sectionX, sectionY, actionX, actionY - 1, actionX, actionY, false, true);
-			return;
-		}
-		if (actionType == 1) {
-			sendWalkCommand(sectionX, sectionY, actionX - 1, actionY, actionX, actionY, false, true);
-			return;
-		} else {
-			sendWalkCommand(sectionX, sectionY, actionX, actionY, actionX, actionY, true, true);
-			return;
-		}
-	}
-
-	private final void garbageCollect() {
-		try {
-			if (gameGraphics != null) {
-				gameGraphics.cleanupSprites();
-				gameGraphics.imagePixelArray = null;
-				gameGraphics = null;
-			}
-			if (gameCamera != null) {
-				gameCamera.cleanupModels();
-				gameCamera = null;
-			}
-			gameDataModels = null;
-			objects = null;
-			doorModel = null;
-			mobArray = null;
-			playerArray = null;
-			npcRecordArray = null;
-			npcArray = null;
-			self.me = null;
-			if (engineHandle != null) {
-				engineHandle.aModelArray596 = null;
-				engineHandle.walls = null;
-				engineHandle.roofs = null;
-				engineHandle.aModel = null;
-				engineHandle = null;
-			}
-			System.gc();
-			return;
-		}
-		catch (Exception _ex) {
-			return;
-		}
-	}
-
+	@Override
 	protected final void loginScreenPrint(String s, String s1) {
 		if (loginScreenNumber == 1)
 		{
@@ -2956,433 +820,8 @@ public class mudclient extends GameWindowMiddleMan
 		drawLoginScreen();
 		resetCurrentTimeArray();
 	}
-	
-	private String getLevelDiffColor(int levelDiff)
-	{
-		if (levelDiff < 0)
-		{
-			if (levelDiff < -9)
-				return "@red@";
-			else if (levelDiff < -6)
-				return "@or3@";
-			else if (levelDiff < -3)
-				return "@or2@";
-			else
-				return "@or1@";
-		}
-		else if (levelDiff > 0)
-		{
-			if (levelDiff > 9)
-				return "@gre@";
-			else if (levelDiff > 6)
-				return "@gr3@";
-			else if (levelDiff > 3)
-				return "@gr2@";
-			else
-				return "@gr1@";
-		}
-		else
-			return "@yel@";
-	}
-	
-	private MenuRightClick addExamine(String tex1, String text2,
-			String adminText, int id, int actionType)
-	{
-		MenuRightClick mrc = new MenuRightClick();
-		mrc.text1 = tex1;
-		mrc.text2 = text2 + adminText;
-		mrc.id = id;
-		mrc.actionType = actionType;
-		return mrc;
-	}
-	
-	private MenuRightClick addCommand(String tex1, String text2,
-			int id, double actionX, double actionY, Integer actionType,
-			Integer actionVariable, Integer actionVariable2)
-	{
-		MenuRightClick mrc = new MenuRightClick();
-		mrc.text1 = tex1;
-		mrc.text2 = text2;
-		mrc.id = id;
-		mrc.actionX = actionX;
-		mrc.actionY = actionY;
-		if (actionType != null)
-			mrc.actionType = actionType.intValue();
-		if (actionVariable != null)
-			mrc.actionVariable = actionVariable.intValue();
-		if (actionVariable2 != null)
-			mrc.actionVariable2 = actionVariable2.intValue();
-		return mrc;
-	}
 
-	private final void drawInventoryRightClickMenu()
-	{
-		int i = 2203 - (sectionY + wildY + areaY);
-		if (sectionX + wildX + areaX >= 2640)
-			i = -50;
-		int ground = -1;
-		int k = 0;
-		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); itr.next())
-			objectRelated[k++] = false;
-
-		for (k = 0; k < doorCount;)
-			doorRelated[k++] = false;
-
-		
-		final SpellDef spellDef = selSpell != null ? selSpell.spell : null;
-
-		int nVisMdl = gameCamera.getVisibleModelCount();
-		Model models[] = gameCamera.getVisibleModels();
-		int ai[] = gameCamera.visibleModelIntArray();
-		for (int mdl = 0; mdl < nVisMdl; mdl++)
-		{
-			if (getMenuLength() > 200)
-				break;
-			int k1 = ai[mdl];
-			Model model = models[mdl];
-			if (model.entityType[k1] <= 65535
-					|| model.entityType[k1] >= 0x30d40
-					&& model.entityType[k1] <= 0x493e0)
-			{
-				if (model == gameCamera.spriteModels)
-				{ /* 2D sprites */
-					int modelIdx = model.entityType[k1] % 10000;
-					int modelType = model.entityType[k1] / 10000;
-					if (modelType == 1)
-					{ /* another player */
-						Mob otherPlr = playerArray.get(modelIdx);
-						int k3 = 0;
-						if (self.me.level > 0 && otherPlr.level > 0)
-							k3 = self.me.level - otherPlr.level;
-						String levelText = String.format("%s(level-%d)",
-								getLevelDiffColor(k3), otherPlr.level);
-						if (selSpell != null)
-						{
-							if (spellDef.getSpellType() == 1
-									|| spellDef.getSpellType() == 2)
-							{
-								MenuRightClick mrc = addCommand(
-										String.format("Cast %s on", spellDef.getName()),
-										String.format("@whi@%s %s", otherPlr.name, levelText),
-										800, otherPlr.currentX, otherPlr.currentY,
-										otherPlr.serverIndex, selSpell.id, null);
-								rightClickMenu.add(mrc);
-							}
-						}
-						else if (selItem != null)
-						{
-							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selItem.item.getName()),
-									String.format("@whi@%s %s", otherPlr.name, levelText),
-									810, otherPlr.currentX, otherPlr.currentY,
-									otherPlr.serverIndex, selItem.index, null);
-							rightClickMenu.add(mrc);
-						}
-						else
-						{
-							if (i > 0 && (otherPlr.currentY - 0.5) + wildY + areaY < 2203)
-							{
-								MenuRightClick mrc = addCommand("Attack",
-										String.format("@whi@%s %s", otherPlr.name, levelText),
-										(k3 >= 0 && k3 < 5 ? 805 : 2805),
-										otherPlr.currentX, otherPlr.currentY,
-										otherPlr.serverIndex, null, null);
-								rightClickMenu.add(mrc);
-							}
-							else
-							{
-								MenuRightClick mrc = addCommand("Duel with",
-										String.format("@whi@%s %s", otherPlr.name, levelText),
-										2806, otherPlr.currentX, otherPlr.currentY,
-										otherPlr.serverIndex, null, null);
-								rightClickMenu.add(mrc);
-							}
-							MenuRightClick mrc = addExamine("Trade with",
-									String.format("@whi@%s %s", otherPlr.name, levelText),
-									"", 2810, otherPlr.serverIndex);
-							rightClickMenu.add(mrc);
-
-							mrc = addExamine("Follow",
-									String.format("@whi@%s %s", otherPlr.name, levelText),
-									"", 2820, otherPlr.serverIndex);
-							rightClickMenu.add(mrc);
-						}
-					}
-					else if (modelType == 2)
-					{ /* item on gound */
-						ItemDef itemDef = EntityHandler.getItemDef(groundItemType[modelIdx]);
-						if (selSpell != null)
-						{
-							if (spellDef.getSpellType() == 3)
-							{
-								MenuRightClick mrc = addCommand(
-										String.format("Cast %s on", spellDef.getName()),
-										String.format("@lre@%s", itemDef.getName()),
-										200, groundItemX[modelIdx], groundItemY[modelIdx],
-										groundItemType[modelIdx], selSpell.id, null);
-								rightClickMenu.add(mrc);
-							}
-						}
-						else if (selItem != null)
-						{
-							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selItem.item.getName()),
-									String.format("@lre@%s", itemDef.getName()),
-									210, groundItemX[modelIdx], groundItemY[modelIdx],
-									groundItemType[modelIdx], selItem.index, null);
-							rightClickMenu.add(mrc);
-						}
-						else
-						{
-							MenuRightClick mrc = addCommand( "Take",
-									String.format("@lre@%s", itemDef.getName()),
-									220, groundItemX[modelIdx], groundItemY[modelIdx],
-									groundItemType[modelIdx], null, null);
-							rightClickMenu.add(mrc);
-
-							String adminText = "";
-							if (self.me.admin >= 2)
-								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
-										groundItemType[modelIdx],
-										groundItemX[modelIdx] + areaX,
-										groundItemY[modelIdx] + areaY);
-							mrc = addExamine("Examine", "@lre@" + itemDef.getName(),
-									adminText, 3200, groundItemType[modelIdx]);
-							rightClickMenu.add(mrc);
-						}
-					}
-					else if (modelType == 3)
-					{ /* NPC */
-						Mob theNPC = npcArray.get(modelIdx);
-						String s1 = "";
-						int levelDiff = -1;
-						NPCDef npcDef = EntityHandler.getNpcDef(theNPC.type);
-						if (npcDef.isAttackable())
-						{
-							int npcLevel = (npcDef.getAtt() + npcDef.getDef() + npcDef.getStr() + npcDef.getHits()) / 4;
-							int plrLevel = (playerStatBase[0] + playerStatBase[1] + playerStatBase[2] + playerStatBase[3] + 27) / 4;
-							levelDiff = plrLevel - npcLevel;
-
-							s1 = String.format("%s(level-%d)",
-									getLevelDiffColor(plrLevel - npcLevel), npcLevel);
-						}
-						if (selSpell != null)
-						{
-							if (spellDef.getSpellType() == 2)
-							{
-								MenuRightClick mrc = addCommand(
-										String.format("Cast %s on", spellDef.getName()),
-										String.format("@yel@%s", npcDef.getName()),
-										700, theNPC.currentX, theNPC.currentY,
-										theNPC.serverIndex, selSpell.id, null);
-								rightClickMenu.add(mrc);
-							}
-						}
-						else if (selItem != null)
-						{
-							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selItem.item.getName()),
-									String.format("@yel@%s", npcDef.getName()),
-									710, theNPC.currentX, theNPC.currentY,
-									theNPC.serverIndex, selItem.index, null);
-							rightClickMenu.add(mrc);
-						}
-						else
-						{
-							if (npcDef.isAttackable())
-							{
-								MenuRightClick mrc = addCommand("Attack",
-										String.format("@yel@%s %s",
-												npcDef.getName(), s1),
-										(levelDiff >= 0 ? 715 : 2715),
-										theNPC.currentX, theNPC.currentY,
-										theNPC.serverIndex, null, null);
-								rightClickMenu.add(mrc);
-							}
-							MenuRightClick mrc = addCommand("Talk-to",
-									String.format("@yel@%s",
-											npcDef.getName()),
-									720, theNPC.currentX, theNPC.currentY,
-									theNPC.serverIndex, null, null);
-							rightClickMenu.add(mrc);
-							if (!npcDef.getCommand().equals(""))
-							{
-								mrc = addCommand(npcDef.getCommand(),
-										String.format("@yel@%s",
-												npcDef.getName()),
-										725, theNPC.currentX, theNPC.currentY,
-										theNPC.serverIndex, null, null);
-								rightClickMenu.add(mrc);
-							}
-
-							String adminText = "";
-							if (self.me.admin >= 2)
-								adminText = String.format(" @or1@(%d)", theNPC.type);
-							mrc = addExamine("Examine", "@yel@" + npcDef.getName(),
-									adminText, 3700, theNPC.type);
-							rightClickMenu.add(mrc);
-						}
-					}
-				}
-				else if (model != null && model.index >= 10000)
-				{ /* Doors */
-					int j2 = model.index - 10000;
-					int i3 = doorType[j2];
-					DoorDef dDef = EntityHandler.getDoorDef(i3);
-					if (!doorRelated[j2])
-					{
-						if (selSpell != null)
-						{
-							if (spellDef.getSpellType() == 4)
-							{
-								MenuRightClick mrc = addCommand(
-										String.format("Cast %s on", spellDef.getName()),
-										String.format("@cya@%s", dDef.getName()),
-										300, doorX[j2], doorY[j2],
-										doorDirection[j2], selSpell.id, null);
-								rightClickMenu.add(mrc);
-							}
-						}
-						else if (selItem != null)
-						{
-							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selItem.item.getName()),
-									String.format("@cya@%s", dDef.getName()),
-									310, doorX[j2], doorY[j2],
-									doorDirection[j2], selItem.index, null);
-							rightClickMenu.add(mrc);
-						}
-						else
-						{
-							if (!dDef.getCommand1().equalsIgnoreCase("WalkTo"))
-							{
-								MenuRightClick mrc = addCommand(dDef.getCommand1(),
-										String.format("@cya@%s", dDef.getName()),
-										320, doorX[j2], doorY[j2],
-										doorDirection[j2], null, null);
-								rightClickMenu.add(mrc);
-							}
-							if (!dDef.getCommand2().equalsIgnoreCase("Examine"))
-							{
-								MenuRightClick mrc = addCommand(dDef.getCommand2(),
-										String.format("@cya@%s", dDef.getName()),
-										2300,  doorX[j2], doorY[j2],
-										doorDirection[j2], null, null);
-								rightClickMenu.add(mrc);
-							}
-
-							String adminText = "";
-							if (self.me.admin >= 2)
-								adminText = String.format(" @or1@(%d: %d,%d)",
-										i3, doorX[j2] + areaX, doorY[j2] + areaY);
-							MenuRightClick mrc = addExamine("Examine",
-									"@cya@" + dDef.getName(),
-									adminText, 3300, i3);
-							rightClickMenu.add(mrc);
-						}
-						doorRelated[j2] = true;
-					}
-				}
-				else if (model != null && model.index >= 0)
-				{ /* Game objects */
-					int k2 = model.index;
-					GameObject gObj = objects.get(k2);
-					//int j3 = objectType[k2];
-					GameObjectDef gobjDef = EntityHandler.getObjectDef(gObj.type);
-					if (!objectRelated[k2])
-					{
-						if (selSpell != null)
-						{
-							if (spellDef.getSpellType() == 5)
-							{
-								MenuRightClick mrc = addCommand(
-										String.format("Cast %s on", spellDef.getName()),
-										String.format("@cya@%s", gobjDef.getName()), 400,
-										gObj.x, gObj.y, gObj.id, gObj.type, selSpell.id);
-								rightClickMenu.add(mrc);
-							}
-						}
-						else if (selItem != null)
-						{
-							MenuRightClick mrc = addCommand(
-									String.format("Use %s with", selItem.item.getName()),
-									String.format("@cya@%s", gobjDef.getName()), 410,
-									gObj.x, gObj.y, gObj.id, gObj.type, selItem.index);
-							rightClickMenu.add(mrc);
-						}
-						else
-						{
-							if (!gobjDef.getCommand1().equalsIgnoreCase("WalkTo"))
-							{
-								MenuRightClick mrc = addCommand(gobjDef.getCommand1(),
-										String.format("@cya@%s", gobjDef.getName()),
-										420, gObj.x, gObj.y, gObj.id, gObj.type, null);
-								rightClickMenu.add(mrc);
-							}
-							if (!gobjDef.getCommand2().equalsIgnoreCase("Examine"))
-							{
-								MenuRightClick mrc = addCommand(gobjDef.getCommand2(),
-										String.format("@cya@%s", gobjDef.getName()),
-										2400, gObj.x, gObj.y, gObj.id, gObj.type, null);
-								rightClickMenu.add(mrc);
-							}
-
-							String adminText = "";
-							if (self.me.admin >= 2)
-								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
-										gObj.type, gObj.x + areaX, gObj.y + areaY);
-							MenuRightClick mrc = addExamine("Examine",
-									"@cya@" + gobjDef.getName(),
-									adminText, 3400, gObj.type);
-							rightClickMenu.add(mrc);
-						}
-						objectRelated[k2] = true;
-					}
-				}
-				else
-				{
-					if (k1 >= 0)
-						k1 = model.entityType[k1] - 0x30d40;
-					if (k1 >= 0)
-						ground = k1;
-				}
-			}
-		}
-
-		if (selSpell != null && spellDef.getSpellType() <= 1)
-		{
-			MenuRightClick mrc = addExamine(
-					String.format("Cast %s on self", spellDef.getName()),
-					"", "", 1000, selSpell.id);
-			rightClickMenu.add(mrc);
-		}
-		if (ground != -1)
-		{
-			int l1 = ground;
-			if (selSpell != null)
-			{
-				if (spellDef.getSpellType() == 6)
-				{
-					MenuRightClick mrc = addCommand(
-							String.format("Cast %s on ground", spellDef.getName()),
-							"", 900, engineHandle.selectedX[l1],
-							engineHandle.selectedY[l1],
-							selSpell.id, null, null);
-					rightClickMenu.add(mrc);
-					return;
-				}
-			}
-			else if (selItem == null)
-			{
-				MenuRightClick mrc = addCommand("Walk here",
-						"", 920, engineHandle.selectedX[l1],
-						engineHandle.selectedY[l1],
-						null, null, null);
-				rightClickMenu.add(mrc);
-			}
-		}
-	}
-
+	@Override
 	protected final void startGame()
 	{
 		int i = 0;
@@ -3399,7 +838,7 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		aGraphics936 = getGraphics();
 		changeThreadSleepModifier(50);
-		gameGraphics = new GameImageMiddleMan(windowWidth, windowHeight + 12, 4000, this);
+		gameGraphics = new GameImageMiddleMan(bounds.width, bounds.height + 12, 4000, this);
 		
 		abWin = new AbuseWindow(center);
 		bankPan = new BankPanel(center, gameGraphics);
@@ -3436,8 +875,8 @@ public class mudclient extends GameWindowMiddleMan
 		if (lastLoadedNull)
 			return;
 		gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
-		gameCamera.setCameraSize(center, windowWidth/2, windowHeight/2,
-				windowWidth, cameraSizeInt);
+		gameCamera.setCameraSize(center, bounds.width/2, bounds.height/2,
+				bounds.width, cameraSizeInt);
 		gameCamera.drawModelMaxDist = viewDistance;
 		gameCamera.drawSpriteMaxDist = viewDistance;
 		gameCamera.fadeFactor = 0.0078125;
@@ -3461,844 +900,13 @@ public class mudclient extends GameWindowMiddleMan
 		resetLoginVars();
 	}
 
-	private final void loadSprite(int id, String packageName, int amount) {
-		for (int i = id; i < id + amount; i++) {
-			if (!gameGraphics.loadSprite(i, packageName)) {
-				lastLoadedNull = true;
-				return;
-			}
-		}
-	}
-
-	private final void loadMedia() {
-		drawLoadingBarText(30, "Unpacking media");
-		loadSprite(SPRITE_MEDIA_START, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 1, "media", 6);
-		loadSprite(SPRITE_MEDIA_START + 9, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 10, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 11, "media", 3);
-		loadSprite(SPRITE_MEDIA_START + 14, "media", 8);
-		loadSprite(SPRITE_MEDIA_START + 22, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 23, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 24, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 25, "media", 2);
-		loadSprite(SPRITE_MEDIA_START + 27, "media", 2);
-		loadSprite(SPRITE_UTIL_START, "util", 2);
-		loadSprite(SPRITE_UTIL_START + 2, "util", 4);
-		loadSprite(SPRITE_UTIL_START + 6, "util", 2);
-		loadSprite(SPRITE_PROJECTILE_START, "projectile", 7);
-		loadSprite(SPRITE_LOGO_START, "logo", 2);
-
-		int i = EntityHandler.invPictureCount();
-		for (int j = 1; i > 0; j++) {
-			int k = i;
-			i -= 30;
-			if (k > 30) {
-				k = 30;
-			}
-			loadSprite(SPRITE_ITEM_START + (j - 1) * 30, "item", k);
-		}
-	}
-
-	private final void loadEntity() {
-		drawLoadingBarText(45, "Unpacking entities");
-		int animation = 0;
-		label0:
-			for (int anim = 0; anim < EntityHandler.animationCount(); anim++)
-			{
-				String s = EntityHandler.getAnimationDef(anim).getName();
-				for (int nextAnim = 0; nextAnim < anim; nextAnim++)
-				{ // find the next animation
-					if (!EntityHandler.getAnimationDef(nextAnim).getName().equalsIgnoreCase(s)) {
-						continue;
-					}
-					EntityHandler.getAnimationDef(anim).number = EntityHandler.getAnimationDef(nextAnim).getNumber();
-					continue label0;
-				}
-
-				loadSprite(animation, "entity", 15);
-				if (EntityHandler.getAnimationDef(anim).hasAttack()) {
-					loadSprite(animation + 15, "entity", 3);
-				}
-
-				if (EntityHandler.getAnimationDef(anim).hasFlip()) {
-					loadSprite(animation + 18, "entity", 9);
-				}
-				EntityHandler.getAnimationDef(anim).number = animation;
-				animation += 27;
-			}
-	}
-
-	private final void loadTextures() {
-		drawLoadingBarText(60, "Unpacking textures");
-		gameCamera.method297(EntityHandler.textureCount(), 7, 11);
-		for (int i = 0; i < EntityHandler.textureCount(); i++) {
-			loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
-			Sprite sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_TEXTURE_START + i];
-
-			int length = sprite.getWidth() * sprite.getHeight();
-			int[] pixels = sprite.getPixels();
-			int ai1[] = new int[32768];
-			for (int k = 0; k < length; k++) {
-				ai1[((pixels[k] & 0xf80000) >> 9) + ((pixels[k] & 0xf800) >> 6) + ((pixels[k] & 0xf8) >> 3)]++;
-			}
-			int[] dictionary = new int[256];
-			dictionary[0] = 0xff00ff;
-			int[] temp = new int[256];
-			for (int i1 = 0; i1 < ai1.length; i1++) {
-				int j1 = ai1[i1];
-				if (j1 > temp[255]) {
-					for (int k1 = 1; k1 < 256; k1++) {
-						if (j1 <= temp[k1]) {
-							continue;
-						}
-						for (int i2 = 255; i2 > k1; i2--) {
-							dictionary[i2] = dictionary[i2 - 1];
-							temp[i2] = temp[i2 - 1];
-						}
-						dictionary[k1] = ((i1 & 0x7c00) << 9) + ((i1 & 0x3e0) << 6) + ((i1 & 0x1f) << 3) + 0x40404;
-						temp[k1] = j1;
-						break;
-					}
-				}
-				ai1[i1] = -1;
-			}
-			byte[] indices = new byte[length];
-			for (int l1 = 0; l1 < length; l1++) {
-				int j2 = pixels[l1];
-				int k2 = ((j2 & 0xf80000) >> 9) + ((j2 & 0xf800) >> 6) + ((j2 & 0xf8) >> 3);
-				int l2 = ai1[k2];
-				if (l2 == -1) {
-					int i3 = 0x3b9ac9ff;
-					int j3 = j2 >> 16 & 0xff;
-						int k3 = j2 >> 8 & 0xff;
-						int l3 = j2 & 0xff;
-						for (int i4 = 0; i4 < 256; i4++) {
-							int j4 = dictionary[i4];
-							int k4 = j4 >> 16 & 0xff;
-						int l4 = j4 >> 8 & 0xff;
-						int i5 = j4 & 0xff;
-						int j5 = (j3 - k4) * (j3 - k4) + (k3 - l4) * (k3 - l4) + (l3 - i5) * (l3 - i5);
-						if (j5 < i3) {
-							i3 = j5;
-							l2 = i4;
-						}
-						}
-
-						ai1[k2] = l2;
-				}
-				indices[l1] = (byte) l2;
-			}
-			gameCamera.method298(i, indices, dictionary, sprite.getTotalWidth());
-		}
-	}
-
-	private final void checkMouseStatus()
-	{
-		if (selSpell != null || selItem != null)
-		{
-			MenuRightClick rmc = new MenuRightClick();
-			rmc.text1 = "Cancel";
-			rmc.text2 = "";
-			rmc.id = 4000;
-			rightClickMenu.add(rmc);
-		}
-
-		rightClickMenu.sort(new Comparator<MenuRightClick>() {
-			@Override
-			public int compare(MenuRightClick a, MenuRightClick b) {
-				return a.id < b.id ? -1 : a.id == b.id ? 0 : 1;
-			}
-		});
-
-		int menuLength = getMenuLength();
-		if (menuLength > 20)
-			menuLength = 20; // should drop all but the first 20 instead.
-		if (menuLength > 0)
-		{
-			MenuRightClick leftClickOption = null;
-			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
-			{
-				MenuRightClick tmp = itr.next();
-				if (tmp.text2 == null || tmp.text2.length() <= 0)
-					continue;
-				leftClickOption = tmp;
-				break;
-			}
-
-			String s = null;
-			if ((selItem != null || selSpell != null)
-					&& menuLength == 1)
-				s = "Choose a target";
-			else if ((selItem != null || selSpell != null)
-					&& menuLength > 1)
-				s = "@whi@" + rightClickMenu.get(0).text1 + " " + rightClickMenu.get(0).text2;
-			else if (leftClickOption != null)
-				s = leftClickOption.text2 + ": @whi@" + rightClickMenu.get(0).text1;
-			
-			if (s != null)
-			{
-				if (menuLength > 1 && (selItem != null || selSpell != null))
-					s = String.format("%s@whi@ / %d more options", s, menuLength-1);
-				gameGraphics.drawString(s, 6, 14, 1, 0xffff00);
-			}
-
-			if (!configMouseButtons && mv.leftDown()
-					|| configMouseButtons && mv.leftDown()
-					&& menuLength == 1)
-			{
-				menuClick(rightClickMenu.get(0));
-				mv.releaseButton();
-				return;
-			}
-			if (!configMouseButtons && mv.rightDown()
-					|| configMouseButtons && mv.leftDown())
-			{
-				MenuRightClick.menuHeight = (menuLength + 1) * 15;
-				MenuRightClick.menuWidth = gameGraphics.textWidth("Choose option", 1) + 5;
-				for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
-				{
-					MenuRightClick tmp = itr.next();
-					int l1 = gameGraphics.textWidth(tmp.text1 + " " + tmp.text2, 1) + 5;
-					if (l1 > MenuRightClick.menuWidth)
-						MenuRightClick.menuWidth = l1;
-				}
-				MouseVariables mv = MouseVariables.get();
-				MenuRightClick.menuX = mv.getX() - MenuRightClick.menuWidth / 2;
-				MenuRightClick.menuY = mv.getY() - 7;
-				showRightClickMenu = true;
-				if (MenuRightClick.menuX < 0)
-					MenuRightClick.menuX = 0;
-				if (MenuRightClick.menuY < 0)
-					MenuRightClick.menuY = 0;
-				if (MenuRightClick.menuX + MenuRightClick.menuWidth > windowWidth - 2)
-					MenuRightClick.menuX = windowWidth - 2 - MenuRightClick.menuWidth;
-				if (MenuRightClick.menuY + MenuRightClick.menuHeight > windowHeight - 19)
-					MenuRightClick.menuY = windowHeight - 19 - MenuRightClick.menuHeight;
-
-				mv.releaseButton();
-			}
-		}
-	}
-
+	@Override
 	protected final void cantLogout() {
 		logoutTimeout = 0;
 		displayMessage("@cya@Sorry, you can't logout at the moment", 3, 0);
 	}
 
-	private void drawFriendPanel()
-	{
-		int friendTabColor = (friendTabOn == 0) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
-		int ignoreTabColor = (friendTabOn == 1) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
-		gameGraphics.drawBoxAlpha(friendPan.getX(), friendPan.getY(),
-				friendPan.getWidth() / 2, friendPan.getTabHeight(),
-				friendTabColor, friendPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(friendPan.getX() + friendPan.getWidth() / 2,
-				friendPan.getY(), friendPan.getWidth() / 2,
-				friendPan.getTabHeight(), ignoreTabColor, friendPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(friendPan.getX(),
-				friendPan.getY() + friendPan.getTabHeight(), friendPan.getWidth(),
-				friendPan.getHeight() - friendPan.getTabHeight(),
-				friendPan.getBGColor(), friendPan.getBGAlpha());
-
-		gameGraphics.drawLineX(friendPan.getX(), friendPan.getY(),
-				friendPan.getWidth(), friendPan.getLineColor());
-		gameGraphics.drawLineY(friendPan.getX(),
-				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
-		gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth(),
-				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
-
-		gameGraphics.drawLineX(friendPan.getX(),
-				friendPan.getY() + friendPan.getTabHeight(),
-				friendPan.getWidth(), friendPan.getLineColor());
-		gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth() / 2,
-				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
-		InGameButton button = friendPan.getFriendsButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-		button = friendPan.getIgnoreButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-	}
-
-	private void drawFriendsList()
-	{
-		for (int i1 = 0; i1 < super.friendsCount; i1++)
-		{
-			String s;
-			if (super.friendsListOnlineStatus[i1] == 99)
-				s = "@gre@";
-			else if (super.friendsListOnlineStatus[i1] > 0)
-				s = "@yel@";
-			else
-				s = "@red@";
-			friendsMenu.drawMenuListText(friendsMenuHandle, i1, s
-					+ DataOperations.longToString(super.friendsListLongs[i1])
-					+ "~"+(windowWidth-73)+"~@whi@|   Remove");
-		}
-	}
-
-	private void drawIgnoreList()
-	{
-		for (int j1 = 0; j1 < super.ignoreListCount; j1++)
-			friendsMenu.drawMenuListText(friendsMenuHandle, j1, "@yel@"
-					+ DataOperations.longToString(super.ignoreListLongs[j1])
-					+ "~"+(windowWidth-73)+"~@whi@|   Remove");
-	}
-
-	private void handleMouseOverFriend()
-	{
-		int mouseX = mv.getX();
-		int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
-		String displayMsg;
-		if (friendNameIdx >= 0
-				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10)
-			if (mouseX > friendPan.getX() + friendPan.getWidth() - 70)
-				displayMsg = "Click to remove "
-						+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
-			else if (super.friendsListOnlineStatus[friendNameIdx] == 99)
-				displayMsg = "Click to message "
-						+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
-			else if (super.friendsListOnlineStatus[friendNameIdx] > 0)
-				displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
-						+ " is on world " + super.friendsListOnlineStatus[friendNameIdx]);
-			else
-				displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
-						+ " is offline");
-		else
-			displayMsg = "Click a name to send a message";
-		gameGraphics.drawText(displayMsg,
-				friendPan.getX() + friendPan.getWidth() / 2,
-				friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
-		InGameButton button = friendPan.getFriendsAddButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth() / 2,
-				(button.getY() + button.getHeight()) - 3, 1,
-				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-	}
-
-	private void handleMouseOverIgnore()
-	{
-		int mouseX = mv.getX();
-		int ignoreNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
-		String displayMsg;
-		if (ignoreNameIdx >= 0
-				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10
-				&& mouseX > friendPan.getX() + friendPan.getWidth() - 70)
-			displayMsg = "Click to remove "
-					+ DataOperations.longToString(super.ignoreListLongs[ignoreNameIdx]);
-		else
-			displayMsg = "Blocking messages from:";
-		gameGraphics.drawText(displayMsg,
-				friendPan.getX() + friendPan.getWidth() / 2,
-				friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
-
-		InGameButton button = friendPan.getIgnoreAddButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth() / 2,
-				(button.getY() + button.getHeight()) - 3, 1,
-				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-	}
-
-	private void handleFriendsTabClicks()
-	{
-		int mouseX = mv.getX();
-		if (mouseX < friendPan.getX() + friendPan.getWidth()/2
-				&& friendTabOn == 1)
-		{
-			friendTabOn = 0;
-			friendsMenu.method165(friendsMenuHandle, 0);
-		} else if (mouseX > friendPan.getX() + friendPan.getWidth()/2
-				&& friendTabOn == 0)
-		{
-			friendTabOn = 1;
-			friendsMenu.method165(friendsMenuHandle, 0);
-		}
-	}
-
-	private void handleClickOnFriends()
-	{
-		int mouseX = mv.getX();
-		int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
-		if (friendNameIdx >= 0
-				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10)
-		{
-			if (mouseX > friendPan.getX() + friendPan.getWidth() - 70)
-			{
-				removeFromFriends(super.friendsListLongs[friendNameIdx]);
-			}
-			else if (super.friendsListOnlineStatus[friendNameIdx] != 0)
-			{
-				inputBoxType = 2;
-				privateMessageTarget = super.friendsListLongs[friendNameIdx];
-				super.inputMessage = "";
-				super.enteredMessage = "";
-			}
-		}
-	}
-
-	private void handleClickOnIgnore()
-	{
-		int mouseX = mv.getX();
-		int j2 = friendsMenu.selectedListIndex(friendsMenuHandle);
-		if (j2 >= 0 && mouseX < friendPan.getX() + friendPan.getWidth() - 10
-				&& mouseX > friendPan.getX() + friendPan.getWidth() - 70)
-		{
-			removeFromIgnoreList(super.ignoreListLongs[j2]);
-		}
-	}
-
-	private void handleClickAddFriend()
-	{
-		inputBoxType = 1;
-		super.inputText = "";
-		super.enteredText = "";
-	}
-
-	private void handleClickAddIgnore()
-	{
-		inputBoxType = 3;
-		super.inputText = "";
-		super.enteredText = "";
-	}
-
-	private void handleFriendsPanelClicks()
-	{
-		int mouseY = mv.getY();
-		friendsMenu.updateActions();
-		if (mouseY <= friendPan.getY() + friendPan.getTabHeight() && mv.leftDown())
-			handleFriendsTabClicks();
-		if (mv.leftDown() && friendTabOn == 0)
-			handleClickOnFriends();
-		if (mv.leftDown() && friendTabOn == 1)
-			handleClickOnIgnore();
-		if (friendPan.getFriendsAddButton().isMouseOver()
-				&& mv.leftDown() && friendTabOn == 0)
-			handleClickAddFriend();
-		if (friendPan.getIgnoreAddButton().isMouseOver()
-				&& mv.leftDown() && friendTabOn == 1)
-			handleClickAddIgnore();
-		mv.releaseButton();
-	}
-
-	private final void drawFriendsWindow(boolean flag)
-	{
-		friendPan.getFrame().drawComponent();
-		drawFriendPanel();
-		friendsMenu.resetListTextCount(friendsMenuHandle);
-		if (friendTabOn == 0)
-			drawFriendsList();
-		if (friendTabOn == 1)
-			drawIgnoreList();
-		friendsMenu.drawMenu(true);
-		if (friendTabOn == 0)
-			handleMouseOverFriend();
-		if (friendTabOn == 1)
-			handleMouseOverIgnore();
-		if (!flag)
-			return;
-		if (friendPan.isMouseOver())
-			handleFriendsPanelClicks();
-		else if (friendPan.getFrame().getCloseButton().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				om.close(OpenMenu.FRIENDS);
-				mv.releaseButton();
-			}
-		}
-		else if (magicPan.getFrame().isMouseOver())
-		{ // click inside friends panel but not on the content or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
-	}
-
-	private final boolean loadSection(int xPos, int yPos)
-	{
-		if (playerAliveTimeout != 0) {
-			engineHandle.playerIsAlive = false;
-			return false;
-		}
-		notInWilderness = false;
-		xPos += wildX;
-		yPos += wildY;
-		if (sectorHeight == wildYSubtract && xPos > xMinReloadNextSect && xPos < xMaxReloadNextSect && yPos > yMinReloadNextSect && yPos < yMaxReloadNextSect) {
-			engineHandle.playerIsAlive = true;
-			return false;
-		}
-		gameGraphics.drawText("Loading... Please wait", windowHalfWidth, windowHalfHeight + 25, 1, 0xffffff);
-		drawChatMessageTabs();
-		gameGraphics.drawImage(aGraphics936, 0, 0);
-		int oldAreaX = areaX;
-		int oldAreaY = areaY;
-		int i1 = (xPos + EngineHandle.SECTOR_WIDTH/2) / EngineHandle.SECTOR_WIDTH; // tile x (or y)
-		int j1 = (yPos + EngineHandle.SECTOR_HEIGHT/2) / EngineHandle.SECTOR_HEIGHT; // tile y (or x)
-		sectorHeight = wildYSubtract;
-		areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
-		areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
-		// sets
-		xMinReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH - 2*EngineHandle.SECTOR_WIDTH/3; // lowerAreaXTile
-		yMinReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT - 2*EngineHandle.SECTOR_HEIGHT/3; // lowerAreaYTile
-		xMaxReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH + 2*EngineHandle.SECTOR_WIDTH/3; // upperAreaXTile
-		yMaxReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT + 2*EngineHandle.SECTOR_HEIGHT/3; // upperAreaYTile
-		engineHandle.method401(xPos, yPos, sectorHeight);
-		areaX -= wildX;
-		areaY -= wildY;
-		int areaXDiff = areaX - oldAreaX;
-		int areaYDiff = areaY - oldAreaY;
-		int objIdx = 0;
-		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); objIdx++)
-		{
-			GameObject gObj = itr.next();
-			gObj.x -= areaXDiff;
-			gObj.y -= areaYDiff;
-			try
-			{
-				double currObjWidth, currObjeHeight;
-				if (gObj.id == 0 || gObj.id == 4)
-				{
-					currObjWidth = EntityHandler.getObjectDef(gObj.type).getWidth();
-					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getHeight();
-				}
-				else
-				{
-					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getWidth();
-					currObjWidth = EntityHandler.getObjectDef(gObj.type).getHeight();
-				}
-				double x = gObj.x + currObjWidth/2;
-				double y = gObj.y + currObjeHeight/2;
-				if (gObj.x >= 0 && gObj.y >= 0
-						&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-						&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
-				{
-					gameCamera.addModel(gObj.model); // objects
-					gObj.model.setTranslate(x,
-							-engineHandle.getAveragedElevation(x, y),
-							y);
-					engineHandle.method412((int)gObj.x, (int)gObj.y, gObj.type, gObj.id); // shadows
-					if (gObj.type == 74)
-						gObj.model.addTranslate(0, -480, 0);
-				}
-			}
-			catch (RuntimeException runtimeexception)
-			{
-				System.out.println("Loc Error: " + runtimeexception.getMessage());
-				System.out.println("i:" + objIdx + " obj:" + gObj.model);
-				runtimeexception.printStackTrace();
-			}
-		}
-
-		for (int k2 = 0; k2 < doorCount; k2++)
-		{
-			doorX[k2] -= areaXDiff;
-			doorY[k2] -= areaYDiff;
-			int i3 = doorX[k2];
-			int l3 = doorY[k2];
-			int j4 = doorType[k2];
-			int i5 = doorDirection[k2];
-			try
-			{
-				engineHandle.method408(i3, l3, i5, j4);
-				Model model_1 = makeModel(i3, l3, i5, j4, k2);
-				doorModel[k2] = model_1;
-			}
-			catch (RuntimeException runtimeexception1)
-			{
-				System.out.println("Bound Error: " + runtimeexception1.getMessage());
-				runtimeexception1.printStackTrace();
-			}
-		}
-
-		for (int j3 = 0; j3 < groundItemCount; j3++)
-		{
-			groundItemX[j3] -= areaXDiff;
-			groundItemY[j3] -= areaYDiff;
-		}
-
-		if (mapClickX >= 0)
-			mapClickX -= areaXDiff;
-		if (mapClickY >= 0)
-			mapClickY -= areaYDiff;
-		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
-		{
-			Mob mob = itr.next();
-			mob.currentX -= areaXDiff;
-			mob.currentY -= areaYDiff;
-			for (int j5 = 0; j5 <= mob.waypointCurrent; j5++) {
-				mob.waypointsX[j5] -= areaXDiff;
-				mob.waypointsY[j5] -= areaYDiff;
-			}
-		}
-
-		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();) {
-			Mob mob_1 = itr.next();
-			mob_1.currentX -= areaXDiff;
-			mob_1.currentY -= areaYDiff;
-			for (int l5 = 0; l5 <= mob_1.waypointCurrent; l5++) {
-				mob_1.waypointsX[l5] -= areaXDiff;
-				mob_1.waypointsY[l5] -= areaYDiff;
-			}
-		}
-
-		engineHandle.playerIsAlive = true;
-		return true;
-	}
-
-	private void drawMagicPanel()
-	{
-
-		int magicTabColor = (menuMagicPrayersSelected == 1) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
-		int prayerTabColor = (menuMagicPrayersSelected == 0) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
-		gameGraphics.drawBoxAlpha(magicPan.getX(), magicPan.getY(),
-				magicPan.getWidth() / 2, magicPan.getTabHeight(),
-				prayerTabColor, magicPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(magicPan.getX() + magicPan.getWidth() / 2,
-				magicPan.getY(), magicPan.getWidth() / 2,
-				magicPan.getTabHeight(), magicTabColor, magicPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(magicPan.getX(),
-				magicPan.getY() + magicPan.getTabHeight(), magicPan.getWidth(),
-				magicPan.getScrollBoxHeight(), magicPan.getBGColor(),
-				magicPan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(magicPan.getX(),
-				magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(), magicPan.getWidth(),
-				magicPan.getHeight() - magicPan.getScrollBoxHeight() - magicPan.getTabHeight(),
-				magicPan.getBGColor(), magicPan.getBGAlpha());
-
-		gameGraphics.drawLineX(magicPan.getX(), magicPan.getY(),
-				magicPan.getWidth(), magicPan.getLineColor());
-		gameGraphics.drawLineY(magicPan.getX(),
-				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
-		gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth(),
-				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
-		gameGraphics.drawLineX(magicPan.getX(),
-				magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(),
-				magicPan.getWidth(), magicPan.getLineColor());
-
-		gameGraphics.drawLineX(magicPan.getX(),
-				magicPan.getY() + magicPan.getTabHeight(),
-				magicPan.getWidth(), magicPan.getLineColor());
-		gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth() / 2,
-				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
-		InGameButton button = magicPan.getMagicButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-		button = magicPan.getPrayerButton();
-		gameGraphics.drawText(button.getButtonText(),
-				button.getX() + button.getWidth()/2,
-				button.getY() + button.getHeight()/2 + 4, 4, 0);
-	}
-
-	private void drawMagicInfoBox(int selectedSpellIndex)
-	{
-		if (selectedSpellIndex != -1)
-		{
-			gameGraphics.drawString("Level "
-					+ EntityHandler.getSpellDef(selectedSpellIndex).getReqLevel()
-					+ ": " + EntityHandler.getSpellDef(selectedSpellIndex).getName(),
-					magicPan.getX() + 2,
-					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 10,
-					1, 0xffff00);
-			gameGraphics.drawString(EntityHandler.getSpellDef(selectedSpellIndex).getDescription(),
-					magicPan.getX() + 2,
-					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 22,
-					0, 0xffffff);
-			int i4 = 0;
-			for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(selectedSpellIndex).getRunesRequired())
-			{
-				int runeID = e.getKey();
-				gameGraphics.drawPicture(magicPan.getX() + 2 + i4 * 44,
-						magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36,
-						SPRITE_ITEM_START + EntityHandler.getItemDef(runeID).getSprite());
-				int runeInvCount = inventoryCount(runeID);
-				int runeCount = e.getValue();
-				String s2 = "@red@";
-				if (hasRequiredRunes(runeID, runeCount))
-					s2 = "@gre@";
-				gameGraphics.drawString(s2 + runeInvCount + "/" + runeCount, magicPan.getX() + 2 + i4 * 44,
-						magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36, 1, 0xffffff);
-				i4++;
-			}
-		}
-		else
-			gameGraphics.drawString("Point at a spell for a description", magicPan.getX() + 2,
-					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
-	}
-
-	private void drawMagicTab()
-	{
-		spellMenu.resetListTextCount(spellMenuHandle);
-		int i1 = 0;
-		for (int spellIndex = 0; spellIndex < EntityHandler.spellCount(); spellIndex++)
-		{
-			String s = "@yel@";
-			for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIndex).getRunesRequired())
-			{
-				if (hasRequiredRunes(e.getKey(), e.getValue()))
-					continue;
-				s = "@whi@";
-				break;
-			}
-			int spellLevel = playerStatCurrent[6];
-			if (EntityHandler.getSpellDef(spellIndex).getReqLevel() > spellLevel) {
-				s = "@bla@";
-			}
-			spellMenu.drawMenuListText(spellMenuHandle, i1++, s + "Level " + EntityHandler.getSpellDef(spellIndex).getReqLevel() + ": " + EntityHandler.getSpellDef(spellIndex).getName());
-		}
-
-		spellMenu.drawMenu(true);
-		drawMagicInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
-	}
-
-	private void drawPrayerInfoBox(int selectedPrayerIdx)
-	{
-		if (selectedPrayerIdx != -1)
-		{
-			gameGraphics.drawText("Level " + EntityHandler.getPrayerDef(selectedPrayerIdx).getReqLevel() + ": "
-					+ EntityHandler.getPrayerDef(selectedPrayerIdx).getName(), magicPan.getX() + magicPan.getWidth() / 2,
-					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 16, 1, 0xffff00);
-			gameGraphics.drawText(EntityHandler.getPrayerDef(selectedPrayerIdx).getDescription(),
-					magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
-					+ magicPan.getScrollBoxHeight() + 31, 0, 0xffffff);
-			gameGraphics.drawText("Drain rate: " + EntityHandler.getPrayerDef(selectedPrayerIdx).getDrainRate(),
-					magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
-					+ magicPan.getScrollBoxHeight() + 46, 1, 0);
-		}
-		else
-			gameGraphics.drawString("Point at a prayer for a description", magicPan.getX() + 2,
-					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
-	}
-
-	private void drawPrayerTab()
-	{
-		spellMenu.resetListTextCount(spellMenuHandle);
-		int j1 = 0;
-		for (int j2 = 0; j2 < EntityHandler.prayerCount(); j2++)
-		{
-			String s1 = "@whi@";
-			if (EntityHandler.getPrayerDef(j2).getReqLevel() > playerStatBase[5])
-				s1 = "@bla@";
-			if (prayerOn[j2])
-				s1 = "@gre@";
-			spellMenu.drawMenuListText(spellMenuHandle, j1++, s1 + "Level " + EntityHandler.getPrayerDef(j2).getReqLevel() + ": " + EntityHandler.getPrayerDef(j2).getName());
-		}
-		spellMenu.drawMenu(true);
-		drawPrayerInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
-	}
-
-	private void handleMagicTabClicks()
-	{
-		int mouseX = mv.getX();
-		if (mouseX < magicPan.getX() + magicPan.getWidth()/2
-				&& menuMagicPrayersSelected == 1)
-		{  // switch to magic tab
-			menuMagicPrayersSelected = 0;
-			prayerMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
-			spellMenu.method165(spellMenuHandle, magicMenuIndex);
-		}
-		else if (mouseX > magicPan.getX() + magicPan.getWidth()/2
-				&& menuMagicPrayersSelected == 0)
-		{  // switch to prayer tab
-			menuMagicPrayersSelected = 1;
-			magicMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
-			spellMenu.method165(spellMenuHandle, prayerMenuIndex);
-		}
-	}
-
-	private void handleSpellsTabClicks()
-	{
-		int spellIdx = spellMenu.selectedListIndex(spellMenuHandle);
-		if (spellIdx != -1)
-		{
-			int k2 = playerStatCurrent[6];
-			if (EntityHandler.getSpellDef(spellIdx).getReqLevel() > k2)
-				displayMessage("Your magic ability is not high enough for this spell", 3, 0);
-			else
-			{
-				int k3 = 0;
-				for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIdx).getRunesRequired())
-				{
-					if (!hasRequiredRunes(e.getKey(), e.getValue()))
-					{
-						displayMessage("You don't have all the reagents you need for this spell",
-								3, 0);
-						k3 = -1;
-						break;
-					}
-					k3++;
-				}
-				if (k3 == EntityHandler.getSpellDef(spellIdx).getRuneCount())
-				{
-					selSpell = new SelectedSpell(spellIdx,
-							EntityHandler.getSpellDef(spellIdx));
-					selItem = null;
-				}
-			}
-		}
-	}
-
-	private void handlePrayerTabClicks()
-	{
-		int prayerIdx = spellMenu.selectedListIndex(spellMenuHandle);
-		if (prayerIdx != -1) {
-			int l2 = playerStatBase[5];
-			if (EntityHandler.getPrayerDef(prayerIdx).getReqLevel() > l2)
-				displayMessage("Your prayer ability is not high enough for this prayer", 3, 0);
-			else if (playerStatCurrent[5] == 0)
-				displayMessage("You have run out of prayer points. Return to a church to recharge", 3, 0);
-			else if (prayerOn[prayerIdx])
-				formatPacket(248, prayerIdx, -1);  // switch prayer off
-			else
-				formatPacket(56, prayerIdx, -1);  // switch prayer on
-		}
-	}
-
-	private void handleMagicPanelClicks()
-	{
-		int mouseY = mv.getY();
-		spellMenu.updateActions();
-		if ((mouseY <= magicPan.getY() + magicPan.getTabHeight()) && mv.leftDown())
-			handleMagicTabClicks();
-		if (mv.leftDown() && menuMagicPrayersSelected == 0)
-			handleSpellsTabClicks();
-		if (mv.leftDown() && menuMagicPrayersSelected == 1)
-		{
-			handlePrayerTabClicks();
-		}
-		mv.releaseButton();
-	}
-
-	private final void drawMagicWindow(boolean flag)
-	{
-		magicPan.getFrame().drawComponent();
-		drawMagicPanel();
-		if (menuMagicPrayersSelected == 0)
-			drawMagicTab();
-		if (menuMagicPrayersSelected == 1)
-			drawPrayerTab();
-		if (!flag)
-			return;
-
-		if (magicPan.isMouseOver())
-			handleMagicPanelClicks();
-		else if (magicPan.getFrame().getCloseButton().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				om.close(OpenMenu.SPELLS);
-				mv.releaseButton();
-			}
-		}
-		else if (magicPan.getFrame().isMouseOver())
-		{ // click inside info panel but not on the content or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
-	}
-
+	@Override
 	protected final void handleMenuKeyDown(int keyCode, int keyChar)
 	{
 		if (keyCode == 122)
@@ -4354,1384 +962,12 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private void handleKeybinds(int keyCode, int keyChar)
-	{
-		switch (keyCode)
-		{
-		case 10: // enter
-			isTyping = !isTyping;
-			break;
-			/*case 69: // E
-        	if (super.keyDownCode[87])
-        	{ // W
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
-        				sectionX - 1, sectionY - 1, false, true);
-        		cameraRotationLeftRight = 160;
-        	}
-        	else if (super.keyDownCode[83])
-        	{ // S
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
-        				sectionX - 1, sectionY + 1, false, true);
-        		cameraRotationLeftRight = 224;
-        	}
-        	else
-        	{
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY,
-        				sectionX - 1, sectionY, false, true);
-        		cameraRotationLeftRight = 192;
-        	}
-        	break;
-        case 81: // Q
-        	if (super.keyDownCode[87])
-        	{ // W
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
-        				sectionX + 1, sectionY - 1, false, true);
-        		cameraRotationLeftRight = 96;
-        	}
-        	else if (super.keyDownCode[83])
-        	{ // S
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
-        				sectionX + 1, sectionY + 1, false, true);
-        		cameraRotationLeftRight = 32;
-        	}
-        	else
-        	{
-        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY,
-        				sectionX + 1, sectionY, false, true);
-        		cameraRotationLeftRight = 64;
-        	}
-        	break;
-        case 83: // S
-        	if (super.keyDownCode[69])
-        	{ // E
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
-            			sectionX - 1, sectionY + 1, false, true);
-        		cameraRotationLeftRight = 224;
-        	}
-        	else if (super.keyDownCode[81])
-        	{ // Q
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
-            			sectionX + 1, sectionY + 1, false, true);
-        		cameraRotationLeftRight = 32;
-        	}
-        	else
-        	{
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY + 1,
-            			sectionX, sectionY + 1, false, true);
-            	cameraRotationLeftRight = 0;
-        	}
-        	break;
-        case 87: // W
-        	if (super.keyDownCode[69])
-        	{ // E
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
-            			sectionX - 1, sectionY - 1, false, true);
-        		cameraRotationLeftRight = 160;
-        	}
-        	else if (super.keyDownCode[81])
-        	{ // Q
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
-            			sectionX + 1, sectionY - 1, false, true);
-        		cameraRotationLeftRight = 96;
-        	}
-        	else
-        	{
-            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY - 1,
-            			sectionX, sectionY - 1, false, true);
-            	cameraRotationLeftRight = 128;
-        	}
-        	break;*/
-		}
-	}
-
-	private void handleChatBinds(int keyCode, int keyChar)
-	{
-		switch(keyCode)
-		{
-		case 38: // Up Arrow
-			gameMenu.updateText(chatHandlePlayerEntry, lastMessage);
-			break;
-		case 40: // Down Arrow
-			gameMenu.updateText(chatHandlePlayerEntry, "");
-			break;
-		default:
-			gameMenu.keyDown(keyCode, keyChar);
-			break;
-		}
-		if (keyCode == 10)
-		{ // return key
-			isTyping = !isTyping;
-		}
-	}
-
-	private void handleCharacterControlBinds()
-	{
-		int arrowKeyMask = 0;
-		if (super.keyDownCode[69]) // E
-			arrowKeyMask |= 1;
-		else if (super.keyDownCode[81]) // Q
-			arrowKeyMask |= 2;
-		if (super.keyDownCode[87]) // W
-			arrowKeyMask |= 4;
-		else if (super.keyDownCode[83]) // S
-			arrowKeyMask |= 8;
-		if (arrowKeyMask != 0)
-			gameCamera.moveCamera(0.5, arrowKeyMask);
-	}
-
-	private final void drawShopBox()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		if (mv.buttonDown()) {
-			mv.releaseButton();
-			int i = mouseX - 52;
-			int j = mouseY - 44;
-			if (i >= 0 && j >= 12 && i < 408 && j < 246) {
-				int k = 0;
-				for (int i1 = 0; i1 < 5; i1++) {
-					for (int i2 = 0; i2 < 8; i2++) {
-						int l2 = 7 + i2 * 49;
-						int l3 = 28 + i1 * 34;
-						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItems[k].getID() != -1) {
-							selectedShopItemIndex = k;
-							selectedShopItemType = shopItems[k].getID();
-						}
-						k++;
-					}
-
-				}
-
-				if (selectedShopItemIndex >= 0) {
-					int j2 = shopItems[selectedShopItemIndex].getID();
-					if (j2 != -1) {
-						if (shopItems[selectedShopItemIndex].getAmount() > 0
-								&& i > 298 && j >= 204 && i < 408 && j <= 215) {
-							int i4 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
-							super.streamClass.createPacket(128);
-							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
-							super.streamClass.add4ByteInt(i4);
-							super.streamClass.writePktSize();
-						}
-						if (inventoryCount(j2) > 0 && i > 2 && j >= 229 && i < 112 && j <= 240) {
-							int j4 = (shopItemSellPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
-							super.streamClass.createPacket(255);
-							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
-							super.streamClass.add4ByteInt(j4);
-							super.streamClass.writePktSize();
-						}
-					}
-				}
-			} else {
-				super.streamClass.createPacket(253);
-				super.streamClass.writePktSize();
-				showShop = false;
-				return;
-			}
-		}
-		byte byte0 = 52;
-		byte byte1 = 44;
-		gameGraphics.drawBox(byte0, byte1, 408, 12, 192);
-		int l = 0x989898;
-		gameGraphics.drawBoxAlpha(byte0, byte1 + 12, 408, 17, l, 160);
-		gameGraphics.drawBoxAlpha(byte0, byte1 + 29, 8, 170, l, 160);
-		gameGraphics.drawBoxAlpha(byte0 + 399, byte1 + 29, 9, 170, l, 160);
-		gameGraphics.drawBoxAlpha(byte0, byte1 + 199, 408, 47, l, 160);
-		gameGraphics.drawString("Buying and selling items", byte0 + 1, byte1 + 10, 1, 0xffffff);
-		int j1 = 0xffffff;
-		if (mouseX > byte0 + 320 && mouseY >= byte1
-				&& mouseX < byte0 + 408 && mouseY < byte1 + 12)
-			j1 = 0xff0000;
-		gameGraphics.drawBoxTextRight("Close window", byte0 + 406, byte1 + 10, 1, j1);
-		gameGraphics.drawString("Shops stock in green", byte0 + 2, byte1 + 24, 1, 65280);
-		gameGraphics.drawString("Number you own in blue", byte0 + 135, byte1 + 24, 1, 65535);
-		gameGraphics.drawString("Your money: " + inventoryCount(10) + "gp", byte0 + 280, byte1 + 24, 1, 0xffff00);
-		int k2 = 0xd0d0d0;
-		int k3 = 0;
-		for (int k4 = 0; k4 < 5; k4++) {
-			for (int l4 = 0; l4 < 8; l4++) {
-				int j5 = byte0 + 7 + l4 * 49;
-				int i6 = byte1 + 28 + k4 * 34;
-				if (selectedShopItemIndex == k3)
-					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, 0xff0000, 160);
-				else
-					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, k2, 160);
-				gameGraphics.drawBoxEdge(j5, i6, 50, 35, 0);
-				if (shopItems[k3].getID() != -1) {
-					gameGraphics.spriteClip4(j5, i6, 48, 32,
-							SPRITE_ITEM_START + shopItems[k3].getIcon(),
-							shopItems[k3].getColor(), 0, 0, false);
-					gameGraphics.drawString(Long.toString(shopItems[k3].getAmount()),
-							j5 + 1, i6 + 10, 1, 65280);
-					gameGraphics.drawBoxTextRight(Integer.toString(inventoryCount(shopItems[k3].getID())),
-							j5 + 47, i6 + 10, 1, 65535);
-				}
-				k3++;
-			}
-
-		}
-
-		gameGraphics.drawLineX(byte0 + 5, byte1 + 222, 398, 0);
-		if (selectedShopItemIndex == -1) {
-			gameGraphics.drawText("Select an object to buy or sell", byte0 + 204, byte1 + 214, 3, 0xffff00);
-			return;
-		}
-		int i5 = shopItems[selectedShopItemIndex].getID();
-		if (i5 != -1) {
-			if (shopItems[selectedShopItemIndex].getAmount() > 0) {
-				int j6 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
-				gameGraphics.drawString("Buy a new " + EntityHandler.getItemDef(i5).getName() + " for " + j6 + "gp", byte0 + 2, byte1 + 214, 1, 0xffff00);
-				int k1 = 0xffffff;
-				if (mouseX > byte0 + 298 && mouseY >= byte1 + 204
-						&& mouseX < byte0 + 408 && mouseY <= byte1 + 215)
-					k1 = 0xff0000;
-				gameGraphics.drawBoxTextRight("Click here to buy", byte0 + 405, byte1 + 214, 3, k1);
-			} else {
-				gameGraphics.drawText("This item is not currently available to buy", byte0 + 204, byte1 + 214, 3, 0xffff00);
-			}
-			if (inventoryCount(i5) > 0) {
-				int k6 = (shopItemSellPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
-				gameGraphics.drawBoxTextRight("Sell your " + EntityHandler.getItemDef(i5).getName() + " for " + k6 + "gp", byte0 + 405, byte1 + 239, 1, 0xffff00);
-				int l1 = 0xffffff;
-				if (mouseX > byte0 + 2 && mouseY >= byte1 + 229
-						&& mouseX < byte0 + 112 && mouseY <= byte1 + 240)
-					l1 = 0xff0000;
-				gameGraphics.drawString("Click here to sell", byte0 + 2, byte1 + 239, 3, l1);
-				return;
-			}
-			gameGraphics.drawText("You do not have any of this item to sell", byte0 + 204, byte1 + 239, 3, 0xffff00);
-		}
-	}
-
-	private final void drawGameMenu()
-	{
-		gameMenu = new Menu(gameGraphics, 10);
-		messagesHandleChatHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
-				chatBoxWidth, chatBoxHeight, 1, 20, true);
-		chatHandlePlayerEntry = gameMenu.createPlayerChatEntry(chatPlayerEntryX, chatPlayerEntryY,
-				chatPlayerEntryWidth, chatPlayerEntryHeight, 1, 80, false, true);
-		messagesHandleQuestHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
-				chatBoxWidth, chatBoxHeight, 1, 20, true);
-		messagesHandlePrivHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
-				chatBoxWidth, chatBoxHeight, 1, 20, true);
-		gameMenu.setFocus(chatHandlePlayerEntry);
-	}
-
+	@Override
 	protected final byte[] load(String filename) {
 		return super.load(Config.DATABASE_DIR + File.separator + filename);
 	}
 
-	private void drawOptionsPanel()
-	{
-		gameGraphics.drawBoxAlpha(optPan.getX(), optPan.getY(),
-				optPan.getWidth(), optPan.getHeight(),
-				optPan.getBGColor(), optPan.getBGAlpha());
-
-		gameGraphics.drawLineX(optPan.getX(),
-				optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight(),
-				optPan.getWidth(), optPan.getLineColor());
-		gameGraphics.drawLineX(optPan.getX(),
-				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight(),
-				optPan.getWidth(), optPan.getLineColor());
-		gameGraphics.drawLineX(optPan.getX(),
-				optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight(),
-				optPan.getWidth(), optPan.getLineColor());
-	}
-
-	private void drawGameOptions()
-	{
-		String info[] = {
-				"Camera angle mode", "Mouse buttons", "Sound effects"
-		};
-		boolean condition[] = {
-				configAutoCameraAngle, !configMouseButtons, !configSoundEffects
-		};
-		int xOffset = 2;
-		gameGraphics.drawString("Game options - click to toggle",
-				optPan.getX() + xOffset, optPan.getY() + optPan.getHeaderHeight() - 3, 1, 0);
-		String color;
-		int i = 0;
-		int clr;
-		for (InGameButton button : optPan.getGameOptions().getButtons())
-		{
-			optPan.setGameOptionState(i, condition[i]);
-			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			gameGraphics.drawString(info[i] + " - " + color
-					+ button.getButtonText(), button.getX() + xOffset,
-					button.getY() + 10, 1, clr);
-			++i;
-		}
-	}
-
-	private void drawClientAssist()
-	{
-		String info[] = {
-				"Hide Roofs", "Auto Screenshots", "Fightmode Selector", "Textures", "Free Camera"
-		};
-		boolean condition[] = {
-				!showRoof, autoScreenshot, combatWindow, engineHandle.getTextureUse(), freeCamera
-		};
-		int xOffset = 2;
-		gameGraphics.drawString("Client assists - click to toggle",
-				optPan.getX() + xOffset,
-				optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight()
-				+ optPan.getHeaderHeight() - 3, 1, 0);
-		String color;
-		int i = 0;
-		int clr;
-		for (InGameButton button : optPan.getClientAssists().getButtons())
-		{
-			optPan.setClientAssistState(i, condition[i]);
-			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			gameGraphics.drawString(info[i] + " - " + color
-					+ button.getButtonText(), button.getX() + xOffset,
-					button.getY() + 10, 1, clr);
-			++i;
-		}
-	}
-
-	private void drawPrivacySettings()
-	{
-		String info[] = {
-				"Block chat messages", "Block private messages",
-				"Block trade requests", "Block duel requests"
-		};
-		boolean condition[] = {
-				!(super.blockChatMessages == 0),
-				!(super.blockPrivateMessages == 0),
-				!(super.blockTradeRequests == 0),
-				!(super.blockDuelRequests == 0)
-		};
-		int xOffset = 2;
-		gameGraphics.drawString("Privacy settings. Will be applied to",
-				optPan.getX() + xOffset,
-				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
-				+ optPan.getHeaderHeight() - 3, 1, 0);
-		gameGraphics.drawString("all people not on your friends list",
-				optPan.getX() + xOffset,
-				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
-				+ 2*optPan.getHeaderHeight() - 3, 1, 0);
-		String color;
-		int i = 0;
-		int clr;
-		for (InGameButton button : optPan.getPrivacySettings().getButtons())
-		{
-			optPan.setPrivacySettingsState(i, condition[i]);
-			color = (condition[i] ? "@gre@" : "@red@");
-			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
-			gameGraphics.drawString(info[i] + ": " + color
-					+ button.getButtonText(), button.getX() + xOffset,
-					button.getY() + 10, 1, clr);
-			++i;
-		}
-	}
-
-	private void drawLogout()
-	{
-		int xOffset = 2;
-		gameGraphics.drawString("Always logout when you finish",
-				optPan.getX() + xOffset,
-				optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight()
-				+ optPan.getHeaderHeight() - 3, 1, 0);
-		int k1 = 0xffffff;
-		if (optPan.getLogoutButton().isMouseOver())
-		{
-			k1 = 0xffff00;
-		}
-		gameGraphics.drawString("Click here to logout",
-				optPan.getLogoutButton().getX() + xOffset,
-				optPan.getLogoutButton().getY() + optPan.getLogoutButton().getHeight() - 3,
-				1, k1);
-	}
-
-	private void handleGameOptionsClicks()
-	{
-		if (mv.leftDown())
-		{
-			InGameButton buttons[] = optPan.getGameOptions().getButtons();
-			if (buttons[0].isMouseOver())
-			{
-				configAutoCameraAngle = !configAutoCameraAngle;
-				formatPacket(157, 0, configAutoCameraAngle ? 1 : 0);
-			}
-			else if (buttons[1].isMouseOver())
-			{
-				configMouseButtons = !configMouseButtons;
-				formatPacket(157, 2, configMouseButtons ? 1 : 0);
-			}
-			else if (buttons[2].isMouseOver())
-			{
-				configSoundEffects = !configSoundEffects;
-				formatPacket(157, 3, configSoundEffects ? 1 : 0);
-			}
-		}
-	}
-
-	private void handleClientAssistClicks()
-	{
-		if (mv.leftDown())
-		{
-			InGameButton buttons[] = optPan.getClientAssists().getButtons();
-			if (buttons[0].isMouseOver())
-			{
-				showRoof = !showRoof;
-				formatPacket(157, 4, showRoof ? 1 : 0);
-			}
-			else if (buttons[1].isMouseOver())
-			{
-				autoScreenshot = !autoScreenshot;
-				formatPacket(157, 5, autoScreenshot ? 1 : 0);
-			}
-			else if (buttons[2].isMouseOver())
-			{
-				combatWindow = !combatWindow;
-				formatPacket(157, 6, combatWindow ? 1 : 0);
-			}
-			else if (buttons[3].isMouseOver())
-			{
-				engineHandle.setTextureUse(!engineHandle.getTextureUse());
-				//TODO: send this toggle to server, also should reload the map
-			}
-			else if (buttons[4].isMouseOver())
-			{
-				freeCamera = !freeCamera;
-				//TODO: send this toggle to server, also should reload the map
-			}
-		}
-	}
-
-	private void handlePrivacySettingsClicks()
-	{
-		if (mv.leftDown())
-		{
-			boolean flag1 = false;
-			InGameButton buttons[] = optPan.getPrivacySettings().getButtons();
-			if (buttons[0].isMouseOver())
-			{
-				super.blockChatMessages = 1 - super.blockChatMessages;
-				flag1 = true;
-			}
-			else if (buttons[1].isMouseOver())
-			{
-				super.blockPrivateMessages = 1 - super.blockPrivateMessages;
-				flag1 = true;
-			}
-			else if (buttons[2].isMouseOver())
-			{
-				super.blockTradeRequests = 1 - super.blockTradeRequests;
-				flag1 = true;
-			}
-			else if (buttons[3].isMouseOver())
-			{
-				super.blockDuelRequests = 1 - super.blockDuelRequests;
-				flag1 = true;
-			}
-			if (flag1)
-			{
-				sendUpdatedPrivacyInfo(
-						super.blockChatMessages, super.blockPrivateMessages,
-						super.blockTradeRequests, super.blockDuelRequests);
-			}
-		}
-	}
-
-	private void handleLogoutClick()
-	{
-		if (mv.leftDown())
-			logout();
-	}
-
-	private void handleOptionsPanelClicks()
-	{
-		if (optPan.getGameOptions().isMouseOver())
-			handleGameOptionsClicks();
-		else if (optPan.getClientAssists().isMouseOver())
-			handleClientAssistClicks();
-		else if (optPan.getPrivacySettings().isMouseOver())
-			handlePrivacySettingsClicks();
-		else if (optPan.getLogoutButton().isMouseOver())
-			handleLogoutClick();
-		mv.releaseButton();
-	}
-
-	private final void drawOptionsMenu(boolean flag)
-	{
-		optPan.getFrame().drawComponent();
-		drawOptionsPanel();
-		drawGameOptions();
-		drawClientAssist();
-		drawPrivacySettings();
-		drawLogout();
-		if (!flag)
-			return;
-		if (optPan.isMouseOver())
-			handleOptionsPanelClicks();
-		else if (optPan.getFrame().getCloseButton().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				om.close(OpenMenu.SETTINGS);
-				mv.releaseButton();
-			}
-		}
-		else if (optPan.getFrame().isMouseOver())
-		{ // click inside settings panel but not on the content or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
-	}
-
-	private void updatePlayers()
-	{
-		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
-		{
-			Mob mob = itr.next();
-			int k = (mob.waypointCurrent + 1) % 10;
-			if (mob.waypointEndSprite != k)
-			{
-				int currentSprite = -1;
-				int endSprite = mob.waypointEndSprite;
-				double j4;
-				if (endSprite < k)
-					j4 = k - endSprite;
-				else
-					j4 = (10 + k) - endSprite;
-				double step = 0.03125;
-				if (j4 > 2)
-					step = (j4 - 1) * 0.03125;
-				if (mob.waypointsX[endSprite] - mob.currentX > 3
-						|| mob.waypointsY[endSprite] - mob.currentY > 3
-						|| mob.waypointsX[endSprite] - mob.currentX < -3
-						|| mob.waypointsY[endSprite] - mob.currentY < -3
-						|| j4 > 8)
-				{ // too far away
-					mob.currentX = mob.waypointsX[endSprite];
-					mob.currentY = mob.waypointsY[endSprite];
-				}
-				else
-				{
-					if (mob.currentX < mob.waypointsX[endSprite])
-					{
-						mob.currentX += step;
-						mob.stepCount++;
-						currentSprite = 2;
-					}
-					else if (mob.currentX > mob.waypointsX[endSprite])
-					{
-						mob.currentX -= step;
-						mob.stepCount++;
-						currentSprite = 6;
-					}
-					if (mob.currentX - mob.waypointsX[endSprite] < step
-							&& mob.currentX - mob.waypointsX[endSprite] > -step)
-						mob.currentX = mob.waypointsX[endSprite];
-					if (mob.currentY < mob.waypointsY[endSprite])
-					{
-						mob.currentY += step;
-						mob.stepCount++;
-						if (currentSprite == -1)
-							currentSprite = 4;
-						else if (currentSprite == 2)
-							currentSprite = 3;
-						else
-							currentSprite = 5;
-					}
-					else if (mob.currentY > mob.waypointsY[endSprite])
-					{
-						mob.currentY -= step;
-						mob.stepCount++;
-						if (currentSprite == -1)
-							currentSprite = 0;
-						else if (currentSprite == 2)
-							currentSprite = 1;
-						else
-							currentSprite = 7;
-					}
-					if (mob.currentY - mob.waypointsY[endSprite] < step
-							&& mob.currentY - mob.waypointsY[endSprite] > -step)
-						mob.currentY = mob.waypointsY[endSprite];
-				}
-				if (currentSprite != -1)
-					mob.currentSprite = currentSprite;
-				if (mob.currentX == mob.waypointsX[endSprite]
-						&& mob.currentY == mob.waypointsY[endSprite])
-					mob.waypointEndSprite = (endSprite + 1) % 10;
-			}
-			else
-				mob.currentSprite = mob.nextSprite;
-			if (mob.lastMessageTimeout > 0)
-				mob.lastMessageTimeout--;
-			if (mob.skullTimer > 0)
-				mob.skullTimer--;
-			if (mob.combatTimer > 0)
-				mob.combatTimer--;
-			if (playerAliveTimeout > 0)
-			{
-				playerAliveTimeout--;
-				if (playerAliveTimeout == 0)
-					displayMessage("You have been granted another life. Be more careful this time!", 3, 0);
-				if (playerAliveTimeout == 0)
-					displayMessage("You retain your skills. Your objects land where you died", 3, 0);
-			}
-		}
-	}
-
-	private void updateNPCs()
-	{
-		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
-		{
-			Mob mob_1 = itr.next();
-			int j1 = (mob_1.waypointCurrent + 1) % 10;
-			if (mob_1.waypointEndSprite != j1)
-			{
-				int currentSprite = -1;
-				int k4 = mob_1.waypointEndSprite;
-				int k5;
-				if (k4 < j1)
-					k5 = j1 - k4;
-				else
-					k5 = (10 + j1) - k4;
-				double step = 0.03125;
-				if (k5 > 2)
-					step = (k5 - 1) * 0.03125;
-				if (mob_1.waypointsX[k4] - mob_1.currentX > 3
-						|| mob_1.waypointsY[k4] - mob_1.currentY > 3
-						|| mob_1.waypointsX[k4] - mob_1.currentX < -3
-						|| mob_1.waypointsY[k4] - mob_1.currentY < -3
-						|| k5 > 8)
-				{
-					mob_1.currentX = mob_1.waypointsX[k4];
-					mob_1.currentY = mob_1.waypointsY[k4];
-				}
-				else
-				{
-					if (mob_1.currentX < mob_1.waypointsX[k4])
-					{
-						mob_1.currentX += step;
-						mob_1.stepCount++;
-						currentSprite = 2;
-					}
-					else if (mob_1.currentX > mob_1.waypointsX[k4])
-					{
-						mob_1.currentX -= step;
-						mob_1.stepCount++;
-						currentSprite = 6;
-					}
-					if (mob_1.currentX - mob_1.waypointsX[k4] < step
-							&& mob_1.currentX - mob_1.waypointsX[k4] > -step)
-						mob_1.currentX = mob_1.waypointsX[k4];
-					if (mob_1.currentY < mob_1.waypointsY[k4])
-					{
-						mob_1.currentY += step;
-						mob_1.stepCount++;
-						if (currentSprite == -1)
-							currentSprite = 4;
-						else if (currentSprite == 2)
-							currentSprite = 3;
-						else
-							currentSprite = 5;
-					}
-					else if (mob_1.currentY > mob_1.waypointsY[k4])
-					{
-						mob_1.currentY -= step;
-						mob_1.stepCount++;
-						if (currentSprite == -1)
-							currentSprite = 0;
-						else if (currentSprite == 2)
-							currentSprite = 1;
-						else
-							currentSprite = 7;
-					}
-					if (mob_1.currentY - mob_1.waypointsY[k4] < step
-							&& mob_1.currentY - mob_1.waypointsY[k4] > -step)
-						mob_1.currentY = mob_1.waypointsY[k4];
-				}
-				if (currentSprite != -1)
-					mob_1.currentSprite = currentSprite;
-				if (mob_1.currentX == mob_1.waypointsX[k4] && mob_1.currentY == mob_1.waypointsY[k4])
-					mob_1.waypointEndSprite = (k4 + 1) % 10;
-			}
-			else
-			{
-				mob_1.currentSprite = mob_1.nextSprite;
-				if (mob_1.type == 43)
-					mob_1.stepCount++;
-			}
-			if (mob_1.lastMessageTimeout > 0)
-				mob_1.lastMessageTimeout--;
-			if (mob_1.skullTimer > 0)
-				mob_1.skullTimer--;
-			if (mob_1.combatTimer > 0)
-				mob_1.combatTimer--;
-		}
-	}
-
-	private void updateCamera()
-	{
-		if (cameraAutoAngleDebug)
-		{
-			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
-			{
-				lastAutoCameraRotatePlayerX = self.me.currentX;
-				lastAutoCameraRotatePlayerY = self.me.currentY;
-			}
-		}
-		else
-		{
-			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
-			{
-				lastAutoCameraRotatePlayerX = self.me.currentX;
-				lastAutoCameraRotatePlayerY = self.me.currentY;
-			}
-			if (lastAutoCameraRotatePlayerX != self.me.currentX)
-				lastAutoCameraRotatePlayerX += (self.me.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
-			if (lastAutoCameraRotatePlayerY != self.me.currentY)
-				lastAutoCameraRotatePlayerY += (self.me.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
-			if (configAutoCameraAngle)
-			{
-				int autoAngle = cameraAutoAngle * 128;
-				int zRotDiff = autoAngle - cameraZRot;
-				byte byte0 = 1;
-				if (zRotDiff != 0)
-				{
-					cameraRotationBaseAddition++;
-					if (zRotDiff > 1024)
-					{
-						byte0 = -1;
-						zRotDiff = 1024 - zRotDiff;
-					}
-					else if (zRotDiff > 0)
-						byte0 = 1;
-					else if (zRotDiff < -1024)
-					{
-						byte0 = 1;
-						zRotDiff = 1024 + zRotDiff;
-					}
-					else if (zRotDiff < 0)
-					{
-						byte0 = -1;
-						zRotDiff = -zRotDiff;
-					}
-					cameraZRot += ((cameraRotationBaseAddition * zRotDiff + 1023) / 1024) * byte0;
-					cameraZRot &= 0x3ff;
-				}
-				else
-					cameraRotationBaseAddition = 0;
-			}
-		}
-	}
-
-	private void checkChatTab()
-	{
-		int mouseX = mv.getX();
-		if (mv.getY() > windowHeight - 4)
-		{ // botom bar; chat tabs & report abuse
-			int buttonWidth = 82;
-			int xOffset = 14;
-			if (mouseX > xOffset
-					&& mouseX < xOffset + buttonWidth
-					&& mv.lastLeftDown())
-			{
-				messagesTab = 0;
-			}
-			xOffset += 99;
-			if (mouseX > xOffset
-					&& mouseX < xOffset + buttonWidth
-					&& mv.lastLeftDown())
-			{
-				messagesTab = 1;
-				gameMenu.anIntArray187[messagesHandleChatHist] = 0xf423f;
-			}
-			xOffset += 101;
-			if (mouseX > xOffset
-					&& mouseX < xOffset + buttonWidth
-					&& mv.lastLeftDown())
-			{
-				messagesTab = 2;
-				gameMenu.anIntArray187[messagesHandleQuestHist] = 0xf423f;
-			}
-			xOffset += 101;
-			if (mouseX > xOffset
-					&& mouseX < xOffset + buttonWidth
-					&& mv.lastLeftDown())
-			{
-				messagesTab = 3;
-				gameMenu.anIntArray187[messagesHandlePrivHist] = 0xf423f;
-			}
-			xOffset += 101;
-			if (mouseX > xOffset
-					&& mouseX < xOffset + buttonWidth
-					&& mv.lastLeftDown())
-			{
-				showAbuseWindow = 1;
-				abuseSelectedType = 0;
-				super.inputText = "";
-				super.enteredText = "";
-			}
-			mv.releaseLastButton();
-			mv.releaseButton();
-		}
-	}
-
-	private void updateChatTabs()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		gameMenu.updateActions();
-		if (messagesTab > 0
-				&& mouseX >= chatBoxX + this.chatBoxWidth - SCROLL_BAR_WIDTH-2
-				&& mouseX <= chatBoxX + this.chatBoxWidth
-				&& mouseY >= chatBoxY
-				&& mouseY <= chatBoxY + chatBoxHeight)
-			mv.releaseLastButton();
-		if (gameMenu.hasActivated(chatHandlePlayerEntry))
-		{
-			String s = lastMessage = gameMenu.getText(chatHandlePlayerEntry);
-			gameMenu.updateText(chatHandlePlayerEntry, "");
-			if (s.startsWith("::"))
-			{
-				s = s.substring(2);
-				if (!handleCommand(s))
-					sendChatString(s);
-			}
-			else
-			{
-				byte[] chatMessage = DataConversions.stringToByteArray(s);
-				sendChatMessage(chatMessage, chatMessage.length);
-				s = DataConversions.byteToString(chatMessage, 0, chatMessage.length);
-				self.me.lastMessageTimeout = 150;
-				self.me.lastMessage = s;
-				displayMessage(self.me.name + ": " + s, 2, self.me.admin);
-			}
-		}
-		if (messagesTab == 0)
-		{
-			for (int l1 = 0; l1 < chatBoxVisRows; l1++)
-				if (messagesTimeout[l1] > 0)
-					messagesTimeout[l1]--;
-
-		}
-	}
-
-	private void handleOfferAmounts()
-	{
-		if (showTradeWindow || showDuelWindow)
-		{
-			if (mv.buttonDown())
-				mouseDownTime++;
-			else
-				mouseDownTime = 0;
-			if (mouseDownTime > 500)
-				itemIncrement += 100000;
-			else if (mouseDownTime > 350)
-				itemIncrement += 10000;
-			else if (mouseDownTime > 250)
-				itemIncrement += 1000;
-			else if (mouseDownTime > 150)
-				itemIncrement += 100;
-			else if (mouseDownTime > 100)
-				itemIncrement += 10;
-			else if (mouseDownTime > 50)
-				itemIncrement++;
-			else if (mouseDownTime > 20 && (mouseDownTime & 5) == 0)
-				itemIncrement++;
-		}
-		else
-		{
-			mouseDownTime = 0;
-			itemIncrement = 0;
-		}
-	}
-
-	private void updateCameraPosition()
-	{
-
-		if (configAutoCameraAngle)
-		{
-			if (cameraRotationBaseAddition == 0 || cameraAutoAngleDebug)
-			{
-				if (super.keyLeftDown)
-				{
-					cameraAutoAngle = cameraAutoAngle + 1 & 7;
-					super.keyLeftDown = false;
-					if (!zoomCamera)
-					{
-						if ((cameraAutoAngle & 1) == 0)
-							cameraAutoAngle = cameraAutoAngle + 1 & 7;
-						for (int i2 = 0; i2 < 8; i2++)
-						{
-							if (enginePlayerVisible(cameraAutoAngle))
-								break;
-							cameraAutoAngle = cameraAutoAngle + 1 & 7;
-						}
-
-					}
-				}
-				if (super.keyRightDown)
-				{
-					cameraAutoAngle = cameraAutoAngle + 7 & 7;
-					super.keyRightDown = false;
-					if (!zoomCamera) {
-						if ((cameraAutoAngle & 1) == 0)
-							cameraAutoAngle = cameraAutoAngle + 7 & 7;
-						for (int j2 = 0; j2 < 8; j2++) {
-							if (enginePlayerVisible(cameraAutoAngle))
-								break;
-							cameraAutoAngle = cameraAutoAngle + 7 & 7;
-						}
-
-					}
-				}
-			}
-		}
-		else if (super.keyLeftDown)
-			cameraZRot = cameraZRot + 8 & 0x3ff;
-		else if (super.keyRightDown)
-			cameraZRot = cameraZRot - 8 & 0x3ff;
-		else if (super.keyUpDown && cameraXRot > 0x390)
-			cameraXRot = cameraXRot - 8 & 0x3ff;
-		else if (super.keyDownDown && cameraXRot < 0x3f8)
-			cameraXRot = cameraXRot + 8 & 0x3ff;
-		if (zoomCamera && cameraHeight > 8.59375D)
-			cameraHeight -= 0.0625D;
-		else if (!zoomCamera && cameraHeight < 11.71875D)
-			cameraHeight += 0.0625D;
-	}
-
-	private final void processGame()
-	{
-		if (systemUpdate > 1)
-			systemUpdate--;
-		sendPingPacketReadPacketData();
-		if (logoutTimeout > 0)
-			logoutTimeout--;
-		if (self.me.currentSprite == 8
-				|| self.me.currentSprite == 9)
-			lastWalkTimeout = 500;
-		if (lastWalkTimeout > 0)
-			lastWalkTimeout--;
-		if (showCharacterLookScreen)
-		{
-			drawCharacterLookScreen();
-			return;
-		}
-		updatePlayers(); // player walking animations
-		updateNPCs(); // npc walking animations
-
-		if (!om.isOpen(OpenMenu.MINIMAP))
-		{
-			if (GameImage.anInt346 > 0)
-				anInt658++;
-			if (GameImage.anInt347 > 0)
-				anInt658 = 0;
-			GameImage.anInt346 = 0;
-			GameImage.anInt347 = 0;
-		}
-		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
-		{
-			Mob mob_2 = itr.next();
-			if (mob_2.anInt176 > 0)
-				mob_2.anInt176--;
-		}
-		updateCamera();
-
-		if (anInt658 > 20)
-			anInt658 = 0;
-
-		checkChatTab();
-		updateChatTabs();
-
-		if (playerAliveTimeout != 0)
-			mv.releaseLastButton();
-		handleOfferAmounts();
-		gameCamera.updateMouseCoords();
-		mv.releaseLastButton();
-		updateCameraPosition();
-
-		if (actionPictureType > 0)
-			actionPictureType--;
-		else if (actionPictureType < 0)
-			actionPictureType++;
-		gameCamera.animateTexture(17, 1);
-		modelUpdatingTimer++;
-		if (modelUpdatingTimer > 5)
-		{
-			modelUpdatingTimer = 0;
-			modelFireLightningSpellNumber = (modelFireLightningSpellNumber + 1) % 3;
-			modelTorchNumber = (modelTorchNumber + 1) % 4;
-			modelClawSpellNumber = (modelClawSpellNumber + 1) % 5;
-		}
-		
-		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
-		{ /* updating models it seems */
-			GameObject gObj = itr.next();
-			if (gObj.x >= 0 && gObj.y >= 0
-					&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-					&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT
-					&& gObj.type == 74)
-				gObj.model.addRotation(1, 0, 0);
-		}
-
-		for (int i4 = 0; i4 < anInt892; i4++)
-		{
-			anIntArray923[i4]++;
-			if (anIntArray923[i4] > 50)
-			{
-				anInt892--;
-				for (int i5 = i4; i5 < anInt892; i5++) {
-					anIntArray944[i5] = anIntArray944[i5 + 1];
-					anIntArray757[i5] = anIntArray757[i5 + 1];
-					anIntArray923[i5] = anIntArray923[i5 + 1];
-					anIntArray782[i5] = anIntArray782[i5 + 1];
-				}
-
-			}
-		}
-
-	}
-
-	private final void loadSounds()
-	{
-		try
-		{
-			drawLoadingBarText(90, "Unpacking Sound effects");
-			sounds = load("sounds.mem");
-			audioReader = new AudioReader();
-			return;
-		}
-		catch (Throwable throwable)
-		{
-			System.out.println("Unable to init sounds:" + throwable);
-		}
-	}
-
-	private final void drawCombatStyleWindow()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		byte byte0 = 7;
-		byte byte1 = 15;
-		char c = '\257';
-		if (mv.buttonDown())
-		{
-			for (int i = 0; i < 5; i++)
-			{
-				if (i <= 0
-						|| mouseX <= byte0
-						|| mouseX >= byte0 + c
-						|| mouseY <= byte1 + i * 20
-						|| mouseY >= byte1 + i * 20 + 20)
-					continue;
-				combatStyle = i - 1;
-				mv.releaseButton();
-				formatPacket(42, combatStyle, -1);
-				break;
-			}
-
-		}
-		for (int j = 0; j < 5; j++)
-		{
-			if (j == combatStyle + 1)
-				gameGraphics.drawBoxAlpha(byte0, byte1 + j * 20, c, 20, GameImage.convertRGBToLong(255, 0, 0), 0x80);
-			else
-				gameGraphics.drawBoxAlpha(byte0, byte1 + j * 20, c, 20, GameImage.convertRGBToLong(190, 190, 190), 0x80);
-			gameGraphics.drawLineX(byte0, byte1 + j * 20, c, 0);
-			gameGraphics.drawLineX(byte0, byte1 + j * 20 + 20, c, 0);
-		}
-
-		gameGraphics.drawText("Select combat style", byte0 + c / 2, byte1 + 16, 3, 0xffffff);
-		gameGraphics.drawText("Controlled (+1 of each)", byte0 + c / 2, byte1 + 36, 3, 0);
-		gameGraphics.drawText("Aggressive (+3 strength)", byte0 + c / 2, byte1 + 56, 3, 0);
-		gameGraphics.drawText("Accurate   (+3 attack)", byte0 + c / 2, byte1 + 76, 3, 0);
-		gameGraphics.drawText("Defensive  (+3 defense)", byte0 + c / 2, byte1 + 96, 3, 0);
-	}
-
-	private final void drawDuelConfirmWindow()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		byte byte0 = 22;
-		byte byte1 = 36;
-		gameGraphics.drawBox(byte0, byte1, 468, 16, 192);
-		int i = 0x989898;
-		gameGraphics.drawBoxAlpha(byte0, byte1 + 16, 468, 246, i, 160);
-		gameGraphics.drawText("Please confirm your duel with @yel@" + DataOperations.longToString(duelOpponentNameLong), byte0 + 234, byte1 + 12, 1, 0xffffff);
-		gameGraphics.drawText("Your stake:", byte0 + 117, byte1 + 30, 1, 0xffff00);
-		for (int j = 0; j < duelConfirmMyItemCount; j++) {
-			String s = self.getDuelConfirmMyItems().get(j).getName();
-			if (self.getDuelConfirmMyItems().get(j).isStackable())
-				s = s + " x " + method74(self.getDuelConfirmMyItems().get(j).getAmount());
-			gameGraphics.drawText(s, byte0 + 117, byte1 + 42 + j * 12, 1, 0xffffff);
-		}
-
-		if (duelConfirmMyItemCount == 0)
-			gameGraphics.drawText("Nothing!", byte0 + 117, byte1 + 42, 1, 0xffffff);
-		gameGraphics.drawText("Your opponent's stake:", byte0 + 351, byte1 + 30, 1, 0xffff00);
-		for (int k = 0; k < duelConfirmOpponentItemCount; k++) {
-			String s1 = self.getDuelConfirmOpponentItems().get(k).getName();
-			if (self.getDuelConfirmOpponentItems().get(k).isStackable())
-				s1 = s1 + " x " + method74(self.getDuelConfirmOpponentItems().get(k).getAmount());
-			gameGraphics.drawText(s1, byte0 + 351, byte1 + 42 + k * 12, 1, 0xffffff);
-		}
-
-		if (duelConfirmOpponentItemCount == 0)
-			gameGraphics.drawText("Nothing!", byte0 + 351, byte1 + 42, 1, 0xffffff);
-		if (duelCantRetreat == 0)
-			gameGraphics.drawText("You can retreat from this duel", byte0 + 234, byte1 + 180, 1, 65280);
-		else
-			gameGraphics.drawText("No retreat is possible!", byte0 + 234, byte1 + 180, 1, 0xff0000);
-		if (duelUseMagic == 0)
-			gameGraphics.drawText("Magic may be used", byte0 + 234, byte1 + 192, 1, 65280);
-		else
-			gameGraphics.drawText("Magic cannot be used", byte0 + 234, byte1 + 192, 1, 0xff0000);
-		if (duelUsePrayer == 0)
-			gameGraphics.drawText("Prayer may be used", byte0 + 234, byte1 + 204, 1, 65280);
-		else
-			gameGraphics.drawText("Prayer cannot be used", byte0 + 234, byte1 + 204, 1, 0xff0000);
-		if (duelUseWeapons == 0)
-			gameGraphics.drawText("Weapons may be used", byte0 + 234, byte1 + 216, 1, 65280);
-		else
-			gameGraphics.drawText("Weapons cannot be used", byte0 + 234, byte1 + 216, 1, 0xff0000);
-		gameGraphics.drawText("If you are sure click 'Accept' to begin the duel", byte0 + 234, byte1 + 230, 1, 0xffffff);
-		if (!duelWeAccept) {
-			gameGraphics.drawPicture((byte0 + 118) - 35, byte1 + 238, SPRITE_MEDIA_START + 25);
-			gameGraphics.drawPicture((byte0 + 352) - 35, byte1 + 238, SPRITE_MEDIA_START + 26);
-		} else {
-			gameGraphics.drawText("Waiting for other player...", byte0 + 234, byte1 + 250, 1, 0xffff00);
-		}
-		if (mv.leftDown()) {
-			if (mouseX < byte0 || mouseY < byte1
-					|| mouseX > byte0 + 468 || mouseY > byte1 + 262)
-			{
-				showDuelConfirmWindow = false;
-				super.streamClass.createPacket(35);
-				super.streamClass.writePktSize();
-			}
-			if (mouseX >= (byte0 + 118) - 35 && mouseX <= byte0 + 118 + 70
-					&& mouseY >= byte1 + 238 && mouseY <= byte1 + 238 + 21)
-			{
-				duelWeAccept = true;
-				super.streamClass.createPacket(87);
-				super.streamClass.writePktSize();
-			}
-			if (mouseX >= (byte0 + 352) - 35 && mouseX <= byte0 + 353 + 70
-					&& mouseY >= byte1 + 238 && mouseY <= byte1 + 238 + 21)
-			{
-				showDuelConfirmWindow = false;
-				super.streamClass.createPacket(35);
-				super.streamClass.writePktSize();
-			}
-			mv.releaseButton();
-		}
-	}
-
-	private final void updateBankItems() {
-		bankItemCount = newBankItemCount;
-		for (int i = 0; i < newBankItemCount; i++) {
-			self.getBankItems().set(i, self.getNewBankItems().get(i));
-		}
-
-		for (int j = 0; j < inventoryCount; j++) {
-			if (bankItemCount >= bankItemsMax)
-				break;
-			int k = self.getInventoryItems().get(j).getID();
-			boolean flag = false;
-			for (int l = 0; l < bankItemCount; l++) {
-				if (self.getBankItems().get(l).getID() != k)
-					continue;
-				flag = true;
-				break;
-			}
-
-			if (!flag) {
-				self.getBankItems().set(bankItemCount++, new Item(k, false, 0));
-			}
-		}
-
-	}
-
-	private final void makeCharacterDesignMenu()
-	{
-		chrDesignMenu = new Menu(gameGraphics, 100);
-		chrDesignMenu.drawText(windowHalfWidth, windowHalfHeight - 157, "Please design Your Character", 4, true);
-		int i = windowHalfWidth - 116;
-		int j = windowHalfHeight - 133;
-		i += 116;
-		j -= 10;
-		chrDesignMenu.drawText(i - 55, j + 110, "Front", 3, true);
-		chrDesignMenu.drawText(i, j + 110, "Side", 3, true);
-		chrDesignMenu.drawText(i + 55, j + 110, "Back", 3, true);
-		byte byte0 = 54;
-		j += 145;
-		chrDesignMenu.method157(i - byte0, j, 53, 41);
-		chrDesignMenu.drawText(i - byte0, j - 8, "Head", 1, true);
-		chrDesignMenu.drawText(i - byte0, j + 8, "Type", 1, true);
-		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignHeadBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignHeadBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-		chrDesignMenu.method157(i + byte0, j, 53, 41);
-		chrDesignMenu.drawText(i + byte0, j - 8, "Hair", 1, true);
-		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignHairClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignHairClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
-		j += 50;
-		chrDesignMenu.method157(i - byte0, j, 53, 41);
-		chrDesignMenu.drawText(i - byte0, j, "Gender", 1, true);
-		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignGenderBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignGenderBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-		chrDesignMenu.method157(i + byte0, j, 53, 41);
-		chrDesignMenu.drawText(i + byte0, j - 8, "Top", 1, true);
-		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignTopClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignTopClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
-		j += 50;
-		chrDesignMenu.method157(i - byte0, j, 53, 41);
-		chrDesignMenu.drawText(i - byte0, j - 8, "Skin", 1, true);
-		chrDesignMenu.drawText(i - byte0, j + 8, "Colour", 1, true);
-		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignSkinClrBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
-		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignSkinClrBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
-		chrDesignMenu.method157(i + byte0, j, 53, 41);
-		chrDesignMenu.drawText(i + byte0, j - 8, "Bottom", 1, true);
-		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
-		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
-		chrDesignBottomClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
-		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
-		chrDesignBottomClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
-		j += 82;
-		j -= 35;
-		chrDesignMenu.drawBox(i, j, 200, 30, 0x343434, 0x000000, 0xc0);
-		chrDesignMenu.drawText(i, j, "Accept", 4, false);
-		characterDesignAcceptButton = chrDesignMenu.makeButton(i, j, 200, 30);
-	}
-
-	private final void drawAbuseWindow2()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getX();
-		if (super.enteredText.length() > 0)
-		{
-			String s = super.enteredText.trim();
-			super.inputText = "";
-			super.enteredText = "";
-			if (s.length() > 0) {
-				long l = DataOperations.stringLength12ToLong(s);
-				super.streamClass.createPacket(7);
-				super.streamClass.addTwo4ByteInts(l);
-				super.streamClass.addByte(abuseSelectedType);
-				super.streamClass.writePktSize();
-			}
-			showAbuseWindow = 0;
-			return;
-		}
-		gameGraphics.drawBox(windowHalfWidth - 200, windowHalfHeight - 37, 400, 100, 0);
-		gameGraphics.drawBoxEdge(windowHalfWidth - 200, windowHalfHeight - 37, 400, 100, 0xffffff);
-		int i = windowHalfHeight - 7;
-		gameGraphics.drawText("Now type the name of the offending player, and press enter", windowHalfWidth, i, 1, 0xffff00);
-		i += 18;
-		gameGraphics.drawText("Name: " + super.inputText + "*", windowHalfWidth, i, 4, 0xffffff);
-		i = windowHalfHeight + 55;
-		int j = 0xffffff;
-		if (mouseX > windowHalfWidth - 60 && mouseX < windowHalfWidth + 60
-				&& mouseY > i - 13 && mouseY < i + 2) {
-			j = 0xffff00;
-			if (mv.leftDown()) {
-				mv.releaseButton();
-				showAbuseWindow = 0;
-			}
-		}
-		gameGraphics.drawText("Click here to cancel", windowHalfWidth, i, 1, j);
-		if (mv.leftDown()
-				&& (mouseX < windowHalfWidth - 200
-						|| mouseX > windowHalfWidth + 200
-						|| mouseY < windowHalfHeight - 37
-						|| mouseY > windowHalfHeight + 63)) {
-			mv.releaseButton();
-			showAbuseWindow = 0;
-		}
-	}
-
-	private final void displayMessage(String message, int type, int status)
-	{
-		if (type == 2 || type == 4 || type == 6) {
-			for (; message.length() > 5 && message.charAt(0) == '@' && message.charAt(4) == '@'; message = message.substring(5))
-				;
-		}
-		message = message.replaceAll("\\#pmd\\#", "");
-		message = message.replaceAll("\\#mod\\#", "");
-		message = message.replaceAll("\\#adm\\#", "");
-		if (type == 2)
-			message = "@yel@" + message;
-		if (type == 3 || type == 4)
-			message = "@whi@" + message;
-		if (type == 6)
-			message = "@cya@" + message;
-		if (status == 1)
-			message = "#pmd#" + message;
-		if (status == 2)
-			message = "#mod#" + message;
-		if (status == 3)
-			message = "#adm#" + message;
-		if (messagesTab != 0) {
-			if (type == 4 || type == 3)
-				anInt952 = 200;
-			if (type == 2 && messagesTab != 1)
-				anInt953 = 200;
-			if (type == 5 && messagesTab != 2)
-				anInt954 = 200;
-			if (type == 6 && messagesTab != 3)
-				anInt955 = 200;
-			if (type == 3 && messagesTab != 0)
-				messagesTab = 0;
-			if (type == 6 && messagesTab != 3 && messagesTab != 0)
-				messagesTab = 0;
-		}
-		for (int k = chatBoxVisRows-1; k > 0; k--)
-		{
-			messagesArray[k] = messagesArray[k - 1];
-			messagesTimeout[k] = messagesTimeout[k - 1];
-		}
-
-		messagesArray[0] = message;
-		messagesTimeout[0] = 300;
-
-		if (type == 2)
-		{
-			if (gameMenu.anIntArray187[messagesHandleChatHist] == gameMenu.menuListTextCount[messagesHandleChatHist] - chatBoxVisRows + 1)
-				gameMenu.addString(messagesHandleChatHist, message, true);
-			else
-				gameMenu.addString(messagesHandleChatHist, message, false);
-		}
-		if (type == 5)
-			if (gameMenu.anIntArray187[messagesHandleQuestHist] == gameMenu.menuListTextCount[messagesHandleQuestHist] - chatBoxVisRows + 1)
-				gameMenu.addString(messagesHandleQuestHist, message, true);
-			else
-				gameMenu.addString(messagesHandleQuestHist, message, false);
-		if (type == 6) {
-			if (gameMenu.anIntArray187[messagesHandlePrivHist] == gameMenu.menuListTextCount[messagesHandlePrivHist] - chatBoxVisRows + 1) {
-				gameMenu.addString(messagesHandlePrivHist, message, true);
-				return;
-			}
-			gameMenu.addString(messagesHandlePrivHist, message, false);
-		}
-	}
-
+	@Override
 	protected final void logoutAndStop() {
 		sendLogoutPacket();
 		garbageCollect();
@@ -5740,32 +976,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
-	private final void animateObject(int i, String s)
-	{
-		GameObject gObj = objects.get(i);
-		double tileXDist = gObj.x - self.me.currentX;
-		double tileYDist = gObj.y - self.me.currentY;
-		double maxAnimateDist = gameCamera.drawModelMaxDist;
-		boolean animate = Math.sqrt(tileXDist*tileXDist + tileYDist*tileYDist) < maxAnimateDist;
-		if (animate && gObj.x >= 0 && gObj.y >= 0
-				&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
-				&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
-		{
-			gameCamera.removeModel(gObj.model);
-			int newMdlIdx = EntityHandler.storeModel(s);
-			try {
-				Model model = gameDataModels[newMdlIdx].newModel();
-				gameCamera.addModel(model);
-				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
-				model.copyRotTrans(gObj.model);
-				model.index = i;
-				gObj.model = model;
-			}
-			catch (Exception e) {
-			}
-		}
-	}
-
+	@Override
 	protected final void resetVars() {
 		systemUpdate = 0;
 		combatStyle = 0;
@@ -5819,340 +1030,7 @@ public class mudclient extends GameWindowMiddleMan
 		self.initPanels(center, gameGraphics);
 	}
 
-	private void drawTradePanel()
-	{
-		tradeCfrmPan.getFrame().setTitle("Trading with: @yel@"
-				+ DataOperations.longToString(tradeConfirmOtherNameLong));
-		gameGraphics.drawBoxAlpha(tradePan.getPlrTextBoxX(),
-				tradePan.getPlrTextBoxY(), tradePan.getPlrTextBoxWidth(),
-				tradePan.getPlrTextBoxHeight(), tradePan.getBGColor(),
-				tradePan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(tradePan.getMdlMarginBarX(),
-				tradePan.getMdlMarginBarY(), tradePan.getMdlMarginBarWidth(),
-				tradePan.getMdlMarginBarHeight(), tradePan.getBGColor(),
-				tradePan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(tradePan.getOpntTextBoxX(),
-				tradePan.getOpntTextBoxY(), tradePan.getOpntTextBoxWidth(),
-				tradePan.getOpntTextBoxHeight(), tradePan.getBGColor(),
-				tradePan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(tradePan.getAccptDclnBoxX(),
-				tradePan.getAccptDclnBoxY(), tradePan.getAccptDclnBoxWidth(),
-				tradePan.getAccptDclnBoxHeight(), tradePan.getBGColor(),
-				tradePan.getBGAlpha());
-		gameGraphics.drawBoxAlpha(tradePan.getItemInfoBarX(),
-				tradePan.getItemInfoBarY(), tradePan.getItemInfoBarWidth(),
-				tradePan.getItemInfoBarHeight(), tradePan.getBGColor(),
-				tradePan.getBGAlpha());
-		tradePan.getFrame().setTitle("Trading with: " + tradeOtherPlayerName);
-		gameGraphics.drawString("Your Offer", tradePan.getPlrTextBoxX()+1,
-				tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
-				4, 0xffffff);
-		gameGraphics.drawString("Opponent's Offer", tradePan.getOpntTextBoxX()+1,
-				tradePan.getOpntTextBoxY()+tradePan.getOpntTextBoxHeight()-3,
-				4, 0xffffff);
-		gameGraphics.drawString("Your Inventory", tradePan.getInvGrid().getX(),
-				tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
-				4, 0xffffff);
-	}
-
-	private void handleTradePanelClicks()
-	{
-		if (mv.leftDown())
-		{
-			if (tradePan.getAcceptButton().isMouseOver())
-				this.formatPacket(211, -1, -1);
-			if (tradePan.getDeclineButton().isMouseOver())
-				this.formatPacket(216, -1, -1);
-		}
-	}
-
-	private void drawTradeInventoryGrid()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid invGrid = tradePan.getInvGrid();
-		for (int j = 0; j < invGrid.getSlots(); j++)
-		{
-			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
-			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
-
-			drawItemBox(invGrid, self.getInventoryItems().get(j).getID(), col, row,
-					false, j < inventoryCount && self.getInventoryItems().get(j).getID() != -1);
-			if (j < inventoryCount && self.getInventoryItems().get(j).getID() != -1
-					&& self.getInventoryItems().get(j).isStackable())
-				drawTradeInvText(col, row, self.getInventoryItems().get(j).getAmount());
-			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
-					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < inventoryCount && self.getInventoryItems().get(j).getID() != -1)
-				gameGraphics.drawString(
-						self.getInventoryItems().get(j).getName() + ": @whi@" + self.getInventoryItems().get(j).getDescription(),
-						tradePan.getX() + 2,
-						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
-						1, 0xffff00);
-		}
-	}
-
-	private void drawTradePlrOfferGrid()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid myOfferGrid = tradePan.getOfferGrid();
-		for (int j = 0; j < myOfferGrid.getSlots(); j++)
-		{
-			int col = myOfferGrid.getX() + (j % myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
-			int row = myOfferGrid.getY() + (j / myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
-
-			drawItemBox(myOfferGrid, self.getTradeMyItems().get(j).getID(), col, row,
-					false, j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1);
-			if (j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1
-					&& self.getTradeMyItems().get(j).isStackable())
-				drawTradeInvText(col, row, self.getTradeMyItems().get(j).getAmount());
-			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
-					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1)
-				gameGraphics.drawString(self.getTradeMyItems().get(j).getName()
-						+ ": @whi@" + self.getTradeMyItems().get(j).getDescription(),
-						tradePan.getX() + 2,
-						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
-						1, 0xffff00);
-		}
-	}
-
-	private void drawTradeOpntOfferGrid()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid otherOfferGrid = tradePan.getOtherOfferGrid();
-		for (int j = 0; j < otherOfferGrid.getSlots(); j++)
-		{
-			int col = otherOfferGrid.getX() + (j % otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
-			int row = otherOfferGrid.getY() + (j / otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
-
-			drawItemBox(otherOfferGrid, self.getTradeOtherItems().get(j).getID(), col, row,
-					false, j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1);
-			if (j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1
-					&& self.getTradeOtherItems().get(j).isStackable())
-				drawTradeInvText(col, row, self.getTradeOtherItems().get(j).getAmount());
-			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
-					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
-					&& j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1)
-				gameGraphics.drawString(self.getTradeOtherItems().get(j).getName()
-						+ ": @whi@" + self.getTradeOtherItems().get(j).getDescription(),
-						tradePan.getX() + 2,
-						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
-						1, 0xffff00);
-		}
-	}
-
-	private void drawTradeInvText(int col, int row, long amount)
-	{
-		gameGraphics.drawString(getAbbreviatedValue(amount),
-				col + 1, row + 10, 1, tradePan.getInvCountTextColor());
-	}
-
-	private void updateTradeStatus()
-	{
-		if (!tradeWeAccepted)
-			gameGraphics.drawPicture(tradePan.getAcceptButton().getX(),
-					tradePan.getAcceptButton().getY(),
-					tradePan.getAcceptButton().getSpriteIdx());
-		gameGraphics.drawPicture(tradePan.getDeclineButton().getX(),
-				tradePan.getDeclineButton().getY(),
-				tradePan.getDeclineButton().getSpriteIdx());
-		if (tradeOtherAccepted)
-		{
-			gameGraphics.drawText("Other player",
-					tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
-					tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
-			gameGraphics.drawText("has accepted",
-					tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
-					tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
-		}
-		if (tradeWeAccepted) {
-			gameGraphics.drawText("Waiting for",
-					tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
-					tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
-			gameGraphics.drawText("other player",
-					tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
-					tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
-		}
-	}
-
-	private void handleMouseOverTradeInv()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid invGrid = tradePan.getInvGrid();
-		int slotIdx = (mouseX - (invGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
-				+ ((mouseY - (invGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * invGrid.getCols();
-		if (slotIdx >= 0 && slotIdx < inventoryCount)
-		{
-			boolean flag = false;
-			int l1 = 0;
-			int slotItemId = self.getInventoryItems().get(slotIdx).getID();
-			for (int k3 = 0; k3 < tradeMyItemCount; k3++)
-			{
-				if (self.getTradeMyItems().get(k3).getID() == slotItemId)
-				{
-					if (EntityHandler.getItemDef(slotItemId).isStackable())
-					{
-						for (int i4 = 0; i4 < itemIncrement; i4++)
-						{
-							if (self.getTradeMyItems().get(k3).getAmount() < self.getInventoryItems().get(slotIdx).getAmount())
-							{
-								self.getTradeMyItems().get(k3).addAmount(1);
-							}
-							flag = true;
-						}
-
-					}
-					else
-						l1++;
-				}
-			}
-			if (inventoryCount(slotItemId) <= l1)
-				flag = true;
-			if (!flag && tradeMyItemCount < 12)
-			{
-				self.getTradeMyItems().set(tradeMyItemCount++, new Item(slotItemId, false, 1));
-				flag = true;
-			}
-			if (flag)
-				formatPacket(70, -1, -1);
-		}
-	}
-
-	private void handleMouseOverPlrTradeOffer()
-	{
-		int mouseX = mv.getX();
-		int mouseY = mv.getY();
-		InGameGrid myOfferGrid = tradePan.getOfferGrid();
-		int l = (mouseX - (myOfferGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
-				+ ((mouseY - (myOfferGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * myOfferGrid.getCols();
-		if (l >= 0 && l < tradeMyItemCount)
-		{
-			int j1 = self.getTradeMyItems().get(l).getID();
-			for (int i2 = 0; i2 < itemIncrement; i2++)
-			{
-				if (EntityHandler.getItemDef(j1).isStackable()
-						&& self.getTradeMyItems().get(l).getAmount() > 1)
-				{
-					self.getTradeMyItems().get(l).delAmount(1);
-					continue;
-				}
-				tradeMyItemCount--;
-				mouseDownTime = 0;
-				for (int l2 = l; l2 < tradeMyItemCount; l2++)
-				{
-					self.getTradeMyItems().set(l2, self.getTradeMyItems().get(l2 + 1));
-				}
-
-				break;
-			}
-			formatPacket(70, -1, -1);
-		}
-	}
-
-	private final void drawTradeWindow()
-	{
-		if (mv.buttonDown() && itemIncrement == 0)
-			itemIncrement = 1;
-		if (itemIncrement > 0)
-		{
-			if (tradePan.isMouseOver())
-			{ // inside trade window
-				if (tradePan.getInvGrid().isMouseOver())
-					handleMouseOverTradeInv();
-				else if (tradePan.getOfferGrid().isMouseOver())
-					handleMouseOverPlrTradeOffer();
-				else
-					handleTradePanelClicks();
-			}
-			mv.releaseButton();
-			itemIncrement = 0;
-		}
-		if (!showTradeWindow)
-			return;
-
-		// draw the interface
-		tradePan.getFrame().drawComponent();
-		drawTradePanel();
-		updateTradeStatus();
-		drawTradeInventoryGrid();
-		drawTradePlrOfferGrid();
-		drawTradeOpntOfferGrid();
-
-		if (tradePan.isMouseOver())
-			handleTradePanelClicks();
-		else if (tradePan.getFrame().getCloseButton().isMouseOver())
-		{ // close button
-			if (mv.leftDown())
-			{
-				formatPacket(216, -1, -1);
-				mv.releaseButton();
-			}
-		}
-		else if (tradePan.getFrame().isMouseOver())
-		{ // click inside settings panel but not on the content or close button
-			if (mv.leftDown())
-				mv.releaseButton();
-		}
-	}
-
-	private final boolean enginePlayerVisible(int i) {
-		int x = (int) self.me.currentX;
-		int y = (int) self.me.currentY;
-		for (int l = 2; l >= 1; l--) {
-			if (i == 1 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 3 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 5 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 7 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 0 && (engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 2 && (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 4 && (engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 6 && (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-		}
-
-		return true;
-	}
-
-	private Mob getLastPlayer(int serverIndex) {
-		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
-			Mob tmp = itr.next();
-			if (tmp.serverIndex == serverIndex) {
-				return tmp;
-			}
-		}
-		return null;
-	}
-
-	private Mob getLastNpc(int serverIndex) {
-		for (Iterator<Mob> itr = lastNpcArray.iterator(); itr.hasNext();)
-		{
-			Mob tmp = itr.next();
-			if (tmp.serverIndex == serverIndex) {
-				return tmp;
-			}
-		}
-		return null;
-	}
-
+	@Override
 	protected final void handleIncomingPacket(
 			int packetID, int dataLength, byte data[])
 	{
@@ -7299,6 +2177,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 	}
 
+	@Override
 	protected final void lostConnection() {
 		systemUpdate = 0;
 		if (logoutTimeout != 0) {
@@ -7306,6 +2185,3567 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		}
 		super.lostConnection();
+	}
+
+	@Override
+	protected final void handleScrollEvent(int scrollDirection)
+	{
+		if (scrollDirection > 0D)
+		{
+			if (cameraZoom < 1.41)
+			{
+				cameraZoom += 0.1;
+				gameCamera.drawModelMaxDist += 1D;
+				gameCamera.drawSpriteMaxDist += 1D;
+				if (!super.keyF1Toggle)
+					gameCamera.fadeDist += 0.9583333333333333;
+				else
+					gameCamera.fadeDist += 0.9545454545454545;
+			}
+		}
+		else if (scrollDirection < 0D)
+		{
+			if (cameraZoom > .39)
+			{
+				cameraZoom -= 0.1;
+				gameCamera.drawModelMaxDist -= 1D;
+				gameCamera.drawSpriteMaxDist -= 1D;
+				if (!super.keyF1Toggle)
+					gameCamera.fadeDist -= 0.9583333333333333;
+				else
+					gameCamera.fadeDist -= 0.9545454545454545;
+			}
+		}
+	}
+
+	/**
+	 * Finds the number of occurences of an item id in the player's inventory.
+	 * Note: A stack of N items counts as N occurences.
+	 * @param reqID Item id.
+	 * @return The number of occurences of the item in the player's inventory.
+	 */
+	protected final int inventoryCount(int reqID)
+	{
+		int amount = 0;
+		for (int index = 0; index < inventoryCount; index++)
+		{
+			if (self.getInventoryItems().get(index).getID() == reqID)
+				if (!EntityHandler.getItemDef(reqID).isStackable())
+					++amount;
+				else
+					amount += self.getInventoryItems().get(index).getAmount();
+		}
+		return amount;
+	}
+
+
+	private static final long serialVersionUID = -9196797188442052009L;
+	private static MouseVariables mv = MouseVariables.get();
+	
+	private final int chrTopBottomClrs[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
+	private final int chrHairClrs[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
+	private final String skillArrayLong[] = {"Attack", "Defense", "Strength", "Hits", "Ranged", "Prayer", "Magic", "Cooking", "Woodcutting", "Fletching", "Fishing", "Firemaking", "Crafting", "Smithing", "Mining", "Herblaw", "Agility", "Thieving"};
+	private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
+
+	private long startTime = 0;
+	private long serverStartTime = 0;
+	private String lastMessage = "";
+	private int fatigue;
+	private String serverLocation = "";
+	private String localhost;
+	private int prayerMenuIndex = 0;
+	private int magicMenuIndex = 0;
+	private boolean showRoof = true;
+	private boolean autoScreenshot = true;
+	private boolean freeCamera = false;
+	private long expGained = 0;
+	private boolean hasWorldInfo = false;
+	private boolean recording = false;
+	private LinkedList<BufferedImage> frames = new LinkedList<BufferedImage>();
+	private long lastFrame = 0;
+	
+	private int bankItemCount;
+	private int newBankItemCount;
+	
+	private int duelMyItemCount;
+	private int duelConfirmMyItemCount;
+	private int duelOpponentItemCount;
+	private int duelConfirmOpponentItemCount;
+
+	private int tradeConfirmItemCount;
+	private int tradeConfirmOtherItemCount;
+
+
+	private int groundItemCount;
+
+	private Item shopItems[];
+	
+	private List<MenuRightClick> rightClickMenu;
+	
+	private boolean combatWindow;
+	private int lastLoggedInDays;
+	private int subscriptionLeftDays;
+	private boolean configAutoCameraAngle;
+	private String questionMenuAnswer[];
+	private int anInt658;
+	private int handlePacketErrorCount;
+	private int loginButtonNewUser;
+	private int loginButtonExistingUser;
+	private String currentUser;
+	private String currentPass;
+	private int lastWalkTimeout;
+	private boolean duelOpponentAccepted;
+	private boolean duelMyAccepted;
+	private String serverMessage;
+	private String duelOpponentName;
+	private int mouseOverBankPageText;
+	private int fightCount;
+	private int mobMessageCount;
+	private boolean showBank;
+	private int mobMsgX[];
+	private int mobMsgY[];
+	private int mobMsgWidth[];
+	private int mobMsgHeight[];
+	private int equipmentStatus[];
+	private int loginScreenNumber;
+	private int anInt699;
+	private boolean prayerOn[];
+	private int npcCombatModelArray1[] = {0, 1, 2, 1, 0, 0, 0, 0};
+	private int anIntArray705[];
+	private int anIntArray706[];
+	private int wildX;
+	private int wildY;
+	private int wildYMultiplier;
+	private int sectorHeight;
+	private boolean memoryError;
+	private int bankItemsMax;
+	private int walkModel[] = {0, 1, 2, 1};
+	private boolean showQuestionMenu;
+	private double viewDistance;
+	private double cameraZoom;
+	private int cameraAutoAngle;
+	private int cameraRotationBaseAddition;
+	private double screenRotationX;
+	private double screenRotationY;
+	private int randomYRot;
+	private int showAbuseWindow;
+	private int duelCantRetreat;
+	private int duelUseMagic;
+	private int duelUsePrayer;
+	private int duelUseWeapons;
+	private boolean showServerMessageBox;
+	private boolean hasReceivedWelcomeBoxDetails;
+	private String lastLoggedInAddress;
+	private int loginTimer;
+	private int playerStatCurrent[];
+	private int areaX;
+	private int areaY;
+	private int wildYSubtract;
+	private int anInt742;
+	private int anInt743;
+	private int anInt744;
+	private int sectionXArray[];
+	private int sectionYArray[];
+	
+	private SelectedItem selItem;
+	private SelectedSpell selSpell;
+	
+	private int anIntArray757[];
+	private boolean showCharacterLookScreen;
+	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
+	private int inputBoxType;
+	private int combatStyle;
+	private boolean configMouseButtons;
+	private boolean duelNoRetreating;
+	private boolean duelNoMagic;
+	private boolean duelNoPrayer;
+	private boolean duelNoWeapons;
+	private int anIntArray782[];
+	private int xMinReloadNextSect;
+	private int yMinReloadNextSect;
+	private int xMaxReloadNextSect;
+	private int yMaxReloadNextSect;
+	private int systemUpdate;
+	private int cameraZRot;
+	private int cameraXRot;
+	private int logoutTimeout;
+	private boolean showWelcomeBox;
+	private int chrHeadType;
+	private int chrBodyGender;
+	private int character2Colour;
+	private int chrHairClr;
+	private int chrTopClr;
+	private int chrBottomClr;
+	private int chrSkinClr;
+	private int chrHeadGender;
+	private int loginStatusText;
+	private int loginUsernameTextBox;
+	private int loginPasswordTextBox;
+	private int loginOkButton;
+	private int loginCancelButton;
+	private int selectedBankItem;
+	private int selectedBankItemType;
+	private boolean objectRelated[];
+	private int playerStatBase[];
+	private AbuseWindow abWin;
+	private BankPanel bankPan;
+	private InventoryPanel invPan;
+	private PlayerInfoPanel plrPan;
+	private MagicPanel magicPan;
+	private FriendsPanel friendPan;
+	private OptionsPanel optPan;
+	private TradePanel tradePan;
+	private TradeConfirmPanel tradeCfrmPan;
+	private int abuseSelectedType;
+	private int actionPictureType;
+	private int npcAnimationArray[][] = {
+			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
+			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
+			{11, 3, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4},
+			{3, 4, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
+			{3, 4, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
+			{4, 3, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
+			{11, 4, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3},
+			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4, 3}
+	};
+	private int chrDesignHeadBtnLeft;
+	private int chrDesignHeadBtnRight;
+	private int chrDesignHairClrBtnLeft;
+	private int chrDesignHairClrBtnRight;
+	private int chrDesignGenderBtnLeft;
+	private int chrDesignGenderBtnRight;
+	private int chrDesignTopClrBtnLeft;
+	private int chrDesignTopClrBtnRight;
+	private int chrDesignSkinClrBtnLeft;
+	private int chrDesignSkinClrBtnRight;
+	private int chrDesignBottomClrBtnLeft;
+	private int chrDesignBottomClrBtnRight;
+	private int characterDesignAcceptButton;
+	private int anIntArray858[];
+	private int anIntArray859[];
+	private int mobArrayIndexes[];
+	private double lastAutoCameraRotatePlayerX;
+	private double lastAutoCameraRotatePlayerY;
+	private int questionMenuCount;
+	private List<GameObject> objects;
+	private int modelFireLightningSpellNumber;
+	private int modelTorchNumber;
+	private int modelClawSpellNumber;
+	private boolean showTradeConfirmWindow;
+	private boolean tradeConfirmAccepted;
+	private int anInt892;
+	private EngineHandle engineHandle;
+
+	private List<Mob> playerArray, lastPlayerArray, mobArray,
+	npcArray, lastNpcArray, npcRecordArray;
+	private List<HitpointsBar> hitpoints;
+	
+	private Menu chrDesignMenu, friendsMenu, menuNewUser, menuLogin,
+	menuWelcome, questMenu, spellMenu, gameMenu;
+
+	private Model gameDataModels[];
+	private Model doorModel[];
+	
+	private boolean serverMessageBoxTop;
+	private int referId;
+	private int anInt900;
+	private int newUserOkButton;
+	private double cameraHeight;
+	private boolean notInWilderness;
+	private boolean zoomCamera;
+	private AudioReader audioReader;
+	private int playerStatExperience[];
+	private boolean cameraAutoAngleDebug;
+	private boolean showDuelWindow;
+	private int anIntArray923[];
+	private boolean lastLoadedNull;
+	private int experienceArray[];
+	private Camera gameCamera;
+	private boolean showShop;
+	private int mouseClickOffset;
+	private boolean showDuelConfirmWindow;
+	private boolean duelWeAccept;
+	private Graphics aGraphics936;
+	private int doorX[];
+	private int doorY[];
+	private int wildernessType;
+	private boolean configSoundEffects;
+	private boolean showRightClickMenu;
+	private int attackingInt40;
+	private int anIntArray944[];
+	private int shopItemSellPriceModifier;
+	private int shopItemBuyPriceModifier;
+	private int modelUpdatingTimer;
+	private int doorCount;
+	private int doorDirection[];
+	private int doorType[];
+	private int anInt952;
+	private int anInt953;
+	private int anInt954;
+	private int anInt955;
+	private double groundItemX[];
+	private double groundItemY[];
+	private int groundItemType[];
+	private double groundItemZ[];
+	private int selectedShopItemIndex;
+	private int selectedShopItemType;
+	private int messagesRows;
+	private String messagesArray[];
+	private int messagesTimeout[];
+	private long tradeConfirmOtherNameLong;
+	private int playerAliveTimeout;
+	private byte sounds[];
+	private boolean doorRelated[];
+	
+	private Rectangle bounds;
+	private Point center;
+	private int cameraSizeInt;
+	
+	private DPoint mapClick;
+	private long duelOpponentNameLong;
+
+	private boolean isTyping;
+	
+	private static final String method74(long i) {
+		String s = String.valueOf(i);
+		for (int j = s.length() - 3; j > 0; j -= 3)
+			s = s.substring(0, j) + "," + s.substring(j);
+
+		if (s.length() > 8)
+			s = "@gre@" + s.substring(0, s.length() - 8) + " million @whi@(" + s + ")";
+		else if (s.length() > 4)
+			s = "@cya@" + s.substring(0, s.length() - 4) + "K @whi@(" + s + ")";
+		return s;
+	}
+	
+	/**
+	 * Draws the character creation/look screen
+	 */
+	private final void drawCharacterLookScreen()
+	{
+		chrDesignMenu.updateActions();
+		if (chrDesignMenu.hasActivated(chrDesignHeadBtnLeft))
+			do {
+				chrHeadType = ((chrHeadType - 1) + EntityHandler.animationCount())
+						% EntityHandler.animationCount();
+			} while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+					|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
+		else if (chrDesignMenu.hasActivated(chrDesignHeadBtnRight))
+			do {
+				chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount();
+			} while ((EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+					|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0);
+		if (chrDesignMenu.hasActivated(chrDesignGenderBtnLeft)
+				|| chrDesignMenu.hasActivated(chrDesignGenderBtnRight))
+		{
+			for (chrHeadGender = 3 - chrHeadGender;
+					(EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 3) != 1
+							|| (EntityHandler.getAnimationDef(chrHeadType).getGenderModel() & 4 * chrHeadGender) == 0;
+					chrHeadType = (chrHeadType + 1) % EntityHandler.animationCount());
+			for (; (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 3) != 2
+					|| (EntityHandler.getAnimationDef(chrBodyGender).getGenderModel() & 4 * chrHeadGender) == 0;
+					chrBodyGender = (chrBodyGender + 1) % EntityHandler.animationCount());
+		}
+		if (chrDesignMenu.hasActivated(chrDesignHairClrBtnLeft))
+			chrHairClr = (chrHairClr-1 + chrHairClrs.length)
+			% chrHairClrs.length;
+		else if (chrDesignMenu.hasActivated(chrDesignHairClrBtnRight))
+			chrHairClr = (chrHairClr + 1) % chrHairClrs.length;
+		if (chrDesignMenu.hasActivated(chrDesignTopClrBtnLeft))
+			chrTopClr = ((chrTopClr - 1) + chrTopBottomClrs.length)
+			% chrTopBottomClrs.length;
+		else if (chrDesignMenu.hasActivated(chrDesignTopClrBtnRight))
+			chrTopClr = (chrTopClr + 1) % chrTopBottomClrs.length;
+		if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnLeft))
+			chrSkinClr = ((chrSkinClr - 1) + chrSkinClrs.length)
+			% chrSkinClrs.length;
+		else if (chrDesignMenu.hasActivated(chrDesignSkinClrBtnRight))
+			chrSkinClr = (chrSkinClr + 1) % chrSkinClrs.length;
+		if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnLeft))
+			chrBottomClr = ((chrBottomClr - 1) + chrTopBottomClrs.length)
+			% chrTopBottomClrs.length;
+		else if (chrDesignMenu.hasActivated(chrDesignBottomClrBtnRight))
+			chrBottomClr = (chrBottomClr + 1) % chrTopBottomClrs.length;
+		if (chrDesignMenu.hasActivated(characterDesignAcceptButton))
+			formatPacket(218, -1, -1);
+	}
+	
+	/**
+	 * Handles updating the welcome login screen, displaying the option to
+	 * create a new account or login to an existing account.
+	 * @return true if the user have clicked on the existing user button.
+	 * false if not.
+	 */
+	private final boolean updateLoginWelcomeScreen()
+	{
+		menuWelcome.updateActions();
+		if (menuWelcome.hasActivated(loginButtonNewUser))
+			loginScreenNumber = 1;
+		if (menuWelcome.hasActivated(loginButtonExistingUser))
+		{
+			loginScreenNumber = 2;
+			menuLogin.updateText(loginStatusText,
+					"Please enter your username and password");
+			menuLogin.updateText(loginUsernameTextBox, currentUser);
+			menuLogin.updateText(loginPasswordTextBox, currentPass);
+			menuLogin.setFocus(loginUsernameTextBox);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Handles updating the new user login screen, displaying information about how
+	 * to create a new account.
+	 * @return true if the user clicked on the 'OK' button in the new user menu.
+	 * false if not.
+	 */
+	private final boolean updateLoginNewScreen()
+	{
+		menuNewUser.updateActions();
+		if (menuNewUser.hasActivated(newUserOkButton))
+		{
+			//loginScreenNumber = 0; // menuWelcome
+			loginScreenNumber = 2;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Handles updating the exising user login screen, displaying the text fields
+	 * where the username and password should be enterd.
+	 * @return false.
+	 */
+	private final boolean updateExistingScreen()
+	{
+		menuLogin.updateActions();
+		if (menuLogin.hasActivated(loginCancelButton))
+		{
+			//loginScreenNumber = 0; // menuwelcome
+			loginScreenNumber = 1;
+		}
+		if (menuLogin.hasActivated(loginUsernameTextBox))
+			menuLogin.setFocus(loginPasswordTextBox);
+		if (menuLogin.hasActivated(loginPasswordTextBox)
+				|| menuLogin.hasActivated(loginOkButton))
+		{
+			currentUser = menuLogin.getText(loginUsernameTextBox);
+			currentPass = menuLogin.getText(loginPasswordTextBox);
+			login(currentUser, currentPass, false);
+		}
+		return false;
+	}
+
+	/**
+	 * Invokes the method that handles the current login scren.
+	 */
+	private final void updateLoginScreen()
+	{
+		if (super.socketTimeout > 0)
+			super.socketTimeout--;
+		if (loginScreenNumber == 0)
+		{
+			if (updateLoginWelcomeScreen())
+				return;
+		} else if (loginScreenNumber == 1)
+		{
+			if (updateLoginNewScreen())
+				return;
+		} else if (loginScreenNumber == 2)
+		{
+			if (updateExistingScreen())
+				return;
+		}
+	}
+
+	/**
+	 * Draws relevant sprites on the login screens. This includes the background
+	 * image itself.
+	 */
+	private final void drawLoginScreenSprites()
+	{
+		if (loginScreenNumber >= 0 && loginScreenNumber <= 3)
+		{
+			// background image
+			/*
+			gameGraphics.imageToPixArray(gameGraphics.loginScreen, 0, 0,
+					windowWidth, windowHeight, true);*/
+			gameGraphics.imageToPixArray(
+					FileOperations.readImage(
+							gameGraphics.sprites[3151].getPixels(),
+							gameGraphics.sprites[3151].getWidth(),
+							gameGraphics.sprites[3151].getHeight()),
+					0, 0, bounds.width, bounds.height, true);
+			// bottom right sprite
+			gameGraphics.drawPicture(0, 20, 2010);
+		}
+		// blue bar at the bottom
+		Sprite sprite;
+		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
+		int nSprites = bounds.width / sprite.getWidth();
+		int currentOffset = 0;
+		for (int i=0; i < nSprites; i++)
+		{
+			gameGraphics.drawPicture(currentOffset, bounds.height, SPRITE_MEDIA_START + 22);
+			currentOffset += sprite.getWidth();
+		}
+		if (bounds.width-nSprites*sprite.getWidth() != 0)
+		{
+			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), bounds.height,
+					bounds.width-nSprites*sprite.getWidth(),
+					sprite.getHeight(), SPRITE_MEDIA_START + 22);
+		}
+	}
+
+	/**
+	 * Draws the login screen background as well as the appropriate login menu.
+	 */
+	private final void drawLoginScreen()
+	{
+		hasReceivedWelcomeBoxDetails = false;
+		gameGraphics.lowDef = false;
+		gameGraphics.resetImagePixels(0);
+		drawLoginScreenSprites();
+		if (loginScreenNumber == 0)
+			menuWelcome.drawMenu(true);
+		if (loginScreenNumber == 1)
+			menuNewUser.drawMenu(true);
+		if (loginScreenNumber == 2)
+			menuLogin.drawMenu(true);
+		gameGraphics.drawImage(aGraphics936, 0, 0);
+	}
+
+	/**
+	 * Draws the main report abuse window.
+	 */
+	private final void drawAbuseWindow1()
+	{
+		abuseSelectedType = 1 + abWin.getSelectedType();
+
+		if (mv.buttonDown() && abuseSelectedType != 0) {
+			mv.releaseButton();
+			showAbuseWindow = 2;
+			super.inputText = "";
+			super.enteredText = "";
+			return;
+		}
+		if (mv.buttonDown()) {
+			mv.releaseButton();
+			if (!abWin.insideWindow()
+					|| abWin.insideCloseBtn())
+			{
+				showAbuseWindow = 0;
+				return;
+			}
+		}
+		gameGraphics.drawBox(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0);
+		gameGraphics.drawBoxEdge(abWin.getX(), abWin.getY(), abWin.getWidth(), abWin.getHeight(), 0xffffff);
+		String[] info = abWin.getInfo();
+		int rowY = abWin.getFirstLineY();
+		for (String str : info)
+		{
+			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffffff);
+			rowY += abWin.getRowSeparation();
+		}
+		String[] reportInfo = abWin.getReportInfo();
+		for (String str : reportInfo)
+		{
+			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1, 0xffff00);
+			rowY += abWin.getRowSeparation();
+		}
+		String[] rules = abWin.getRules();
+		int i = 0;
+		for (String str : rules)
+		{
+			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
+					abWin.getSelectedType() == i ? 0xff8000 : 0xffffff);
+			++i;
+			rowY += abWin.getRowSeparation();
+		}
+		int selectedType = abWin.getSelectedType();
+		if (selectedType != -1)
+		{
+			gameGraphics.drawBoxEdge(abWin.getBoxX(),
+					abWin.getFirstRuleY() + abWin.getRowYOffset()
+					+ abWin.getSelectedType()*abWin.getRowSeparation(),
+					abWin.getBoxWidth(), abWin.getRowSeparation(), 0xffffff);
+		}
+		String [] closeText = abWin.getCloseText();
+		for (String str : closeText)
+		{
+			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
+					abWin.insideCloseBtn() ? 0xffff00 : 0xffffff);
+			rowY += abWin.getRowSeparation();
+		}
+	}
+
+	private final void autoRotateCamera()
+	{
+		if ((cameraAutoAngle & 1) == 1 && enginePlayerVisible(cameraAutoAngle))
+			return;
+		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
+		{
+			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
+			{
+				cameraAutoAngle = cameraAutoAngle + 1 & 7;
+				return;
+			}
+			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
+				cameraAutoAngle = cameraAutoAngle + 7 & 7;
+			return;
+		}
+		int ai[] = {1, -1, 2, -2, 3, -3, 4};
+		for (int i = 0; i < ai.length; ++i)
+		{
+			if (!enginePlayerVisible(cameraAutoAngle + ai[i] + 8 & 7))
+				continue;
+			cameraAutoAngle = cameraAutoAngle + ai[i] + 8 & 7;
+			break;
+		}
+
+		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
+		{
+			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
+			{
+				cameraAutoAngle = cameraAutoAngle + 1 & 7;
+				return;
+			}
+			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
+				cameraAutoAngle = cameraAutoAngle + 7 & 7;
+		}
+	}
+
+	private final void loadConfigFilter()
+	{
+		drawLoadingBarText(15, "Unpacking Configuration");
+		EntityHandler.load();
+	}
+
+	private final void loadModel() throws IOException
+	{
+		ZipFile objectArchive = new ZipFile(new File(Config.DATABASE_DIR + "models.zip"));
+		try {
+			for (int j = 0; j < EntityHandler.getModelCount(); j++)
+			{
+				ZipEntry e = objectArchive.getEntry(String.valueOf(j));
+				if (e == null)
+				{
+					System.err.printf("Model %d missing!", j);
+					continue;
+				}
+
+				DataInputStream datainputstream = new DataInputStream(objectArchive.getInputStream(e));
+				byte entrySize[] = new byte[4];
+				datainputstream.readFully(entrySize, 0, 4);
+				int dataSize = ((entrySize[0] & 0xff) << 24)
+						+ ((entrySize[1] & 0xff) << 16)
+						+ ((entrySize[2] & 0xff) << 8)
+						+ (entrySize[3] & 0xff);
+				int offset = 0;
+				byte model[] = new byte[dataSize];
+				while (offset < dataSize)
+				{
+					int bufferSize = dataSize - offset;
+					if (bufferSize > 1000)
+					{
+						bufferSize = 1000;
+					}
+					datainputstream.readFully(model, offset, bufferSize);
+					offset += bufferSize;
+				}
+				datainputstream.close();
+				gameDataModels[j] = new Model(model, 0, true);
+				gameDataModels[j].transparent = EntityHandler.getModelName(j).equals("giantcrystal");
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally
+		{
+			objectArchive.close();
+		}
+	}
+
+	/**
+	 * Loads 3D models
+	 */
+	private final void loadModels()
+	{
+		drawLoadingBarText(75, "Loading 3d models");
+
+		String[] modelNames = {
+				"torcha2", "torcha3", "torcha4",
+				"skulltorcha2", "skulltorcha3", "skulltorcha4",
+				"firea2", "firea3",
+				"fireplacea2", "fireplacea3",
+				"firespell2", "firespell3",
+				"lightning2", "lightning3",
+				"clawspell2", "clawspell3", "clawspell4", "clawspell5",
+				"spellcharge2", "spellcharge3"
+		};
+		for (String name : modelNames)
+			EntityHandler.storeModel(name);
+		try
+		{
+			loadModel();
+		} catch (IOException ioe) { ioe.printStackTrace(); }
+	}
+
+	private final void displayLastLoadedNull()
+	{
+		Graphics g = getGraphics();
+		g.setColor(Color.black);
+		g.fillRect(0, 0, 512, 356);
+		g.setFont(new Font("Helvetica", 1, 16));
+		g.setColor(Color.yellow);
+		int i = 35;
+		g.drawString("Sorry, an error has occured whilst loading TestServer", 30, i);
+		i += 50;
+		g.setColor(Color.white);
+		g.drawString("To fix this try the following (in order):", 30, i);
+		i += 50;
+		g.setColor(Color.white);
+		g.setFont(new Font("Helvetica", 1, 12));
+		g.drawString("1: Try closing ALL open web-browser windows, and reloading", 30, i);
+		i += 30;
+		g.drawString("2: Try clearing your web-browsers cache from tools->internet options", 30, i);
+		i += 30;
+		g.drawString("3: Try using a different game-world", 30, i);
+		i += 30;
+		g.drawString("4: Try rebooting your computer", 30, i);
+		i += 30;
+		g.drawString("5: Try selecting a different version of Java from the play-game menu", 30, i);
+		changeThreadSleepModifier(1);
+		return;
+	}
+
+	private final void walkToObject(int x, int y, int id, int type)
+	{
+		int i1;
+		int j1;
+		if (id == 0 || id == 4)
+		{
+			i1 = EntityHandler.getObjectDef(type).getWidth();
+			j1 = EntityHandler.getObjectDef(type).getHeight();
+		}
+		else
+		{
+			j1 = EntityHandler.getObjectDef(type).getWidth();
+			i1 = EntityHandler.getObjectDef(type).getHeight();
+		}
+		if (EntityHandler.getObjectDef(type).getType() == 2
+				|| EntityHandler.getObjectDef(type).getType() == 3)
+		{
+			if (id == 0)
+			{
+				x--;
+				i1++;
+			}
+			if (id == 2)
+				j1++;
+			if (id == 4)
+				i1++;
+			if (id == 6)
+			{
+				y--;
+				j1++;
+			}
+			sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
+					(y + j1) - 1, false, true);
+			return;
+		}
+		else
+		{
+			sendWalkCommand(sectionX, sectionY, x, y, (x + i1) - 1,
+					(y + j1) - 1, true, true);
+			return;
+		}
+	}
+
+	/**
+	 * Presents the bank on the screen and handles clicking in the bank.
+	 */
+	private final void drawBankBox()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		mouseOverBankPageText = bankPan.updateVisibleBankTabs(mouseOverBankPageText, bankItemCount);
+		checkSelectedBankItem();
+		if (mv.buttonDown())
+		{
+			mv.releaseButton();
+			if (bankPan.getBankGrid().isMouseOverGrid())
+				clickBankItem();
+			else if (mouseX > bankPan.getBottomInfoBoxX()
+					&& mouseY > bankPan.getBottomInfoBoxY()
+					&& mouseX < (bankPan.getBottomInfoBoxX()
+							+ bankPan.getBottomInfoBoxWidth())
+					&& mouseY < (bankPan.getBottomInfoBoxY()
+							+ bankPan.getBottomInfoBoxHeight()))
+				clickBankItemMove();
+			else if (bankPan.getTabButtonPanel().isMouseOver())
+				mouseOverBankPageText = bankPan.switchBankTab(bankItemCount, mouseOverBankPageText);
+			else if (!bankPan.getFrame().isMouseOver()
+					|| (bankPan.getFrame().getCloseButton().isMouseOver()))
+			{
+				formatPacket(48, -1, -1);
+				return;
+			}
+		}
+		bankPan.getFrame().drawComponent();
+		bankPan.drawBankTabs(bankItemCount, mouseOverBankPageText);
+		bankPan.drawBankInfo();
+		InGameGrid bankGrid = bankPan.getBankGrid();
+		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
+		bankGrid.drawStorableGrid(self.getBankItems(), itemIdx, bankItemCount, bankPan.getBankCountTextColor(), selectedBankItem, self.getInventoryItems(), inventoryCount, 0x00ffff);
+		bankPan.drawBankDepWithPanel(self.getBankItems(), selectedBankItem, self.getInventoryItems(), inventoryCount);
+	}
+
+	/**
+	 * Displays a message that the player is logging out.
+	 */
+	private final void drawLoggingOutBox()
+	{
+		gameGraphics.drawBox(center.x - 130, center.y - 30, 260, 60, 0);
+		gameGraphics.drawBoxEdge(center.x - 130, center.y - 30, 260, 60, 0xffffff);
+		gameGraphics.drawText("Logging out...", center.x, center.y + 6, 5, 0xffffff);
+	}
+
+	private final void drawChatMessageTabs()
+	{
+		// blue bar at the botom
+		Sprite sprite;
+		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
+		int nSprites = bounds.width / sprite.getWidth();
+		int currentOffset = 0;
+		for (int i=0; i < nSprites; i++)
+		{
+			gameGraphics.drawPicture(currentOffset, bounds.height, SPRITE_MEDIA_START + 22);
+			currentOffset += sprite.getWidth();
+		}
+		if (bounds.width-nSprites*sprite.getWidth() != 0)
+		{
+			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), bounds.height,
+					bounds.width-nSprites*sprite.getWidth(),
+					sprite.getHeight(), SPRITE_MEDIA_START + 22);
+		}
+		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 23];
+		gameGraphics.drawPicture(0, bounds.height - 4, SPRITE_MEDIA_START + 23);
+
+		int i = GameImage.convertRGBToLong(200, 200, 255);
+		if (messagesTab == 0)
+			i = GameImage.convertRGBToLong(255, 200, 50);
+		if (anInt952 % 30 > 15)
+			i = GameImage.convertRGBToLong(255, 50, 50);
+		int buttonWidth = 82;
+		int j = 14 + buttonWidth/2;
+		gameGraphics.drawText("All messages", j, bounds.height + 6, 0, i);
+		i = GameImage.convertRGBToLong(200, 200, 255);
+		if (messagesTab == 1)
+			i = GameImage.convertRGBToLong(255, 200, 50);
+		if (anInt953 % 30 > 15)
+			i = GameImage.convertRGBToLong(255, 50, 50);
+		j += 99;
+		gameGraphics.drawText("Chat history", j, bounds.height + 6, 0, i);
+		i = GameImage.convertRGBToLong(200, 200, 255);
+		if (messagesTab == 2)
+			i = GameImage.convertRGBToLong(255, 200, 50);
+		if (anInt954 % 30 > 15)
+			i = GameImage.convertRGBToLong(255, 50, 50);
+		j += 101;
+		gameGraphics.drawText("Quest history", j, bounds.height + 6, 0, i);
+		i = GameImage.convertRGBToLong(200, 200, 255);
+		if (messagesTab == 3)
+			i = GameImage.convertRGBToLong(255, 200, 50);
+		if (anInt955 % 30 > 15)
+			i = GameImage.convertRGBToLong(255, 50, 50);
+		j += 101;
+		gameGraphics.drawText("Private history", j, bounds.height + 6, 0, i);
+		j += 101;
+		gameGraphics.drawText("Report abuse", j, bounds.height + 6, 0, 0xffffff);
+	}
+
+	/**
+	 * draw the sprites for character design menu
+	 */
+	private final void method62()
+	{
+		gameGraphics.lowDef = false;
+		gameGraphics.resetImagePixels(0);
+		chrDesignMenu.drawMenu(true);
+		int i = center.x - 116;
+		int j = center.y - 117;
+		i += 116;
+		j -= 25;
+		gameGraphics.spriteClip3(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber(), chrTopBottomClrs[chrBottomClr]);
+		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber(), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber(), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip3(i - 32, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 6, chrTopBottomClrs[chrBottomClr]);
+		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 6, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 6, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip3((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 12, chrTopBottomClrs[chrBottomClr]);
+		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 12, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 12, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+
+		// blue bar at the botom
+		Sprite sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 22];
+		int nSprites = bounds.width / sprite.getWidth();
+		int currentOffset = 0;
+		for (int n=0; n < nSprites; n++)
+		{
+			gameGraphics.drawPicture(currentOffset, bounds.height, SPRITE_MEDIA_START + 22);
+			currentOffset += sprite.getWidth();
+		}
+		if (bounds.width-nSprites*sprite.getWidth() != 0)
+		{
+			gameGraphics.spriteClip1(nSprites*sprite.getWidth(), bounds.height,
+					bounds.width-nSprites*sprite.getWidth(),
+					sprite.getHeight(), SPRITE_MEDIA_START + 22);
+		}
+		gameGraphics.drawPicture(0, bounds.height, SPRITE_MEDIA_START + 22);
+		gameGraphics.drawImage(aGraphics936, 0, 0);
+	}
+
+	private final Mob makePlayer(int mobArrayIndex, double x, double y, int sprite) {
+		
+		if (mobArray.get(mobArrayIndex) == null) {
+			mobArray.set(mobArrayIndex, new Mob());
+			mobArray.get(mobArrayIndex).serverIndex = mobArrayIndex;
+			mobArray.get(mobArrayIndex).mobIntUnknown = 0;
+		}
+		Mob mob = mobArray.get(mobArrayIndex);
+		boolean flag = false;
+		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
+			if (itr.next().serverIndex != mobArrayIndex)
+				continue;
+			flag = true;
+			break;
+		}
+
+		if (flag) {
+			mob.nextSprite = sprite;
+			int j1 = mob.waypointCurrent;
+			if (x != mob.waypointsX[j1] || y != mob.waypointsY[j1]) {
+				mob.waypointCurrent = j1 = (j1 + 1) % 10;
+				mob.waypointsX[j1] = x;
+				mob.waypointsY[j1] = y;
+			}
+		} else {
+			mob.serverIndex = mobArrayIndex;
+			mob.waypointEndSprite = 0;
+			mob.waypointCurrent = 0;
+			mob.waypointsX[0] = mob.currentX = x;
+			mob.waypointsY[0] = mob.currentY = y;
+			mob.nextSprite = mob.currentSprite = sprite;
+			mob.stepCount = 0;
+		}
+		playerArray.add(mob);
+		return mob;
+	}
+
+	private final void drawWelcomeBox()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		int boxHeight = 65;
+		if (!lastLoggedInAddress.equals("0.0.0.0"))
+			boxHeight += 30;
+		if (subscriptionLeftDays > 0)
+			boxHeight += 15;
+		int j = center.y - boxHeight / 2;
+		gameGraphics.drawBox(center.x - 200, center.y - boxHeight / 2, 400, boxHeight, 0);
+		gameGraphics.drawBoxEdge(center.x - 200, center.y - boxHeight / 2, 400, boxHeight, 0xffffff);
+		j += 20;
+		gameGraphics.drawText("Welcome to TestServer " + currentUser, center.x, j, 4, 0xffff00);
+		j += 30;
+		String s;
+		if (lastLoggedInDays == 0)
+			s = "earlier today";
+		else if (lastLoggedInDays == 1)
+			s = "yesterday";
+		else
+			s = lastLoggedInDays + " days ago";
+		if (!lastLoggedInAddress.equals("0.0.0.0")) {
+			gameGraphics.drawText("You last logged in " + s, center.x, j, 1, 0xffffff);
+			j += 15;
+			gameGraphics.drawText("from: " + lastLoggedInAddress, center.x, j, 1, 0xffffff);
+			j += 15;
+		}
+		if (subscriptionLeftDays > 0) {
+			gameGraphics.drawText("Subscription Left: " + subscriptionLeftDays + " days", center.x, j, 1, 0xffffff);
+			j += 15;
+		}
+		int l = 0xffffff;
+		if (mouseY > j - 12 && mouseY <= j
+				&& mouseX > center.x - 150
+				&& mouseX < center.x + 150)
+			l = 0xff0000;
+		gameGraphics.drawText("Click here to close window", center.x, j, 1, l);
+		if (mv.leftDown()) {
+			if (l == 0xff0000)
+				showWelcomeBox = false;
+			if ((mouseX < center.x - 170
+					|| mouseX > center.x + 170)
+					&& (mouseY < center.y - boxHeight / 2
+							|| mouseY > center.y + boxHeight / 2))
+				showWelcomeBox = false;
+		}
+		mv.releaseButton();
+	}
+
+	private final void logout() {
+		if (!loggedIn) {
+			return;
+		}
+		if (lastWalkTimeout > 450) {
+			displayMessage("@cya@You can't logout during combat!", 3, 0);
+			return;
+		}
+		if (lastWalkTimeout > 0) {
+			displayMessage("@cya@You can't logout for 10 seconds after combat", 3, 0);
+			return;
+		}
+		super.streamClass.createPacket(129);
+		super.streamClass.writePktSize();
+		logoutTimeout = 1000;
+	}
+
+	private final void drawPlayerInfoMenu(boolean flag)
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		plrPan.getFrame().drawComponent();
+		drawInfoPanel();
+		if (anInt826 == 0)
+			drawStatsTab();
+		if (anInt826 == 1)
+			drawQuestsTab();
+		if (!flag)
+		{
+			return;
+		}
+		if (plrPan.isMouseOver())
+		{
+			if (mouseY <= plrPan.getY() + plrPan.getTabHeight() && mv.leftDown())
+			{
+				mv.releaseButton();
+				if (mouseX < plrPan.getX() + plrPan.getWidth()/2)
+				{
+					anInt826 = 0;
+					return;
+				}
+				if (mouseX > plrPan.getX() + plrPan.getWidth()/2)
+				{
+					anInt826 = 1;
+				}
+			}
+			else if (mouseY > plrPan.getY() + plrPan.getTabHeight())
+			{
+				if (anInt826 == 0)
+				{
+					//handle clicking on skills and combat stats
+				}
+				else if (anInt826 == 1)
+				{
+					/* TODO: Find out why the scroll bar does not work for quest menu
+					 * but it does for magic menu. I fixed it now by increasing the
+					 * visible scroll area to twice the width of the scroll bar.
+					 */ 
+					questMenu.updateActions();
+					mv.releaseButton();
+				}
+				mv.releaseButton();
+			}
+		}
+		else if (plrPan.getFrame().getCloseButton().isMouseOver())
+		{ // close button
+			if (mv.leftDown())
+			{
+				om.close(OpenMenu.STATS);
+				mv.releaseButton();
+			}
+		}
+		else if (plrPan.getFrame().isMouseOver())
+		{ // click inside info panel but not on the content or close button
+			if (mv.leftDown())
+				mv.releaseButton();
+		}
+	}
+	/*
+    private final void drawPlayerInfoMenu(boolean flag) {
+        int i = ((GameImage) (gameGraphics)).menuDefaultWidth - 199;
+        int j = 36;
+        gameGraphics.drawPicture(i - 49, 3, SPRITE_MEDIA_START + 3);
+        char c = '\304';
+        char c1 = '\u0113';
+        int l;
+        int k = l = GameImage.convertRGBToLong(160, 160, 160);
+        if (anInt826 == 0)
+            k = GameImage.convertRGBToLong(220, 220, 220);
+        else
+            l = GameImage.convertRGBToLong(220, 220, 220);
+        gameGraphics.drawBoxAlpha(i, j, c / 2, 24, k, 128);
+        gameGraphics.drawBoxAlpha(i + c / 2, j, c / 2, 24, l, 128);
+        gameGraphics.drawBoxAlpha(i, j + 24, c, c1 - 24, GameImage.convertRGBToLong(220, 220, 220), 128);
+        gameGraphics.drawLineX(i, j + 24, c, 0);
+        gameGraphics.drawLineY(i + c / 2, j, 24, 0);
+        gameGraphics.drawText("Stats", i + c / 4, j + 16, 4, 0);
+        gameGraphics.drawText("Info", i + c / 4 + c / 2, j + 16, 4, 0);
+        if (anInt826 == 0) {
+            int i1 = 72;
+            int k1 = -1;
+            gameGraphics.drawString("Skills", i + 5, i1, 3, 0xffff00);
+            i1 += 13;
+            gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%", (i + c / 2) - 5, i1 - 13, 1, 0xffffff);
+            for (int l1 = 0; l1 < 9; l1++) {
+                int i2 = 0xffffff;
+                if (super.mouseX > i + 3 && super.mouseY >= i1 - 11 && super.mouseY < i1 + 2 && super.mouseX < i + 90) {
+                    i2 = 0xff0000;
+                    k1 = l1;
+                }
+                gameGraphics.drawString(skillArray[l1] + ":@yel@" + playerStatCurrent[l1] + "/" + playerStatBase[l1], i + 5, i1, 1, i2);
+                i2 = 0xffffff;
+                if (super.mouseX >= i + 90 && super.mouseY >= i1 - 11 && super.mouseY < i1 + 2 && super.mouseX < i + 196) {
+                    i2 = 0xff0000;
+                    k1 = l1 + 9;
+                }
+                gameGraphics.drawString(skillArray[l1 + 9] + ":@yel@" + playerStatCurrent[l1 + 9] + "/" + playerStatBase[l1 + 9], (i + c / 2) - 5, i1, 1, i2);
+                i1 += 13;
+            }
+
+            i1 += 8;
+            gameGraphics.drawString("Equipment Status", i + 5, i1, 3, 0xffff00);
+            i1 += 12;
+            for (int j2 = 0; j2 < 3; j2++) {
+                gameGraphics.drawString(equipmentStatusName[j2] + ":@yel@" + equipmentStatus[j2], i + 5, i1, 1, 0xffffff);
+                gameGraphics.drawString(equipmentStatusName[j2 + 3] + ":@yel@" + equipmentStatus[j2 + 3], i + c / 2 + 25, i1, 1, 0xffffff);
+                i1 += 13;
+            }
+
+            i1 += 6;
+            gameGraphics.drawLineX(i, i1 - 15, c, 0);
+            if (k1 != -1) {
+                gameGraphics.drawString(skillArrayLong[k1] + " skill", i + 5, i1, 1, 0xffff00);
+                i1 += 12;
+                int k2 = experienceArray[0];
+                for (int i3 = 0; i3 < 98; i3++)
+                    if (playerStatExperience[k1] >= experienceArray[i3])
+                        k2 = experienceArray[i3 + 1];
+
+                gameGraphics.drawString("Total xp: " + playerStatExperience[k1], i + 5, i1, 1, 0xffffff);
+                i1 += 12;
+                gameGraphics.drawString("Next level at: " + k2, i + 5, i1, 1, 0xffffff);
+                i1 += 12;
+                gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]), i + 5, i1, 1, 0xffffff);
+            } else {
+                gameGraphics.drawString("Overall levels", i + 5, i1, 1, 0xffff00);
+                i1 += 12;
+                int skillTotal = 0;
+                long expTotal = 0;
+                for (int j3 = 0; j3 < 18; j3++) {
+                    skillTotal += playerStatBase[j3];
+                    expTotal += playerStatExperience[j3];
+                }
+                gameGraphics.drawString("Skill total: " + skillTotal, i + 5, i1, 1, 0xffffff);
+                i1 += 12;
+                gameGraphics.drawString("Total xp: " + expTotal, i + 5, i1, 1, 0xffffff);
+                i1 += 12;
+                gameGraphics.drawString("Combat level: " + self.me.level, i + 5, i1, 1, 0xffffff);
+            }
+        }
+        if (anInt826 == 1) {
+            int i1 = 72; // Player Info
+            gameGraphics.drawString("Player Info", i + 5, i1, 3, 0xffff00);
+            i1 += 13;
+            gameGraphics.drawString("Username:@yel@ " + self.me.name, i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Coords:@yel@ (" + (sectionX + areaX) + ", " + (sectionY + areaY) + ")", i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Server Index:@yel@ " + self.me.serverIndex, i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Exp Gained:@yel@ " + (expGained > 1000 ? (expGained / 1000) + "k" : expGained), i + 5, i1, 1, 0xffffff);
+            if (!lastLoggedInAddress.equals("0.0.0.0")) {
+                i1 += 13;
+                gameGraphics.drawString("Last IP:@yel@ " + lastLoggedInAddress, i + 5, i1, 1, 0xffffff);
+            }
+            i1 += 21; // Client Info
+            gameGraphics.drawString("Client Info", i + 5, i1, 3, 0xffff00);
+            i1 += 13;
+            gameGraphics.drawString("Hostname:@yel@ " + localhost, i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Uptime:@yel@ " + timeSince(startTime), i + 5, i1, 1, 0xffffff);
+            i1 += 21; // Server Info
+            gameGraphics.drawString("Server Info", i + 5, i1, 3, 0xffff00);
+            i1 += 13;
+            gameGraphics.drawString("Hostname:@yel@ " + Config.SERVER_IP, i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Uptime:@yel@ " + timeSince(serverStartTime), i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+            gameGraphics.drawString("Location:@yel@ " + serverLocation, i + 5, i1, 1, 0xffffff);
+            i1 += 13;
+        }
+        if (!flag) {
+            return;
+        }
+        i = super.mouseX - (((GameImage) (gameGraphics)).menuDefaultWidth - 199);
+        j = super.mouseY - 36;
+        if (i >= 0 && j >= 0 && i < c && j < c1) {
+            if (j <= 24 && mouseButtonClick == 1) {
+                if (i < 98) {
+                    anInt826 = 0;
+                    return;
+                }
+                if (i > 98) {
+                    anInt826 = 1;
+                }
+            }
+        }
+    }
+	 */
+	private final void drawWildernessWarningBox()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		int i = 97;
+		gameGraphics.drawBox(86, 77, 340, 180, 0);
+		gameGraphics.drawBoxEdge(86, 77, 340, 180, 0xffffff);
+		gameGraphics.drawText("Warning! Proceed with caution", 256, i, 4, 0xff0000);
+		i += 26;
+		gameGraphics.drawText("If you go much further north you will enter the", 256, i, 1, 0xffffff);
+		i += 13;
+		gameGraphics.drawText("wilderness. This a very dangerous area where", 256, i, 1, 0xffffff);
+		i += 13;
+		gameGraphics.drawText("other players can attack you!", 256, i, 1, 0xffffff);
+		i += 22;
+		gameGraphics.drawText("The further north you go the more dangerous it", 256, i, 1, 0xffffff);
+		i += 13;
+		gameGraphics.drawText("becomes, but the more treasure you will find.", 256, i, 1, 0xffffff);
+		i += 22;
+		gameGraphics.drawText("In the wilderness an indicator at the bottom-right", 256, i, 1, 0xffffff);
+		i += 13;
+		gameGraphics.drawText("of the screen will show the current level of danger", 256, i, 1, 0xffffff);
+		i += 22;
+		int j = 0xffffff;
+		if (mouseY > i - 12 && mouseY <= i
+				&& mouseX > 181 && mouseX < 331)
+			j = 0xff0000;
+		gameGraphics.drawText("Click here to close window", 256, i, 1, j);
+		if (mv.buttonDown()) {
+			if (mouseY > i - 12 && mouseY <= i
+					&& mouseX > 181 && mouseX < 331)
+				wildernessType = 2;
+			if (mouseX < 86 || mouseX > 426 || mouseY < 77 || mouseY > 257)
+				wildernessType = 2;
+			mv.releaseButton();
+		}
+	}
+
+	private final void checkMouseOverMenus()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		if (mv.leftDown()
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{
+			mv.releaseButton();
+			switch((mouseX - gameWindowMenuBarX) / gameWindowMenuBarItemWidth)
+			{
+			case 5: om.toggle(OpenMenu.INVENTORY);
+				break;
+			case 3: om.toggle(OpenMenu.STATS);
+				break;
+			case 2: om.toggle(OpenMenu.SPELLS);
+				break;
+			case 1: om.toggle(OpenMenu.FRIENDS);
+				break;
+			case 0: om.toggle(OpenMenu.SETTINGS);
+				break;
+			}
+		}
+		/*
+		if (mv.leftDown()
+				&& mouseX >= gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // iventory
+			om.toggle(OpenMenu.INVENTORY);
+			mv.releaseButton();
+		}
+		if (mouseX >= gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + 5*gameWindowMenuBarItemWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // map
+			mv.releaseButton();
+		}
+		if (mv.leftDown()
+				&& mouseX >= gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + 4*gameWindowMenuBarItemWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // stats
+			om.toggle(OpenMenu.STATS);
+			mv.releaseButton();
+		}
+		if (mv.leftDown()
+				&& mouseX >= gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + 3*gameWindowMenuBarItemWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // spells
+			om.toggle(OpenMenu.SPELLS);
+			mv.releaseButton();
+		}
+		if (mv.leftDown()
+				&& mouseX >= gameWindowMenuBarX + gameWindowMenuBarItemWidth
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + 2*gameWindowMenuBarItemWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // friends
+			om.toggle(OpenMenu.FRIENDS);
+			mv.releaseButton();
+		}
+		if (mv.leftDown()
+				&& mouseX >= gameWindowMenuBarX
+				&& mouseY >= gameWindowMenuBarY
+				&& mouseX < gameWindowMenuBarX + gameWindowMenuBarItemWidth
+				&& mouseY < gameWindowMenuBarY + gameWindowMenuBarHeight)
+		{ // settings when some menu is open
+			om.toggle(OpenMenu.SETTINGS);
+			mv.releaseButton();
+		}
+		*/
+	}
+
+	private final void menuClick(MenuRightClick clickedItem)
+	{
+		int actionX = (int) clickedItem.actionX;
+		int actionY = (int) clickedItem.actionY;
+		int actionType = clickedItem.actionType;
+		int actionVariable = clickedItem.actionVariable;
+		int actionVariable2 = clickedItem.actionVariable2;
+		int currentMenuID = clickedItem.id;
+		if (currentMenuID == 200) {
+			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
+			super.streamClass.createPacket(104);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 210) {
+			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
+			super.streamClass.createPacket(34);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 220) {
+			walkToGroundItem(sectionX, sectionY, actionX, actionY, true);
+			super.streamClass.createPacket(245);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 3200)
+			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
+		if (currentMenuID == 300) {
+			walkToAction(actionX, actionY, actionType);
+			super.streamClass.createPacket(67);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.addByte(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 310) {
+			walkToAction(actionX, actionY, actionType);
+			super.streamClass.createPacket(36);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.addByte(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 320) {
+			walkToAction(actionX, actionY, actionType);
+			super.streamClass.createPacket(126);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.addByte(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 2300) {
+			walkToAction(actionX, actionY, actionType);
+			super.streamClass.createPacket(235);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.addByte(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 3300)
+			displayMessage(EntityHandler.getDoorDef(actionType).getDescription(), 3, 0);
+		if (currentMenuID == 400) {
+			walkToObject(actionX, actionY, actionType, actionVariable);
+			super.streamClass.createPacket(17);
+			super.streamClass.add2ByteInt(actionVariable2);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 410) {
+			walkToObject(actionX, actionY, actionType, actionVariable);
+			super.streamClass.createPacket(94);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.add2ByteInt(actionVariable2);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 420) {
+			walkToObject(actionX, actionY, actionType, actionVariable);
+			super.streamClass.createPacket(51);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 2400) {
+			walkToObject(actionX, actionY, actionType, actionVariable);
+			super.streamClass.createPacket(40);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 3400)
+			displayMessage(EntityHandler.getObjectDef(actionType).getDescription(), 3, 0);
+		if (currentMenuID == 600) {
+			super.streamClass.createPacket(49);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 610) {
+			super.streamClass.createPacket(27);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 620) {
+			super.streamClass.createPacket(92);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 630) {
+			super.streamClass.createPacket(181);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 640) {
+			super.streamClass.createPacket(89);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 650)
+		{ /* selecting item it seems */
+			selItem = new SelectedItem(actionType,
+					self.getInventoryItems().get(actionType));
+		}
+		if (currentMenuID == 660)
+		{ /* dropping an item */
+			super.streamClass.createPacket(147);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selItem = null;
+			displayMessage("Dropping " + self.getInventoryItems().get(actionType).getName(), 4, 0);
+		}
+		if (currentMenuID == 3600)
+		{ /* examine */
+			displayMessage(EntityHandler.getItemDef(actionType).getDescription(), 3, 0);
+		}
+		if (currentMenuID == 700) {
+			walkTo(sectionX, sectionY, actionX, actionX, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(71);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 710) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(142);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 720) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(177);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 725) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(74);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 715 || currentMenuID == 2715) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(73);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 3700)
+			displayMessage(EntityHandler.getNpcDef(actionType).getDescription(), 3, 0);
+		if (currentMenuID == 800) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(55);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 810) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(16);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionVariable);
+			super.streamClass.writePktSize();
+			selItem = null;
+		}
+		if (currentMenuID == 805 || currentMenuID == 2805) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(57);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 2806) {
+			super.streamClass.createPacket(222);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 2810) {
+			super.streamClass.createPacket(166);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 2820) {
+			super.streamClass.createPacket(68);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+		}
+		if (currentMenuID == 900) {
+			walkTo(sectionX, sectionY, actionX, actionY, true);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			super.streamClass.createPacket(232);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.add2ByteInt(actionX + areaX);
+			super.streamClass.add2ByteInt(actionY + areaY);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 920) {
+			walkTo(sectionX, sectionY, actionX, actionY, false);
+			mapClick.x = -1;
+			mapClick.y = -1;
+			if (actionPictureType == -24)
+				actionPictureType = 24;
+		}
+		if (currentMenuID == 1000) {
+			super.streamClass.createPacket(206);
+			super.streamClass.add2ByteInt(actionType);
+			super.streamClass.writePktSize();
+			selSpell = null;
+		}
+		if (currentMenuID == 4000) {
+			selItem = null;
+			selSpell = null;
+		}
+	}
+
+	private final Model makeModel(int x, int y, int k, int l, int i1) {
+		int modelX = x;
+		int modelY = y;
+		int modelX1 = x;
+		int modelX2 = y;
+		int texture1 = EntityHandler.getDoorDef(l).getTexture1();
+		int texture2 = EntityHandler.getDoorDef(l).getTexture2();
+		double height = EntityHandler.getDoorDef(l).getHeight();
+		Model model = new Model(4, 1);
+		if (k == 0)
+			modelX1 = x + 1;
+		if (k == 1)
+			modelX2 = y + 1;
+		if (k == 2) {
+			modelX = x + 1;
+			modelX2 = y + 1;
+		}
+		if (k == 3) {
+			modelX1 = x + 1;
+			modelX2 = y + 1;
+		}
+		int p0 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
+		int p1 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - height, modelY);
+		int p2 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - height, modelX2);
+		int p3 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
+		int surface[] = {
+				p0, p1, p2, p3
+		};
+		model.addSurface(4, surface, texture1, texture2);
+		model.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
+		if (x >= 0 && y >= 0
+				&& x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+				&& y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+		{
+			gameCamera.addModel(model);
+		}
+		model.index = i1 + 10000;
+		return model;
+	}
+
+	private final void resetLoginVars() {
+		loggedIn = false;
+		//loginScreenNumber = 0; // menuwelcome
+		loginScreenNumber = 2;
+		currentUser = "";
+		currentPass = "";
+		playerArray.clear();
+		npcArray.clear();
+	}
+
+	private final void drawGame() {
+		long now = System.currentTimeMillis();
+		if (recording && now - lastFrame > (1000 / Config.MOVIE_FPS)) {
+			try {
+				lastFrame = now;
+				frames.add(getImage());
+			}
+			catch (Exception e) {
+			}
+		}
+		if (playerAliveTimeout != 0) {
+			gameGraphics.fadePixels();
+			gameGraphics.drawText("Oh dear! You are dead...", bounds.width / 2, bounds.height / 2, 7, 0xff0000);
+			drawChatMessageTabs();
+			gameGraphics.drawImage(aGraphics936, 0, 0);
+			return;
+		}
+		if (showCharacterLookScreen) {
+			method62();
+			return;
+		}
+		if (!engineHandle.playerIsAlive) {
+			return;
+		}
+		for (int i = 0; i < 64; i++)
+		{ // draw other height sectors
+			gameCamera.removeModel(engineHandle.roofs[sectorHeight][i]);
+			if (sectorHeight == 0) {
+				gameCamera.removeModel(engineHandle.walls[1][i]);
+				gameCamera.removeModel(engineHandle.roofs[1][i]);
+				gameCamera.removeModel(engineHandle.walls[2][i]);
+				gameCamera.removeModel(engineHandle.roofs[2][i]);
+			}
+			zoomCamera = true;
+			if (sectorHeight == 0 && (engineHandle.walkableValue[(int)self.me.currentX][(int)self.me.currentY] & EngineHandle.WALKABLE_INDOORS) == 0)
+			{
+				if (showRoof) {
+					gameCamera.addModel(engineHandle.roofs[sectorHeight][i]);
+					if (sectorHeight == 0) {
+						gameCamera.addModel(engineHandle.walls[1][i]);
+						gameCamera.addModel(engineHandle.roofs[1][i]);
+						gameCamera.addModel(engineHandle.walls[2][i]);
+						gameCamera.addModel(engineHandle.roofs[2][i]);
+					}
+				}
+				zoomCamera = false;
+			}
+		}
+
+		if (modelFireLightningSpellNumber != anInt742) {
+			anInt742 = modelFireLightningSpellNumber;
+			int j = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); j++)
+			{
+				GameObject gObj = itr.next();
+				if (gObj.type == 97)
+					animateObject(j, "firea" + (modelFireLightningSpellNumber + 1));
+				if (gObj.type == 274)
+					animateObject(j, "fireplacea" + (modelFireLightningSpellNumber + 1));
+				if (gObj.type == 1031)
+					animateObject(j, "lightning" + (modelFireLightningSpellNumber + 1));
+				if (gObj.type == 1036)
+					animateObject(j, "firespell" + (modelFireLightningSpellNumber + 1));
+				if (gObj.type == 1147)
+					animateObject(j, "spellcharge" + (modelFireLightningSpellNumber + 1));
+			}
+		}
+		if (modelTorchNumber != anInt743) {
+			anInt743 = modelTorchNumber;
+			int k = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); k++)
+			{
+				GameObject gObj = itr.next();
+				if (gObj.type == 51)
+					animateObject(k, "torcha" + (modelTorchNumber + 1));
+				if (gObj.type == 143)
+					animateObject(k, "skulltorcha" + (modelTorchNumber + 1));
+			}
+		}
+		if (modelClawSpellNumber != anInt744) {
+			anInt744 = modelClawSpellNumber;
+			int l = 0;
+			for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); l++)
+			{
+				if (itr.next().type == 1142)
+					animateObject(l, "clawspell" + (modelClawSpellNumber + 1));
+			}
+		}
+		gameCamera.updateFightCount(fightCount);
+		fightCount = 0;
+		int i1 = 0;
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext(); i1++) {
+			Mob mob = itr.next();
+			if (mob.colourBottomType != 255) {
+				double x = mob.currentX;
+				double y = mob.currentY;
+				double z = -engineHandle.getAveragedElevation(x, y);
+				double mobWidth = 1.1328125D;
+				double mobHeight = 1.71875D;
+				int l3 = gameCamera.add2DModel(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
+				fightCount++;
+				if (mob == self.me)
+					gameCamera.setOurPlayer(l3);
+				if (mob.currentSprite == 8)
+					gameCamera.setCombat(l3, -30);
+				if (mob.currentSprite == 9)
+					gameCamera.setCombat(l3, 30);
+			}
+		}
+
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();) {
+			Mob player = itr.next();
+			if (player.anInt176 > 0) {
+				Mob npc = null;
+				if (player.attackingNpcIndex != -1)
+					npc = npcRecordArray.get(player.attackingNpcIndex);
+				else if (player.attackingMobIndex != -1)
+					npc = mobArray.get(player.attackingMobIndex);
+				if (npc != null) {
+					double px = player.currentX;
+					double py = player.currentY;
+					double pz = -engineHandle.getAveragedElevation(px, py) - 0.859375D;
+					double nx = npc.currentX;
+					double ny = npc.currentY;
+					double nz = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getHeight() / 2;
+					double i10 = (px * player.anInt176 + nx * (attackingInt40 - player.anInt176)) / attackingInt40;
+					double j10 = (pz * player.anInt176 + nz * (attackingInt40 - player.anInt176)) / attackingInt40;
+					double k10 = (py * player.anInt176 + ny * (attackingInt40 - player.anInt176)) / attackingInt40;
+					double mobWidth = 0.25D;
+					double mobHeight = 0.25D;
+					gameCamera.add2DModel(SPRITE_PROJECTILE_START + player.attackingCameraInt,
+							i10, j10, k10, mobWidth, mobHeight, 0);
+					fightCount++;
+				}
+			}
+		}
+
+		int l1 = 0;
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext(); l1++) {
+			Mob npc = itr.next();
+			double mobx = npc.currentX;
+			double moby = npc.currentY;
+			double mobz = -engineHandle.getAveragedElevation(mobx, moby);
+			double mobWidth = EntityHandler.getNpcDef(npc.type).getWidth();
+			double mobHeight = EntityHandler.getNpcDef(npc.type).getHeight();
+			int i9 = gameCamera.add2DModel(20000 + l1, mobx, mobz, moby,
+					mobWidth, mobHeight, l1 + 30000);
+			fightCount++;
+			if (npc.currentSprite == 8)
+				gameCamera.setCombat(i9, -30);
+			if (npc.currentSprite == 9)
+				gameCamera.setCombat(i9, 30);
+		}
+		for (int j2 = 0; j2 < groundItemCount; j2++) {
+			double x = groundItemX[j2] + 0.5;
+			double y = groundItemY[j2] + 0.5;
+			double mobWidth = 0.75D;
+			double mobHeight = 0.5D;
+			gameCamera.add2DModel(40000 + groundItemType[j2], x,
+					-engineHandle.getAveragedElevation(x, y) - groundItemZ[j2],
+					y, mobWidth, mobHeight, j2 + 20000);
+			fightCount++;
+		}
+
+		for (int k3 = 0; k3 < anInt892; k3++) {
+			double x = anIntArray944[k3] + 0.5;
+			double y = anIntArray757[k3] + 0.5;
+			int j9 = anIntArray782[k3];
+			double mobWidth = 1D;
+			double mobHeight = 0D;
+			if (j9 == 0)
+				mobHeight = 2D;
+			if (j9 == 1)
+				mobHeight = 0.5D;
+			gameCamera.add2DModel(50000 + k3, x, -engineHandle.getAveragedElevation(x, y),
+					y, mobWidth, mobHeight, k3 + 50000);
+			fightCount++;
+		}
+
+		gameGraphics.lowDef = false;
+		if (sectorHeight == 3)
+			gameGraphics.resetImagePixels(0);
+		else
+			gameGraphics.resetImagePixels(GameImage.BACKGROUND);
+		gameGraphics.lowDef = super.keyF1Toggle;
+		if (sectorHeight == 3)
+		{ // underground, flickering light
+			int globalLight = 40 + (int) (Math.random() * 3D);
+			int featureLight = 40 + (int) (Math.random() * 7D);
+			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
+		}
+		anInt699 = 0;
+		mobMessageCount = 0;
+		hitpoints.clear();
+		if (freeCamera)
+		{
+			handleCharacterControlBinds();
+		}
+		if (cameraAutoAngleDebug) {
+			if (configAutoCameraAngle && !zoomCamera) {
+				int lastCameraAutoAngle = cameraAutoAngle;
+				autoRotateCamera();
+				if (cameraAutoAngle != lastCameraAutoAngle) {
+					lastAutoCameraRotatePlayerX = self.me.currentX;
+					lastAutoCameraRotatePlayerY = self.me.currentY;
+				}
+			}
+			cameraZRot = cameraAutoAngle * 128;
+			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
+			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
+			gameCamera.setCamera(plrX,
+					-engineHandle.getAveragedElevation(plrX, plrY),
+					plrY, cameraXRot, cameraZRot, 0,
+					15.625D, cameraZoom);
+		} else {
+			if (configAutoCameraAngle && !zoomCamera)
+				autoRotateCamera();
+			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
+			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
+			gameCamera.setCamera(plrX,
+					-engineHandle.getAveragedElevation(plrX, plrY),
+					plrY, cameraXRot, cameraZRot, 0,
+					cameraHeight, cameraZoom);
+			/*
+			gameCamera.setCamera(self.me.currentX,
+					-engineHandle.getAveragedElevation(
+							self.me.currentX, self.me.currentY),
+					self.me.currentY, cameraXRot, cameraZRot, 0,
+					cameraHeight, cameraZoom);*/
+		}
+		gameCamera.finishCamera();
+		method119();
+		if (actionPictureType > 0)
+			gameGraphics.drawPicture(actionPictureX - 8, actionPictureY - 8, SPRITE_MEDIA_START + 14 + (24 - actionPictureType) / 6);
+		if (actionPictureType < 0)
+			gameGraphics.drawPicture(actionPictureX - 8, actionPictureY - 8, SPRITE_MEDIA_START + 18 + (24 + actionPictureType) / 6);
+		if (systemUpdate != 0) {
+			int i6 = systemUpdate / 50;
+			int j8 = i6 / 60;
+			i6 %= 60;
+			if (i6 < 10)
+				gameGraphics.drawText("System update in: " + j8 + ":0" + i6, 256, bounds.height - 7, 1, 0xffff00);
+			else
+				gameGraphics.drawText("System update in: " + j8 + ":" + i6, 256, bounds.height - 7, 1, 0xffff00);
+		}
+		if (!notInWilderness) {
+			int j6 = 2203 - (sectionY + wildY + areaY);
+			if (sectionX + wildX + areaX >= 2640)
+				j6 = -50;
+			if (j6 > 0) {
+				int k8 = 1 + j6 / 6;
+				int wildysignX = bounds.width - 50;
+				int wildysignY = miniMapY + miniMapHeight + 3;
+				gameGraphics.drawPicture(wildysignX, wildysignY, SPRITE_MEDIA_START + 13);
+				gameGraphics.drawText("Wilderness", wildysignX + 12, wildysignY + 36, 1, 0xffff00);
+				gameGraphics.drawText("Level: " + k8, wildysignX + 12, wildysignY + 49, 1, 0xffff00);
+				if (wildernessType == 0)
+					wildernessType = 2;
+			}
+			if (wildernessType == 0 && j6 > -10 && j6 <= 0)
+				wildernessType = 1;
+		}
+		if (messagesTab == 0)
+		{
+			gameGraphics.drawBoxAlpha(chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, 0x232323, 0xc0);
+			gameGraphics.drawBoxEdge(chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, 0x000000);
+			for (int k6 = 0; k6 < chatBoxVisRows; k6++)
+				if (messagesTimeout[k6] > 0) {
+					String s = messagesArray[k6];
+					gameGraphics.drawString(s, 7, chatBoxY + chatBoxHeight-4 - k6 * 14, 1, 0xffff00);
+				}
+
+		}
+		gameGraphics.drawBoxAlpha(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x232323, 0xc0);
+		gameGraphics.drawBoxEdge(chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight, 0x000000);
+
+		gameMenu.method171(messagesHandleChatHist);
+		gameMenu.method171(messagesHandleQuestHist);
+		gameMenu.method171(messagesHandlePrivHist);
+		if (messagesTab == 1)
+			gameMenu.method170(messagesHandleChatHist);
+		else if (messagesTab == 2)
+			gameMenu.method170(messagesHandleQuestHist);
+		else if (messagesTab == 3)
+			gameMenu.method170(messagesHandlePrivHist);
+		Menu.anInt225 = 2;
+		gameMenu.drawMenu(isTyping);
+		drawMapMenu(true);
+		Menu.anInt225 = 0;
+		gameGraphics.method232(gameWindowMenuBarX, gameWindowMenuBarY,
+				SPRITE_MEDIA_START, 0x80);
+		drawGameWindowsMenus();
+		gameGraphics.drawStringShadows = false;
+		drawChatMessageTabs();
+		gameGraphics.drawImage(aGraphics936, 0, 0);
+	}
+
+	private final void drawRightClickMenu()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		if (mv.buttonDown())
+		{
+			int i = 0;
+			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
+			{
+				MenuRightClick tmp = itr.next();
+				int xMenu = MenuRightClick.menuX + 2;
+				int yMenu = MenuRightClick.menuY + 27 + i * 15;
+				if (mouseX <= xMenu - 2
+						|| mouseY <= yMenu - 12
+						|| mouseY >= yMenu + 4 
+						|| mouseX >= (xMenu - 3) + MenuRightClick.menuWidth)
+					continue;
+				menuClick(tmp);
+				break;
+			}
+			mv.releaseButton();
+			showRightClickMenu = false;
+			return;
+		}
+		if (mouseX < MenuRightClick.menuX - 10
+				|| mouseY < MenuRightClick.menuY - 10
+				|| mouseX > MenuRightClick.menuX + MenuRightClick.menuWidth + 10 
+				|| mouseY > MenuRightClick.menuY + MenuRightClick.menuHeight + 10) {
+			showRightClickMenu = false;
+			return;
+		}
+		gameGraphics.drawBoxAlpha(MenuRightClick.menuX, MenuRightClick.menuY, MenuRightClick.menuWidth, MenuRightClick.menuHeight, 0xd0d0d0, 160);
+		gameGraphics.drawString("Choose option", MenuRightClick.menuX + 2, MenuRightClick.menuY + 12, 1, 65535);
+		
+		int i = 0;
+		for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext(); ++i)
+		{
+			MenuRightClick tmp = itr.next();
+			int xMenu = MenuRightClick.menuX + 2;
+			int yMenu = MenuRightClick.menuY + 27 + i * 15;
+			int color = 0xffffff;
+			if (mouseX > xMenu - 2
+					&& mouseY > yMenu - 12
+					&& mouseY < yMenu + 4
+					&& mouseX < (xMenu - 3) + MenuRightClick.menuWidth)
+				color = 0xffff00;
+			gameGraphics.drawString(tmp.text1 + " " + tmp.text2, xMenu, yMenu, 1, color);
+		}
+
+	}
+
+	private final void drawQuestionMenu()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		if (mv.buttonDown()) {
+			for (int i = 0; i < questionMenuCount; i++) {
+				if (mouseX >= gameGraphics.textWidth(questionMenuAnswer[i], 1)
+						|| mouseY <= i * 12 || mouseY >= 12 + i * 12)
+					continue;
+				super.streamClass.createPacket(154);
+				super.streamClass.addByte(i);
+				super.streamClass.writePktSize();
+				break;
+			}
+
+			mv.releaseButton();
+			showQuestionMenu = false;
+			return;
+		}
+		for (int j = 0; j < questionMenuCount; j++) {
+			int k = 65535;
+			if (mouseX < gameGraphics.textWidth(questionMenuAnswer[j], 1)
+					&& mouseY > j * 12 && mouseY < 12 + j * 12)
+				k = 0xff0000;
+			gameGraphics.drawString(questionMenuAnswer[j], 6, 12 + j * 12, 1, k);
+		}
+
+	}
+
+	private final void walkToAction(int actionX, int actionY, int actionType) {
+		if (actionType == 0) {
+			sendWalkCommand(sectionX, sectionY, actionX, actionY - 1, actionX, actionY, false, true);
+			return;
+		}
+		if (actionType == 1) {
+			sendWalkCommand(sectionX, sectionY, actionX - 1, actionY, actionX, actionY, false, true);
+			return;
+		} else {
+			sendWalkCommand(sectionX, sectionY, actionX, actionY, actionX, actionY, true, true);
+			return;
+		}
+	}
+
+	private final void garbageCollect() {
+		try {
+			if (gameGraphics != null) {
+				gameGraphics.cleanupSprites();
+				gameGraphics.imagePixelArray = null;
+				gameGraphics = null;
+			}
+			if (gameCamera != null) {
+				gameCamera.cleanupModels();
+				gameCamera = null;
+			}
+			gameDataModels = null;
+			objects = null;
+			doorModel = null;
+			mobArray = null;
+			playerArray = null;
+			npcRecordArray = null;
+			npcArray = null;
+			self.me = null;
+			if (engineHandle != null) {
+				engineHandle.aModelArray596 = null;
+				engineHandle.walls = null;
+				engineHandle.roofs = null;
+				engineHandle.aModel = null;
+				engineHandle = null;
+			}
+			System.gc();
+			return;
+		}
+		catch (Exception _ex) {
+			return;
+		}
+	}
+
+	private final void drawInventoryRightClickMenu()
+	{
+		int i = 2203 - (sectionY + wildY + areaY);
+		if (sectionX + wildX + areaX >= 2640)
+			i = -50;
+		int ground = -1;
+		int k = 0;
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); itr.next())
+			objectRelated[k++] = false;
+
+		for (k = 0; k < doorCount;)
+			doorRelated[k++] = false;
+
+		
+		final SpellDef spellDef = selSpell != null ? selSpell.spell : null;
+
+		int nVisMdl = gameCamera.getVisibleModelCount();
+		Model models[] = gameCamera.getVisibleModels();
+		int ai[] = gameCamera.visibleModelIntArray();
+		for (int mdl = 0; mdl < nVisMdl; mdl++)
+		{
+			if (getMenuLength() > 200)
+				break;
+			int k1 = ai[mdl];
+			Model model = models[mdl];
+			if (model.entityType[k1] <= 65535
+					|| model.entityType[k1] >= 0x30d40
+					&& model.entityType[k1] <= 0x493e0)
+			{
+				if (model == gameCamera.spriteModels)
+				{ /* 2D sprites */
+					int modelIdx = model.entityType[k1] % 10000;
+					int modelType = model.entityType[k1] / 10000;
+					if (modelType == 1)
+					{ /* another player */
+						Mob otherPlr = playerArray.get(modelIdx);
+						int k3 = 0;
+						if (self.me.level > 0 && otherPlr.level > 0)
+							k3 = self.me.level - otherPlr.level;
+						String levelText = String.format("%s(level-%d)",
+								getLevelDiffColor(k3), otherPlr.level);
+						if (selSpell != null)
+						{
+							if (spellDef.getSpellType() == 1
+									|| spellDef.getSpellType() == 2)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										800, otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, selSpell.id, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selItem != null)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selItem.item.getName()),
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									810, otherPlr.currentX, otherPlr.currentY,
+									otherPlr.serverIndex, selItem.index, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (i > 0 && (otherPlr.currentY - 0.5) + wildY + areaY < 2203)
+							{
+								MenuRightClick mrc = addCommand("Attack",
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										(k3 >= 0 && k3 < 5 ? 805 : 2805),
+										otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+							else
+							{
+								MenuRightClick mrc = addCommand("Duel with",
+										String.format("@whi@%s %s", otherPlr.name, levelText),
+										2806, otherPlr.currentX, otherPlr.currentY,
+										otherPlr.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+							MenuRightClick mrc = addExamine("Trade with",
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									"", 2810, otherPlr.serverIndex);
+							rightClickMenu.add(mrc);
+
+							mrc = addExamine("Follow",
+									String.format("@whi@%s %s", otherPlr.name, levelText),
+									"", 2820, otherPlr.serverIndex);
+							rightClickMenu.add(mrc);
+						}
+					}
+					else if (modelType == 2)
+					{ /* item on gound */
+						ItemDef itemDef = EntityHandler.getItemDef(groundItemType[modelIdx]);
+						if (selSpell != null)
+						{
+							if (spellDef.getSpellType() == 3)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@lre@%s", itemDef.getName()),
+										200, groundItemX[modelIdx], groundItemY[modelIdx],
+										groundItemType[modelIdx], selSpell.id, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selItem != null)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selItem.item.getName()),
+									String.format("@lre@%s", itemDef.getName()),
+									210, groundItemX[modelIdx], groundItemY[modelIdx],
+									groundItemType[modelIdx], selItem.index, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							MenuRightClick mrc = addCommand( "Take",
+									String.format("@lre@%s", itemDef.getName()),
+									220, groundItemX[modelIdx], groundItemY[modelIdx],
+									groundItemType[modelIdx], null, null);
+							rightClickMenu.add(mrc);
+
+							String adminText = "";
+							if (self.me.admin >= 2)
+								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
+										groundItemType[modelIdx],
+										groundItemX[modelIdx] + areaX,
+										groundItemY[modelIdx] + areaY);
+							mrc = addExamine("Examine", "@lre@" + itemDef.getName(),
+									adminText, 3200, groundItemType[modelIdx]);
+							rightClickMenu.add(mrc);
+						}
+					}
+					else if (modelType == 3)
+					{ /* NPC */
+						Mob theNPC = npcArray.get(modelIdx);
+						String s1 = "";
+						int levelDiff = -1;
+						NPCDef npcDef = EntityHandler.getNpcDef(theNPC.type);
+						if (npcDef.isAttackable())
+						{
+							int npcLevel = (npcDef.getAtt() + npcDef.getDef() + npcDef.getStr() + npcDef.getHits()) / 4;
+							int plrLevel = (playerStatBase[0] + playerStatBase[1] + playerStatBase[2] + playerStatBase[3] + 27) / 4;
+							levelDiff = plrLevel - npcLevel;
+
+							s1 = String.format("%s(level-%d)",
+									getLevelDiffColor(plrLevel - npcLevel), npcLevel);
+						}
+						if (selSpell != null)
+						{
+							if (spellDef.getSpellType() == 2)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@yel@%s", npcDef.getName()),
+										700, theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, selSpell.id, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selItem != null)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selItem.item.getName()),
+									String.format("@yel@%s", npcDef.getName()),
+									710, theNPC.currentX, theNPC.currentY,
+									theNPC.serverIndex, selItem.index, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (npcDef.isAttackable())
+							{
+								MenuRightClick mrc = addCommand("Attack",
+										String.format("@yel@%s %s",
+												npcDef.getName(), s1),
+										(levelDiff >= 0 ? 715 : 2715),
+										theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+							MenuRightClick mrc = addCommand("Talk-to",
+									String.format("@yel@%s",
+											npcDef.getName()),
+									720, theNPC.currentX, theNPC.currentY,
+									theNPC.serverIndex, null, null);
+							rightClickMenu.add(mrc);
+							if (!npcDef.getCommand().equals(""))
+							{
+								mrc = addCommand(npcDef.getCommand(),
+										String.format("@yel@%s",
+												npcDef.getName()),
+										725, theNPC.currentX, theNPC.currentY,
+										theNPC.serverIndex, null, null);
+								rightClickMenu.add(mrc);
+							}
+
+							String adminText = "";
+							if (self.me.admin >= 2)
+								adminText = String.format(" @or1@(%d)", theNPC.type);
+							mrc = addExamine("Examine", "@yel@" + npcDef.getName(),
+									adminText, 3700, theNPC.type);
+							rightClickMenu.add(mrc);
+						}
+					}
+				}
+				else if (model != null && model.index >= 10000)
+				{ /* Doors */
+					int j2 = model.index - 10000;
+					int i3 = doorType[j2];
+					DoorDef dDef = EntityHandler.getDoorDef(i3);
+					if (!doorRelated[j2])
+					{
+						if (selSpell != null)
+						{
+							if (spellDef.getSpellType() == 4)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@cya@%s", dDef.getName()),
+										300, doorX[j2], doorY[j2],
+										doorDirection[j2], selSpell.id, null);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selItem != null)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selItem.item.getName()),
+									String.format("@cya@%s", dDef.getName()),
+									310, doorX[j2], doorY[j2],
+									doorDirection[j2], selItem.index, null);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (!dDef.getCommand1().equalsIgnoreCase("WalkTo"))
+							{
+								MenuRightClick mrc = addCommand(dDef.getCommand1(),
+										String.format("@cya@%s", dDef.getName()),
+										320, doorX[j2], doorY[j2],
+										doorDirection[j2], null, null);
+								rightClickMenu.add(mrc);
+							}
+							if (!dDef.getCommand2().equalsIgnoreCase("Examine"))
+							{
+								MenuRightClick mrc = addCommand(dDef.getCommand2(),
+										String.format("@cya@%s", dDef.getName()),
+										2300,  doorX[j2], doorY[j2],
+										doorDirection[j2], null, null);
+								rightClickMenu.add(mrc);
+							}
+
+							String adminText = "";
+							if (self.me.admin >= 2)
+								adminText = String.format(" @or1@(%d: %d,%d)",
+										i3, doorX[j2] + areaX, doorY[j2] + areaY);
+							MenuRightClick mrc = addExamine("Examine",
+									"@cya@" + dDef.getName(),
+									adminText, 3300, i3);
+							rightClickMenu.add(mrc);
+						}
+						doorRelated[j2] = true;
+					}
+				}
+				else if (model != null && model.index >= 0)
+				{ /* Game objects */
+					int k2 = model.index;
+					GameObject gObj = objects.get(k2);
+					//int j3 = objectType[k2];
+					GameObjectDef gobjDef = EntityHandler.getObjectDef(gObj.type);
+					if (!objectRelated[k2])
+					{
+						if (selSpell != null)
+						{
+							if (spellDef.getSpellType() == 5)
+							{
+								MenuRightClick mrc = addCommand(
+										String.format("Cast %s on", spellDef.getName()),
+										String.format("@cya@%s", gobjDef.getName()), 400,
+										gObj.x, gObj.y, gObj.id, gObj.type, selSpell.id);
+								rightClickMenu.add(mrc);
+							}
+						}
+						else if (selItem != null)
+						{
+							MenuRightClick mrc = addCommand(
+									String.format("Use %s with", selItem.item.getName()),
+									String.format("@cya@%s", gobjDef.getName()), 410,
+									gObj.x, gObj.y, gObj.id, gObj.type, selItem.index);
+							rightClickMenu.add(mrc);
+						}
+						else
+						{
+							if (!gobjDef.getCommand1().equalsIgnoreCase("WalkTo"))
+							{
+								MenuRightClick mrc = addCommand(gobjDef.getCommand1(),
+										String.format("@cya@%s", gobjDef.getName()),
+										420, gObj.x, gObj.y, gObj.id, gObj.type, null);
+								rightClickMenu.add(mrc);
+							}
+							if (!gobjDef.getCommand2().equalsIgnoreCase("Examine"))
+							{
+								MenuRightClick mrc = addCommand(gobjDef.getCommand2(),
+										String.format("@cya@%s", gobjDef.getName()),
+										2400, gObj.x, gObj.y, gObj.id, gObj.type, null);
+								rightClickMenu.add(mrc);
+							}
+
+							String adminText = "";
+							if (self.me.admin >= 2)
+								adminText = String.format(" @or1@(%d: %.0f,%.0f)",
+										gObj.type, gObj.x + areaX, gObj.y + areaY);
+							MenuRightClick mrc = addExamine("Examine",
+									"@cya@" + gobjDef.getName(),
+									adminText, 3400, gObj.type);
+							rightClickMenu.add(mrc);
+						}
+						objectRelated[k2] = true;
+					}
+				}
+				else
+				{
+					if (k1 >= 0)
+						k1 = model.entityType[k1] - 0x30d40;
+					if (k1 >= 0)
+						ground = k1;
+				}
+			}
+		}
+
+		if (selSpell != null && spellDef.getSpellType() <= 1)
+		{
+			MenuRightClick mrc = addExamine(
+					String.format("Cast %s on self", spellDef.getName()),
+					"", "", 1000, selSpell.id);
+			rightClickMenu.add(mrc);
+		}
+		if (ground != -1)
+		{
+			int l1 = ground;
+			if (selSpell != null)
+			{
+				if (spellDef.getSpellType() == 6)
+				{
+					MenuRightClick mrc = addCommand(
+							String.format("Cast %s on ground", spellDef.getName()),
+							"", 900, engineHandle.selectedX[l1],
+							engineHandle.selectedY[l1],
+							selSpell.id, null, null);
+					rightClickMenu.add(mrc);
+					return;
+				}
+			}
+			else if (selItem == null)
+			{
+				MenuRightClick mrc = addCommand("Walk here",
+						"", 920, engineHandle.selectedX[l1],
+						engineHandle.selectedY[l1],
+						null, null, null);
+				rightClickMenu.add(mrc);
+			}
+		}
+	}
+
+	private final void loadSprite(int id, String packageName, int amount) {
+		for (int i = id; i < id + amount; i++) {
+			if (!gameGraphics.loadSprite(i, packageName)) {
+				lastLoadedNull = true;
+				return;
+			}
+		}
+	}
+
+	private final void loadMedia() {
+		drawLoadingBarText(30, "Unpacking media");
+		loadSprite(SPRITE_MEDIA_START, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 1, "media", 6);
+		loadSprite(SPRITE_MEDIA_START + 9, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 10, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 11, "media", 3);
+		loadSprite(SPRITE_MEDIA_START + 14, "media", 8);
+		loadSprite(SPRITE_MEDIA_START + 22, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 23, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 24, "media", 1);
+		loadSprite(SPRITE_MEDIA_START + 25, "media", 2);
+		loadSprite(SPRITE_MEDIA_START + 27, "media", 2);
+		loadSprite(SPRITE_UTIL_START, "util", 2);
+		loadSprite(SPRITE_UTIL_START + 2, "util", 4);
+		loadSprite(SPRITE_UTIL_START + 6, "util", 2);
+		loadSprite(SPRITE_PROJECTILE_START, "projectile", 7);
+		loadSprite(SPRITE_LOGO_START, "logo", 2);
+
+		int i = EntityHandler.invPictureCount();
+		for (int j = 1; i > 0; j++) {
+			int k = i;
+			i -= 30;
+			if (k > 30) {
+				k = 30;
+			}
+			loadSprite(SPRITE_ITEM_START + (j - 1) * 30, "item", k);
+		}
+	}
+
+	private final void loadEntity() {
+		drawLoadingBarText(45, "Unpacking entities");
+		int animation = 0;
+		label0:
+			for (int anim = 0; anim < EntityHandler.animationCount(); anim++)
+			{
+				String s = EntityHandler.getAnimationDef(anim).getName();
+				for (int nextAnim = 0; nextAnim < anim; nextAnim++)
+				{ // find the next animation
+					if (!EntityHandler.getAnimationDef(nextAnim).getName().equalsIgnoreCase(s)) {
+						continue;
+					}
+					EntityHandler.getAnimationDef(anim).number = EntityHandler.getAnimationDef(nextAnim).getNumber();
+					continue label0;
+				}
+
+				loadSprite(animation, "entity", 15);
+				if (EntityHandler.getAnimationDef(anim).hasAttack()) {
+					loadSprite(animation + 15, "entity", 3);
+				}
+
+				if (EntityHandler.getAnimationDef(anim).hasFlip()) {
+					loadSprite(animation + 18, "entity", 9);
+				}
+				EntityHandler.getAnimationDef(anim).number = animation;
+				animation += 27;
+			}
+	}
+
+	private final void loadTextures() {
+		drawLoadingBarText(60, "Unpacking textures");
+		gameCamera.method297(EntityHandler.textureCount(), 7, 11);
+		for (int i = 0; i < EntityHandler.textureCount(); i++) {
+			loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
+			Sprite sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_TEXTURE_START + i];
+
+			int length = sprite.getWidth() * sprite.getHeight();
+			int[] pixels = sprite.getPixels();
+			int ai1[] = new int[32768];
+			for (int k = 0; k < length; k++) {
+				ai1[((pixels[k] & 0xf80000) >> 9) + ((pixels[k] & 0xf800) >> 6) + ((pixels[k] & 0xf8) >> 3)]++;
+			}
+			int[] dictionary = new int[256];
+			dictionary[0] = 0xff00ff;
+			int[] temp = new int[256];
+			for (int i1 = 0; i1 < ai1.length; i1++) {
+				int j1 = ai1[i1];
+				if (j1 > temp[255]) {
+					for (int k1 = 1; k1 < 256; k1++) {
+						if (j1 <= temp[k1]) {
+							continue;
+						}
+						for (int i2 = 255; i2 > k1; i2--) {
+							dictionary[i2] = dictionary[i2 - 1];
+							temp[i2] = temp[i2 - 1];
+						}
+						dictionary[k1] = ((i1 & 0x7c00) << 9) + ((i1 & 0x3e0) << 6) + ((i1 & 0x1f) << 3) + 0x40404;
+						temp[k1] = j1;
+						break;
+					}
+				}
+				ai1[i1] = -1;
+			}
+			byte[] indices = new byte[length];
+			for (int l1 = 0; l1 < length; l1++) {
+				int j2 = pixels[l1];
+				int k2 = ((j2 & 0xf80000) >> 9) + ((j2 & 0xf800) >> 6) + ((j2 & 0xf8) >> 3);
+				int l2 = ai1[k2];
+				if (l2 == -1) {
+					int i3 = 0x3b9ac9ff;
+					int j3 = j2 >> 16 & 0xff;
+						int k3 = j2 >> 8 & 0xff;
+						int l3 = j2 & 0xff;
+						for (int i4 = 0; i4 < 256; i4++) {
+							int j4 = dictionary[i4];
+							int k4 = j4 >> 16 & 0xff;
+						int l4 = j4 >> 8 & 0xff;
+						int i5 = j4 & 0xff;
+						int j5 = (j3 - k4) * (j3 - k4) + (k3 - l4) * (k3 - l4) + (l3 - i5) * (l3 - i5);
+						if (j5 < i3) {
+							i3 = j5;
+							l2 = i4;
+						}
+						}
+
+						ai1[k2] = l2;
+				}
+				indices[l1] = (byte) l2;
+			}
+			gameCamera.method298(i, indices, dictionary, sprite.getTotalWidth());
+		}
+	}
+
+	private final void checkMouseStatus()
+	{
+		if (selSpell != null || selItem != null)
+		{
+			MenuRightClick rmc = new MenuRightClick();
+			rmc.text1 = "Cancel";
+			rmc.text2 = "";
+			rmc.id = 4000;
+			rightClickMenu.add(rmc);
+		}
+
+		rightClickMenu.sort(new Comparator<MenuRightClick>() {
+			@Override
+			public int compare(MenuRightClick a, MenuRightClick b) {
+				return a.id < b.id ? -1 : a.id == b.id ? 0 : 1;
+			}
+		});
+
+		int menuLength = getMenuLength();
+		if (menuLength > 20)
+			menuLength = 20; // should drop all but the first 20 instead.
+		if (menuLength > 0)
+		{
+			MenuRightClick leftClickOption = null;
+			for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
+			{
+				MenuRightClick tmp = itr.next();
+				if (tmp.text2 == null || tmp.text2.length() <= 0)
+					continue;
+				leftClickOption = tmp;
+				break;
+			}
+
+			String s = null;
+			if ((selItem != null || selSpell != null)
+					&& menuLength == 1)
+				s = "Choose a target";
+			else if ((selItem != null || selSpell != null)
+					&& menuLength > 1)
+				s = "@whi@" + rightClickMenu.get(0).text1 + " " + rightClickMenu.get(0).text2;
+			else if (leftClickOption != null)
+				s = leftClickOption.text2 + ": @whi@" + rightClickMenu.get(0).text1;
+			
+			if (s != null)
+			{
+				if (menuLength > 1 && (selItem != null || selSpell != null))
+					s = String.format("%s@whi@ / %d more options", s, menuLength-1);
+				gameGraphics.drawString(s, 6, 14, 1, 0xffff00);
+			}
+
+			if (!configMouseButtons && mv.leftDown()
+					|| configMouseButtons && mv.leftDown()
+					&& menuLength == 1)
+			{
+				menuClick(rightClickMenu.get(0));
+				mv.releaseButton();
+				return;
+			}
+			if (!configMouseButtons && mv.rightDown()
+					|| configMouseButtons && mv.leftDown())
+			{
+				MenuRightClick.menuHeight = (menuLength + 1) * 15;
+				MenuRightClick.menuWidth = gameGraphics.textWidth("Choose option", 1) + 5;
+				for (Iterator<MenuRightClick> itr = rightClickMenu.iterator(); itr.hasNext();)
+				{
+					MenuRightClick tmp = itr.next();
+					int l1 = gameGraphics.textWidth(tmp.text1 + " " + tmp.text2, 1) + 5;
+					if (l1 > MenuRightClick.menuWidth)
+						MenuRightClick.menuWidth = l1;
+				}
+				MouseVariables mv = MouseVariables.get();
+				MenuRightClick.menuX = mv.getX() - MenuRightClick.menuWidth / 2;
+				MenuRightClick.menuY = mv.getY() - 7;
+				showRightClickMenu = true;
+				if (MenuRightClick.menuX < 0)
+					MenuRightClick.menuX = 0;
+				if (MenuRightClick.menuY < 0)
+					MenuRightClick.menuY = 0;
+				if (MenuRightClick.menuX + MenuRightClick.menuWidth > bounds.width - 2)
+					MenuRightClick.menuX = bounds.width - 2 - MenuRightClick.menuWidth;
+				if (MenuRightClick.menuY + MenuRightClick.menuHeight > bounds.height - 19)
+					MenuRightClick.menuY = bounds.height - 19 - MenuRightClick.menuHeight;
+
+				mv.releaseButton();
+			}
+		}
+	}
+
+	private final void drawFriendsWindow(boolean flag)
+	{
+		friendPan.getFrame().drawComponent();
+		drawFriendPanel();
+		friendsMenu.resetListTextCount(friendsMenuHandle);
+		if (friendTabOn == 0)
+			drawFriendsList();
+		if (friendTabOn == 1)
+			drawIgnoreList();
+		friendsMenu.drawMenu(true);
+		if (friendTabOn == 0)
+			handleMouseOverFriend();
+		if (friendTabOn == 1)
+			handleMouseOverIgnore();
+		if (!flag)
+			return;
+		if (friendPan.isMouseOver())
+			handleFriendsPanelClicks();
+		else if (friendPan.getFrame().getCloseButton().isMouseOver())
+		{ // close button
+			if (mv.leftDown())
+			{
+				om.close(OpenMenu.FRIENDS);
+				mv.releaseButton();
+			}
+		}
+		else if (magicPan.getFrame().isMouseOver())
+		{ // click inside friends panel but not on the content or close button
+			if (mv.leftDown())
+				mv.releaseButton();
+		}
+	}
+
+	private final boolean loadSection(int xPos, int yPos)
+	{
+		if (playerAliveTimeout != 0) {
+			engineHandle.playerIsAlive = false;
+			return false;
+		}
+		notInWilderness = false;
+		xPos += wildX;
+		yPos += wildY;
+		if (sectorHeight == wildYSubtract && xPos > xMinReloadNextSect && xPos < xMaxReloadNextSect && yPos > yMinReloadNextSect && yPos < yMaxReloadNextSect) {
+			engineHandle.playerIsAlive = true;
+			return false;
+		}
+		gameGraphics.drawText("Loading... Please wait", center.x, center.y + 25, 1, 0xffffff);
+		drawChatMessageTabs();
+		gameGraphics.drawImage(aGraphics936, 0, 0);
+		int oldAreaX = areaX;
+		int oldAreaY = areaY;
+		int i1 = (xPos + EngineHandle.SECTOR_WIDTH/2) / EngineHandle.SECTOR_WIDTH; // tile x (or y)
+		int j1 = (yPos + EngineHandle.SECTOR_HEIGHT/2) / EngineHandle.SECTOR_HEIGHT; // tile y (or x)
+		sectorHeight = wildYSubtract;
+		areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
+		areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
+		// sets
+		xMinReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH - 2*EngineHandle.SECTOR_WIDTH/3; // lowerAreaXTile
+		yMinReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT - 2*EngineHandle.SECTOR_HEIGHT/3; // lowerAreaYTile
+		xMaxReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH + 2*EngineHandle.SECTOR_WIDTH/3; // upperAreaXTile
+		yMaxReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT + 2*EngineHandle.SECTOR_HEIGHT/3; // upperAreaYTile
+		engineHandle.method401(xPos, yPos, sectorHeight);
+		areaX -= wildX;
+		areaY -= wildY;
+		int areaXDiff = areaX - oldAreaX;
+		int areaYDiff = areaY - oldAreaY;
+		int objIdx = 0;
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext(); objIdx++)
+		{
+			GameObject gObj = itr.next();
+			gObj.x -= areaXDiff;
+			gObj.y -= areaYDiff;
+			try
+			{
+				double currObjWidth, currObjeHeight;
+				if (gObj.id == 0 || gObj.id == 4)
+				{
+					currObjWidth = EntityHandler.getObjectDef(gObj.type).getWidth();
+					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getHeight();
+				}
+				else
+				{
+					currObjeHeight = EntityHandler.getObjectDef(gObj.type).getWidth();
+					currObjWidth = EntityHandler.getObjectDef(gObj.type).getHeight();
+				}
+				double x = gObj.x + currObjWidth/2;
+				double y = gObj.y + currObjeHeight/2;
+				if (gObj.x >= 0 && gObj.y >= 0
+						&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+						&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+				{
+					gameCamera.addModel(gObj.model); // objects
+					gObj.model.setTranslate(x,
+							-engineHandle.getAveragedElevation(x, y),
+							y);
+					engineHandle.method412((int)gObj.x, (int)gObj.y, gObj.type, gObj.id); // shadows
+					if (gObj.type == 74)
+						gObj.model.addTranslate(0, -480, 0);
+				}
+			}
+			catch (RuntimeException runtimeexception)
+			{
+				System.out.println("Loc Error: " + runtimeexception.getMessage());
+				System.out.println("i:" + objIdx + " obj:" + gObj.model);
+				runtimeexception.printStackTrace();
+			}
+		}
+
+		for (int k2 = 0; k2 < doorCount; k2++)
+		{
+			doorX[k2] -= areaXDiff;
+			doorY[k2] -= areaYDiff;
+			int i3 = doorX[k2];
+			int l3 = doorY[k2];
+			int j4 = doorType[k2];
+			int i5 = doorDirection[k2];
+			try
+			{
+				engineHandle.method408(i3, l3, i5, j4);
+				Model model_1 = makeModel(i3, l3, i5, j4, k2);
+				doorModel[k2] = model_1;
+			}
+			catch (RuntimeException runtimeexception1)
+			{
+				System.out.println("Bound Error: " + runtimeexception1.getMessage());
+				runtimeexception1.printStackTrace();
+			}
+		}
+
+		for (int j3 = 0; j3 < groundItemCount; j3++)
+		{
+			groundItemX[j3] -= areaXDiff;
+			groundItemY[j3] -= areaYDiff;
+		}
+
+		if (mapClick.x >= 0)
+			mapClick.x -= areaXDiff;
+		if (mapClick.y >= 0)
+			mapClick.y -= areaYDiff;
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
+		{
+			Mob mob = itr.next();
+			mob.currentX -= areaXDiff;
+			mob.currentY -= areaYDiff;
+			for (int j5 = 0; j5 <= mob.waypointCurrent; j5++) {
+				mob.waypointsX[j5] -= areaXDiff;
+				mob.waypointsY[j5] -= areaYDiff;
+			}
+		}
+
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();) {
+			Mob mob_1 = itr.next();
+			mob_1.currentX -= areaXDiff;
+			mob_1.currentY -= areaYDiff;
+			for (int l5 = 0; l5 <= mob_1.waypointCurrent; l5++) {
+				mob_1.waypointsX[l5] -= areaXDiff;
+				mob_1.waypointsY[l5] -= areaYDiff;
+			}
+		}
+
+		engineHandle.playerIsAlive = true;
+		return true;
+	}
+
+	private final void drawMagicWindow(boolean flag)
+	{
+		magicPan.getFrame().drawComponent();
+		drawMagicPanel();
+		if (menuMagicPrayersSelected == 0)
+			drawMagicTab();
+		if (menuMagicPrayersSelected == 1)
+			drawPrayerTab();
+		if (!flag)
+			return;
+
+		if (magicPan.isMouseOver())
+			handleMagicPanelClicks();
+		else if (magicPan.getFrame().getCloseButton().isMouseOver())
+		{ // close button
+			if (mv.leftDown())
+			{
+				om.close(OpenMenu.SPELLS);
+				mv.releaseButton();
+			}
+		}
+		else if (magicPan.getFrame().isMouseOver())
+		{ // click inside info panel but not on the content or close button
+			if (mv.leftDown())
+				mv.releaseButton();
+		}
+	}
+
+	private final void drawShopBox()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		if (mv.buttonDown()) {
+			mv.releaseButton();
+			int i = mouseX - 52;
+			int j = mouseY - 44;
+			if (i >= 0 && j >= 12 && i < 408 && j < 246) {
+				int k = 0;
+				for (int i1 = 0; i1 < 5; i1++) {
+					for (int i2 = 0; i2 < 8; i2++) {
+						int l2 = 7 + i2 * 49;
+						int l3 = 28 + i1 * 34;
+						if (i > l2 && i < l2 + 49 && j > l3 && j < l3 + 34 && shopItems[k].getID() != -1) {
+							selectedShopItemIndex = k;
+							selectedShopItemType = shopItems[k].getID();
+						}
+						k++;
+					}
+
+				}
+
+				if (selectedShopItemIndex >= 0) {
+					int j2 = shopItems[selectedShopItemIndex].getID();
+					if (j2 != -1) {
+						if (shopItems[selectedShopItemIndex].getAmount() > 0
+								&& i > 298 && j >= 204 && i < 408 && j <= 215) {
+							int i4 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
+							super.streamClass.createPacket(128);
+							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
+							super.streamClass.add4ByteInt(i4);
+							super.streamClass.writePktSize();
+						}
+						if (inventoryCount(j2) > 0 && i > 2 && j >= 229 && i < 112 && j <= 240) {
+							int j4 = (shopItemSellPriceModifier * EntityHandler.getItemDef(j2).getBasePrice()) / 100;
+							super.streamClass.createPacket(255);
+							super.streamClass.add2ByteInt(shopItems[selectedShopItemIndex].getID());
+							super.streamClass.add4ByteInt(j4);
+							super.streamClass.writePktSize();
+						}
+					}
+				}
+			} else {
+				super.streamClass.createPacket(253);
+				super.streamClass.writePktSize();
+				showShop = false;
+				return;
+			}
+		}
+		byte byte0 = 52;
+		byte byte1 = 44;
+		gameGraphics.drawBox(byte0, byte1, 408, 12, 192);
+		int l = 0x989898;
+		gameGraphics.drawBoxAlpha(byte0, byte1 + 12, 408, 17, l, 160);
+		gameGraphics.drawBoxAlpha(byte0, byte1 + 29, 8, 170, l, 160);
+		gameGraphics.drawBoxAlpha(byte0 + 399, byte1 + 29, 9, 170, l, 160);
+		gameGraphics.drawBoxAlpha(byte0, byte1 + 199, 408, 47, l, 160);
+		gameGraphics.drawString("Buying and selling items", byte0 + 1, byte1 + 10, 1, 0xffffff);
+		int j1 = 0xffffff;
+		if (mouseX > byte0 + 320 && mouseY >= byte1
+				&& mouseX < byte0 + 408 && mouseY < byte1 + 12)
+			j1 = 0xff0000;
+		gameGraphics.drawBoxTextRight("Close window", byte0 + 406, byte1 + 10, 1, j1);
+		gameGraphics.drawString("Shops stock in green", byte0 + 2, byte1 + 24, 1, 65280);
+		gameGraphics.drawString("Number you own in blue", byte0 + 135, byte1 + 24, 1, 65535);
+		gameGraphics.drawString("Your money: " + inventoryCount(10) + "gp", byte0 + 280, byte1 + 24, 1, 0xffff00);
+		int k2 = 0xd0d0d0;
+		int k3 = 0;
+		for (int k4 = 0; k4 < 5; k4++) {
+			for (int l4 = 0; l4 < 8; l4++) {
+				int j5 = byte0 + 7 + l4 * 49;
+				int i6 = byte1 + 28 + k4 * 34;
+				if (selectedShopItemIndex == k3)
+					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, 0xff0000, 160);
+				else
+					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, k2, 160);
+				gameGraphics.drawBoxEdge(j5, i6, 50, 35, 0);
+				if (shopItems[k3].getID() != -1) {
+					gameGraphics.spriteClip4(j5, i6, 48, 32,
+							SPRITE_ITEM_START + shopItems[k3].getIcon(),
+							shopItems[k3].getColor(), 0, 0, false);
+					gameGraphics.drawString(Long.toString(shopItems[k3].getAmount()),
+							j5 + 1, i6 + 10, 1, 65280);
+					gameGraphics.drawBoxTextRight(Integer.toString(inventoryCount(shopItems[k3].getID())),
+							j5 + 47, i6 + 10, 1, 65535);
+				}
+				k3++;
+			}
+
+		}
+
+		gameGraphics.drawLineX(byte0 + 5, byte1 + 222, 398, 0);
+		if (selectedShopItemIndex == -1) {
+			gameGraphics.drawText("Select an object to buy or sell", byte0 + 204, byte1 + 214, 3, 0xffff00);
+			return;
+		}
+		int i5 = shopItems[selectedShopItemIndex].getID();
+		if (i5 != -1) {
+			if (shopItems[selectedShopItemIndex].getAmount() > 0) {
+				int j6 = (shopItemBuyPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
+				gameGraphics.drawString("Buy a new " + EntityHandler.getItemDef(i5).getName() + " for " + j6 + "gp", byte0 + 2, byte1 + 214, 1, 0xffff00);
+				int k1 = 0xffffff;
+				if (mouseX > byte0 + 298 && mouseY >= byte1 + 204
+						&& mouseX < byte0 + 408 && mouseY <= byte1 + 215)
+					k1 = 0xff0000;
+				gameGraphics.drawBoxTextRight("Click here to buy", byte0 + 405, byte1 + 214, 3, k1);
+			} else {
+				gameGraphics.drawText("This item is not currently available to buy", byte0 + 204, byte1 + 214, 3, 0xffff00);
+			}
+			if (inventoryCount(i5) > 0) {
+				int k6 = (shopItemSellPriceModifier * EntityHandler.getItemDef(i5).getBasePrice()) / 100;
+				gameGraphics.drawBoxTextRight("Sell your " + EntityHandler.getItemDef(i5).getName() + " for " + k6 + "gp", byte0 + 405, byte1 + 239, 1, 0xffff00);
+				int l1 = 0xffffff;
+				if (mouseX > byte0 + 2 && mouseY >= byte1 + 229
+						&& mouseX < byte0 + 112 && mouseY <= byte1 + 240)
+					l1 = 0xff0000;
+				gameGraphics.drawString("Click here to sell", byte0 + 2, byte1 + 239, 3, l1);
+				return;
+			}
+			gameGraphics.drawText("You do not have any of this item to sell", byte0 + 204, byte1 + 239, 3, 0xffff00);
+		}
+	}
+
+	private final void drawGameMenu()
+	{
+		gameMenu = new Menu(gameGraphics, 10);
+		messagesHandleChatHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+				chatBoxWidth, chatBoxHeight, 1, 20, true);
+		chatHandlePlayerEntry = gameMenu.createPlayerChatEntry(chatPlayerEntryX, chatPlayerEntryY,
+				chatPlayerEntryWidth, chatPlayerEntryHeight, 1, 80, false, true);
+		messagesHandleQuestHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+				chatBoxWidth, chatBoxHeight, 1, 20, true);
+		messagesHandlePrivHist = gameMenu.createChatHist(chatBoxX, chatBoxY,
+				chatBoxWidth, chatBoxHeight, 1, 20, true);
+		gameMenu.setFocus(chatHandlePlayerEntry);
+	}
+
+	private final void drawOptionsMenu(boolean flag)
+	{
+		optPan.getFrame().drawComponent();
+		drawOptionsPanel();
+		drawGameOptions();
+		drawClientAssist();
+		drawPrivacySettings();
+		drawLogout();
+		if (!flag)
+			return;
+		if (optPan.isMouseOver())
+			handleOptionsPanelClicks();
+		else if (optPan.getFrame().getCloseButton().isMouseOver())
+		{ // close button
+			if (mv.leftDown())
+			{
+				om.close(OpenMenu.SETTINGS);
+				mv.releaseButton();
+			}
+		}
+		else if (optPan.getFrame().isMouseOver())
+		{ // click inside settings panel but not on the content or close button
+			if (mv.leftDown())
+				mv.releaseButton();
+		}
+	}
+
+	private final void processGame()
+	{
+		if (systemUpdate > 1)
+			systemUpdate--;
+		sendPingPacketReadPacketData();
+		if (logoutTimeout > 0)
+			logoutTimeout--;
+		if (self.me.currentSprite == 8
+				|| self.me.currentSprite == 9)
+			lastWalkTimeout = 500;
+		if (lastWalkTimeout > 0)
+			lastWalkTimeout--;
+		if (showCharacterLookScreen)
+		{
+			drawCharacterLookScreen();
+			return;
+		}
+		updatePlayers(); // player walking animations
+		updateNPCs(); // npc walking animations
+
+		if (!om.isOpen(OpenMenu.MINIMAP))
+		{
+			if (GameImage.anInt346 > 0)
+				anInt658++;
+			if (GameImage.anInt347 > 0)
+				anInt658 = 0;
+			GameImage.anInt346 = 0;
+			GameImage.anInt347 = 0;
+		}
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
+		{
+			Mob mob_2 = itr.next();
+			if (mob_2.anInt176 > 0)
+				mob_2.anInt176--;
+		}
+		updateCamera();
+
+		if (anInt658 > 20)
+			anInt658 = 0;
+
+		checkChatTab();
+		updateChatTabs();
+
+		if (playerAliveTimeout != 0)
+			mv.releaseLastButton();
+		handleOfferAmounts();
+		gameCamera.updateMouseCoords();
+		mv.releaseLastButton();
+		updateCameraPosition();
+
+		if (actionPictureType > 0)
+			actionPictureType--;
+		else if (actionPictureType < 0)
+			actionPictureType++;
+		gameCamera.animateTexture(17, 1);
+		modelUpdatingTimer++;
+		if (modelUpdatingTimer > 5)
+		{
+			modelUpdatingTimer = 0;
+			modelFireLightningSpellNumber = (modelFireLightningSpellNumber + 1) % 3;
+			modelTorchNumber = (modelTorchNumber + 1) % 4;
+			modelClawSpellNumber = (modelClawSpellNumber + 1) % 5;
+		}
+		
+		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
+		{ /* updating models it seems */
+			GameObject gObj = itr.next();
+			if (gObj.x >= 0 && gObj.y >= 0
+					&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+					&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT
+					&& gObj.type == 74)
+				gObj.model.addRotation(1, 0, 0);
+		}
+
+		for (int i4 = 0; i4 < anInt892; i4++)
+		{
+			anIntArray923[i4]++;
+			if (anIntArray923[i4] > 50)
+			{
+				anInt892--;
+				for (int i5 = i4; i5 < anInt892; i5++) {
+					anIntArray944[i5] = anIntArray944[i5 + 1];
+					anIntArray757[i5] = anIntArray757[i5 + 1];
+					anIntArray923[i5] = anIntArray923[i5 + 1];
+					anIntArray782[i5] = anIntArray782[i5 + 1];
+				}
+
+			}
+		}
+
+	}
+
+	private final void loadSounds()
+	{
+		try
+		{
+			drawLoadingBarText(90, "Unpacking Sound effects");
+			sounds = load("sounds.mem");
+			audioReader = new AudioReader();
+			return;
+		}
+		catch (Throwable throwable)
+		{
+			System.out.println("Unable to init sounds:" + throwable);
+		}
+	}
+
+	private final void drawCombatStyleWindow()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		byte byte0 = 7;
+		byte byte1 = 15;
+		char c = '\257';
+		if (mv.buttonDown())
+		{
+			for (int i = 0; i < 5; i++)
+			{
+				if (i <= 0
+						|| mouseX <= byte0
+						|| mouseX >= byte0 + c
+						|| mouseY <= byte1 + i * 20
+						|| mouseY >= byte1 + i * 20 + 20)
+					continue;
+				combatStyle = i - 1;
+				mv.releaseButton();
+				formatPacket(42, combatStyle, -1);
+				break;
+			}
+
+		}
+		for (int j = 0; j < 5; j++)
+		{
+			if (j == combatStyle + 1)
+				gameGraphics.drawBoxAlpha(byte0, byte1 + j * 20, c, 20, GameImage.convertRGBToLong(255, 0, 0), 0x80);
+			else
+				gameGraphics.drawBoxAlpha(byte0, byte1 + j * 20, c, 20, GameImage.convertRGBToLong(190, 190, 190), 0x80);
+			gameGraphics.drawLineX(byte0, byte1 + j * 20, c, 0);
+			gameGraphics.drawLineX(byte0, byte1 + j * 20 + 20, c, 0);
+		}
+
+		gameGraphics.drawText("Select combat style", byte0 + c / 2, byte1 + 16, 3, 0xffffff);
+		gameGraphics.drawText("Controlled (+1 of each)", byte0 + c / 2, byte1 + 36, 3, 0);
+		gameGraphics.drawText("Aggressive (+3 strength)", byte0 + c / 2, byte1 + 56, 3, 0);
+		gameGraphics.drawText("Accurate   (+3 attack)", byte0 + c / 2, byte1 + 76, 3, 0);
+		gameGraphics.drawText("Defensive  (+3 defense)", byte0 + c / 2, byte1 + 96, 3, 0);
+	}
+
+	private final void drawDuelConfirmWindow()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		byte byte0 = 22;
+		byte byte1 = 36;
+		gameGraphics.drawBox(byte0, byte1, 468, 16, 192);
+		int i = 0x989898;
+		gameGraphics.drawBoxAlpha(byte0, byte1 + 16, 468, 246, i, 160);
+		gameGraphics.drawText("Please confirm your duel with @yel@" + DataOperations.longToString(duelOpponentNameLong), byte0 + 234, byte1 + 12, 1, 0xffffff);
+		gameGraphics.drawText("Your stake:", byte0 + 117, byte1 + 30, 1, 0xffff00);
+		for (int j = 0; j < duelConfirmMyItemCount; j++) {
+			String s = self.getDuelConfirmMyItems().get(j).getName();
+			if (self.getDuelConfirmMyItems().get(j).isStackable())
+				s = s + " x " + method74(self.getDuelConfirmMyItems().get(j).getAmount());
+			gameGraphics.drawText(s, byte0 + 117, byte1 + 42 + j * 12, 1, 0xffffff);
+		}
+
+		if (duelConfirmMyItemCount == 0)
+			gameGraphics.drawText("Nothing!", byte0 + 117, byte1 + 42, 1, 0xffffff);
+		gameGraphics.drawText("Your opponent's stake:", byte0 + 351, byte1 + 30, 1, 0xffff00);
+		for (int k = 0; k < duelConfirmOpponentItemCount; k++) {
+			String s1 = self.getDuelConfirmOpponentItems().get(k).getName();
+			if (self.getDuelConfirmOpponentItems().get(k).isStackable())
+				s1 = s1 + " x " + method74(self.getDuelConfirmOpponentItems().get(k).getAmount());
+			gameGraphics.drawText(s1, byte0 + 351, byte1 + 42 + k * 12, 1, 0xffffff);
+		}
+
+		if (duelConfirmOpponentItemCount == 0)
+			gameGraphics.drawText("Nothing!", byte0 + 351, byte1 + 42, 1, 0xffffff);
+		if (duelCantRetreat == 0)
+			gameGraphics.drawText("You can retreat from this duel", byte0 + 234, byte1 + 180, 1, 65280);
+		else
+			gameGraphics.drawText("No retreat is possible!", byte0 + 234, byte1 + 180, 1, 0xff0000);
+		if (duelUseMagic == 0)
+			gameGraphics.drawText("Magic may be used", byte0 + 234, byte1 + 192, 1, 65280);
+		else
+			gameGraphics.drawText("Magic cannot be used", byte0 + 234, byte1 + 192, 1, 0xff0000);
+		if (duelUsePrayer == 0)
+			gameGraphics.drawText("Prayer may be used", byte0 + 234, byte1 + 204, 1, 65280);
+		else
+			gameGraphics.drawText("Prayer cannot be used", byte0 + 234, byte1 + 204, 1, 0xff0000);
+		if (duelUseWeapons == 0)
+			gameGraphics.drawText("Weapons may be used", byte0 + 234, byte1 + 216, 1, 65280);
+		else
+			gameGraphics.drawText("Weapons cannot be used", byte0 + 234, byte1 + 216, 1, 0xff0000);
+		gameGraphics.drawText("If you are sure click 'Accept' to begin the duel", byte0 + 234, byte1 + 230, 1, 0xffffff);
+		if (!duelWeAccept) {
+			gameGraphics.drawPicture((byte0 + 118) - 35, byte1 + 238, SPRITE_MEDIA_START + 25);
+			gameGraphics.drawPicture((byte0 + 352) - 35, byte1 + 238, SPRITE_MEDIA_START + 26);
+		} else {
+			gameGraphics.drawText("Waiting for other player...", byte0 + 234, byte1 + 250, 1, 0xffff00);
+		}
+		if (mv.leftDown()) {
+			if (mouseX < byte0 || mouseY < byte1
+					|| mouseX > byte0 + 468 || mouseY > byte1 + 262)
+			{
+				showDuelConfirmWindow = false;
+				super.streamClass.createPacket(35);
+				super.streamClass.writePktSize();
+			}
+			if (mouseX >= (byte0 + 118) - 35 && mouseX <= byte0 + 118 + 70
+					&& mouseY >= byte1 + 238 && mouseY <= byte1 + 238 + 21)
+			{
+				duelWeAccept = true;
+				super.streamClass.createPacket(87);
+				super.streamClass.writePktSize();
+			}
+			if (mouseX >= (byte0 + 352) - 35 && mouseX <= byte0 + 353 + 70
+					&& mouseY >= byte1 + 238 && mouseY <= byte1 + 238 + 21)
+			{
+				showDuelConfirmWindow = false;
+				super.streamClass.createPacket(35);
+				super.streamClass.writePktSize();
+			}
+			mv.releaseButton();
+		}
+	}
+
+	private final void updateBankItems() {
+		bankItemCount = newBankItemCount;
+		for (int i = 0; i < newBankItemCount; i++) {
+			self.getBankItems().set(i, self.getNewBankItems().get(i));
+		}
+
+		for (int j = 0; j < inventoryCount; j++) {
+			if (bankItemCount >= bankItemsMax)
+				break;
+			int k = self.getInventoryItems().get(j).getID();
+			boolean flag = false;
+			for (int l = 0; l < bankItemCount; l++) {
+				if (self.getBankItems().get(l).getID() != k)
+					continue;
+				flag = true;
+				break;
+			}
+
+			if (!flag) {
+				self.getBankItems().set(bankItemCount++, new Item(k, false, 0));
+			}
+		}
+
+	}
+
+	private final void makeCharacterDesignMenu()
+	{
+		chrDesignMenu = new Menu(gameGraphics, 100);
+		chrDesignMenu.drawText(center.x, center.y - 157, "Please design Your Character", 4, true);
+		int i = center.x - 116;
+		int j = center.y - 133;
+		i += 116;
+		j -= 10;
+		chrDesignMenu.drawText(i - 55, j + 110, "Front", 3, true);
+		chrDesignMenu.drawText(i, j + 110, "Side", 3, true);
+		chrDesignMenu.drawText(i + 55, j + 110, "Back", 3, true);
+		byte byte0 = 54;
+		j += 145;
+		chrDesignMenu.method157(i - byte0, j, 53, 41);
+		chrDesignMenu.drawText(i - byte0, j - 8, "Head", 1, true);
+		chrDesignMenu.drawText(i - byte0, j + 8, "Type", 1, true);
+		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignHeadBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignHeadBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+		chrDesignMenu.method157(i + byte0, j, 53, 41);
+		chrDesignMenu.drawText(i + byte0, j - 8, "Hair", 1, true);
+		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignHairClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignHairClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+		j += 50;
+		chrDesignMenu.method157(i - byte0, j, 53, 41);
+		chrDesignMenu.drawText(i - byte0, j, "Gender", 1, true);
+		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignGenderBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignGenderBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+		chrDesignMenu.method157(i + byte0, j, 53, 41);
+		chrDesignMenu.drawText(i + byte0, j - 8, "Top", 1, true);
+		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignTopClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignTopClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+		j += 50;
+		chrDesignMenu.method157(i - byte0, j, 53, 41);
+		chrDesignMenu.drawText(i - byte0, j - 8, "Skin", 1, true);
+		chrDesignMenu.drawText(i - byte0, j + 8, "Colour", 1, true);
+		chrDesignMenu.method158(i - byte0 - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignSkinClrBtnLeft = chrDesignMenu.makeButton(i - byte0 - 40, j, 20, 20);
+		chrDesignMenu.method158((i - byte0) + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignSkinClrBtnRight = chrDesignMenu.makeButton((i - byte0) + 40, j, 20, 20);
+		chrDesignMenu.method157(i + byte0, j, 53, 41);
+		chrDesignMenu.drawText(i + byte0, j - 8, "Bottom", 1, true);
+		chrDesignMenu.drawText(i + byte0, j + 8, "Colour", 1, true);
+		chrDesignMenu.method158((i + byte0) - 40, j, SPRITE_UTIL_START + 7);
+		chrDesignBottomClrBtnLeft = chrDesignMenu.makeButton((i + byte0) - 40, j, 20, 20);
+		chrDesignMenu.method158(i + byte0 + 40, j, SPRITE_UTIL_START + 6);
+		chrDesignBottomClrBtnRight = chrDesignMenu.makeButton(i + byte0 + 40, j, 20, 20);
+		j += 82;
+		j -= 35;
+		chrDesignMenu.drawBox(i, j, 200, 30, 0x343434, 0x000000, 0xc0);
+		chrDesignMenu.drawText(i, j, "Accept", 4, false);
+		characterDesignAcceptButton = chrDesignMenu.makeButton(i, j, 200, 30);
+	}
+
+	private final void drawAbuseWindow2()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getX();
+		if (super.enteredText.length() > 0)
+		{
+			String s = super.enteredText.trim();
+			super.inputText = "";
+			super.enteredText = "";
+			if (s.length() > 0) {
+				long l = DataOperations.stringLength12ToLong(s);
+				super.streamClass.createPacket(7);
+				super.streamClass.addTwo4ByteInts(l);
+				super.streamClass.addByte(abuseSelectedType);
+				super.streamClass.writePktSize();
+			}
+			showAbuseWindow = 0;
+			return;
+		}
+		gameGraphics.drawBox(center.x - 200, center.y - 37, 400, 100, 0);
+		gameGraphics.drawBoxEdge(center.x - 200, center.y - 37, 400, 100, 0xffffff);
+		int i = center.y - 7;
+		gameGraphics.drawText("Now type the name of the offending player, and press enter", center.x, i, 1, 0xffff00);
+		i += 18;
+		gameGraphics.drawText("Name: " + super.inputText + "*", center.x, i, 4, 0xffffff);
+		i = center.y + 55;
+		int j = 0xffffff;
+		if (mouseX > center.x - 60 && mouseX < center.x + 60
+				&& mouseY > i - 13 && mouseY < i + 2) {
+			j = 0xffff00;
+			if (mv.leftDown()) {
+				mv.releaseButton();
+				showAbuseWindow = 0;
+			}
+		}
+		gameGraphics.drawText("Click here to cancel", center.x, i, 1, j);
+		if (mv.leftDown()
+				&& (mouseX < center.x - 200
+						|| mouseX > center.x + 200
+						|| mouseY < center.y - 37
+						|| mouseY > center.y + 63)) {
+			mv.releaseButton();
+			showAbuseWindow = 0;
+		}
+	}
+
+	private final void displayMessage(String message, int type, int status)
+	{
+		if (type == 2 || type == 4 || type == 6) {
+			for (; message.length() > 5 && message.charAt(0) == '@' && message.charAt(4) == '@'; message = message.substring(5))
+				;
+		}
+		message = message.replaceAll("\\#pmd\\#", "");
+		message = message.replaceAll("\\#mod\\#", "");
+		message = message.replaceAll("\\#adm\\#", "");
+		if (type == 2)
+			message = "@yel@" + message;
+		if (type == 3 || type == 4)
+			message = "@whi@" + message;
+		if (type == 6)
+			message = "@cya@" + message;
+		if (status == 1)
+			message = "#pmd#" + message;
+		if (status == 2)
+			message = "#mod#" + message;
+		if (status == 3)
+			message = "#adm#" + message;
+		if (messagesTab != 0) {
+			if (type == 4 || type == 3)
+				anInt952 = 200;
+			if (type == 2 && messagesTab != 1)
+				anInt953 = 200;
+			if (type == 5 && messagesTab != 2)
+				anInt954 = 200;
+			if (type == 6 && messagesTab != 3)
+				anInt955 = 200;
+			if (type == 3 && messagesTab != 0)
+				messagesTab = 0;
+			if (type == 6 && messagesTab != 3 && messagesTab != 0)
+				messagesTab = 0;
+		}
+		for (int k = chatBoxVisRows-1; k > 0; k--)
+		{
+			messagesArray[k] = messagesArray[k - 1];
+			messagesTimeout[k] = messagesTimeout[k - 1];
+		}
+
+		messagesArray[0] = message;
+		messagesTimeout[0] = 300;
+
+		if (type == 2)
+		{
+			if (gameMenu.anIntArray187[messagesHandleChatHist] == gameMenu.menuListTextCount[messagesHandleChatHist] - chatBoxVisRows + 1)
+				gameMenu.addString(messagesHandleChatHist, message, true);
+			else
+				gameMenu.addString(messagesHandleChatHist, message, false);
+		}
+		if (type == 5)
+			if (gameMenu.anIntArray187[messagesHandleQuestHist] == gameMenu.menuListTextCount[messagesHandleQuestHist] - chatBoxVisRows + 1)
+				gameMenu.addString(messagesHandleQuestHist, message, true);
+			else
+				gameMenu.addString(messagesHandleQuestHist, message, false);
+		if (type == 6) {
+			if (gameMenu.anIntArray187[messagesHandlePrivHist] == gameMenu.menuListTextCount[messagesHandlePrivHist] - chatBoxVisRows + 1) {
+				gameMenu.addString(messagesHandlePrivHist, message, true);
+				return;
+			}
+			gameMenu.addString(messagesHandlePrivHist, message, false);
+		}
+	}
+
+	private final void animateObject(int i, String s)
+	{
+		GameObject gObj = objects.get(i);
+		double tileXDist = gObj.x - self.me.currentX;
+		double tileYDist = gObj.y - self.me.currentY;
+		double maxAnimateDist = gameCamera.drawModelMaxDist;
+		boolean animate = Math.sqrt(tileXDist*tileXDist + tileYDist*tileYDist) < maxAnimateDist;
+		if (animate && gObj.x >= 0 && gObj.y >= 0
+				&& gObj.x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
+				&& gObj.y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
+		{
+			gameCamera.removeModel(gObj.model);
+			int newMdlIdx = EntityHandler.storeModel(s);
+			try {
+				Model model = gameDataModels[newMdlIdx].newModel();
+				gameCamera.addModel(model);
+				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
+				model.copyRotTrans(gObj.model);
+				model.index = i;
+				gObj.model = model;
+			}
+			catch (Exception e) {
+			}
+		}
+	}
+
+	private final void drawTradeWindow()
+	{
+		if (mv.buttonDown() && itemIncrement == 0)
+			itemIncrement = 1;
+		if (itemIncrement > 0)
+		{
+			if (tradePan.isMouseOver())
+			{ // inside trade window
+				if (tradePan.getInvGrid().isMouseOver())
+					handleMouseOverTradeInv();
+				else if (tradePan.getOfferGrid().isMouseOver())
+					handleMouseOverPlrTradeOffer();
+				else
+					handleTradePanelClicks();
+			}
+			mv.releaseButton();
+			itemIncrement = 0;
+		}
+		if (!showTradeWindow)
+			return;
+
+		// draw the interface
+		tradePan.getFrame().drawComponent();
+		drawTradePanel();
+		updateTradeStatus();
+		drawTradeInventoryGrid();
+		drawTradePlrOfferGrid();
+		drawTradeOpntOfferGrid();
+
+		if (tradePan.isMouseOver())
+			handleTradePanelClicks();
+		else if (tradePan.getFrame().getCloseButton().isMouseOver())
+		{ // close button
+			if (mv.leftDown())
+			{
+				formatPacket(216, -1, -1);
+				mv.releaseButton();
+			}
+		}
+		else if (tradePan.getFrame().isMouseOver())
+		{ // click inside settings panel but not on the content or close button
+			if (mv.leftDown())
+				mv.releaseButton();
+		}
+	}
+
+	private final boolean enginePlayerVisible(int i) {
+		int x = (int) self.me.currentX;
+		int y = (int) self.me.currentY;
+		for (int l = 2; l >= 1; l--) {
+			if (i == 1 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
+				return false;
+			if (i == 3 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x - l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
+				return false;
+			if (i == 5 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
+				return false;
+			if (i == 7 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
+					|| (engineHandle.walkableValue[x + l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
+				return false;
+			if (i == 0 && (engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
+				return false;
+			if (i == 2 && (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
+				return false;
+			if (i == 4 && (engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
+				return false;
+			if (i == 6 && (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
+				return false;
+		}
+
+		return true;
 	}
 
 	private final void playSound(String s) {
@@ -7456,98 +5896,6 @@ public class mudclient extends GameWindowMiddleMan
 		return true;
 	}
 
-	public final Image createImage(int i, int j) {
-		if (GameWindow.gameFrame != null) {
-			return GameWindow.gameFrame.createImage(i, j);
-		}
-		return super.createImage(i, j);
-	}
-
-	private void drawTradeCfrmPanel()
-	{
-		tradeCfrmPan.getFrame().setTitle("Please confirm your trade with @yel@"
-				+ DataOperations.longToString(tradeConfirmOtherNameLong));
-		gameGraphics.drawBoxAlpha(tradeCfrmPan.getX(), tradeCfrmPan.getY(),
-				tradeCfrmPan.getWidth(), tradeCfrmPan.getHeight(),
-				tradeCfrmPan.getBGColor(), tradeCfrmPan.getBGAlpha());
-		int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
-		gameGraphics.drawText("You are about to give:",
-				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
-				itemsTitleHeight, 1, 0xffff00);
-		gameGraphics.drawText("In return you will receive:",
-				tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
-				itemsTitleHeight, 1, 0xffff00);
-		gameGraphics.drawText("Are you sure you want to do this?",
-				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
-				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-62, 4, 65535);
-		gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.",
-				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
-				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-47, 1, 0xffffff);
-		gameGraphics.drawText("Remember that not all players are trustworthy",
-				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
-				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-32, 1, 0xffffff);
-	}
-
-	private void drawTradeItems()
-	{
-		int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
-		if (tradeConfirmItemCount == 0)
-			gameGraphics.drawText("Nothing!",
-					tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
-					itemsTitleHeight + 12, 1, 0xffffff);
-		for (int line = 0; line < tradeConfirmItemCount; line++)
-		{
-			String s = self.getTradeConfirmMyItems().get(line).getName();
-			if (self.getTradeConfirmMyItems().get(line).isStackable())
-				s = s + " x " + method74(self.getTradeConfirmMyItems().get(line).getAmount());
-			gameGraphics.drawText(s, tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
-					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
-		}
-
-		if (tradeConfirmOtherItemCount == 0)
-			gameGraphics.drawText("Nothing!",
-					tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
-					itemsTitleHeight + 12, 1, 0xffffff);
-		for (int line = 0; line < tradeConfirmOtherItemCount; line++)
-		{
-			String s1 = self.getTradeConfirmOtherItems().get(line).getName();
-			if (self.getTradeConfirmOtherItems().get(line).isStackable())
-				s1 = s1 + " x " + method74(self.getTradeConfirmOtherItems().get(line).getAmount());
-			gameGraphics.drawText(s1, tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
-					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
-		}
-	}
-
-	private void updateTradeCfrmButtons()
-	{
-		if (!tradeConfirmAccepted)
-		{
-			gameGraphics.drawPicture(tradeCfrmPan.getAcceptButton().getX(),
-					tradeCfrmPan.getAcceptButton().getY(),
-					tradeCfrmPan.getAcceptButton().getSpriteIdx());
-			gameGraphics.drawPicture(tradeCfrmPan.getDeclineButton().getX(),
-					tradeCfrmPan.getDeclineButton().getY(),
-					tradeCfrmPan.getDeclineButton().getSpriteIdx());
-		}
-		else
-		{
-			gameGraphics.drawText("Waiting for other player...",
-					tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
-					tradeCfrmPan.getY()+tradeCfrmPan.getHeight()/4-12, 1, 0xffff00);
-		}
-	}
-
-	private void handleTradeCfrmPanelClicks()
-	{
-		if (tradeCfrmPan.getAcceptButton().isMouseOver())
-			formatPacket(53, -1, -1);
-		if (!tradeCfrmPan.getFrame().isMouseOver()
-				|| tradeCfrmPan.getDeclineButton().isMouseOver()
-				|| tradeCfrmPan.getFrame().getCloseButton().isMouseOver())
-			formatPacket(216, -1, -1);
-		mv.releaseButton();
-	}
-
 	private final void drawTradeConfirmWindow()
 	{
 		if (tradePan.isMouseOver())
@@ -7635,8 +5983,8 @@ public class mudclient extends GameWindowMiddleMan
 		int duelWindowHalfWidth = duelWindowWidth/2;
 		int duelWidnowHeight = 12+18 + 2*(nDuelRows*itemSlotHeight+1) + 22 + 20;//      262;
 		int duelWidnowHalfHeight = duelWidnowHeight/2;
-		int duelWindowX = (windowHalfWidth - duelWindowHalfWidth);
-		int duelWindowY = (windowHalfHeight - duelWidnowHalfHeight);
+		int duelWindowX = (center.x - duelWindowHalfWidth);
+		int duelWindowY = (center.y - duelWidnowHalfHeight);
 		int duelBgClr = 0x989898;
 		int invBgClr = 0xd0d0d0;
 		int duelWindowAlpha = 0xa0;
@@ -7941,8 +6289,8 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		int menuWidth = 210;
 		int mnenuHeight = 250;
-		int menuX = windowHalfWidth - menuWidth/2;
-		int menuY = windowHalfHeight - mnenuHeight/2;
+		int menuX = center.x - menuWidth/2;
+		int menuY = center.y - mnenuHeight/2;
 		int menuClor = 0x343434;
 		int menuBorderColor = 0x000000;
 		int menuAlpha = 0x7f;
@@ -8123,40 +6471,40 @@ public class mudclient extends GameWindowMiddleMan
 		int mouseX = mv.getX();
 		int mouseY = mv.getY();
 		//int i = 145;
-		int i = windowHalfHeight - 22;
+		int i = center.y - 22;
 		if (mv.buttonDown()) {
 			mv.releaseButton();
 			if (inputBoxType == 1
-					&& (mouseX < windowHalfWidth - 150 || mouseY < i
-							|| mouseX > windowHalfWidth + 150 || mouseY > i + 70)) {
+					&& (mouseX < center.x - 150 || mouseY < i
+							|| mouseX > center.x + 150 || mouseY > i + 70)) {
 				inputBoxType = 0;
 				return;
 			}
 			if (inputBoxType == 2
-					&& (mouseX < windowHalfWidth - 250 || mouseY < i
-							|| mouseX > windowHalfWidth + 250 || mouseY > i + 70)) {
+					&& (mouseX < center.x - 250 || mouseY < i
+							|| mouseX > center.x + 250 || mouseY > i + 70)) {
 				inputBoxType = 0;
 				return;
 			}
 			if (inputBoxType == 3
-					&& (mouseX < windowHalfWidth - 150 || mouseY < i
-							|| mouseX > windowHalfWidth + 150 || mouseY > i + 70)) {
+					&& (mouseX < center.x - 150 || mouseY < i
+							|| mouseX > center.x + 150 || mouseY > i + 70)) {
 				inputBoxType = 0;
 				return;
 			}
-			if (mouseX > windowHalfWidth - 20 && mouseX < windowHalfWidth + 20
-					&& mouseY > windowHalfHeight + 26 && mouseY < windowHalfHeight + 46) {
+			if (mouseX > center.x - 20 && mouseX < center.x + 20
+					&& mouseY > center.y + 26 && mouseY < center.y + 46) {
 				inputBoxType = 0;
 				return;
 			}
 		}
 		if (inputBoxType == 1) {
-			gameGraphics.drawBox(windowHalfWidth - 150, i, 300, 70, 0);
-			gameGraphics.drawBoxEdge(windowHalfWidth - 150, i, 300, 70, 0xffffff);
+			gameGraphics.drawBox(center.x - 150, i, 300, 70, 0);
+			gameGraphics.drawBoxEdge(center.x - 150, i, 300, 70, 0xffffff);
 			i += 20;
-			gameGraphics.drawText("Enter name to add to friends list", windowHalfWidth, i, 4, 0xffffff);
+			gameGraphics.drawText("Enter name to add to friends list", center.x, i, 4, 0xffffff);
 			i += 20;
-			gameGraphics.drawText(super.inputText + "*", windowHalfWidth, i, 4, 0xffffff);
+			gameGraphics.drawText(super.inputText + "*", center.x, i, 4, 0xffffff);
 			if (super.enteredText.length() > 0) {
 				String s = super.enteredText.trim();
 				super.inputText = "";
@@ -8167,12 +6515,12 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 		if (inputBoxType == 2) {
-			gameGraphics.drawBox(windowHalfWidth - 250, i, 500, 70, 0);
-			gameGraphics.drawBoxEdge(windowHalfWidth - 250, i, 500, 70, 0xffffff);
+			gameGraphics.drawBox(center.x - 250, i, 500, 70, 0);
+			gameGraphics.drawBoxEdge(center.x - 250, i, 500, 70, 0xffffff);
 			i += 20;
 			gameGraphics.drawText("Enter message to send to " + DataOperations.longToString(privateMessageTarget), 256, i, 4, 0xffffff);
 			i += 20;
-			gameGraphics.drawText(super.inputMessage + "*", windowHalfWidth, i, 4, 0xffffff);
+			gameGraphics.drawText(super.inputMessage + "*", center.x, i, 4, 0xffffff);
 			if (super.enteredMessage.length() > 0) {
 				String s1 = super.enteredMessage;
 				super.inputMessage = "";
@@ -8185,12 +6533,12 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 		if (inputBoxType == 3) {
-			gameGraphics.drawBox(windowHalfWidth - 150, i, 300, 70, 0);
-			gameGraphics.drawBoxEdge(windowHalfWidth - 150, i, 300, 70, 0xffffff);
+			gameGraphics.drawBox(center.x - 150, i, 300, 70, 0);
+			gameGraphics.drawBoxEdge(center.x - 150, i, 300, 70, 0xffffff);
 			i += 20;
-			gameGraphics.drawText("Enter name to add to ignore list", windowHalfWidth, i, 4, 0xffffff);
+			gameGraphics.drawText("Enter name to add to ignore list", center.x, i, 4, 0xffffff);
 			i += 20;
-			gameGraphics.drawText(super.inputText + "*", windowHalfWidth, i, 4, 0xffffff);
+			gameGraphics.drawText(super.inputText + "*", center.x, i, 4, 0xffffff);
 			if (super.enteredText.length() > 0) {
 				String s2 = super.enteredText.trim();
 				super.inputText = "";
@@ -8201,10 +6549,10 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 		int j = 0xffffff;
-		if (mouseX > windowHalfWidth - 20 && mouseX < windowHalfWidth + 20
-				&& mouseY > windowHalfHeight + 26 && mouseY < windowHalfHeight + 46)
+		if (mouseX > center.x - 20 && mouseX < center.x + 20
+				&& mouseY > center.y + 26 && mouseY < center.y + 46)
 			j = 0xffff00;
-		gameGraphics.drawText("Cancel", windowHalfWidth, windowHalfHeight + 41, 1, j);
+		gameGraphics.drawText("Cancel", center.x, center.y + 41, 1, j);
 	}
 
 	private final boolean hasRequiredRunes(int i, int j) {
@@ -8378,13 +6726,13 @@ public class mudclient extends GameWindowMiddleMan
 
 		Sprite sprite;
 		/* Waypoint target */
-		if (Math.abs(mapClickX - self.me.currentX) > 1D
-				|| Math.abs(mapClickY - self.me.currentY) > 1D)
+		if (Math.abs(mapClick.x - self.me.currentX) > 1D
+				|| Math.abs(mapClick.y - self.me.currentY) > 1D)
 		{
-			if (mapClickX >= 0 && mapClickY >= 0)
+			if (mapClick.x >= 0 && mapClick.y >= 0)
 			{
-				x = (mapClickX - self.me.currentX) * 4.5;
-				y = (mapClickY - self.me.currentY) * 4.5;
+				x = (mapClick.x - self.me.currentX) * 4.5;
+				y = (mapClick.y - self.me.currentY) * 4.5;
 				tmp = y * sin + x * cos;
 				y = y * cos - x * sin;
 				x = tmp;
@@ -8398,8 +6746,8 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		else
 		{
-			mapClickX = -1;
-			mapClickY = -1;
+			mapClick.x = -1;
+			mapClick.y = -1;
 		}
 		/* player dot on map */
 		sprite = ((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 28];
@@ -8413,7 +6761,7 @@ public class mudclient extends GameWindowMiddleMan
 				cameraZRot + 512 & 0x3ff, 128);
 
 		/* restore dimensions */
-		gameGraphics.setDimensions(0, 0, windowWidth, windowHeight + 12);
+		gameGraphics.setDimensions(0, 0, bounds.width, bounds.height + 12);
 		if (!canClick)
 			return;
 		if (mouseX >= miniMapX
@@ -8431,513 +6779,2168 @@ public class mudclient extends GameWindowMiddleMan
 			if (mv.leftDown())
 			{
 				walkTo(sectionX, sectionY, (int)x, (int)y, false);
-				mapClickX = x;
-				mapClickY = y;
+				mapClick.x = x;
+				mapClick.y = y;
 			}
 			mv.releaseButton();
 		}
 	}
 
-	protected final void handleScrollEvent(int scrollDirection)
-	{
-		if (scrollDirection > 0D)
-		{
-			if (cameraZoom < 1.41)
-			{
-				cameraZoom += 0.1;
-				gameCamera.drawModelMaxDist += 1D;
-				gameCamera.drawSpriteMaxDist += 1D;
-				if (!super.keyF1Toggle)
-					gameCamera.fadeDist += 0.9583333333333333;
-				else
-					gameCamera.fadeDist += 0.9545454545454545;
-			}
-		}
-		else if (scrollDirection < 0D)
-		{
-			if (cameraZoom > .39)
-			{
-				cameraZoom -= 0.1;
-				gameCamera.drawModelMaxDist -= 1D;
-				gameCamera.drawSpriteMaxDist -= 1D;
-				if (!super.keyF1Toggle)
-					gameCamera.fadeDist -= 0.9583333333333333;
-				else
-					gameCamera.fadeDist -= 0.9545454545454545;
-			}
-		}
-	}
 
-	public mudclient()
+	/**
+	 * Formats a packet and cleans up necessary variables.
+	 * @param packetID The id of the packet.
+	 */
+	private void formatPacket(int packetID, int id, int amount)
 	{
-		combatWindow = false;
-		threadSleepTime = 10;
-		try {
-			localhost = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException uhe)
+		switch(packetID)
 		{
-			localhost = "unknown";
-		}
-		startTime = System.currentTimeMillis();
-		configAutoCameraAngle = true;
-		questionMenuAnswer = new String[10];
-		currentUser = "";
-		currentPass = "";
-		self = new Player(new Mob());
-		
-		rightClickMenu = new ArrayList<MenuRightClick>();
-		
-		duelOpponentAccepted = false;
-		duelMyAccepted = false;
-		serverMessage = "";
-		duelOpponentName = "";
-		mobMsg = new String[50];
+		case 42:
+			super.streamClass.createPacket(42);
+			super.streamClass.addByte(id);
+			super.streamClass.writePktSize();
+			break;
+		case 48: // close bank
+		super.streamClass.createPacket(48);
+		super.streamClass.writePktSize();
 		showBank = false;
-		doorModel = new Model[500];
-		mobMsgX = new int[50];
-		mobMsgY = new int[50];
-		mobMsgWidth = new int[50];
-		mobMsgHeight = new int[50];
-		equipmentStatus = new int[6];
-		prayerOn = new boolean[50];
-		tradeOtherAccepted = false;
-		tradeWeAccepted = false;
-		anIntArray705 = new int[50];
-		anIntArray706 = new int[50];
-		sectorHeight = -1;
-		memoryError = false;
-		bankItemsMax = 48;
-		showQuestionMenu = false;
-		viewDistance = 37.5;
-		cameraAutoAngle = 1;
-		showServerMessageBox = false;
-		hasReceivedWelcomeBoxDetails = false;
-		playerStatCurrent = new int[18];
-		wildYSubtract = -1;
-		anInt742 = -1;
-		anInt743 = -1;
-		anInt744 = -1;
-		sectionXArray = new int[8000];
-		sectionYArray = new int[8000];
-		
-		selItem = null;
-		
-		anIntArray757 = new int[50];
-		showCharacterLookScreen = false;
-		gameDataModels = new Model[1000];
-		configMouseButtons = false;
-		duelNoRetreating = false;
-		duelNoMagic = false;
-		duelNoPrayer = false;
-		duelNoWeapons = false;
-		anIntArray782 = new int[50];
-		hitpoints = new ArrayList<HitpointsBar>(50);
-		cameraZRot = 512;
-		cameraXRot = 912;
-		showWelcomeBox = false;
-		chrBodyGender = 1;
-		character2Colour = 2;
-		chrHairClr = 2;
-		chrTopClr = 8;
-		chrBottomClr = 14;
-		chrHeadGender = 1;
-		selectedBankItem = -1;
-		selectedBankItemType = -2;
-		objectRelated = new boolean[1500];
-		playerStatBase = new int[18];
-		shopItems = new Item[256];
-		anIntArray858 = new int[50];
-		anIntArray859 = new int[50];
-		mobArrayIndexes = new int[500];
-		serverIndex = -1;
-		showTradeConfirmWindow = false;
-		tradeConfirmAccepted = false;
-		playerArray = new ArrayList<Mob>(500);
-		lastPlayerArray = new ArrayList<Mob>(500);
-		npcArray = new ArrayList<Mob>(500);
-		lastNpcArray = new ArrayList<Mob>(500);
-		mobArray = new ArrayList<Mob>(8000);
-		npcRecordArray = new ArrayList<Mob>(8000);
-
-		objects = new ArrayList<GameObject>();
-		serverMessageBoxTop = false;
-		cameraHeight = 8.59375D;
-		cameraZoom = 1.0;
-		notInWilderness = false;
-		zoomCamera = false;
-		playerStatExperience = new int[18];
-		cameraAutoAngleDebug = false;
-		showDuelWindow = false;
-		anIntArray923 = new int[50];
-		lastLoadedNull = false;
-		experienceArray = new int[99];
-		showShop = false;
-		mouseClickX = new int[8192];
-		mouseClickYArray = new int[8192];
-		showDuelConfirmWindow = false;
-		duelWeAccept = false;
-		doorX = new int[500];
-		doorY = new int[500];
-		configSoundEffects = false;
-		showRightClickMenu = false;
-		attackingInt40 = 40;
-		anIntArray944 = new int[50];
-		doorDirection = new int[500];
-		doorType = new int[500];
-		groundItemX = new double[8000];
-		groundItemY = new double[8000];
-		groundItemType = new int[8000];
-		groundItemZ = new double[8000];
-		selectedShopItemIndex = -1;
-		selectedShopItemType = -2;
-		showTradeWindow = false;
-		doorRelated = new boolean[500];
-		/*
-        windowWidth = 512;
-        windowHeight = 334;
-		 */
-		bounds = new Rectangle(0, 0, 1120, 630);
-		center = new Point(bounds.width/2, bounds.height/2);
-		windowWidth = 1120;
-		windowHeight = 630;
-		windowHalfWidth = windowWidth/2;
-		windowHalfHeight = windowHeight/2;
-		
-		cameraSizeInt = 9;
-		tradeOtherPlayerName = "";
-		chatBoxVisRows = 7;
-		messagesArray = new String[chatBoxVisRows];
-		messagesTimeout = new int[chatBoxVisRows];
-		chatPlayerEntryHeight = 14;
-		chatBoxHeight = chatPlayerEntryHeight*chatBoxVisRows;
-		chatBoxWidth = 502;
-		chatBoxX = 5;
-		chatBoxY = windowHeight - chatBoxHeight - chatPlayerEntryHeight-10;
-		chatPlayerEntryX = chatBoxX;
-		chatPlayerEntryY = chatBoxY + chatBoxHeight;
-		chatPlayerEntryWidth = chatBoxWidth - (chatPlayerEntryX - chatBoxX);
-		gameWindowMenuBarWidth = 197;
-		gameWindowMenuBarHeight = 32;
-		gameWindowMenuBarX = windowWidth - gameWindowMenuBarWidth-3;
-		gameWindowMenuBarY = windowHeight - gameWindowMenuBarHeight-3;
-		gameWindowMenuBarItemWidth = 33;
-		gameWindowMenuBarItemHeight = 32;
-		miniMapWidth = 156+40;
-		miniMapHeight = 152+40;
-		miniMapX = windowWidth-miniMapWidth-3;
-		miniMapY = 3;
+		break;
+		case 53: // confirm trade
+			tradeConfirmAccepted = true;
+			super.streamClass.createPacket(53);
+			super.streamClass.writePktSize();
+			break;
+		case 56:
+			super.streamClass.createPacket(56);
+			super.streamClass.addByte(id);
+			super.streamClass.writePktSize();
+			prayerOn[id] = true;
+			playSound("prayeron");
+			break;
+		case 70:
+			super.streamClass.createPacket(70);
+			super.streamClass.addByte(tradeMyItemCount);
+			for (int i = 0; i < tradeMyItemCount; i++)
+			{
+				super.streamClass.add2ByteInt(self.getTradeMyItems().get(i).getID());
+				super.streamClass.add4ByteInt((int) self.getTradeMyItems().get(i).getAmount());
+			}
+			super.streamClass.writePktSize();
+			tradeOtherAccepted = false;
+			tradeWeAccepted = false;
+			break;
+		case 123:
+			super.streamClass.createPacket(123);
+			super.streamClass.addByte(duelMyItemCount);
+			for (int i = 0; i < duelMyItemCount; i++)
+			{
+				super.streamClass.add2ByteInt(self.getDuelMyItems().get(i).getID());
+				super.streamClass.add4ByteInt((int) self.getDuelMyItems().get(i).getAmount());
+			}
+			super.streamClass.writePktSize();
+			duelOpponentAccepted = false;
+			duelMyAccepted = false;
+			break;
+		case 157: // change settings in settings menu
+			super.streamClass.createPacket(157);
+			super.streamClass.addByte(id);
+			super.streamClass.addByte(amount);
+			super.streamClass.writePktSize();
+			break;
+		case 183: // bank withdraw
+			super.streamClass.createPacket(183);
+			super.streamClass.add2ByteInt(id);
+			super.streamClass.add4ByteInt(amount);
+			super.streamClass.writePktSize();
+			break;
+		case 198: // bank deposit
+			super.streamClass.createPacket(198);
+			super.streamClass.add2ByteInt(id);
+			super.streamClass.add4ByteInt(amount);
+			super.streamClass.writePktSize();
+			break;
+		case 211: // trade accept button
+			tradeWeAccepted = true;
+			super.streamClass.createPacket(211);
+			super.streamClass.writePktSize();
+			break;
+		case 216: // trade decline
+			showTradeWindow = false;
+			super.streamClass.createPacket(216);
+			super.streamClass.writePktSize();
+			break;
+		case 218: // accept character remake?
+			super.streamClass.createPacket(218);
+			super.streamClass.addByte(chrHeadGender);
+			super.streamClass.addByte(chrHeadType);
+			super.streamClass.addByte(chrBodyGender);
+			super.streamClass.addByte(character2Colour);
+			super.streamClass.addByte(chrHairClr);
+			super.streamClass.addByte(chrTopClr);
+			super.streamClass.addByte(chrBottomClr);
+			super.streamClass.addByte(chrSkinClr);
+			super.streamClass.writePktSize();
+			gameGraphics.resetImagePixels(0);
+			showCharacterLookScreen = false;
+			break;
+		case 248:  // switch prayer off
+			super.streamClass.createPacket(248);
+			super.streamClass.addByte(id);
+			super.streamClass.writePktSize();
+			prayerOn[id] = false;
+			playSound("prayeroff");
+			break;
+		}
 
 	}
+
+	/**
+	 * Checks for any errors when requesting to add items to the trade.
+	 * @param id Item id
+	 * @param amount Item amount
+	 * @param offerType Type of offer being made; 0 for trade, 1 for duel.
+	 * @return True if no errors were found. False if errors were found.
+	 */
+	private boolean anyOfferErrors(int id, int amount, int offerType)
+	{
+		if (offerType == 0 && tradeMyItemCount >= 12)
+		{
+			displayMessage("@cya@Your trade offer is currently full", 3, 0);
+			return false;
+		}
+		if (offerType == 1 && duelMyItemCount >= 12)
+		{
+			displayMessage("@cya@Your duel offer is currently full", 3, 0);
+			return false;
+		}
+		if (inventoryCount(id) < amount)
+		{
+			displayMessage("@cya@You do not have that many"
+					+ EntityHandler.getItemDef(id).getName()
+					+ " to offer", 3, 0);
+			return false;
+		}
+		if (!EntityHandler.getItemDef(id).isStackable()
+				&& amount > 1)
+		{
+			displayMessage("@cya@You can only offer 1 non stackable at a time",
+					3, 0);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Handles adding an item to the trade list of the player items currently offered.
+	 * If an error occurs (such as invalid amount or id) no items are added.
+	 * @param id Item id.
+	 * @param amount Item amount.
+	 */
+	private void handleTradeOfferCommand(int id, int amount)
+	{
+		if (anyOfferErrors(id, amount, 0))
+			return;
+		boolean addNewItem = true;
+		for (int i = 0; i < tradeMyItemCount; ++i)
+		{
+			if (self.getTradeMyItems().get(i).getID() != id)
+				continue;
+			if (!EntityHandler.getItemDef(id).isStackable())
+				break;
+			if (inventoryCount(id) < (self.getTradeMyItems().get(i).getAmount() + amount))
+			{
+				displayMessage("@cya@You do not have that many"
+						+ EntityHandler.getItemDef(id).getName()
+						+ " to offer", 3, 0);
+				return;
+			}
+			self.getTradeMyItems().get(i).addAmount(amount);
+			addNewItem = false;
+			break;
+		}
+		if (addNewItem)
+		{
+			self.getTradeMyItems().set(tradeMyItemCount++, new Item(id, false, amount));
+		}
+		formatPacket(70, -1, -1);
+	}
+
+	/**
+	 * Handles adding an item to the duel list of the player items currently offered.
+	 * If an error occurs (such as invalid amount or id) no items are added.
+	 * @param id Item id.
+	 * @param amount Item amount.
+	 */
+	private void handleDuelOfferCommand(int id, int amount)
+	{
+		if (anyOfferErrors(id, amount, 1))
+			return;
+		boolean addNewItem = true;
+		for (int i = 0; i < duelMyItemCount; i++)
+		{
+			if (self.getDuelMyItems().get(i).getID() != id)
+				continue;
+			if (!EntityHandler.getItemDef(id).isStackable())
+				break;
+			if (inventoryCount(id) < (self.getDuelMyItems().get(i).getAmount() + amount))
+			{
+				displayMessage("@cya@You do not have that many"
+						+ EntityHandler.getItemDef(id).getName()
+						+ " to offer", 3, 0);
+				return;
+			}
+			self.getDuelMyItems().get(i).addAmount(amount);
+			addNewItem = false;
+			break;
+		}
+		if (addNewItem)
+			self.getDuelMyItems().set(duelMyItemCount++, new Item(id, false, amount));
+		formatPacket(123, -1, -1);
+	}
+
+	/**
+	 * Passes an offer command to the relevant function depending on what offer window
+	 * is open.
+	 * @param id Item id.
+	 * @param amount Item amount.
+	 * @return
+	 */
+	private boolean handleOfferCommand(int id, int amount)
+	{
+		if (showTradeWindow)
+			handleTradeOfferCommand(id, amount);
+		else if (showDuelWindow)
+			handleDuelOfferCommand(id, amount);
+		else {
+			displayMessage("@cya@There is nothing to offer to.", 3, 0);
+		}
+		return false;
+	}
+
+	/**
+	 * Takes a command, formats it and passes it to the relevant function.
+	 * The command must be on the form:
+	 * 
+	 * command args0 args1 args2 ... argsN
+	 * 
+	 * @param s The command.
+	 * @return true if the input string matches a valid command
+	 */
+	private boolean handleCommand(String s)
+	{
+		String[] cmd = s.split(" ");
+		if (cmd[0].equalsIgnoreCase("offer") && cmd.length > 3)
+		{
+			int id, amount;
+			try
+			{
+				id = Integer.parseInt(cmd[1]);
+				amount = Integer.parseInt(cmd[2]);
+			} catch (NumberFormatException nfe)
+			{
+				displayMessage("@cya@Arguments must be integers!", 3, 0);
+				return true;
+			}
+			return handleOfferCommand(id, amount);
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the game image. Used to present the game on the screen and take
+	 * creenshots.
+	 * @return
+	 * @throws IOException
+	 */
+	private BufferedImage getImage() throws IOException
+	{
+		BufferedImage bufferedImage = new BufferedImage(bounds.width,
+				bounds.height + 11, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = bufferedImage.createGraphics();
+		g2d.drawImage(gameGraphics.image, 0, 0, this);
+		g2d.dispose();
+		return bufferedImage;
+	}
+
+	/**
+	 * Takes a screenshot and saves it.
+	 * @param verbose True if additional information about the process should be
+	 * printed.
+	 * @return True if a screenshot was successfully taken.
+	 */
+	private boolean takeScreenshot(boolean verbose)
+	{
+		try
+		{
+			File file = misc.getEmptyFile(false, currentUser);
+			ImageIO.write(getImage(), "png", file);
+			if (verbose)
+				handleServerMessage("Screenshot saved as " + file.getName() + ".");
+			return true;
+		}
+		catch (IOException e)
+		{
+			if (verbose)
+				handleServerMessage("Error saving screenshot.");
+			return false;
+		}
+	}
+
+	private void displayMemoryError()
+	{
+		Graphics g2 = getGraphics();
+		g2.setColor(Color.black);
+		g2.fillRect(0, 0, 512, 356);
+		g2.setFont(new Font("Helvetica", 1, 20));
+		g2.setColor(Color.white);
+		g2.drawString("Error - out of memory!", 50, 50);
+		g2.drawString("Close ALL unnecessary programs", 50, 100);
+		g2.drawString("and windows before loading the game", 50, 150);
+		g2.drawString("TestServer needs about 100mb of spare RAM", 50, 200);
+		changeThreadSleepModifier(1);
+		return;
+	}
+
+	private void drawItemBox(InGameGrid panel, int itemID,
+			int slotX, int slotY, boolean selected, boolean drawSprite)
+	{
+		if (selected)
+			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
+					panel.getGridBGSelectColor(),
+					panel.getGridBGAlpha());
+		else
+			gameGraphics.drawBoxAlpha(slotX+1, slotY+1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
+					panel.getGridBGNotSelectColor(),
+					panel.getGridBGAlpha());
+		gameGraphics.drawBoxEdge(slotX, slotY,
+				InGameGrid.ITEM_SLOT_WIDTH+1,
+				InGameGrid.ITEM_SLOT_HEIGHT+1, panel.getGridLineColor());
+		if (drawSprite)
+			gameGraphics.spriteClip4(slotX+1, slotY+1,
+					InGameGrid.ITEM_SLOT_WIDTH-1,
+					InGameGrid.ITEM_SLOT_HEIGHT-1,
+					SPRITE_ITEM_START + EntityHandler.getItemDef(
+							itemID).getSprite(),
+					EntityHandler.getItemDef(itemID).getPictureMask(),
+					0, 0, false);
+	}
+
+	/**
+	 * Handles what happens when you click on an item in the bank.
+	 */
+	private void clickBankItem()
+	{
+		InGameGrid bankGrid = bankPan.getBankGrid();
+		int itemIdx = mouseOverBankPageText * bankGrid.getRows()*bankGrid.getCols();
+		int mouseXGrid = mv.getX() - bankGrid.getX();
+		int mouseYGrid = mv.getY() - bankGrid.getY();
+		for (int row = 0; row < bankGrid.getRows(); row++)
+		{
+			for (int col = 0; col < bankGrid.getCols(); col++)
+			{
+				int slotXMin = col * itemSlotWidth - 1;
+				int slotYMin = row * itemSlotHeight - 1;
+				if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + itemSlotWidth
+						&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + itemSlotHeight
+						&& itemIdx < bankItemCount && self.getBankItems().get(itemIdx).getID() != -1)
+				{
+					selectedBankItemType = self.getBankItems().get(itemIdx).getID();
+					selectedBankItem = itemIdx;
+				}
+				itemIdx++;
+			}
+
+		}
+	}
+
+	/**
+	 * Handles what happens when you withdraw/deposit an item from/to the bank. 
+	 */
+	private void clickBankItemMove()
+	{
+		int selectedBankItemId;
+		if (selectedBankItem < 0)
+			selectedBankItemId = -1;
+		else
+			selectedBankItemId = self.getBankItems().get(selectedBankItem).getID();
+		if (selectedBankItemId != -1)
+		{
+			long selectedBankItemCount = self.getBankItems().get(selectedBankItem).getAmount();
+			int depAmt = bankPan.getDepAmt(inventoryCount(selectedBankItemId));
+			if (depAmt != 0)
+				formatPacket(198, selectedBankItemId, depAmt);
+			long withAmt = bankPan.getWithAmt(selectedBankItemCount);
+			if (withAmt != 0)
+				formatPacket(183, selectedBankItemId, (int)withAmt);
+		}
+	}
+
+	/**
+	 * Checks if an invalid item is selected. If so it will clear the reference.
+	 */
+	private void checkSelectedBankItem()
+	{
+		if (selectedBankItem >= bankItemCount || selectedBankItem < 0)
+			selectedBankItem = -1;
+		if (selectedBankItem != -1
+				&& self.getBankItems().get(selectedBankItem).getID() != selectedBankItemType)
+		{
+			selectedBankItem = -1;
+			selectedBankItemType = -2;
+		}
+	}
+
+	private void drawStatsTab()
+	{
+		int i1 = plrPan.getY() + plrPan.getTabHeight() + plrPan.getHeaderHeight()/*13*/;
+		int k1 = -1;
+		int yOffset = -5;
+		gameGraphics.drawString("Skills", plrPan.getX() + 5, i1 + yOffset,
+				3, 0xffff00);
+		gameGraphics.drawString("Fatigue: @yel@" + fatigue + "%",
+				(plrPan.getX() + plrPan.getWidth() / 2) + 5, i1 + yOffset,
+				1, 0xffffff);
+		i1 += plrPan.getStatButtonPanel().getHeight() + plrPan.getHeaderHeight();
+		int i = 0;
+		for (InGameButton button : plrPan.getStatButtonPanel().getButtons())
+		{
+			gameGraphics.drawString(button.getButtonText() + ":@yel@"
+					+ playerStatCurrent[i] + "/" + playerStatBase[i],
+					button.getX() + 5, button.getY() + 10, 1,
+					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			if (button.isMouseOver())
+				k1 = plrPan.getCorrectedSkillIndex(i);
+			++i;
+		}
+
+		gameGraphics.drawString("Equipment Status", plrPan.getX() + 5,
+				i1 + yOffset, 3, 0xffff00);
+
+		i = 0;
+		for (InGameButton button : plrPan.getEquipmentButtonPanel().getButtons())
+		{
+			gameGraphics.drawString(button.getButtonText()
+					+ ":@yel@" + equipmentStatus[i],
+					button.getX() + 5, button.getY() + 10, 1,
+					button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			++i;
+		}
+		i1 += plrPan.getEquipmentButtonPanel().getHeight() + 1;
+
+		gameGraphics.drawLineX(plrPan.getX(), i1 /*- 15*/, plrPan.getWidth(),
+				plrPan.getLineColor());
+		i1 += 11;
+		if (k1 != -1) {
+			gameGraphics.drawString(skillArrayLong[k1] + " skill",
+					plrPan.getX() + 5, i1, 1, 0xffff00);
+			i1 += 12;
+			int k2 = experienceArray[0];
+			for (int i3 = 0; i3 < 98; i3++)
+				if (playerStatExperience[k1] >= experienceArray[i3])
+					k2 = experienceArray[i3 + 1];
+
+			gameGraphics.drawString("Total xp: " + playerStatExperience[k1],
+					plrPan.getX() + 5, i1, 1, 0xffffff);
+			i1 += 12;
+			gameGraphics.drawString("Next level at: " + k2, plrPan.getX() + 5,
+					i1, 1, 0xffffff);
+			i1 += 12;
+			gameGraphics.drawString("Required xp: " + (k2 - playerStatExperience[k1]),
+					plrPan.getX() + 5, i1, 1, 0xffffff);
+		} else {
+			gameGraphics.drawString("Overall levels", plrPan.getX() + 5, i1, 1, 0xffff00);
+			i1 += 12;
+			int skillTotal = 0;
+			long expTotal = 0;
+			for (int j3 = 0; j3 < 18; j3++) {
+				skillTotal += playerStatBase[j3];
+				expTotal += playerStatExperience[j3];
+			}
+			gameGraphics.drawString("Skill total: " + skillTotal, plrPan.getX() + 5, i1, 1, 0xffffff);
+			i1 += 12;
+			gameGraphics.drawString("Total xp: " + expTotal, plrPan.getX() + 5, i1, 1, 0xffffff);
+			i1 += 12;
+			gameGraphics.drawString("Combat level: " + self.me.level, plrPan.getX() + 5, i1, 1, 0xffffff);
+		}
+	}
+
+	private void drawQuestsTab()
+	{
+		/* TODO: if player completed quest; set 0x00ff00,
+		 * if player started quest, set 0xffff00, else set 0xff0000
+		 */
+		int i1 = plrPan.getY() + plrPan.getTabHeight() + 12;
+		gameGraphics.drawString("Quest-list (green=completed)",
+				plrPan.getX() + 5, i1, 2, 0xffffff);
+		questMenu.resetListTextCount(questMenuHandle);
+		i1 = 0;
+		String s1;
+		for (int idx = 1; idx < quests.length; idx++)
+		{
+			if (true)
+			{ // quest complete
+				s1 = "@gre@";
+			}/*
+        	else if (true || false)
+        	{ // quest started
+        		s1 = "@yel@";
+        	}
+        	else
+        	{ // quest not started
+        		s1 = "@red@";
+        	}*/
+			questMenu.drawMenuListText(questMenuHandle, i1++, s1 + quests[idx]);
+		}
+		questMenu.drawMenu(true);
+	}
+
+	private void drawInfoPanel()
+	{
+		int questTabColor = (anInt826 == 1) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
+		int statsTabColor = (anInt826 == 0) ? plrPan.getBGColor() : plrPan.getInactiveTabColor();
+		gameGraphics.drawBoxAlpha(plrPan.getX(), plrPan.getY(),
+				plrPan.getWidth() / 2, plrPan.getTabHeight(),
+				statsTabColor, plrPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(plrPan.getX() + plrPan.getWidth() / 2,
+				plrPan.getY(), plrPan.getWidth() / 2,
+				plrPan.getTabHeight(), questTabColor, plrPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(plrPan.getX(),
+				plrPan.getY() + plrPan.getTabHeight(), plrPan.getWidth(),
+				plrPan.getHeight() - plrPan.getTabHeight(),
+				plrPan.getBGColor(), plrPan.getBGAlpha());
+
+		gameGraphics.drawLineX(plrPan.getX(), plrPan.getY(),
+				plrPan.getWidth(), plrPan.getLineColor());
+		gameGraphics.drawLineY(plrPan.getX(),
+				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
+		gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth(),
+				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
+
+		gameGraphics.drawLineX(plrPan.getX(),
+				plrPan.getY() + plrPan.getTabHeight(),
+				plrPan.getWidth(), plrPan.getLineColor());
+		gameGraphics.drawLineY(plrPan.getX() + plrPan.getWidth() / 2,
+				plrPan.getY(), plrPan.getTabHeight(), plrPan.getLineColor());
+		InGameButton button = plrPan.getStatButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+		button = plrPan.getQuestButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+	}
 	
-	protected Player self;
-	private static MouseVariables mv = MouseVariables.get();
-
-	private int bankItemCount;
-	private int newBankItemCount;
+	private String getLevelDiffColor(int levelDiff)
+	{
+		if (levelDiff < 0)
+		{
+			if (levelDiff < -9)
+				return "@red@";
+			else if (levelDiff < -6)
+				return "@or3@";
+			else if (levelDiff < -3)
+				return "@or2@";
+			else
+				return "@or1@";
+		}
+		else if (levelDiff > 0)
+		{
+			if (levelDiff > 9)
+				return "@gre@";
+			else if (levelDiff > 6)
+				return "@gr3@";
+			else if (levelDiff > 3)
+				return "@gr2@";
+			else
+				return "@gr1@";
+		}
+		else
+			return "@yel@";
+	}
 	
-	private int duelMyItemCount;
-	private int duelConfirmMyItemCount;
-	private int duelOpponentItemCount;
-	private int duelConfirmOpponentItemCount;
-
-	protected int tradeMyItemCount;
-	private int tradeConfirmItemCount;
-	protected int tradeOtherItemCount;
-	private int tradeConfirmOtherItemCount;
-
-	protected int inventoryCount;
-
-	private int groundItemCount;
-
-	private Item shopItems[];
+	private MenuRightClick addExamine(String tex1, String text2,
+			String adminText, int id, int actionType)
+	{
+		MenuRightClick mrc = new MenuRightClick();
+		mrc.text1 = tex1;
+		mrc.text2 = text2 + adminText;
+		mrc.id = id;
+		mrc.actionType = actionType;
+		return mrc;
+	}
 	
-	private List<MenuRightClick> rightClickMenu;
+	private MenuRightClick addCommand(String tex1, String text2,
+			int id, double actionX, double actionY, Integer actionType,
+			Integer actionVariable, Integer actionVariable2)
+	{
+		MenuRightClick mrc = new MenuRightClick();
+		mrc.text1 = tex1;
+		mrc.text2 = text2;
+		mrc.id = id;
+		mrc.actionX = actionX;
+		mrc.actionY = actionY;
+		if (actionType != null)
+			mrc.actionType = actionType.intValue();
+		if (actionVariable != null)
+			mrc.actionVariable = actionVariable.intValue();
+		if (actionVariable2 != null)
+			mrc.actionVariable2 = actionVariable2.intValue();
+		return mrc;
+	}
+
+	private void drawFriendPanel()
+	{
+		int friendTabColor = (friendTabOn == 0) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
+		int ignoreTabColor = (friendTabOn == 1) ? friendPan.getBGColor() : friendPan.getInactiveTabColor();
+		gameGraphics.drawBoxAlpha(friendPan.getX(), friendPan.getY(),
+				friendPan.getWidth() / 2, friendPan.getTabHeight(),
+				friendTabColor, friendPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(friendPan.getX() + friendPan.getWidth() / 2,
+				friendPan.getY(), friendPan.getWidth() / 2,
+				friendPan.getTabHeight(), ignoreTabColor, friendPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(friendPan.getX(),
+				friendPan.getY() + friendPan.getTabHeight(), friendPan.getWidth(),
+				friendPan.getHeight() - friendPan.getTabHeight(),
+				friendPan.getBGColor(), friendPan.getBGAlpha());
+
+		gameGraphics.drawLineX(friendPan.getX(), friendPan.getY(),
+				friendPan.getWidth(), friendPan.getLineColor());
+		gameGraphics.drawLineY(friendPan.getX(),
+				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+		gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth(),
+				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+
+		gameGraphics.drawLineX(friendPan.getX(),
+				friendPan.getY() + friendPan.getTabHeight(),
+				friendPan.getWidth(), friendPan.getLineColor());
+		gameGraphics.drawLineY(friendPan.getX() + friendPan.getWidth() / 2,
+				friendPan.getY(), friendPan.getTabHeight(), friendPan.getLineColor());
+		InGameButton button = friendPan.getFriendsButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+		button = friendPan.getIgnoreButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+	}
+
+	private void drawFriendsList()
+	{
+		for (int i1 = 0; i1 < super.friendsCount; i1++)
+		{
+			String s;
+			if (super.friendsListOnlineStatus[i1] == 99)
+				s = "@gre@";
+			else if (super.friendsListOnlineStatus[i1] > 0)
+				s = "@yel@";
+			else
+				s = "@red@";
+			friendsMenu.drawMenuListText(friendsMenuHandle, i1, s
+					+ DataOperations.longToString(super.friendsListLongs[i1])
+					+ "~"+(bounds.width-73)+"~@whi@|   Remove");
+		}
+	}
+
+	private void drawIgnoreList()
+	{
+		for (int j1 = 0; j1 < super.ignoreListCount; j1++)
+			friendsMenu.drawMenuListText(friendsMenuHandle, j1, "@yel@"
+					+ DataOperations.longToString(super.ignoreListLongs[j1])
+					+ "~"+(bounds.width-73)+"~@whi@|   Remove");
+	}
+
+	private void handleMouseOverFriend()
+	{
+		int mouseX = mv.getX();
+		int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+		String displayMsg;
+		if (friendNameIdx >= 0
+				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10)
+			if (mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+				displayMsg = "Click to remove "
+						+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
+			else if (super.friendsListOnlineStatus[friendNameIdx] == 99)
+				displayMsg = "Click to message "
+						+ DataOperations.longToString(super.friendsListLongs[friendNameIdx]);
+			else if (super.friendsListOnlineStatus[friendNameIdx] > 0)
+				displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
+						+ " is on world " + super.friendsListOnlineStatus[friendNameIdx]);
+			else
+				displayMsg = (DataOperations.longToString(super.friendsListLongs[friendNameIdx])
+						+ " is offline");
+		else
+			displayMsg = "Click a name to send a message";
+		gameGraphics.drawText(displayMsg,
+				friendPan.getX() + friendPan.getWidth() / 2,
+				friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
+		InGameButton button = friendPan.getFriendsAddButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth() / 2,
+				(button.getY() + button.getHeight()) - 3, 1,
+				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+	}
+
+	private void handleMouseOverIgnore()
+	{
+		int mouseX = mv.getX();
+		int ignoreNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+		String displayMsg;
+		if (ignoreNameIdx >= 0
+				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10
+				&& mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+			displayMsg = "Click to remove "
+					+ DataOperations.longToString(super.ignoreListLongs[ignoreNameIdx]);
+		else
+			displayMsg = "Blocking messages from:";
+		gameGraphics.drawText(displayMsg,
+				friendPan.getX() + friendPan.getWidth() / 2,
+				friendPan.getY() + friendPan.getTabHeight() + 11, 1, 0xffffff);
+
+		InGameButton button = friendPan.getIgnoreAddButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth() / 2,
+				(button.getY() + button.getHeight()) - 3, 1,
+				button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+	}
+
+	private void handleFriendsTabClicks()
+	{
+		int mouseX = mv.getX();
+		if (mouseX < friendPan.getX() + friendPan.getWidth()/2
+				&& friendTabOn == 1)
+		{
+			friendTabOn = 0;
+			friendsMenu.method165(friendsMenuHandle, 0);
+		} else if (mouseX > friendPan.getX() + friendPan.getWidth()/2
+				&& friendTabOn == 0)
+		{
+			friendTabOn = 1;
+			friendsMenu.method165(friendsMenuHandle, 0);
+		}
+	}
+
+	private void handleClickOnFriends()
+	{
+		int mouseX = mv.getX();
+		int friendNameIdx = friendsMenu.selectedListIndex(friendsMenuHandle);
+		if (friendNameIdx >= 0
+				&& mouseX < friendPan.getX() + friendPan.getWidth() - 10)
+		{
+			if (mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+			{
+				removeFromFriends(super.friendsListLongs[friendNameIdx]);
+			}
+			else if (super.friendsListOnlineStatus[friendNameIdx] != 0)
+			{
+				inputBoxType = 2;
+				privateMessageTarget = super.friendsListLongs[friendNameIdx];
+				super.inputMessage = "";
+				super.enteredMessage = "";
+			}
+		}
+	}
+
+	private void handleClickOnIgnore()
+	{
+		int mouseX = mv.getX();
+		int j2 = friendsMenu.selectedListIndex(friendsMenuHandle);
+		if (j2 >= 0 && mouseX < friendPan.getX() + friendPan.getWidth() - 10
+				&& mouseX > friendPan.getX() + friendPan.getWidth() - 70)
+		{
+			removeFromIgnoreList(super.ignoreListLongs[j2]);
+		}
+	}
+
+	private void handleClickAddFriend()
+	{
+		inputBoxType = 1;
+		super.inputText = "";
+		super.enteredText = "";
+	}
+
+	private void handleClickAddIgnore()
+	{
+		inputBoxType = 3;
+		super.inputText = "";
+		super.enteredText = "";
+	}
+
+	private void handleFriendsPanelClicks()
+	{
+		int mouseY = mv.getY();
+		friendsMenu.updateActions();
+		if (mouseY <= friendPan.getY() + friendPan.getTabHeight() && mv.leftDown())
+			handleFriendsTabClicks();
+		if (mv.leftDown() && friendTabOn == 0)
+			handleClickOnFriends();
+		if (mv.leftDown() && friendTabOn == 1)
+			handleClickOnIgnore();
+		if (friendPan.getFriendsAddButton().isMouseOver()
+				&& mv.leftDown() && friendTabOn == 0)
+			handleClickAddFriend();
+		if (friendPan.getIgnoreAddButton().isMouseOver()
+				&& mv.leftDown() && friendTabOn == 1)
+			handleClickAddIgnore();
+		mv.releaseButton();
+	}
+
+	private void drawMagicPanel()
+	{
+
+		int magicTabColor = (menuMagicPrayersSelected == 1) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
+		int prayerTabColor = (menuMagicPrayersSelected == 0) ? magicPan.getBGColor() : magicPan.getInactiveTabColor();
+		gameGraphics.drawBoxAlpha(magicPan.getX(), magicPan.getY(),
+				magicPan.getWidth() / 2, magicPan.getTabHeight(),
+				prayerTabColor, magicPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(magicPan.getX() + magicPan.getWidth() / 2,
+				magicPan.getY(), magicPan.getWidth() / 2,
+				magicPan.getTabHeight(), magicTabColor, magicPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(magicPan.getX(),
+				magicPan.getY() + magicPan.getTabHeight(), magicPan.getWidth(),
+				magicPan.getScrollBoxHeight(), magicPan.getBGColor(),
+				magicPan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(magicPan.getX(),
+				magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(), magicPan.getWidth(),
+				magicPan.getHeight() - magicPan.getScrollBoxHeight() - magicPan.getTabHeight(),
+				magicPan.getBGColor(), magicPan.getBGAlpha());
+
+		gameGraphics.drawLineX(magicPan.getX(), magicPan.getY(),
+				magicPan.getWidth(), magicPan.getLineColor());
+		gameGraphics.drawLineY(magicPan.getX(),
+				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+		gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth(),
+				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+		gameGraphics.drawLineX(magicPan.getX(),
+				magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight(),
+				magicPan.getWidth(), magicPan.getLineColor());
+
+		gameGraphics.drawLineX(magicPan.getX(),
+				magicPan.getY() + magicPan.getTabHeight(),
+				magicPan.getWidth(), magicPan.getLineColor());
+		gameGraphics.drawLineY(magicPan.getX() + magicPan.getWidth() / 2,
+				magicPan.getY(), magicPan.getTabHeight(), magicPan.getLineColor());
+		InGameButton button = magicPan.getMagicButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+		button = magicPan.getPrayerButton();
+		gameGraphics.drawText(button.getButtonText(),
+				button.getX() + button.getWidth()/2,
+				button.getY() + button.getHeight()/2 + 4, 4, 0);
+	}
+
+	private void drawMagicInfoBox(int selectedSpellIndex)
+	{
+		if (selectedSpellIndex != -1)
+		{
+			gameGraphics.drawString("Level "
+					+ EntityHandler.getSpellDef(selectedSpellIndex).getReqLevel()
+					+ ": " + EntityHandler.getSpellDef(selectedSpellIndex).getName(),
+					magicPan.getX() + 2,
+					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 10,
+					1, 0xffff00);
+			gameGraphics.drawString(EntityHandler.getSpellDef(selectedSpellIndex).getDescription(),
+					magicPan.getX() + 2,
+					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 22,
+					0, 0xffffff);
+			int i4 = 0;
+			for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(selectedSpellIndex).getRunesRequired())
+			{
+				int runeID = e.getKey();
+				gameGraphics.drawPicture(magicPan.getX() + 2 + i4 * 44,
+						magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36,
+						SPRITE_ITEM_START + EntityHandler.getItemDef(runeID).getSprite());
+				int runeInvCount = inventoryCount(runeID);
+				int runeCount = e.getValue();
+				String s2 = "@red@";
+				if (hasRequiredRunes(runeID, runeCount))
+					s2 = "@gre@";
+				gameGraphics.drawString(s2 + runeInvCount + "/" + runeCount, magicPan.getX() + 2 + i4 * 44,
+						magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 36, 1, 0xffffff);
+				i4++;
+			}
+		}
+		else
+			gameGraphics.drawString("Point at a spell for a description", magicPan.getX() + 2,
+					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
+	}
+
+	private void drawMagicTab()
+	{
+		spellMenu.resetListTextCount(spellMenuHandle);
+		int i1 = 0;
+		for (int spellIndex = 0; spellIndex < EntityHandler.spellCount(); spellIndex++)
+		{
+			String s = "@yel@";
+			for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIndex).getRunesRequired())
+			{
+				if (hasRequiredRunes(e.getKey(), e.getValue()))
+					continue;
+				s = "@whi@";
+				break;
+			}
+			int spellLevel = playerStatCurrent[6];
+			if (EntityHandler.getSpellDef(spellIndex).getReqLevel() > spellLevel) {
+				s = "@bla@";
+			}
+			spellMenu.drawMenuListText(spellMenuHandle, i1++, s + "Level " + EntityHandler.getSpellDef(spellIndex).getReqLevel() + ": " + EntityHandler.getSpellDef(spellIndex).getName());
+		}
+
+		spellMenu.drawMenu(true);
+		drawMagicInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
+	}
+
+	private void drawPrayerInfoBox(int selectedPrayerIdx)
+	{
+		if (selectedPrayerIdx != -1)
+		{
+			gameGraphics.drawText("Level " + EntityHandler.getPrayerDef(selectedPrayerIdx).getReqLevel() + ": "
+					+ EntityHandler.getPrayerDef(selectedPrayerIdx).getName(), magicPan.getX() + magicPan.getWidth() / 2,
+					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 16, 1, 0xffff00);
+			gameGraphics.drawText(EntityHandler.getPrayerDef(selectedPrayerIdx).getDescription(),
+					magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
+					+ magicPan.getScrollBoxHeight() + 31, 0, 0xffffff);
+			gameGraphics.drawText("Drain rate: " + EntityHandler.getPrayerDef(selectedPrayerIdx).getDrainRate(),
+					magicPan.getX() + magicPan.getWidth() / 2, magicPan.getY() + magicPan.getTabHeight()
+					+ magicPan.getScrollBoxHeight() + 46, 1, 0);
+		}
+		else
+			gameGraphics.drawString("Point at a prayer for a description", magicPan.getX() + 2,
+					magicPan.getY() + magicPan.getTabHeight() + magicPan.getScrollBoxHeight() + 13, 1, 0);
+	}
+
+	private void drawPrayerTab()
+	{
+		spellMenu.resetListTextCount(spellMenuHandle);
+		int j1 = 0;
+		for (int j2 = 0; j2 < EntityHandler.prayerCount(); j2++)
+		{
+			String s1 = "@whi@";
+			if (EntityHandler.getPrayerDef(j2).getReqLevel() > playerStatBase[5])
+				s1 = "@bla@";
+			if (prayerOn[j2])
+				s1 = "@gre@";
+			spellMenu.drawMenuListText(spellMenuHandle, j1++, s1 + "Level " + EntityHandler.getPrayerDef(j2).getReqLevel() + ": " + EntityHandler.getPrayerDef(j2).getName());
+		}
+		spellMenu.drawMenu(true);
+		drawPrayerInfoBox(spellMenu.selectedListIndex(spellMenuHandle));
+	}
+
+	private void handleMagicTabClicks()
+	{
+		int mouseX = mv.getX();
+		if (mouseX < magicPan.getX() + magicPan.getWidth()/2
+				&& menuMagicPrayersSelected == 1)
+		{  // switch to magic tab
+			menuMagicPrayersSelected = 0;
+			prayerMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
+			spellMenu.method165(spellMenuHandle, magicMenuIndex);
+		}
+		else if (mouseX > magicPan.getX() + magicPan.getWidth()/2
+				&& menuMagicPrayersSelected == 0)
+		{  // switch to prayer tab
+			menuMagicPrayersSelected = 1;
+			magicMenuIndex = spellMenu.getMenuIndex(spellMenuHandle);
+			spellMenu.method165(spellMenuHandle, prayerMenuIndex);
+		}
+	}
+
+	private void handleSpellsTabClicks()
+	{
+		int spellIdx = spellMenu.selectedListIndex(spellMenuHandle);
+		if (spellIdx != -1)
+		{
+			int k2 = playerStatCurrent[6];
+			if (EntityHandler.getSpellDef(spellIdx).getReqLevel() > k2)
+				displayMessage("Your magic ability is not high enough for this spell", 3, 0);
+			else
+			{
+				int k3 = 0;
+				for (Entry<Integer, Integer> e : EntityHandler.getSpellDef(spellIdx).getRunesRequired())
+				{
+					if (!hasRequiredRunes(e.getKey(), e.getValue()))
+					{
+						displayMessage("You don't have all the reagents you need for this spell",
+								3, 0);
+						k3 = -1;
+						break;
+					}
+					k3++;
+				}
+				if (k3 == EntityHandler.getSpellDef(spellIdx).getRuneCount())
+				{
+					selSpell = new SelectedSpell(spellIdx,
+							EntityHandler.getSpellDef(spellIdx));
+					selItem = null;
+				}
+			}
+		}
+	}
+
+	private void handlePrayerTabClicks()
+	{
+		int prayerIdx = spellMenu.selectedListIndex(spellMenuHandle);
+		if (prayerIdx != -1) {
+			int l2 = playerStatBase[5];
+			if (EntityHandler.getPrayerDef(prayerIdx).getReqLevel() > l2)
+				displayMessage("Your prayer ability is not high enough for this prayer", 3, 0);
+			else if (playerStatCurrent[5] == 0)
+				displayMessage("You have run out of prayer points. Return to a church to recharge", 3, 0);
+			else if (prayerOn[prayerIdx])
+				formatPacket(248, prayerIdx, -1);  // switch prayer off
+			else
+				formatPacket(56, prayerIdx, -1);  // switch prayer on
+		}
+	}
+
+	private void handleMagicPanelClicks()
+	{
+		int mouseY = mv.getY();
+		spellMenu.updateActions();
+		if ((mouseY <= magicPan.getY() + magicPan.getTabHeight()) && mv.leftDown())
+			handleMagicTabClicks();
+		if (mv.leftDown() && menuMagicPrayersSelected == 0)
+			handleSpellsTabClicks();
+		if (mv.leftDown() && menuMagicPrayersSelected == 1)
+		{
+			handlePrayerTabClicks();
+		}
+		mv.releaseButton();
+	}
+
+	private void handleKeybinds(int keyCode, int keyChar)
+	{
+		switch (keyCode)
+		{
+		case 10: // enter
+			isTyping = !isTyping;
+			break;
+			/*case 69: // E
+        	if (super.keyDownCode[87])
+        	{ // W
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
+        				sectionX - 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 160;
+        	}
+        	else if (super.keyDownCode[83])
+        	{ // S
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
+        				sectionX - 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 224;
+        	}
+        	else
+        	{
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY,
+        				sectionX - 1, sectionY, false, true);
+        		cameraRotationLeftRight = 192;
+        	}
+        	break;
+        case 81: // Q
+        	if (super.keyDownCode[87])
+        	{ // W
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
+        				sectionX + 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 96;
+        	}
+        	else if (super.keyDownCode[83])
+        	{ // S
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
+        				sectionX + 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 32;
+        	}
+        	else
+        	{
+        		sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY,
+        				sectionX + 1, sectionY, false, true);
+        		cameraRotationLeftRight = 64;
+        	}
+        	break;
+        case 83: // S
+        	if (super.keyDownCode[69])
+        	{ // E
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY + 1,
+            			sectionX - 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 224;
+        	}
+        	else if (super.keyDownCode[81])
+        	{ // Q
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY + 1,
+            			sectionX + 1, sectionY + 1, false, true);
+        		cameraRotationLeftRight = 32;
+        	}
+        	else
+        	{
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY + 1,
+            			sectionX, sectionY + 1, false, true);
+            	cameraRotationLeftRight = 0;
+        	}
+        	break;
+        case 87: // W
+        	if (super.keyDownCode[69])
+        	{ // E
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX - 1, sectionY - 1,
+            			sectionX - 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 160;
+        	}
+        	else if (super.keyDownCode[81])
+        	{ // Q
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX + 1, sectionY - 1,
+            			sectionX + 1, sectionY - 1, false, true);
+        		cameraRotationLeftRight = 96;
+        	}
+        	else
+        	{
+            	sendWalkCommandKeys(sectionX, sectionY, sectionX, sectionY - 1,
+            			sectionX, sectionY - 1, false, true);
+            	cameraRotationLeftRight = 128;
+        	}
+        	break;*/
+		}
+	}
+
+	private void handleChatBinds(int keyCode, int keyChar)
+	{
+		switch(keyCode)
+		{
+		case 38: // Up Arrow
+			gameMenu.updateText(chatHandlePlayerEntry, lastMessage);
+			break;
+		case 40: // Down Arrow
+			gameMenu.updateText(chatHandlePlayerEntry, "");
+			break;
+		default:
+			gameMenu.keyDown(keyCode, keyChar);
+			break;
+		}
+		if (keyCode == 10)
+		{ // return key
+			isTyping = !isTyping;
+		}
+	}
+
+	private void handleCharacterControlBinds()
+	{
+		int arrowKeyMask = 0;
+		if (super.keyDownCode[69]) // E
+			arrowKeyMask |= 1;
+		else if (super.keyDownCode[81]) // Q
+			arrowKeyMask |= 2;
+		if (super.keyDownCode[87]) // W
+			arrowKeyMask |= 4;
+		else if (super.keyDownCode[83]) // S
+			arrowKeyMask |= 8;
+		if (arrowKeyMask != 0)
+			gameCamera.moveCamera(0.5, arrowKeyMask);
+	}
+
+	private void drawOptionsPanel()
+	{
+		gameGraphics.drawBoxAlpha(optPan.getX(), optPan.getY(),
+				optPan.getWidth(), optPan.getHeight(),
+				optPan.getBGColor(), optPan.getBGAlpha());
+
+		gameGraphics.drawLineX(optPan.getX(),
+				optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight(),
+				optPan.getWidth(), optPan.getLineColor());
+		gameGraphics.drawLineX(optPan.getX(),
+				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight(),
+				optPan.getWidth(), optPan.getLineColor());
+		gameGraphics.drawLineX(optPan.getX(),
+				optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight(),
+				optPan.getWidth(), optPan.getLineColor());
+	}
+
+	private void drawGameOptions()
+	{
+		String info[] = {
+				"Camera angle mode", "Mouse buttons", "Sound effects"
+		};
+		boolean condition[] = {
+				configAutoCameraAngle, !configMouseButtons, !configSoundEffects
+		};
+		int xOffset = 2;
+		gameGraphics.drawString("Game options - click to toggle",
+				optPan.getX() + xOffset, optPan.getY() + optPan.getHeaderHeight() - 3, 1, 0);
+		String color;
+		int i = 0;
+		int clr;
+		for (InGameButton button : optPan.getGameOptions().getButtons())
+		{
+			optPan.setGameOptionState(i, condition[i]);
+			color = (condition[i] ? "@gre@" : "@red@");
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			gameGraphics.drawString(info[i] + " - " + color
+					+ button.getButtonText(), button.getX() + xOffset,
+					button.getY() + 10, 1, clr);
+			++i;
+		}
+	}
+
+	private void drawClientAssist()
+	{
+		String info[] = {
+				"Hide Roofs", "Auto Screenshots", "Fightmode Selector", "Textures", "Free Camera"
+		};
+		boolean condition[] = {
+				!showRoof, autoScreenshot, combatWindow, engineHandle.getTextureUse(), freeCamera
+		};
+		int xOffset = 2;
+		gameGraphics.drawString("Client assists - click to toggle",
+				optPan.getX() + xOffset,
+				optPan.getGameOptions().getY() + optPan.getGameOptions().getHeight()
+				+ optPan.getHeaderHeight() - 3, 1, 0);
+		String color;
+		int i = 0;
+		int clr;
+		for (InGameButton button : optPan.getClientAssists().getButtons())
+		{
+			optPan.setClientAssistState(i, condition[i]);
+			color = (condition[i] ? "@gre@" : "@red@");
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			gameGraphics.drawString(info[i] + " - " + color
+					+ button.getButtonText(), button.getX() + xOffset,
+					button.getY() + 10, 1, clr);
+			++i;
+		}
+	}
+
+	private void drawPrivacySettings()
+	{
+		String info[] = {
+				"Block chat messages", "Block private messages",
+				"Block trade requests", "Block duel requests"
+		};
+		boolean condition[] = {
+				!(super.blockChatMessages == 0),
+				!(super.blockPrivateMessages == 0),
+				!(super.blockTradeRequests == 0),
+				!(super.blockDuelRequests == 0)
+		};
+		int xOffset = 2;
+		gameGraphics.drawString("Privacy settings. Will be applied to",
+				optPan.getX() + xOffset,
+				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
+				+ optPan.getHeaderHeight() - 3, 1, 0);
+		gameGraphics.drawString("all people not on your friends list",
+				optPan.getX() + xOffset,
+				optPan.getClientAssists().getY() + optPan.getClientAssists().getHeight()
+				+ 2*optPan.getHeaderHeight() - 3, 1, 0);
+		String color;
+		int i = 0;
+		int clr;
+		for (InGameButton button : optPan.getPrivacySettings().getButtons())
+		{
+			optPan.setPrivacySettingsState(i, condition[i]);
+			color = (condition[i] ? "@gre@" : "@red@");
+			clr = (button.isMouseOver() ? button.getMouseOverColor() : button.getMouseNotOverColor());
+			gameGraphics.drawString(info[i] + ": " + color
+					+ button.getButtonText(), button.getX() + xOffset,
+					button.getY() + 10, 1, clr);
+			++i;
+		}
+	}
+
+	private void drawLogout()
+	{
+		int xOffset = 2;
+		gameGraphics.drawString("Always logout when you finish",
+				optPan.getX() + xOffset,
+				optPan.getPrivacySettings().getY() + optPan.getPrivacySettings().getHeight()
+				+ optPan.getHeaderHeight() - 3, 1, 0);
+		int k1 = 0xffffff;
+		if (optPan.getLogoutButton().isMouseOver())
+		{
+			k1 = 0xffff00;
+		}
+		gameGraphics.drawString("Click here to logout",
+				optPan.getLogoutButton().getX() + xOffset,
+				optPan.getLogoutButton().getY() + optPan.getLogoutButton().getHeight() - 3,
+				1, k1);
+	}
+
+	private void handleGameOptionsClicks()
+	{
+		if (mv.leftDown())
+		{
+			List<InGameButton> buttons = optPan.getGameOptions().getButtons();
+			if (buttons.get(0).isMouseOver())
+			{
+				configAutoCameraAngle = !configAutoCameraAngle;
+				formatPacket(157, 0, configAutoCameraAngle ? 1 : 0);
+			}
+			else if (buttons.get(1).isMouseOver())
+			{
+				configMouseButtons = !configMouseButtons;
+				formatPacket(157, 2, configMouseButtons ? 1 : 0);
+			}
+			else if (buttons.get(2).isMouseOver())
+			{
+				configSoundEffects = !configSoundEffects;
+				formatPacket(157, 3, configSoundEffects ? 1 : 0);
+			}
+		}
+	}
+
+	private void handleClientAssistClicks()
+	{
+		if (mv.leftDown())
+		{
+			List<InGameButton> buttons = optPan.getClientAssists().getButtons();
+			if (buttons.get(0).isMouseOver())
+			{
+				showRoof = !showRoof;
+				formatPacket(157, 4, showRoof ? 1 : 0);
+			}
+			else if (buttons.get(1).isMouseOver())
+			{
+				autoScreenshot = !autoScreenshot;
+				formatPacket(157, 5, autoScreenshot ? 1 : 0);
+			}
+			else if (buttons.get(2).isMouseOver())
+			{
+				combatWindow = !combatWindow;
+				formatPacket(157, 6, combatWindow ? 1 : 0);
+			}
+			else if (buttons.get(3).isMouseOver())
+			{
+				engineHandle.setTextureUse(!engineHandle.getTextureUse());
+				//TODO: send this toggle to server, also should reload the map
+			}
+			else if (buttons.get(4).isMouseOver())
+			{
+				freeCamera = !freeCamera;
+				//TODO: send this toggle to server, also should reload the map
+			}
+		}
+	}
+
+	private void handlePrivacySettingsClicks()
+	{
+		if (mv.leftDown())
+		{
+			boolean flag1 = false;
+			List<InGameButton> buttons = optPan.getPrivacySettings().getButtons();
+			if (buttons.get(0).isMouseOver())
+			{
+				super.blockChatMessages = 1 - super.blockChatMessages;
+				flag1 = true;
+			}
+			else if (buttons.get(1).isMouseOver())
+			{
+				super.blockPrivateMessages = 1 - super.blockPrivateMessages;
+				flag1 = true;
+			}
+			else if (buttons.get(2).isMouseOver())
+			{
+				super.blockTradeRequests = 1 - super.blockTradeRequests;
+				flag1 = true;
+			}
+			else if (buttons.get(3).isMouseOver())
+			{
+				super.blockDuelRequests = 1 - super.blockDuelRequests;
+				flag1 = true;
+			}
+			if (flag1)
+			{
+				sendUpdatedPrivacyInfo(
+						super.blockChatMessages, super.blockPrivateMessages,
+						super.blockTradeRequests, super.blockDuelRequests);
+			}
+		}
+	}
+
+	private void handleLogoutClick()
+	{
+		if (mv.leftDown())
+			logout();
+	}
+
+	private void handleOptionsPanelClicks()
+	{
+		if (optPan.getGameOptions().isMouseOver())
+			handleGameOptionsClicks();
+		else if (optPan.getClientAssists().isMouseOver())
+			handleClientAssistClicks();
+		else if (optPan.getPrivacySettings().isMouseOver())
+			handlePrivacySettingsClicks();
+		else if (optPan.getLogoutButton().isMouseOver())
+			handleLogoutClick();
+		mv.releaseButton();
+	}
+
+	private void updatePlayers()
+	{
+		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
+		{
+			Mob mob = itr.next();
+			int k = (mob.waypointCurrent + 1) % 10;
+			if (mob.waypointEndSprite != k)
+			{
+				int currentSprite = -1;
+				int endSprite = mob.waypointEndSprite;
+				double j4;
+				if (endSprite < k)
+					j4 = k - endSprite;
+				else
+					j4 = (10 + k) - endSprite;
+				double step = 0.03125;
+				if (j4 > 2)
+					step = (j4 - 1) * 0.03125;
+				if (mob.waypointsX[endSprite] - mob.currentX > 3
+						|| mob.waypointsY[endSprite] - mob.currentY > 3
+						|| mob.waypointsX[endSprite] - mob.currentX < -3
+						|| mob.waypointsY[endSprite] - mob.currentY < -3
+						|| j4 > 8)
+				{ // too far away
+					mob.currentX = mob.waypointsX[endSprite];
+					mob.currentY = mob.waypointsY[endSprite];
+				}
+				else
+				{
+					if (mob.currentX < mob.waypointsX[endSprite])
+					{
+						mob.currentX += step;
+						mob.stepCount++;
+						currentSprite = 2;
+					}
+					else if (mob.currentX > mob.waypointsX[endSprite])
+					{
+						mob.currentX -= step;
+						mob.stepCount++;
+						currentSprite = 6;
+					}
+					if (mob.currentX - mob.waypointsX[endSprite] < step
+							&& mob.currentX - mob.waypointsX[endSprite] > -step)
+						mob.currentX = mob.waypointsX[endSprite];
+					if (mob.currentY < mob.waypointsY[endSprite])
+					{
+						mob.currentY += step;
+						mob.stepCount++;
+						if (currentSprite == -1)
+							currentSprite = 4;
+						else if (currentSprite == 2)
+							currentSprite = 3;
+						else
+							currentSprite = 5;
+					}
+					else if (mob.currentY > mob.waypointsY[endSprite])
+					{
+						mob.currentY -= step;
+						mob.stepCount++;
+						if (currentSprite == -1)
+							currentSprite = 0;
+						else if (currentSprite == 2)
+							currentSprite = 1;
+						else
+							currentSprite = 7;
+					}
+					if (mob.currentY - mob.waypointsY[endSprite] < step
+							&& mob.currentY - mob.waypointsY[endSprite] > -step)
+						mob.currentY = mob.waypointsY[endSprite];
+				}
+				if (currentSprite != -1)
+					mob.currentSprite = currentSprite;
+				if (mob.currentX == mob.waypointsX[endSprite]
+						&& mob.currentY == mob.waypointsY[endSprite])
+					mob.waypointEndSprite = (endSprite + 1) % 10;
+			}
+			else
+				mob.currentSprite = mob.nextSprite;
+			if (mob.lastMessageTimeout > 0)
+				mob.lastMessageTimeout--;
+			if (mob.skullTimer > 0)
+				mob.skullTimer--;
+			if (mob.combatTimer > 0)
+				mob.combatTimer--;
+			if (playerAliveTimeout > 0)
+			{
+				playerAliveTimeout--;
+				if (playerAliveTimeout == 0)
+					displayMessage("You have been granted another life. Be more careful this time!", 3, 0);
+				if (playerAliveTimeout == 0)
+					displayMessage("You retain your skills. Your objects land where you died", 3, 0);
+			}
+		}
+	}
+
+	private void updateNPCs()
+	{
+		for (Iterator<Mob> itr = npcArray.iterator(); itr.hasNext();)
+		{
+			Mob mob_1 = itr.next();
+			int j1 = (mob_1.waypointCurrent + 1) % 10;
+			if (mob_1.waypointEndSprite != j1)
+			{
+				int currentSprite = -1;
+				int k4 = mob_1.waypointEndSprite;
+				int k5;
+				if (k4 < j1)
+					k5 = j1 - k4;
+				else
+					k5 = (10 + j1) - k4;
+				double step = 0.03125;
+				if (k5 > 2)
+					step = (k5 - 1) * 0.03125;
+				if (mob_1.waypointsX[k4] - mob_1.currentX > 3
+						|| mob_1.waypointsY[k4] - mob_1.currentY > 3
+						|| mob_1.waypointsX[k4] - mob_1.currentX < -3
+						|| mob_1.waypointsY[k4] - mob_1.currentY < -3
+						|| k5 > 8)
+				{
+					mob_1.currentX = mob_1.waypointsX[k4];
+					mob_1.currentY = mob_1.waypointsY[k4];
+				}
+				else
+				{
+					if (mob_1.currentX < mob_1.waypointsX[k4])
+					{
+						mob_1.currentX += step;
+						mob_1.stepCount++;
+						currentSprite = 2;
+					}
+					else if (mob_1.currentX > mob_1.waypointsX[k4])
+					{
+						mob_1.currentX -= step;
+						mob_1.stepCount++;
+						currentSprite = 6;
+					}
+					if (mob_1.currentX - mob_1.waypointsX[k4] < step
+							&& mob_1.currentX - mob_1.waypointsX[k4] > -step)
+						mob_1.currentX = mob_1.waypointsX[k4];
+					if (mob_1.currentY < mob_1.waypointsY[k4])
+					{
+						mob_1.currentY += step;
+						mob_1.stepCount++;
+						if (currentSprite == -1)
+							currentSprite = 4;
+						else if (currentSprite == 2)
+							currentSprite = 3;
+						else
+							currentSprite = 5;
+					}
+					else if (mob_1.currentY > mob_1.waypointsY[k4])
+					{
+						mob_1.currentY -= step;
+						mob_1.stepCount++;
+						if (currentSprite == -1)
+							currentSprite = 0;
+						else if (currentSprite == 2)
+							currentSprite = 1;
+						else
+							currentSprite = 7;
+					}
+					if (mob_1.currentY - mob_1.waypointsY[k4] < step
+							&& mob_1.currentY - mob_1.waypointsY[k4] > -step)
+						mob_1.currentY = mob_1.waypointsY[k4];
+				}
+				if (currentSprite != -1)
+					mob_1.currentSprite = currentSprite;
+				if (mob_1.currentX == mob_1.waypointsX[k4] && mob_1.currentY == mob_1.waypointsY[k4])
+					mob_1.waypointEndSprite = (k4 + 1) % 10;
+			}
+			else
+			{
+				mob_1.currentSprite = mob_1.nextSprite;
+				if (mob_1.type == 43)
+					mob_1.stepCount++;
+			}
+			if (mob_1.lastMessageTimeout > 0)
+				mob_1.lastMessageTimeout--;
+			if (mob_1.skullTimer > 0)
+				mob_1.skullTimer--;
+			if (mob_1.combatTimer > 0)
+				mob_1.combatTimer--;
+		}
+	}
+
+	private void updateCamera()
+	{
+		if (cameraAutoAngleDebug)
+		{
+			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
+			{
+				lastAutoCameraRotatePlayerX = self.me.currentX;
+				lastAutoCameraRotatePlayerY = self.me.currentY;
+			}
+		}
+		else
+		{
+			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
+					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
+					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
+			{
+				lastAutoCameraRotatePlayerX = self.me.currentX;
+				lastAutoCameraRotatePlayerY = self.me.currentY;
+			}
+			if (lastAutoCameraRotatePlayerX != self.me.currentX)
+				lastAutoCameraRotatePlayerX += (self.me.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
+			if (lastAutoCameraRotatePlayerY != self.me.currentY)
+				lastAutoCameraRotatePlayerY += (self.me.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
+			if (configAutoCameraAngle)
+			{
+				int autoAngle = cameraAutoAngle * 128;
+				int zRotDiff = autoAngle - cameraZRot;
+				byte byte0 = 1;
+				if (zRotDiff != 0)
+				{
+					cameraRotationBaseAddition++;
+					if (zRotDiff > 1024)
+					{
+						byte0 = -1;
+						zRotDiff = 1024 - zRotDiff;
+					}
+					else if (zRotDiff > 0)
+						byte0 = 1;
+					else if (zRotDiff < -1024)
+					{
+						byte0 = 1;
+						zRotDiff = 1024 + zRotDiff;
+					}
+					else if (zRotDiff < 0)
+					{
+						byte0 = -1;
+						zRotDiff = -zRotDiff;
+					}
+					cameraZRot += ((cameraRotationBaseAddition * zRotDiff + 1023) / 1024) * byte0;
+					cameraZRot &= 0x3ff;
+				}
+				else
+					cameraRotationBaseAddition = 0;
+			}
+		}
+	}
+
+	private void checkChatTab()
+	{
+		int mouseX = mv.getX();
+		if (mv.getY() > bounds.height - 4)
+		{ // botom bar; chat tabs & report abuse
+			int buttonWidth = 82;
+			int xOffset = 14;
+			if (mouseX > xOffset
+					&& mouseX < xOffset + buttonWidth
+					&& mv.lastLeftDown())
+			{
+				messagesTab = 0;
+			}
+			xOffset += 99;
+			if (mouseX > xOffset
+					&& mouseX < xOffset + buttonWidth
+					&& mv.lastLeftDown())
+			{
+				messagesTab = 1;
+				gameMenu.anIntArray187[messagesHandleChatHist] = 0xf423f;
+			}
+			xOffset += 101;
+			if (mouseX > xOffset
+					&& mouseX < xOffset + buttonWidth
+					&& mv.lastLeftDown())
+			{
+				messagesTab = 2;
+				gameMenu.anIntArray187[messagesHandleQuestHist] = 0xf423f;
+			}
+			xOffset += 101;
+			if (mouseX > xOffset
+					&& mouseX < xOffset + buttonWidth
+					&& mv.lastLeftDown())
+			{
+				messagesTab = 3;
+				gameMenu.anIntArray187[messagesHandlePrivHist] = 0xf423f;
+			}
+			xOffset += 101;
+			if (mouseX > xOffset
+					&& mouseX < xOffset + buttonWidth
+					&& mv.lastLeftDown())
+			{
+				showAbuseWindow = 1;
+				abuseSelectedType = 0;
+				super.inputText = "";
+				super.enteredText = "";
+			}
+			mv.releaseLastButton();
+			mv.releaseButton();
+		}
+	}
+
+	private void updateChatTabs()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		gameMenu.updateActions();
+		if (messagesTab > 0
+				&& mouseX >= chatBoxX + this.chatBoxWidth - SCROLL_BAR_WIDTH-2
+				&& mouseX <= chatBoxX + this.chatBoxWidth
+				&& mouseY >= chatBoxY
+				&& mouseY <= chatBoxY + chatBoxHeight)
+			mv.releaseLastButton();
+		if (gameMenu.hasActivated(chatHandlePlayerEntry))
+		{
+			String s = lastMessage = gameMenu.getText(chatHandlePlayerEntry);
+			gameMenu.updateText(chatHandlePlayerEntry, "");
+			if (s.startsWith("::"))
+			{
+				s = s.substring(2);
+				if (!handleCommand(s))
+					sendChatString(s);
+			}
+			else
+			{
+				byte[] chatMessage = DataConversions.stringToByteArray(s);
+				sendChatMessage(chatMessage, chatMessage.length);
+				s = DataConversions.byteToString(chatMessage, 0, chatMessage.length);
+				self.me.lastMessageTimeout = 150;
+				self.me.lastMessage = s;
+				displayMessage(self.me.name + ": " + s, 2, self.me.admin);
+			}
+		}
+		if (messagesTab == 0)
+		{
+			for (int l1 = 0; l1 < chatBoxVisRows; l1++)
+				if (messagesTimeout[l1] > 0)
+					messagesTimeout[l1]--;
+
+		}
+	}
+
+	private void handleOfferAmounts()
+	{
+		if (showTradeWindow || showDuelWindow)
+		{
+			if (mv.buttonDown())
+				mouseDownTime++;
+			else
+				mouseDownTime = 0;
+			if (mouseDownTime > 500)
+				itemIncrement += 100000;
+			else if (mouseDownTime > 350)
+				itemIncrement += 10000;
+			else if (mouseDownTime > 250)
+				itemIncrement += 1000;
+			else if (mouseDownTime > 150)
+				itemIncrement += 100;
+			else if (mouseDownTime > 100)
+				itemIncrement += 10;
+			else if (mouseDownTime > 50)
+				itemIncrement++;
+			else if (mouseDownTime > 20 && (mouseDownTime & 5) == 0)
+				itemIncrement++;
+		}
+		else
+		{
+			mouseDownTime = 0;
+			itemIncrement = 0;
+		}
+	}
+
+	private void updateCameraPosition()
+	{
+
+		if (configAutoCameraAngle)
+		{
+			if (cameraRotationBaseAddition == 0 || cameraAutoAngleDebug)
+			{
+				if (super.keyLeftDown)
+				{
+					cameraAutoAngle = cameraAutoAngle + 1 & 7;
+					super.keyLeftDown = false;
+					if (!zoomCamera)
+					{
+						if ((cameraAutoAngle & 1) == 0)
+							cameraAutoAngle = cameraAutoAngle + 1 & 7;
+						for (int i2 = 0; i2 < 8; i2++)
+						{
+							if (enginePlayerVisible(cameraAutoAngle))
+								break;
+							cameraAutoAngle = cameraAutoAngle + 1 & 7;
+						}
+
+					}
+				}
+				if (super.keyRightDown)
+				{
+					cameraAutoAngle = cameraAutoAngle + 7 & 7;
+					super.keyRightDown = false;
+					if (!zoomCamera) {
+						if ((cameraAutoAngle & 1) == 0)
+							cameraAutoAngle = cameraAutoAngle + 7 & 7;
+						for (int j2 = 0; j2 < 8; j2++) {
+							if (enginePlayerVisible(cameraAutoAngle))
+								break;
+							cameraAutoAngle = cameraAutoAngle + 7 & 7;
+						}
+
+					}
+				}
+			}
+		}
+		else if (super.keyLeftDown)
+			cameraZRot = cameraZRot + 8 & 0x3ff;
+		else if (super.keyRightDown)
+			cameraZRot = cameraZRot - 8 & 0x3ff;
+		else if (super.keyUpDown && cameraXRot > 0x390)
+			cameraXRot = cameraXRot - 8 & 0x3ff;
+		else if (super.keyDownDown && cameraXRot < 0x3f8)
+			cameraXRot = cameraXRot + 8 & 0x3ff;
+		if (zoomCamera && cameraHeight > 8.59375D)
+			cameraHeight -= 0.0625D;
+		else if (!zoomCamera && cameraHeight < 11.71875D)
+			cameraHeight += 0.0625D;
+	}
+
+	private void drawTradePanel()
+	{
+		tradeCfrmPan.getFrame().setTitle("Trading with: @yel@"
+				+ DataOperations.longToString(tradeConfirmOtherNameLong));
+		gameGraphics.drawBoxAlpha(tradePan.getPlrTextBoxX(),
+				tradePan.getPlrTextBoxY(), tradePan.getPlrTextBoxWidth(),
+				tradePan.getPlrTextBoxHeight(), tradePan.getBGColor(),
+				tradePan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(tradePan.getMdlMarginBarX(),
+				tradePan.getMdlMarginBarY(), tradePan.getMdlMarginBarWidth(),
+				tradePan.getMdlMarginBarHeight(), tradePan.getBGColor(),
+				tradePan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(tradePan.getOpntTextBoxX(),
+				tradePan.getOpntTextBoxY(), tradePan.getOpntTextBoxWidth(),
+				tradePan.getOpntTextBoxHeight(), tradePan.getBGColor(),
+				tradePan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(tradePan.getAccptDclnBoxX(),
+				tradePan.getAccptDclnBoxY(), tradePan.getAccptDclnBoxWidth(),
+				tradePan.getAccptDclnBoxHeight(), tradePan.getBGColor(),
+				tradePan.getBGAlpha());
+		gameGraphics.drawBoxAlpha(tradePan.getItemInfoBarX(),
+				tradePan.getItemInfoBarY(), tradePan.getItemInfoBarWidth(),
+				tradePan.getItemInfoBarHeight(), tradePan.getBGColor(),
+				tradePan.getBGAlpha());
+		tradePan.getFrame().setTitle("Trading with: " + tradeOtherPlayerName);
+		gameGraphics.drawString("Your Offer", tradePan.getPlrTextBoxX()+1,
+				tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
+				4, 0xffffff);
+		gameGraphics.drawString("Opponent's Offer", tradePan.getOpntTextBoxX()+1,
+				tradePan.getOpntTextBoxY()+tradePan.getOpntTextBoxHeight()-3,
+				4, 0xffffff);
+		gameGraphics.drawString("Your Inventory", tradePan.getInvGrid().getX(),
+				tradePan.getPlrTextBoxY()+tradePan.getPlrTextBoxHeight()-3,
+				4, 0xffffff);
+	}
+
+	private void handleTradePanelClicks()
+	{
+		if (mv.leftDown())
+		{
+			if (tradePan.getAcceptButton().isMouseOver())
+				this.formatPacket(211, -1, -1);
+			if (tradePan.getDeclineButton().isMouseOver())
+				this.formatPacket(216, -1, -1);
+		}
+	}
+
+	private void drawTradeInventoryGrid()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		InGameGrid invGrid = tradePan.getInvGrid();
+		for (int j = 0; j < invGrid.getSlots(); j++)
+		{
+			int col = invGrid.getX() + (j % invGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = invGrid.getY() + (j / invGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
+
+			drawItemBox(invGrid, self.getInventoryItems().get(j).getID(), col, row,
+					false, j < inventoryCount && self.getInventoryItems().get(j).getID() != -1);
+			if (j < inventoryCount && self.getInventoryItems().get(j).getID() != -1
+					&& self.getInventoryItems().get(j).isStackable())
+				drawTradeInvText(col, row, self.getInventoryItems().get(j).getAmount());
+			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
+					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
+					&& j < inventoryCount && self.getInventoryItems().get(j).getID() != -1)
+				gameGraphics.drawString(
+						self.getInventoryItems().get(j).getName() + ": @whi@" + self.getInventoryItems().get(j).getDescription(),
+						tradePan.getX() + 2,
+						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+						1, 0xffff00);
+		}
+	}
+
+	private void drawTradePlrOfferGrid()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		InGameGrid myOfferGrid = tradePan.getOfferGrid();
+		for (int j = 0; j < myOfferGrid.getSlots(); j++)
+		{
+			int col = myOfferGrid.getX() + (j % myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = myOfferGrid.getY() + (j / myOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
+
+			drawItemBox(myOfferGrid, self.getTradeMyItems().get(j).getID(), col, row,
+					false, j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1);
+			if (j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1
+					&& self.getTradeMyItems().get(j).isStackable())
+				drawTradeInvText(col, row, self.getTradeMyItems().get(j).getAmount());
+			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
+					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
+					&& j < tradeMyItemCount && self.getTradeMyItems().get(j).getID() != -1)
+				gameGraphics.drawString(self.getTradeMyItems().get(j).getName()
+						+ ": @whi@" + self.getTradeMyItems().get(j).getDescription(),
+						tradePan.getX() + 2,
+						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+						1, 0xffff00);
+		}
+	}
+
+	private void drawTradeOpntOfferGrid()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		InGameGrid otherOfferGrid = tradePan.getOtherOfferGrid();
+		for (int j = 0; j < otherOfferGrid.getSlots(); j++)
+		{
+			int col = otherOfferGrid.getX() + (j % otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_WIDTH;
+			int row = otherOfferGrid.getY() + (j / otherOfferGrid.getCols()) * InGameGrid.ITEM_SLOT_HEIGHT;
+
+			drawItemBox(otherOfferGrid, self.getTradeOtherItems().get(j).getID(), col, row,
+					false, j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1);
+			if (j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1
+					&& self.getTradeOtherItems().get(j).isStackable())
+				drawTradeInvText(col, row, self.getTradeOtherItems().get(j).getAmount());
+			if (mouseX > col && mouseX < col + InGameGrid.ITEM_SLOT_WIDTH
+					&& mouseY > row && mouseY < row + InGameGrid.ITEM_SLOT_HEIGHT
+					&& j < tradeOtherItemCount && self.getTradeOtherItems().get(j).getID() != -1)
+				gameGraphics.drawString(self.getTradeOtherItems().get(j).getName()
+						+ ": @whi@" + self.getTradeOtherItems().get(j).getDescription(),
+						tradePan.getX() + 2,
+						tradePan.getItemInfoBarY() + tradePan.getItemInfoBarHeight() - 5,
+						1, 0xffff00);
+		}
+	}
+
+	private void drawTradeInvText(int col, int row, long amount)
+	{
+		gameGraphics.drawString(getAbbreviatedValue(amount),
+				col + 1, row + 10, 1, tradePan.getInvCountTextColor());
+	}
+
+	private void updateTradeStatus()
+	{
+		if (!tradeWeAccepted)
+			gameGraphics.drawPicture(tradePan.getAcceptButton().getX(),
+					tradePan.getAcceptButton().getY(),
+					tradePan.getAcceptButton().getSpriteIdx());
+		gameGraphics.drawPicture(tradePan.getDeclineButton().getX(),
+				tradePan.getDeclineButton().getY(),
+				tradePan.getDeclineButton().getSpriteIdx());
+		if (tradeOtherAccepted)
+		{
+			gameGraphics.drawText("Other player",
+					tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
+					tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
+			gameGraphics.drawText("has accepted",
+					tradePan.getAccptDclnBoxX()+tradePan.getAccptDclnBoxWidth()/2,
+					tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
+		}
+		if (tradeWeAccepted) {
+			gameGraphics.drawText("Waiting for",
+					tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
+					tradePan.getAccptDclnBoxY()+11, 1, 0xffffff);
+			gameGraphics.drawText("other player",
+					tradePan.getAccptDclnBoxX()+tradePan.getAcceptButton().getSprite().getWidth()/2,
+					tradePan.getAccptDclnBoxY()+21, 1, 0xffffff);
+		}
+	}
+
+	private void handleMouseOverTradeInv()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		InGameGrid invGrid = tradePan.getInvGrid();
+		int slotIdx = (mouseX - (invGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
+				+ ((mouseY - (invGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * invGrid.getCols();
+		if (slotIdx >= 0 && slotIdx < inventoryCount)
+		{
+			boolean flag = false;
+			int l1 = 0;
+			int slotItemId = self.getInventoryItems().get(slotIdx).getID();
+			for (int k3 = 0; k3 < tradeMyItemCount; k3++)
+			{
+				if (self.getTradeMyItems().get(k3).getID() == slotItemId)
+				{
+					if (EntityHandler.getItemDef(slotItemId).isStackable())
+					{
+						for (int i4 = 0; i4 < itemIncrement; i4++)
+						{
+							if (self.getTradeMyItems().get(k3).getAmount() < self.getInventoryItems().get(slotIdx).getAmount())
+							{
+								self.getTradeMyItems().get(k3).addAmount(1);
+							}
+							flag = true;
+						}
+
+					}
+					else
+						l1++;
+				}
+			}
+			if (inventoryCount(slotItemId) <= l1)
+				flag = true;
+			if (!flag && tradeMyItemCount < 12)
+			{
+				self.getTradeMyItems().set(tradeMyItemCount++, new Item(slotItemId, false, 1));
+				flag = true;
+			}
+			if (flag)
+				formatPacket(70, -1, -1);
+		}
+	}
+
+	private void handleMouseOverPlrTradeOffer()
+	{
+		int mouseX = mv.getX();
+		int mouseY = mv.getY();
+		InGameGrid myOfferGrid = tradePan.getOfferGrid();
+		int l = (mouseX - (myOfferGrid.getX()+1)) / InGameGrid.ITEM_SLOT_WIDTH
+				+ ((mouseY - (myOfferGrid.getY()+1)) / InGameGrid.ITEM_SLOT_HEIGHT) * myOfferGrid.getCols();
+		if (l >= 0 && l < tradeMyItemCount)
+		{
+			int j1 = self.getTradeMyItems().get(l).getID();
+			for (int i2 = 0; i2 < itemIncrement; i2++)
+			{
+				if (EntityHandler.getItemDef(j1).isStackable()
+						&& self.getTradeMyItems().get(l).getAmount() > 1)
+				{
+					self.getTradeMyItems().get(l).delAmount(1);
+					continue;
+				}
+				tradeMyItemCount--;
+				mouseDownTime = 0;
+				for (int l2 = l; l2 < tradeMyItemCount; l2++)
+				{
+					self.getTradeMyItems().set(l2, self.getTradeMyItems().get(l2 + 1));
+				}
+
+				break;
+			}
+			formatPacket(70, -1, -1);
+		}
+	}
+
+	private Mob getLastPlayer(int serverIndex) {
+		for (Iterator<Mob> itr = lastPlayerArray.iterator(); itr.hasNext();) {
+			Mob tmp = itr.next();
+			if (tmp.serverIndex == serverIndex) {
+				return tmp;
+			}
+		}
+		return null;
+	}
+
+	private Mob getLastNpc(int serverIndex) {
+		for (Iterator<Mob> itr = lastNpcArray.iterator(); itr.hasNext();)
+		{
+			Mob tmp = itr.next();
+			if (tmp.serverIndex == serverIndex) {
+				return tmp;
+			}
+		}
+		return null;
+	}
+
+	private void drawTradeCfrmPanel()
+	{
+		tradeCfrmPan.getFrame().setTitle("Please confirm your trade with @yel@"
+				+ DataOperations.longToString(tradeConfirmOtherNameLong));
+		gameGraphics.drawBoxAlpha(tradeCfrmPan.getX(), tradeCfrmPan.getY(),
+				tradeCfrmPan.getWidth(), tradeCfrmPan.getHeight(),
+				tradeCfrmPan.getBGColor(), tradeCfrmPan.getBGAlpha());
+		int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
+		gameGraphics.drawText("You are about to give:",
+				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+				itemsTitleHeight, 1, 0xffff00);
+		gameGraphics.drawText("In return you will receive:",
+				tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
+				itemsTitleHeight, 1, 0xffff00);
+		gameGraphics.drawText("Are you sure you want to do this?",
+				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-62, 4, 65535);
+		gameGraphics.drawText("There is NO WAY to reverse a trade if you change your mind.",
+				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-47, 1, 0xffffff);
+		gameGraphics.drawText("Remember that not all players are trustworthy",
+				tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/2,
+				tradeCfrmPan.getY()+tradeCfrmPan.getHeight()-32, 1, 0xffffff);
+	}
+
+	private void drawTradeItems()
+	{
+		int itemsTitleHeight = tradeCfrmPan.getY() + tradeCfrmPan.getPlrTextBoxHeight();
+		if (tradeConfirmItemCount == 0)
+			gameGraphics.drawText("Nothing!",
+					tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+					itemsTitleHeight + 12, 1, 0xffffff);
+		for (int line = 0; line < tradeConfirmItemCount; line++)
+		{
+			String s = self.getTradeConfirmMyItems().get(line).getName();
+			if (self.getTradeConfirmMyItems().get(line).isStackable())
+				s = s + " x " + method74(self.getTradeConfirmMyItems().get(line).getAmount());
+			gameGraphics.drawText(s, tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
+		}
+
+		if (tradeConfirmOtherItemCount == 0)
+			gameGraphics.drawText("Nothing!",
+					tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
+					itemsTitleHeight + 12, 1, 0xffffff);
+		for (int line = 0; line < tradeConfirmOtherItemCount; line++)
+		{
+			String s1 = self.getTradeConfirmOtherItems().get(line).getName();
+			if (self.getTradeConfirmOtherItems().get(line).isStackable())
+				s1 = s1 + " x " + method74(self.getTradeConfirmOtherItems().get(line).getAmount());
+			gameGraphics.drawText(s1, tradeCfrmPan.getX()+3*tradeCfrmPan.getWidth()/4,
+					itemsTitleHeight + 12 + line * 12, 1, 0xffffff);
+		}
+	}
+
+	private void updateTradeCfrmButtons()
+	{
+		if (!tradeConfirmAccepted)
+		{
+			gameGraphics.drawPicture(tradeCfrmPan.getAcceptButton().getX(),
+					tradeCfrmPan.getAcceptButton().getY(),
+					tradeCfrmPan.getAcceptButton().getSpriteIdx());
+			gameGraphics.drawPicture(tradeCfrmPan.getDeclineButton().getX(),
+					tradeCfrmPan.getDeclineButton().getY(),
+					tradeCfrmPan.getDeclineButton().getSpriteIdx());
+		}
+		else
+		{
+			gameGraphics.drawText("Waiting for other player...",
+					tradeCfrmPan.getX()+tradeCfrmPan.getWidth()/4,
+					tradeCfrmPan.getY()+tradeCfrmPan.getHeight()/4-12, 1, 0xffff00);
+		}
+	}
+
+	private void handleTradeCfrmPanelClicks()
+	{
+		if (tradeCfrmPan.getAcceptButton().isMouseOver())
+			formatPacket(53, -1, -1);
+		if (!tradeCfrmPan.getFrame().isMouseOver()
+				|| tradeCfrmPan.getDeclineButton().isMouseOver()
+				|| tradeCfrmPan.getFrame().getCloseButton().isMouseOver())
+			formatPacket(216, -1, -1);
+		mv.releaseButton();
+	}
+	
 	private int getMenuLength() { return rightClickMenu.size(); }
-	
-	private boolean combatWindow;
-	private int lastLoggedInDays;
-	private int subscriptionLeftDays;
-	private boolean configAutoCameraAngle;
-	private String questionMenuAnswer[];
-	private int anInt658;
-	private int handlePacketErrorCount;
-	private int loginButtonNewUser;
-	private int loginButtonExistingUser;
-	private String currentUser;
-	private String currentPass;
-	private int lastWalkTimeout;
-	private boolean duelOpponentAccepted;
-	private boolean duelMyAccepted;
-	private String serverMessage;
-	private String duelOpponentName;
-	private int mouseOverBankPageText;
-	private int fightCount;
-	private int mobMessageCount;
-	String mobMsg[];
-	private boolean showBank;
-	private int mobMsgX[];
-	private int mobMsgY[];
-	private int mobMsgWidth[];
-	private int mobMsgHeight[];
-	private int equipmentStatus[];
-	private final int chrTopBottomClrs[] = {0xff0000, 0xff8000, 0xffe000, 0xa0e000, 57344, 32768, 41088, 45311, 33023, 12528, 0xe000e0, 0x303030, 0x604000, 0x805000, 0xffffff};
-	private int loginScreenNumber;
-	private int anInt699;
-	private boolean prayerOn[];
-	protected boolean tradeOtherAccepted;
-	protected boolean tradeWeAccepted;
-	private int npcCombatModelArray1[] = {0, 1, 2, 1, 0, 0, 0, 0};
-	private int anIntArray705[];
-	private int anIntArray706[];
-	private int wildX;
-	private int wildY;
-	private int wildYMultiplier;
-	private int sectorHeight;
-	private boolean memoryError;
-	private int bankItemsMax;
-	private int walkModel[] = {0, 1, 2, 1};
-	private boolean showQuestionMenu;
-	private double viewDistance;
-	private double cameraZoom;
-	public boolean loggedIn;
-	private int cameraAutoAngle;
-	private int cameraRotationBaseAddition;
-	int menuMagicPrayersSelected;
-	private double screenRotationX;
-	private double screenRotationY;
-	private int randomYRot;
-	private int showAbuseWindow;
-	private int duelCantRetreat;
-	private int duelUseMagic;
-	private int duelUsePrayer;
-	private int duelUseWeapons;
-	private boolean showServerMessageBox;
-	private boolean hasReceivedWelcomeBoxDetails;
-	private String lastLoggedInAddress;
-	private int loginTimer;
-	private int playerStatCurrent[];
-	private int areaX;
-	private int areaY;
-	private int wildYSubtract;
-	private int anInt742;
-	private int anInt743;
-	private int anInt744;
-	private int sectionXArray[];
-	private int sectionYArray[];
-	
-	private SelectedItem selItem;
-	private SelectedSpell selSpell;
-	
-	private int anIntArray757[];
-	private boolean showCharacterLookScreen;
-	private int npcCombatModelArray2[] = {0, 0, 0, 0, 0, 1, 2, 1};
-	private int inputBoxType;
-	private int combatStyle;
-	private boolean configMouseButtons;
-	private boolean duelNoRetreating;
-	private boolean duelNoMagic;
-	private boolean duelNoPrayer;
-	private boolean duelNoWeapons;
-	private int anIntArray782[];
-	private int xMinReloadNextSect;
-	private int yMinReloadNextSect;
-	private int xMaxReloadNextSect;
-	private int yMaxReloadNextSect;
-	private final int chrHairClrs[] = {0xffc030, 0xffa040, 0x805030, 0x604020, 0x303030, 0xff6020, 0xff4000, 0xffffff, 0xff00, 0xffff};
-	private int systemUpdate;
-	private int cameraZRot;
-	private int cameraXRot;
-	private int logoutTimeout;
-	int messagesHandleChatHist;
-	int chatHandlePlayerEntry;
-	int messagesHandleQuestHist;
-	int messagesHandlePrivHist;
-	int messagesTab;
-	private boolean showWelcomeBox;
-	private int chrHeadType;
-	private int chrBodyGender;
-	private int character2Colour;
-	private int chrHairClr;
-	private int chrTopClr;
-	private int chrBottomClr;
-	private int chrSkinClr;
-	private int chrHeadGender;
-	private int loginStatusText;
-	private int loginUsernameTextBox;
-	private int loginPasswordTextBox;
-	private int loginOkButton;
-	private int loginCancelButton;
-	private int selectedBankItem;
-	private int selectedBankItemType;
-	int anInt826;
-	private boolean objectRelated[];
-	private int playerStatBase[];
-	private AbuseWindow abWin;
-	private BankPanel bankPan;
-	private InventoryPanel invPan;
-	private PlayerInfoPanel plrPan;
-	private MagicPanel magicPan;
-	private FriendsPanel friendPan;
-	private OptionsPanel optPan;
-	private TradePanel tradePan;
-	private TradeConfirmPanel tradeCfrmPan;
-	private int abuseSelectedType;
-	private int actionPictureType;
-	int actionPictureX;
-	int actionPictureY;
-	private int npcAnimationArray[][] = {
-			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
-			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3, 4},
-			{11, 3, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4},
-			{3, 4, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
-			{3, 4, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
-			{4, 3, 2, 9, 7, 1, 6, 10, 8, 11, 0, 5},
-			{11, 4, 2, 9, 7, 1, 6, 10, 0, 5, 8, 3},
-			{11, 2, 9, 7, 1, 6, 10, 0, 5, 8, 4, 3}
-	};
-	private int chrDesignHeadBtnLeft;
-	private int chrDesignHeadBtnRight;
-	private int chrDesignHairClrBtnLeft;
-	private int chrDesignHairClrBtnRight;
-	private int chrDesignGenderBtnLeft;
-	private int chrDesignGenderBtnRight;
-	private int chrDesignTopClrBtnLeft;
-	private int chrDesignTopClrBtnRight;
-	private int chrDesignSkinClrBtnLeft;
-	private int chrDesignSkinClrBtnRight;
-	private int chrDesignBottomClrBtnLeft;
-	private int chrDesignBottomClrBtnRight;
-	private int characterDesignAcceptButton;
-	private int anIntArray858[];
-	private int anIntArray859[];
-	private int mobArrayIndexes[];
-	private double lastAutoCameraRotatePlayerX;
-	private double lastAutoCameraRotatePlayerY;
-	private int questionMenuCount;
-	private List<GameObject> objects;
-	int sectionX;
-	int sectionY;
-	int serverIndex;
-	protected int mouseDownTime;
-	protected int itemIncrement;
-	private int modelFireLightningSpellNumber;
-	private int modelTorchNumber;
-	private int modelClawSpellNumber;
-	private boolean showTradeConfirmWindow;
-	private boolean tradeConfirmAccepted;
-	private int anInt892;
-	private EngineHandle engineHandle;
 
-	private List<Mob> playerArray, lastPlayerArray, mobArray,
-	npcArray, lastNpcArray, npcRecordArray;
-	private List<HitpointsBar> hitpoints;
-	
-	private Menu chrDesignMenu, friendsMenu, menuNewUser, menuLogin,
-	menuWelcome, questMenu, spellMenu, gameMenu;
-	int questMenuHandle, spellMenuHandle;
 
-	private Model gameDataModels[];
-	private Model doorModel[];
 	
-	private boolean serverMessageBoxTop;
-	private int referId;
-	private int anInt900;
-	private int newUserOkButton;
-	private double cameraHeight;
-	private boolean notInWilderness;
-	private boolean zoomCamera;
-	private AudioReader audioReader;
-	private int playerStatExperience[];
-	private boolean cameraAutoAngleDebug;
-	private boolean showDuelWindow;
-	private int anIntArray923[];
-	protected GameImageMiddleMan gameGraphics;
-	private final String skillArrayLong[] = {"Attack", "Defense", "Strength", "Hits", "Ranged", "Prayer", "Magic", "Cooking", "Woodcutting", "Fletching", "Fishing", "Firemaking", "Crafting", "Smithing", "Mining", "Herblaw", "Agility", "Thieving"};
-	private boolean lastLoadedNull;
-	private int experienceArray[];
-	private Camera gameCamera;
-	private boolean showShop;
-	private int mouseClickOffset;
-	int mouseClickX[];
-	int mouseClickYArray[];
-	private boolean showDuelConfirmWindow;
-	private boolean duelWeAccept;
-	private Graphics aGraphics936;
-	private int doorX[];
-	private int doorY[];
-	private int wildernessType;
-	private boolean configSoundEffects;
-	private boolean showRightClickMenu;
-	private int attackingInt40;
-	private int anIntArray944[];
-	private int shopItemSellPriceModifier;
-	private int shopItemBuyPriceModifier;
-	private int modelUpdatingTimer;
-	private int doorCount;
-	private int doorDirection[];
-	private int doorType[];
-	private int anInt952;
-	private int anInt953;
-	private int anInt954;
-	private int anInt955;
-	private double groundItemX[];
-	private double groundItemY[];
-	private int groundItemType[];
-	private double groundItemZ[];
-	private int selectedShopItemIndex;
-	private int selectedShopItemType;
-	private int messagesRows;
-	private String messagesArray[];
-	private int messagesTimeout[];
-	private long tradeConfirmOtherNameLong;
-	protected boolean showTradeWindow;
-	private int playerAliveTimeout;
-	private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
-	private byte sounds[];
-	private boolean doorRelated[];
-	
-	private Rectangle bounds;
-	private Point center;
-	public int windowWidth;
-	public int windowHeight;
-	public int windowHalfWidth;
-	public int windowHalfHeight;
-	
-	private int cameraSizeInt;
-	private double mapClickX, mapClickY;
-	int friendsMenuHandle;
-	int friendTabOn;
-	long privateMessageTarget;
-	private long duelOpponentNameLong;
-	protected String tradeOtherPlayerName;
-	public int chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, chatBoxVisRows,
-	chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight;
-	public static int SCROLL_BAR_WIDTH = 11;
-	public static int SCROLL_BAR_HEIGHT = 12;
-	public int gameWindowMenuBarX, gameWindowMenuBarY, gameWindowMenuBarWidth,
-	gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
-	public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
-	public static String quests[] = new String[]{
-			"Black Knights' Fortress", "Cook's Assistant", "Demon slayer",
-			"Doric's quest", "The restless ghost", "Goblin diplomacy",
-			"Ernes the chicken", "Imp catcher", "Pirate's treasure",
-			"Romeo & Juliet", "Prince Ali rescue", "Sheep shearer",
-			"Shield of Arrav", "The knight's sword", "Vampire slayer", "Wich's potion",
-			"Dragon slayer", "Witch's house (members)", "Lost City (members)",
-			"Hero's quest (members)", "Druidic ritual (members)", "Merlin's crystal(members)",
-			"Scorpion catcher (members)", "Family crest (members)", "Tribal totem (members)",
-			"Fishing contest (members)", "Monk's friend (members)", "Temple of Ikov(members)",
-			"Clock tower (members)", "The Holy Grail (members)", "Fight Arena (members)",
-			"Tree Gnome Village (members)", "The Hazel Cult (members)", "Sheep Herder (members)",
-			"Plague City (members)", "Sea Slug (members)", "Waterfall quest (members)",
-			"Biohazard (members)", "Jungle potion (members)", "Grand tree (members)",
-			"Shilo village (members)", "Underground pass (members)", "Observatory quest (members)",
-			"Tourist trap (members)", "Watchtower (members)", "Dwarf Cannon (members)",
-			"Murder Mystery (members)", "Digsite (members)", "Gertrude's Cat (members)",
-	"Legend's Quest (members)"};
-	private boolean isTyping;
-	
-	public static OpenMenu om = OpenMenu.get();
 	
 	public class SelectedItem
 	{
@@ -9078,5 +9081,18 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		
 		private int open;
+	}
+	
+	public class DPoint
+	{
+		public double x, y;
+		
+		public DPoint() { this(0, 0); }
+		
+		public DPoint(double x, double y)
+		{
+			this.x = x;
+			this.y = y;
+		}
 	}
 }

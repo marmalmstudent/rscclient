@@ -78,7 +78,7 @@ public class OptionsPanel extends InGamePanel
 			newText = gameOptionsText[index][1];
 		else
 			newText = gameOptionsText[index][0];
-		gameOptions.getButtons()[index].setButtonText(newText);
+		gameOptions.getButtons().get(index).setButtonText(newText);
 	}
 	
 	public void setClientAssistState(int index, boolean isSet)
@@ -88,7 +88,7 @@ public class OptionsPanel extends InGamePanel
 			newText = clientAssistsText[index][1];
 		else
 			newText = clientAssistsText[index][0];
-		clientAssists.getButtons()[index].setButtonText(newText);
+		clientAssists.getButtons().get(index).setButtonText(newText);
 	}
 	
 	public void setPrivacySettingsState(int index, boolean isSet)
@@ -98,7 +98,7 @@ public class OptionsPanel extends InGamePanel
 			newText = privacySettingsText[index][1];
 		else
 			newText = privacySettingsText[index][0];
-		privacySettings.getButtons()[index].setButtonText(newText);
+		privacySettings.getButtons().get(index).setButtonText(newText);
 	}
 	
 	public InGameButtonPanel getGameOptions() { return gameOptions; }
