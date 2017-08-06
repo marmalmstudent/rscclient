@@ -18,7 +18,8 @@ public class Inventory
 	public static final int MAX_INVENTORY_SLOTS = 35;
 	
 	
-	public List<Item> getItems() {
+	public List<Item> items()
+	{
 		return inventory.getItems();
 	}
 
@@ -27,18 +28,20 @@ public class Inventory
 	{
 		List<MenuRightClick> result = new ArrayList<MenuRightClick>();
 		invPan.getFrame().drawComponent();
-		invPan.getInvGrid().drawStaticGrid(getItems(),
+		invPan.getInvGrid().drawStaticGrid(items(),
 				inventoryCount, invPan.getInvCountTextColor());
 		if (!flag)
 			return result;
 		if (invPan.getInvGrid().isMouseOver())
 			result = handleMouseover(selItem, selSpell);
 		else if (invPan.getFrame().getCloseButton().isMouseOver())
+		{
 			if (mv.leftDown())
 			{
 				OpenMenu.get().close(OpenMenu.INVENTORY);
 				mv.releaseButton();
 			}
+		}
 		else if (invPan.getFrame().isMouseOver())
 			if (mv.leftDown())
 				mv.releaseButton();
@@ -64,7 +67,7 @@ public class Inventory
 		List<MenuRightClick> lmrc = new ArrayList<MenuRightClick>();
 		if (currentInventorySlot < invGrid.getCols()*invGrid.getRows())
 		{
-			Item item = getItems().get(currentInventorySlot);
+			Item item = items().get(currentInventorySlot);
 			if (item.getID() == Item.NONE)
 				return lmrc;
 			

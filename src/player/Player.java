@@ -45,8 +45,6 @@ public class Player
 		inventory.initGraphics(center, graphics);
 	}
 	
-	public List<Item> getInventoryItems() { return inventory.getItems(); }
-	
 	public List<Item> getBankItems() { return bank.getItems(); }
 	public List<Item> getNewBankItems() { return newBank.getItems(); }
 	
