@@ -967,28 +967,29 @@ public class Camera {
 		int xTextureStep = i3 - xTexture >> 4;
 		int yTextureStep = j3 - yTexture >> 4;
 		int color, shadeVal, fadeVal;
-		for (int j4 = length >> 4; j4 > 0; j4--)
+		for (int j4 = length; j4 > 0; j4 -= 0x10)
 		{
-			for (int i = 0; i < 4; ++i)
+			int lim = j4 < 0x10 ? (length & 0xf) : 0x10;
+			for (int i = 0; i < lim; ++i)
 			{
-				xTexture = (xTexture & maxSpriteIdx);
-				shadeOffset += shadeStep;
-				fadeOffset  += fadeStep;
-				for (int j = 0; j < 4; ++j)
+				if ((i & 3) == 0)
 				{
-					color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
-					shadeVal = 255-(shadeOffset >> 8 & 0xff);
-					fadeVal  = 255-(fadeOffset  >> 8 & 0xff);
-					color = applyShade(color, shadeVal);
-					color = applyFade(color, fadeVal);
-					int fadeColor = getModifiedColor(GameImage.BACKGROUND,
-							getModCompl(getMod(fadeVal)));
-					if (!seethrough || color != fadeColor)
-						pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
-					++offset;
-					xTexture += xTextureStep;
-					yTexture += yTextureStep;
+					xTexture = (xTexture & maxSpriteIdx);
+					shadeOffset += shadeStep;
+					fadeOffset  += fadeStep;
 				}
+				color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
+				shadeVal = 255-(shadeOffset >> 8);
+				fadeVal  = 255-(fadeOffset  >> 8);
+				color = applyShade(color, shadeVal);
+				color = applyFade(color, fadeVal);
+				int fadeColor = getModifiedColor(GameImage.BACKGROUND,
+						getModCompl(getMod(fadeVal)));
+				if (!seethrough || color != fadeColor)
+					pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
+				++offset;
+				xTexture += xTextureStep;
+				yTexture += yTextureStep;
 			}
 			xTexture = i3;
 			yTexture = j3;
@@ -1006,28 +1007,6 @@ public class Camera {
 				i3 = lastRow;
 			xTextureStep = i3 - xTexture >> 4;
 			yTextureStep = j3 - yTexture >> 4;
-		}
-
-		for (int k4 = 0; k4 < (length & 0xf); k4++)
-		{
-			if ((k4 & 3) == 0)
-			{
-				xTexture = (xTexture & maxSpriteIdx);
-				shadeOffset += shadeStep;
-				shadeOffset += shadeStep;
-			}
-			color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
-			shadeVal = 255 - (shadeOffset >> 8 & 0xff);
-			fadeVal  = 255 - (fadeOffset  >> 8 & 0xff);
-			color = applyShade(color, shadeVal);
-			color = applyFade(color, fadeVal);
-			int fadeColor = getModifiedColor(GameImage.BACKGROUND,
-					getModCompl(getMod(fadeVal)));
-			if (!seethrough || color != fadeColor)
-				pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
-			++offset;
-			xTexture += xTextureStep;
-			yTexture += yTextureStep;
 		}
 	}
 
