@@ -11,26 +11,36 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
-public class GameImage implements ImageProducer, ImageObserver {
-    public Sprite[] sprites;
-    private ZipFile entityArchive, mediaArchive, utilArchive,
-    itemArchive, logoArchive, projectileArchive, textureArchive;
-    public BufferedImage loginScreen;
+public class GameImage implements ImageProducer, ImageObserver
+{
     public static final int BACKGROUND = 0;//0x349ed8;
+    public static int anInt346;
+    public static int anInt347;
+    public static int anInt348;
+    public static int anInt352;
+    public Sprite[] sprites;
+    public BufferedImage loginScreen;
+    public int gameWindowWidth;
+    public int gameWindowHeight;
+    public int imagePixelArray[];
+    public Image image;
+    public boolean lowDef;
+    public boolean drawStringShadows;
 
     public GameImage(int width, int height, int maxSprites, Component component)
     {
         lowDef = false;
         drawStringShadows = false;
-        imageHeight = height;
-        imageWidth = width;
-        gameWindowWidthUnused = gameWindowWidth = width;
-        gameWindowHeightUnused = gameWindowHeight = height;
+        bounds = new Rectangle(0, 0, width, height);
+        gameWindowWidth = width;
+        gameWindowHeight = height;
         imagePixelArray = new int[width * height];
         sprites = new Sprite[maxSprites];
         if (width > 1 && height > 1 && component != null) {
@@ -65,8 +75,193 @@ public class GameImage implements ImageProducer, ImageObserver {
         	e.printStackTrace();
         }
     }
+
+    @Override
+    public synchronized void addConsumer(ImageConsumer imageconsumer)
+    {
+        imageConsumer = imageconsumer;
+        imageconsumer.setDimensions(gameWindowWidth, gameWindowHeight);
+        imageconsumer.setProperties(null);
+        imageconsumer.setColorModel(colourModel);
+        imageconsumer.setHints(14);
+    }
+
+    @Override
+    public synchronized boolean isConsumer(ImageConsumer imageconsumer)
+    {
+        return imageConsumer == imageconsumer;
+    }
+
+    @Override
+    public synchronized void removeConsumer(ImageConsumer imageconsumer)
+    {
+        if (imageConsumer == imageconsumer)
+            imageConsumer = null;
+    }
+
+    @Override
+    public void startProduction(ImageConsumer imageconsumer)
+    {
+        addConsumer(imageconsumer);
+    }
+
+    @Override
+    public void requestTopDownLeftRightResend(ImageConsumer imageconsumer)
+    {
+        System.out.println("TDLR");
+    }
+
+    @Override
+    public boolean imageUpdate(Image image, int i, int j, int k, int l, int i1) {
+        return true;
+    }
+
+    public static int convertRGBToLong(int red, int green, int blue)
+    {
+        return (red << 16) + (green << 8) + blue;
+    }
     
-    public boolean loadSprite(int id, String packageName) {
+    public static void loadFont(String fontName, int fontSize,
+    		int fontStyle, boolean addCharWidth, int fontNumber,
+    		GameWindow gameWindow)
+    {
+    	/*
+    	String fnts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    	for (String str : fnts)
+    	{
+    		System.out.println(str);
+    	}*/
+        Font font = new Font(fontName, fontStyle, fontSize);
+        FontMetrics fontmetrics = gameWindow.getFontMetrics(font);
+        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
+        anInt350 = 885; //855
+        for (int charSetOffset = 0; charSetOffset < 95; charSetOffset++)
+            drawLetter(font, fontmetrics, charSet.charAt(charSetOffset),
+            		charSetOffset, gameWindow, fontNumber, addCharWidth);
+
+        fontPixels[fontNumber] = new byte[anInt350];
+        for (int i1 = 0; i1 < anInt350; i1++)
+            fontPixels[fontNumber][i1] = fontPixelsLoadBuffer[i1];
+    }
+    
+    public static void drawLetter(Font font, FontMetrics fontmetrics,
+    		char letter, int charSetOffset, GameWindow gameWindow,
+    		int fontNumber, boolean addCharWidth)
+    {
+        int charWidth = fontmetrics.charWidth(letter);
+        int oldCharWidth = charWidth;
+        if (addCharWidth)
+            try {
+                if (letter == '/')
+                    addCharWidth = false;
+                if (letter == 'f' || letter == 't' || letter == 'w' || letter == 'v' || letter == 'k' || letter == 'x' || letter == 'y' || letter == 'A' || letter == 'V' || letter == 'W')
+                    charWidth++;
+            }
+            catch (Exception _ex) {
+            }
+        int i1 = fontmetrics.getMaxAscent();
+        int j1 = fontmetrics.getMaxAscent() + fontmetrics.getMaxDescent();
+        int k1 = fontmetrics.getHeight();
+        Image image = gameWindow.createImage(charWidth, j1);
+        Graphics g = image.getGraphics();
+        g.setColor(Color.black);
+        g.fillRect(0, 0, charWidth, j1);
+        g.setColor(Color.white);
+        g.setFont(font);
+        g.drawString(String.valueOf(letter), 0, i1);
+        if (addCharWidth)
+            g.drawString(String.valueOf(letter), 1, i1);
+        int ai[] = new int[charWidth * j1];
+        PixelGrabber pixelgrabber = new PixelGrabber(image, 0, 0, charWidth, j1, ai, 0, charWidth);
+        try {
+            pixelgrabber.grabPixels();
+        }
+        catch (InterruptedException _ex) {
+            return;
+        }
+        image.flush();
+        image = null;
+        int l1 = 0;
+        int i2 = 0;
+        int j2 = charWidth;
+        int k2 = j1;
+        label0:
+        for (int l2 = 0; l2 < j1; l2++) {
+            for (int i3 = 0; i3 < charWidth; i3++) {
+                int k3 = ai[i3 + l2 * charWidth];
+                if ((k3 & 0xffffff) == 0)
+                    continue;
+                i2 = l2;
+                break label0;
+            }
+
+        }
+
+        label1:
+        for (int j3 = 0; j3 < charWidth; j3++) {
+            for (int l3 = 0; l3 < j1; l3++) {
+                int j4 = ai[j3 + l3 * charWidth];
+                if ((j4 & 0xffffff) == 0)
+                    continue;
+                l1 = j3;
+                break label1;
+            }
+
+        }
+
+        label2:
+        for (int i4 = j1 - 1; i4 >= 0; i4--) {
+            for (int k4 = 0; k4 < charWidth; k4++) {
+                int i5 = ai[k4 + i4 * charWidth];
+                if ((i5 & 0xffffff) == 0)
+                    continue;
+                k2 = i4 + 1;
+                break label2;
+            }
+
+        }
+        label3:
+        for (int l4 = charWidth - 1; l4 >= 0; l4--) {
+            for (int j5 = 0; j5 < j1; j5++) {
+                int l5 = ai[l4 + j5 * charWidth];
+                if ((l5 & 0xffffff) == 0)
+                    continue;
+                j2 = l4 + 1;
+                break label3;
+            }
+
+        }
+        fontPixelsLoadBuffer[charSetOffset * 9] = (byte) (anInt350 / 16384);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 1] = (byte) (anInt350 / 128 & 0x7f);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 2] = (byte) (anInt350 & 0x7f);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 3] = (byte) (j2 - l1);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 4] = (byte) (k2 - i2);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 5] = (byte) l1;
+        fontPixelsLoadBuffer[charSetOffset * 9 + 6] = (byte) (i1 - i2);
+        fontPixelsLoadBuffer[charSetOffset * 9 + 7] = (byte) oldCharWidth;
+        fontPixelsLoadBuffer[charSetOffset * 9 + 8] = (byte) k1;
+        for (int k5 = i2; k5 < k2; k5++) {
+            for (int i6 = l1; i6 < j2; i6++) {
+                int j6 = ai[i6 + k5 * charWidth] & 0xff;
+                if (j6 > 30 && j6 < 230)
+                    aBooleanArray349[fontNumber] = true;
+                fontPixelsLoadBuffer[anInt350++] = (byte) j6;
+            }
+        }
+    }
+
+    public synchronized void completePixels()
+    {
+        if (imageConsumer == null)
+            return;
+
+        imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight,
+        		colourModel, imagePixelArray, 0, gameWindowWidth);
+        imageConsumer.imageComplete(ImageConsumer.TOPDOWNLEFTRIGHT);
+    }
+    
+    public boolean loadSprite(int id, String packageName)
+    {
     	if (packageName.equals("entity"))
         	return loadArchive(id, entityArchive);
     	else if (packageName.equals("media"))
@@ -84,57 +279,8 @@ public class GameImage implements ImageProducer, ImageObserver {
     	return false;
     }
 
-    private boolean loadArchive(int id, ZipFile archive) {
-        try {
-            ZipEntry e = archive.getEntry(String.valueOf(id));
-            if (e == null)
-                return false;
-            ByteBuffer data = DataConversions.streamToBuffer(new BufferedInputStream(archive.getInputStream(e)));
-            sprites[id] = Sprite.unpack(data);
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public synchronized void addConsumer(ImageConsumer imageconsumer) {
-        imageConsumer = imageconsumer;
-        imageconsumer.setDimensions(gameWindowWidth, gameWindowHeight);
-        imageconsumer.setProperties(null);
-        imageconsumer.setColorModel(colourModel);
-        imageconsumer.setHints(14);
-    }
-
-    public synchronized boolean isConsumer(ImageConsumer imageconsumer) {
-        return imageConsumer == imageconsumer;
-    }
-
-    public synchronized void removeConsumer(ImageConsumer imageconsumer) {
-        if (imageConsumer == imageconsumer) {
-            imageConsumer = null;
-        }
-    }
-
-    public void startProduction(ImageConsumer imageconsumer) {
-        addConsumer(imageconsumer);
-    }
-
-    public void requestTopDownLeftRightResend(ImageConsumer imageconsumer) {
-        System.out.println("TDLR");
-    }
-
-    public synchronized void completePixels() {
-        if (imageConsumer == null) {
-            return;
-        }
-        imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight,
-        		colourModel, imagePixelArray, 0, gameWindowWidth);
-        imageConsumer.imageComplete(ImageConsumer.TOPDOWNLEFTRIGHT);
-    }
-
-    public void setDimensions(int x, int y, int width, int height) {
+    public void setDimensions(int x, int y, int width, int height)
+    {
         if (x < 0)
             x = 0;
         if (y < 0)
@@ -143,20 +289,17 @@ public class GameImage implements ImageProducer, ImageObserver {
             width = gameWindowWidth;
         if (height > gameWindowHeight)
             height = gameWindowHeight;
-        imageX = x;
-        imageY = y;
-        imageWidth = width;
-        imageHeight = height;
+
+    	bounds.setBounds(x, y, width, height);
     }
 
-    public void resetDimensions() {
-        imageX = 0;
-        imageY = 0;
-        imageWidth = gameWindowWidth;
-        imageHeight = gameWindowHeight;
+    public void resetDimensions()
+    {
+    	bounds.setBounds(0, 0, gameWindowWidth, gameWindowHeight);
     }
 
-    public void drawImage(Graphics g, int x, int y) {
+    public void drawImage(Graphics g, int x, int y)
+    {
         completePixels();
         g.drawImage(image, x, y, this);
     }
@@ -225,19 +368,21 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void drawBoxAlpha(int x, int y, int width, int height, int colour, int alpha) {
-        if (x < imageX) {
-            width -= imageX - x;
-            x = imageX;
+    public void drawBoxAlpha(int x, int y, int width, int height,
+    		int colour, int alpha)
+    {
+        if (x < bounds.x) {
+            width -= bounds.x - x;
+            x = bounds.x;
         }
-        if (y < imageY) {
-            height -= imageY - y;
-            y = imageY;
+        if (y < bounds.y) {
+            height -= bounds.y - y;
+            y = bounds.y;
         }
-        if (x + width > imageWidth)
-            width = imageWidth - x;
-        if (y + height > imageHeight)
-            height = imageHeight - y;
+        if (x + width > bounds.width)
+            width = bounds.width - x;
+        if (y + height > bounds.height)
+            height = bounds.height - y;
         int bgAlpha = 256 - alpha;
         int red_a_mult = (colour >> 16 & 0xff) * alpha;
         int green_a_mult = (colour >> 8 & 0xff) * alpha;
@@ -269,13 +414,15 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void drawGradientBox(int x, int y, int width, int height, int colorTop, int colorBottom) {
-        if (x < imageX) {
-            width -= imageX - x;
-            x = imageX;
+    public void drawGradientBox(int x, int y, int width, int height,
+    		int colorTop, int colorBottom)
+    {
+        if (x < bounds.x) {
+            width -= bounds.x - x;
+            x = bounds.x;
         }
-        if (x + width > imageWidth)
-            width = imageWidth - x;
+        if (x + width > bounds.width)
+            width = bounds.width - x;
         int clrBtmRed = colorBottom >> 16 & 0xff;
         int clrBtmGre = colorBottom >> 8 & 0xff;
         int clrBtmBlu = colorBottom & 0xff;
@@ -295,7 +442,7 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         int offset = x + y * gameWindowWidth;
         for (int j = 0; j < height; j += yStep)
-            if (j + y >= imageY && j + y < imageHeight) 
+            if (j + y >= bounds.y && j + y < bounds.height) 
             {
                 int pixelClr = ((clrBtmRed * j + clrTopRed * (height - j)) / height << 16) + ((clrBtmGre * j + clrTopGre * (height - j)) / height << 8) + (clrBtmBlu * j + clrTopBlu * (height - j)) / height;
                 for (int i = -width; i < 0; i++)
@@ -306,21 +453,22 @@ public class GameImage implements ImageProducer, ImageObserver {
             }
     }
 
-    public void drawBox(int x, int y, int width, int height, int colour) {
-        if (x < imageX)
+    public void drawBox(int x, int y, int width, int height, int colour)
+    {
+        if (x < bounds.x)
         {
-            width -= imageX - x;
-            x = imageX;
+            width -= bounds.x - x;
+            x = bounds.x;
         }
-        if (y < imageY)
+        if (y < bounds.y)
         {
-            height -= imageY - y;
-            y = imageY;
+            height -= bounds.y - y;
+            y = bounds.y;
         }
-        if (x + width > imageWidth)
-            width = imageWidth - x;
-        if (y + height > imageHeight)
-            height = imageHeight - y;
+        if (x + width > bounds.width)
+            width = bounds.width - x;
+        if (y + height > bounds.height)
+            height = bounds.height - y;
 
         int skip = gameWindowWidth - width;
         byte yStep = 1;
@@ -342,45 +490,50 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public void drawBoxEdge(int x1, int y1, int x2, int y2, int colour) {
+    public void drawBoxEdge(int x1, int y1, int x2, int y2, int colour)
+    {
         drawLineX(x1, y1, x2, colour);
         drawLineX(x1, (y1 + y2) - 1, x2, colour);
         drawLineY(x1, y1, y2, colour);
         drawLineY((x1 + x2) - 1, y1, y2, colour);
     }
 
-    public void drawLineX(int x1, int y1, int x2, int colour) {
-        if (y1 < imageY || y1 >= imageHeight)
+    public void drawLineX(int x1, int y1, int x2, int colour)
+    {
+        if (y1 < bounds.y || y1 >= bounds.height)
             return;
-        if (x1 < imageX) {
-            x2 -= imageX - x1;
-            x1 = imageX;
+        if (x1 < bounds.x) {
+            x2 -= bounds.x - x1;
+            x1 = bounds.x;
         }
-        if (x1 + x2 > imageWidth)
-            x2 = imageWidth - x1;
+        if (x1 + x2 > bounds.width)
+            x2 = bounds.width - x1;
         int xPixel = x1 + y1 * gameWindowWidth;
         for (int yPixel = 0; yPixel < x2; yPixel++)
             imagePixelArray[xPixel + yPixel] = colour;
 
     }
 
-    public void drawLineY(int x1, int y1, int y2, int colour) {
-        if (x1 < imageX || x1 >= imageWidth)
+    public void drawLineY(int x1, int y1, int y2, int colour)
+    {
+        if (x1 < bounds.x || x1 >= bounds.width)
             return;
-        if (y1 < imageY) {
-            y2 -= imageY - y1;
-            y1 = imageY;
+        if (y1 < bounds.y) {
+            y2 -= bounds.y - y1;
+            y1 = bounds.y;
         }
-        if (y1 + y2 > imageWidth)
-            y2 = imageHeight - y1;
+        if (y1 + y2 > bounds.width)
+            y2 = bounds.height - y1;
         int xPixel = x1 + y1 * gameWindowWidth;
         for (int yPixel = 0; yPixel < y2; yPixel++)
             imagePixelArray[xPixel + yPixel * gameWindowWidth] = colour;
 
     }
 
-    public void setMinimapPixel(int x, int y, int colour) {
-        if (x < imageX || y < imageY || x >= imageWidth || y >= imageHeight) {
+    public void setMinimapPixel(int x, int y, int colour)
+    {
+        if (x < bounds.x || y < bounds.y
+        		|| x >= bounds.width || y >= bounds.height) {
             return;
         }
         imagePixelArray[x + y * gameWindowWidth] = colour;
@@ -397,7 +550,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void method221(int i, int j, int k, int l, int i1, int j1) {
+    public void method221(int i, int j, int k, int l, int i1, int j1)
+    {
         for (int k1 = k; k1 < k + i1; k1++) {
             for (int l1 = l; l1 < l + j1; l1++) {
                 int i2 = 0;
@@ -424,17 +578,15 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    public static int convertRGBToLong(int red, int green, int blue) {
-        return (red << 16) + (green << 8) + blue;
-    }
-
-    public void cleanupSprites() {
-        for (int i = 0; i < sprites.length; i++) {
+    public void cleanupSprites()
+    {
+        for (int i = 0; i < sprites.length; i++)
             sprites[i] = null;
-        }
     }
 
-    public void storeSpriteHoriz(int index, int startX, int startY, int width, int height) {
+    public void storeSpriteHoriz(int index, int startX, int startY,
+    		int width, int height)
+    {
         int[] pixels = new int[width * height];
         int pixel = 0;
         for (int x = startX; x < startX + width; x++) {
@@ -451,7 +603,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         sprites[index] = sprite;
     }
 
-    public void storeSpriteVert(int index, int startX, int startY, int width, int height) {
+    public void storeSpriteVert(int index, int startX, int startY,
+    		int width, int height)
+    {
         int[] pixels = new int[width * height];
         int pixel = 0;
         for (int y = startY; y < startY + height; y++) {
@@ -468,7 +622,8 @@ public class GameImage implements ImageProducer, ImageObserver {
         sprites[index] = sprite;
     }
 
-    public void drawPicture(int x, int y, int picture) {
+    public void drawPicture(int x, int y, int picture)
+    {
         try {
             if (sprites[picture].requiresShift()) {
                 x += sprites[picture].getXShift();
@@ -480,26 +635,26 @@ public class GameImage implements ImageProducer, ImageObserver {
             int k1 = sprites[picture].getWidth();
             int l1 = gameWindowWidth - k1;
             int i2 = 0;
-            if (y < imageY) {
-                int j2 = imageY - y;
+            if (y < bounds.y) {
+                int j2 = bounds.y - y;
                 j1 -= j2;
-                y = imageY;
+                y = bounds.y;
                 i1 += j2 * k1;
                 l += j2 * gameWindowWidth;
             }
-            if (y + j1 >= imageHeight)
-                j1 -= ((y + j1) - imageHeight) + 1;
-            if (x < imageX) {
-                int k2 = imageX - x;
+            if (y + j1 >= bounds.height)
+                j1 -= ((y + j1) - bounds.height) + 1;
+            if (x < bounds.x) {
+                int k2 = bounds.x - x;
                 k1 -= k2;
-                x = imageX;
+                x = bounds.x;
                 i1 += k2;
                 l += k2;
                 i2 += k2;
                 l1 += k2;
             }
-            if (x + k1 >= imageWidth) {
-                int l2 = ((x + k1) - imageWidth) + 1;
+            if (x + k1 >= bounds.width) {
+                int l2 = ((x + k1) - bounds.width) + 1;
                 k1 -= l2;
                 i2 += l2;
                 l1 += l2;
@@ -516,7 +671,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                     j1--;
                 }
             }
-            method235(imagePixelArray, sprites[picture].getPixels(), 0, i1, l, k1, j1, l1, i2, byte0);
+            drawImage(imagePixelArray, sprites[picture].getPixels(), i1, l, k1, j1, l1, i2, byte0);
         }
         catch (Exception e) {
             System.err.println("Error drawing: " + picture);
@@ -525,7 +680,9 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void spriteClip1(int startX, int startY, int newWidth, int newHeight, int spriteId) {
+    public void spriteClip1(int startX, int startY, int newWidth,
+    		int newHeight, int spriteId)
+    {
         try {
             int spriteWidthInit = sprites[spriteId].getWidth();
             int spriteHeightInit = sprites[spriteId].getHeight();
@@ -550,25 +707,25 @@ public class GameImage implements ImageProducer, ImageObserver {
             }
             int i3 = startX + startY * gameWindowWidth;
             int k3 = gameWindowWidth - newWidth;
-            if (startY < imageY) {
-                int l3 = imageY - startY;
+            if (startY < bounds.y) {
+                int l3 = bounds.y - startY;
                 newHeight -= l3;
                 startY = 0;
                 i3 += l3 * gameWindowWidth;
                 i2 += k2 * l3;
             }
-            if (startY + newHeight >= imageHeight)
-                newHeight -= ((startY + newHeight) - imageHeight) + 1;
-            if (startX < imageX) {
-                int i4 = imageX - startX;
+            if (startY + newHeight >= bounds.height)
+                newHeight -= ((startY + newHeight) - bounds.height) + 1;
+            if (startX < bounds.x) {
+                int i4 = bounds.x - startX;
                 newWidth -= i4;
                 startX = 0;
                 i3 += i4;
                 l1 += j2 * i4;
                 k3 += i4;
             }
-            if (startX + newWidth >= imageWidth) {
-                int j4 = ((startX + newWidth) - imageWidth) + 1;
+            if (startX + newWidth >= bounds.width) {
+                int j4 = ((startX + newWidth) - bounds.width) + 1;
                 newWidth -= j4;
                 k3 += j4;
             }
@@ -582,7 +739,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                     newHeight--;
                 }
             }
-            plotSale1(imagePixelArray, sprites[spriteId].getPixels(), 0, l1, i2, i3, k3, newWidth, newHeight, j2, k2, spriteWidthInit, byte0);
+            drawImageScale(imagePixelArray, sprites[spriteId].getPixels(), l1, i2, i3, k3, newWidth, newHeight, j2, k2, spriteWidthInit, byte0);
             return;
         }
         catch (Exception _ex) {
@@ -590,54 +747,57 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
     }
 
-    public void method232(int i, int j, int spriteId, int l) {
+    public void method232(int i, int j, int spriteId, int spriteAlpha)
+    {
         if (sprites[spriteId].requiresShift()) {
             i += sprites[spriteId].getXShift();
             j += sprites[spriteId].getYShift();
         }
-        int i1 = i + j * gameWindowWidth;
-        int j1 = 0;
+        int imageStart = i + j * gameWindowWidth;
+        int spriteStart = 0;
         int spriteHeight = sprites[spriteId].getHeight();
         int spriteWidth = sprites[spriteId].getWidth();
-        int i2 = gameWindowWidth - spriteWidth;
-        int j2 = 0;
-        if (j < imageY) {
-            int k2 = imageY - j;
+        int imageYStep = gameWindowWidth - spriteWidth;
+        int spriteYStep = 0;
+        if (j < bounds.y) {
+            int k2 = bounds.y - j;
             spriteHeight -= k2;
-            j = imageY;
-            j1 += k2 * spriteWidth;
-            i1 += k2 * gameWindowWidth;
+            j = bounds.y;
+            spriteStart += k2 * spriteWidth;
+            imageStart += k2 * gameWindowWidth;
         }
-        if (j + spriteHeight >= imageHeight)
-            spriteHeight -= ((j + spriteHeight) - imageHeight) + 1;
-        if (i < imageX) {
-            int l2 = imageX - i;
+        if (j + spriteHeight >= bounds.height)
+            spriteHeight -= ((j + spriteHeight) - bounds.height) + 1;
+        if (i < bounds.x) {
+            int l2 = bounds.x - i;
             spriteWidth -= l2;
-            i = imageX;
-            j1 += l2;
-            i1 += l2;
-            j2 += l2;
-            i2 += l2;
+            i = bounds.x;
+            spriteStart += l2;
+            imageStart += l2;
+            spriteYStep += l2;
+            imageYStep += l2;
         }
-        if (i + spriteWidth >= imageWidth) {
-            int i3 = ((i + spriteWidth) - imageWidth) + 1;
+        if (i + spriteWidth >= bounds.width) {
+            int i3 = ((i + spriteWidth) - bounds.width) + 1;
             spriteWidth -= i3;
-            j2 += i3;
-            i2 += i3;
+            spriteYStep += i3;
+            imageYStep += i3;
         }
         if (spriteWidth <= 0 || spriteHeight <= 0)
             return;
-        byte byte0 = 1;
+        byte yStep = 1;
         if (lowDef) {
-            byte0 = 2;
-            i2 += gameWindowWidth;
-            j2 += sprites[spriteId].getWidth();
+            yStep = 2;
+            imageYStep += gameWindowWidth;
+            spriteYStep += sprites[spriteId].getWidth();
             if ((j & 1) != 0) {
-                i1 += gameWindowWidth;
+                imageStart += gameWindowWidth;
                 spriteHeight--;
             }
         }
-        method238(imagePixelArray, sprites[spriteId].getPixels(), 0, j1, i1, spriteWidth, spriteHeight, i2, j2, byte0, l);
+        drawImageTransparent(imagePixelArray, sprites[spriteId].getPixels(),
+        		spriteStart, imageStart, spriteWidth, spriteHeight,
+        		imageYStep, spriteYStep, yStep, spriteAlpha);
     }
 
     /**
@@ -649,7 +809,8 @@ public class GameImage implements ImageProducer, ImageObserver {
      * @param spriteId
      * @param j1
      */
-    public void spriteClip2(int startX, int startY, int newWidth, int newHeight, int spriteId, int j1)
+    public void spriteClip2(int startX, int startY, int newWidth,
+    		int newHeight, int spriteId, int j1)
     {
         try
         {
@@ -675,25 +836,25 @@ public class GameImage implements ImageProducer, ImageObserver {
             }
             int j3 = startX + startY * gameWindowWidth;
             int l3 = gameWindowWidth - newWidth;
-            if (startY < imageY) {
-                int i4 = imageY - startY;
+            if (startY < bounds.y) {
+                int i4 = bounds.y - startY;
                 newHeight -= i4;
                 startY = 0;
                 j3 += i4 * gameWindowWidth;
                 j2 += l2 * i4;
             }
-            if (startY + newHeight >= imageHeight)
-                newHeight -= ((startY + newHeight) - imageHeight) + 1;
-            if (startX < imageX) {
-                int j4 = imageX - startX;
+            if (startY + newHeight >= bounds.height)
+                newHeight -= ((startY + newHeight) - bounds.height) + 1;
+            if (startX < bounds.x) {
+                int j4 = bounds.x - startX;
                 newWidth -= j4;
                 startX = 0;
                 j3 += j4;
                 i2 += k2 * j4;
                 l3 += j4;
             }
-            if (startX + newWidth >= imageWidth) {
-                int k4 = ((startX + newWidth) - imageWidth) + 1;
+            if (startX + newWidth >= bounds.width) {
+                int k4 = ((startX + newWidth) - bounds.width) + 1;
                 newWidth -= k4;
                 l3 += k4;
             }
@@ -707,7 +868,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                     newHeight--;
                 }
             }
-            tranScale(imagePixelArray, sprites[spriteId].getPixels(), 0, i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, j1);
+            drawImageTransparentScale(imagePixelArray, sprites[spriteId].getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, j1);
             return;
         }
         catch (Exception _ex) {
@@ -724,7 +885,8 @@ public class GameImage implements ImageProducer, ImageObserver {
      * @param spriteId
      * @param spriteColor
      */
-    public void spriteClip3(int startX, int startY, int newWidth, int newHeight, int spriteId, int spriteColor)
+    public void spriteClip3(int startX, int startY, int newWidth,
+    		int newHeight, int spriteId, int spriteColor)
     {
         try {
             int spriteWidthInit = sprites[spriteId].getWidth();
@@ -749,25 +911,25 @@ public class GameImage implements ImageProducer, ImageObserver {
             }
             int j3 = startX + startY * gameWindowWidth;
             int l3 = gameWindowWidth - newWidth;
-            if (startY < imageY) {
-                int i4 = imageY - startY;
+            if (startY < bounds.y) {
+                int i4 = bounds.y - startY;
                 newHeight -= i4;
                 startY = 0;
                 j3 += i4 * gameWindowWidth;
                 j2 += l2 * i4;
             }
-            if (startY + newHeight >= imageHeight)
-                newHeight -= ((startY + newHeight) - imageHeight) + 1;
-            if (startX < imageX) {
-                int j4 = imageX - startX;
+            if (startY + newHeight >= bounds.height)
+                newHeight -= ((startY + newHeight) - bounds.height) + 1;
+            if (startX < bounds.x) {
+                int j4 = bounds.x - startX;
                 newWidth -= j4;
                 startX = 0;
                 j3 += j4;
                 i2 += k2 * j4;
                 l3 += j4;
             }
-            if (startX + newWidth >= imageWidth) {
-                int k4 = ((startX + newWidth) - imageWidth) + 1;
+            if (startX + newWidth >= bounds.width) {
+                int k4 = ((startX + newWidth) - bounds.width) + 1;
                 newWidth -= k4;
                 l3 += k4;
             }
@@ -781,7 +943,7 @@ public class GameImage implements ImageProducer, ImageObserver {
                     newHeight--;
                 }
             }
-            plotScale2(imagePixelArray, sprites[spriteId].getPixels(), 0, i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, spriteColor);
+            drawImageOverlay(imagePixelArray, sprites[spriteId].getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, spriteColor);
             return;
         }
         catch (Exception _ex) {
@@ -796,8 +958,8 @@ public class GameImage implements ImageProducer, ImageObserver {
      * @param height
      * @param resize
      */
-    public void imageToPixArray(BufferedImage imageRaw, int imgXPos, int imgYPos,
-    		int width, int height, boolean resize)
+    public void imageToPixArray(BufferedImage imageRaw, int imgXPos,
+    		int imgYPos, int width, int height, boolean resize)
     {
     	final int unScaledWidth = imageRaw.getWidth();
     	final int unScaledHeight = imageRaw.getHeight();
@@ -816,209 +978,9 @@ public class GameImage implements ImageProducer, ImageObserver {
 			image = imageRaw;
 		}
 		final int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-    	method235(imagePixelArray, pixels, 0, 0,
-    			imgYPos*imageWidth+imgXPos, image.getWidth(),
-    			image.getHeight(), imageWidth-image.getWidth(), 0, 1);
-    }
-
-    private void method235(int pixelArray[], int imagePixels[], int imagePixVal,
-    		int imageArrayIdx, int pixelArrayIdx, int imageWidth, int imageHeight,
-    		int skipNLastPixEachRowPixArray, int skipNLastPixEachRowImgArray, int l1)
-    {
-        int oneFourthImageWidth = -(imageWidth >> 2);
-        imageWidth = -(imageWidth & 3);
-        for (int j2 = -imageHeight; j2 < 0; j2 += l1)
-        {
-            for (int k2 = oneFourthImageWidth; k2 < 0; k2++)
-            {
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-            }
-            
-            for (int l2 = imageWidth; l2 < 0; l2++) {
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-            }
-
-            pixelArrayIdx += skipNLastPixEachRowPixArray;
-            imageArrayIdx += skipNLastPixEachRowImgArray;
-        }
-    	/*
-        int oneFourthImageWidth = -(imageWidth >> 2);
-        imageWidth = -(imageWidth & 3);
-        for (int j2 = -imageHeight; j2 < 0; j2 += l1)
-        {
-            for (int k2 = oneFourthImageWidth; k2 < 0; k2++)
-            {
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-            }
-
-            for (int l2 = imageWidth; l2 < 0; l2++) {
-                imagePixVal = imagePixels[imageArrayIdx++];
-                if (imagePixVal != 0)
-                    pixelArray[pixelArrayIdx++] = imagePixVal;
-                else
-                    pixelArrayIdx++;
-            }
-
-            pixelArrayIdx += skipNLastPixEachRowPixArray;
-            imageArrayIdx += skipNLastPixEachRowImgArray;
-        }*/
-
-    }
-
-    private void plotSale1(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1, int i2, int j2, int k2) {
-        try {
-            int l2 = j;
-            for (int i3 = -k1; i3 < 0; i3 += k2) {
-                int j3 = (k >> 16) * j2;
-                for (int k3 = -j1; k3 < 0; k3++) {
-                    i = ai1[(j >> 16) + j3];
-                    if (i != 0)
-                        ai[l++] = i;
-                    else
-                        l++;
-                    j += l1;
-                }
-
-                k += i2;
-                j = l2;
-                l += i1;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in plot_scale");
-        }
-    }
-
-    private void method238(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1, int i2) {
-        int j2 = 256 - i2;
-        for (int k2 = -i1; k2 < 0; k2 += l1) {
-            for (int l2 = -l; l2 < 0; l2++) {
-                i = ai1[j++];
-                if (i != 0) {
-                    int i3 = ai[k];
-                    ai[k++] = ((i & 0xff00ff) * i2 + (i3 & 0xff00ff) * j2 & 0xff00ff00) + ((i & 0xff00) * i2 + (i3 & 0xff00) * j2 & 0xff0000) >> 8;
-                } else {
-                    k++;
-                }
-            }
-
-            k += j1;
-            j += k1;
-        }
-
-    }
-
-    private void tranScale(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                           int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
-        int i3 = 256 - l2;
-        try {
-            int j3 = j;
-            for (int k3 = -k1; k3 < 0; k3 += k2) {
-                int l3 = (k >> 16) * j2;
-                for (int i4 = -j1; i4 < 0; i4++) {
-                    i = ai1[(j >> 16) + l3];
-                    if (i != 0) {
-                        int j4 = ai[l];
-                        ai[l++] = ((i & 0xff00ff) * l2 + (j4 & 0xff00ff) * i3 & 0xff00ff00) + ((i & 0xff00) * l2 + (j4 & 0xff00) * i3 & 0xff0000) >> 8;
-                    } else {
-                        l++;
-                    }
-                    j += l1;
-                }
-
-                k += i2;
-                j = j3;
-                l += i1;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in tran_scale");
-        }
-    }
-
-    private void plotScale2(int ai[], int ai1[], int i, int j, int k, int l, int i1,
-                            int j1, int k1, int l1, int i2, int j2, int k2, int l2) {
-        int i3 = l2 >> 16 & 0xff;
-        int j3 = l2 >> 8 & 0xff;
-        int k3 = l2 & 0xff;
-        try {
-            int l3 = j;
-            for (int i4 = -k1; i4 < 0; i4 += k2) {
-                int j4 = (k >> 16) * j2;
-                for (int k4 = -j1; k4 < 0; k4++) {
-                    i = ai1[(j >> 16) + j4];
-                    if (i != 0) {
-                        int l4 = i >> 16 & 0xff;
-                        int i5 = i >> 8 & 0xff;
-                        int j5 = i & 0xff;
-                        if (l4 == i5 && i5 == j5)
-                            ai[l++] = ((l4 * i3 >> 8) << 16) + ((i5 * j3 >> 8) << 8) + (j5 * k3 >> 8);
-                        else
-                            ai[l++] = i;
-                    } else {
-                        l++;
-                    }
-                    j += l1;
-                }
-
-                k += i2;
-                j = l3;
-                l += i1;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in plot_scale");
-        }
+    	drawImage(imagePixelArray, pixels, 0, imgYPos*bounds.width+imgXPos,
+    			image.getWidth(), image.getHeight(),
+    			bounds.width-image.getWidth(), 0, 1);
     }
 
     public void drawMinimapTiles(int xCorner, int yCorner,
@@ -1063,10 +1025,10 @@ public class GameImage implements ImageProducer, ImageObserver {
         		ymx = j;
         int ymin = (int)ymn;
         int ymax = (int)ymx;
-        if (ymin < imageY)
-            ymin = imageY;
-        if (ymax > imageHeight)
-            ymax = imageHeight;
+        if (ymin < bounds.y)
+            ymin = bounds.y;
+        if (ymax > bounds.height)
+            ymax = bounds.height;
         double[] x_start = new double[windowHeight + 1];
         double[] x_end = new double[windowHeight + 1];
         double[] x_start_sprite = new double[windowHeight + 1];
@@ -1260,14 +1222,14 @@ public class GameImage implements ImageProducer, ImageObserver {
             	double xStep = ((x_end_sprite[y]) - xDrawStart) / (xEnd - xStart);
             	double yDrawstart = y_start_sprite[y];
             	double yStep = ((y_end_sprite[y]) - yDrawstart) / (xEnd - xStart);
-                if (xStart < imageX)
+                if (xStart < bounds.x)
                 {
-                    xDrawStart += (imageX - xStart) * xStep;
-                    yDrawstart += (imageX - xStart) * yStep;
-                    xStart = imageX;
+                    xDrawStart += (bounds.x - xStart) * xStep;
+                    yDrawstart += (bounds.x - xStart) * yStep;
+                    xStart = bounds.x;
                 }
-                if (xEnd > imageWidth)
-                    xEnd = imageWidth;
+                if (xEnd > bounds.width)
+                    xEnd = bounds.width;
                 if (!lowDef || (y & 1) == 0)
                     if (!sprites[sprite].requiresShift())
                         drawMapSpriteWOShift(imagePixelArray, mapPixels,
@@ -1289,38 +1251,6 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     }
 
-    private void drawMapSpriteWOShift(
-    		int imagePixels[], int spritePixels[],
-    		int offset, double x, double y,
-    		double xStep, double yStep,
-    		int length, int spriteWidth)
-    {
-        for (int i = length; i < 0; i++) {
-        	imagePixels[offset++] = spritePixels[((int) x) + ((int) y) * spriteWidth];
-            x += xStep;
-            y += yStep;
-        }
-
-    }
-
-    private void drawMapSpriteWShift(
-    		int imagePixels[], int spritePixels[],
-    		int offset, double x, double y,
-    		double xStep, double yStep,
-    		int length, int spriteWidth)
-    {
-    	int pixelVal, pixIdx;
-        for (int i = length; i < 0; i++)
-        {
-        	pixIdx = ((int) x) + ((int) y) * spriteWidth;
-            if (pixIdx > 0 && (pixelVal = spritePixels[pixIdx]) != 0)
-            	imagePixels[offset] = pixelVal;
-            offset++;
-            x += xStep;
-            y += yStep;
-        }
-    }
-
     public void doSpriteClip1(int startX, int startY, int newWidth,
     		int newHeight, int spriteId, int i, int j)
     {
@@ -1331,102 +1261,101 @@ public class GameImage implements ImageProducer, ImageObserver {
      * Looks like this has to do with animations.
      * @param startX
      * @param startY
-     * @param newWidth
-     * @param newHeight
+     * @param scaledWidth
+     * @param scaledHeight
      * @param spriteId
      * @param hairColor
      * @param skinColor
      * @param l1
      * @param flip
      */
-    public void spriteClip4(int startX, int startY, int newWidth, int newHeight,
-    		int spriteId, int hairColor, int skinColor, int l1, boolean flip)
+    public void spriteClip4(int startX, int startY, int scaledWidth,
+    		int scaledHeight, int spriteId, int hairColor, int skinColor,
+    		int l1, boolean flip)
     {
-        try {
+        try
+        {
+        	Sprite sprite = sprites[spriteId];
             if (hairColor == 0)
                 hairColor = 0xffffff;
             if (skinColor == 0)
                 skinColor = 0xffffff;
-            int spriteWidth = sprites[spriteId].getWidth();
-            int spriteHeight = sprites[spriteId].getHeight();
-            int k2 = 0;
-            int l2 = 0;
+            
+            int spriteWidth = sprite.getWidth();
+            int spriteHeight = sprite.getHeight();
+            int spriteXIdxHD = 0;
+            int spriteYIdxHD = 0;
             int i3 = l1 << 16;
-            int j3 = (spriteWidth << 16) / newWidth;
-            int k3 = (spriteHeight << 16) / newHeight;
-            int l3 = -(l1 << 16) / newHeight;
-            if (sprites[spriteId].requiresShift())
+            int spriteXStepHD = (spriteWidth << 16) / scaledWidth;
+            int spriteYStepHD = (spriteHeight << 16) / scaledHeight;
+            int l3 = -(l1 << 16) / scaledHeight;
+            if (sprite.requiresShift())
             {
-                int totalWidth = sprites[spriteId].getTotalWidth();
-                int totalHeight = sprites[spriteId].getTotalHeight();
-                j3 = (totalWidth << 16) / newWidth;
-                k3 = (totalHeight << 16) / newHeight;
-                int xShift = sprites[spriteId].getXShift();
-                int yShift = sprites[spriteId].getYShift();
+                int totalWidth = sprite.getTotalWidth();
+                int totalHeight = sprite.getTotalHeight();
+                spriteXStepHD = (totalWidth << 16) / scaledWidth;
+                spriteYStepHD = (totalHeight << 16) / scaledHeight;
+                int xShift = sprite.getXShift();
+                int yShift = sprite.getYShift();
                 if (flip)
-                    xShift = totalWidth - sprites[spriteId].getWidth() - xShift;
-                startX += ((xShift * newWidth + totalWidth) - 1) / totalWidth;
-                int l5 = ((yShift * newHeight + totalHeight) - 1) / totalHeight;
+                    xShift = totalWidth - sprite.getWidth() - xShift;
+                startX += ((xShift * scaledWidth + totalWidth) - 1) / totalWidth;
+                int l5 = ((yShift * scaledHeight + totalHeight) - 1) / totalHeight;
                 startY += l5;
                 i3 += l5 * l3;
-                if ((xShift * newWidth) % totalWidth != 0)
-                    k2 = (totalWidth - (xShift * newWidth) % totalWidth << 16) / newWidth;
-                if ((yShift * newHeight) % totalHeight != 0)
-                    l2 = (totalHeight - (yShift * newHeight) % totalHeight << 16) / newHeight;
-                newWidth = ((((sprites[spriteId].getWidth() << 16) - k2) + j3) - 1) / j3;
-                newHeight = ((((sprites[spriteId].getHeight() << 16) - l2) + k3) - 1) / k3;
+                if ((xShift * scaledWidth) % totalWidth != 0)
+                    spriteXIdxHD = (totalWidth - (xShift * scaledWidth) % totalWidth << 16) / scaledWidth;
+                if ((yShift * scaledHeight) % totalHeight != 0)
+                    spriteYIdxHD = (totalHeight - (yShift * scaledHeight) % totalHeight << 16) / scaledHeight;
+                scaledWidth = ((((sprite.getWidth() << 16) - spriteXIdxHD) + spriteXStepHD) - 1) / spriteXStepHD;
+                scaledHeight = ((((sprite.getHeight() << 16) - spriteYIdxHD) + spriteYStepHD) - 1) / spriteYStepHD;
             }
             int windowYIdx = startY * gameWindowWidth;
             i3 += startX << 16;
-            if (startY < imageY) {
-                int l4 = imageY - startY;
-                newHeight -= l4;
-                startY = imageY;
+            if (startY < bounds.y)
+            {
+                int l4 = bounds.y - startY;
+                scaledHeight -= l4;
+                startY = bounds.y;
                 windowYIdx += l4 * gameWindowWidth;
-                l2 += k3 * l4;
+                spriteYIdxHD += spriteYStepHD * l4;
                 i3 += l3 * l4;
             }
-            if (startY + newHeight >= imageHeight)
-                newHeight -= ((startY + newHeight) - imageHeight) + 1;
-            int i5 = windowYIdx / gameWindowWidth & 1;
+            if (startY + scaledHeight >= bounds.height)
+                scaledHeight -= ((startY + scaledHeight) - bounds.height) + 1;
+            int yStep = windowYIdx / gameWindowWidth & 1;
             if (!lowDef)
-                i5 = 2;
+                yStep = 2;
+            
             if (skinColor == 0xffffff)
             {
                 if (!flip)
-                {              	
-                    spritePlotTransparent(
-                    		imagePixelArray, sprites[spriteId].getPixels(),
-                    		0, k2, l2, windowYIdx, newWidth, newHeight, j3, k3,
-                    		spriteWidth, hairColor, i3, l3, i5);
-                    return;
-                }
+                    darwImageOverlayScale(imagePixelArray, sprite.getPixels(),
+                    		spriteXIdxHD, spriteYIdxHD,
+                    		windowYIdx, scaledWidth, scaledHeight, spriteXStepHD,
+                    		spriteYStepHD, spriteWidth, hairColor,
+                    		i3, l3, yStep);
                 else
-                {
-                    spritePlotTransparent(
-                    		imagePixelArray, sprites[spriteId].getPixels(), 0,
-                    		(sprites[spriteId].getWidth() << 16) - k2 - 1, l2,
-                    		windowYIdx, newWidth, newHeight, -j3, k3, spriteWidth,
-                    		hairColor, i3, l3, i5);
-                    return;
-                }
-            }
-            if (!flip)
-            {
-                spritePlotTransparent(
-                		imagePixelArray, sprites[spriteId].getPixels(), 0,
-                		k2, l2, windowYIdx, newWidth, newHeight, j3, k3,
-                		spriteWidth, hairColor, skinColor, i3, l3, i5);
-                return;
+                    darwImageOverlayScale(imagePixelArray, sprite.getPixels(),
+                    		(spriteWidth << 16) - spriteXIdxHD - 1, spriteYIdxHD,
+                    		windowYIdx, scaledWidth, scaledHeight, -spriteXStepHD,
+                    		spriteYStepHD, spriteWidth, hairColor,
+                    		i3, l3, yStep);
             }
             else
             {
-                spritePlotTransparent(
-                		imagePixelArray, sprites[spriteId].getPixels(), 0,
-                		(sprites[spriteId].getWidth() << 16) - k2 - 1, l2,
-                		windowYIdx, newWidth, newHeight, -j3, k3, spriteWidth,
-                		hairColor, skinColor, i3, l3, i5);
-                return;
+            	if (!flip)
+            		drawImageOverlayScale2(imagePixelArray, sprite.getPixels(),
+            				spriteXIdxHD, spriteYIdxHD,
+            				windowYIdx, scaledWidth, scaledHeight, spriteXStepHD,
+            				spriteYStepHD, spriteWidth, hairColor, skinColor,
+            				i3, l3, yStep);
+            	else
+            		drawImageOverlayScale2(imagePixelArray, sprite.getPixels(),
+            				(spriteWidth << 16) - spriteXIdxHD - 1, spriteYIdxHD,
+            				windowYIdx, scaledWidth, scaledHeight, -spriteXStepHD,
+            				spriteYStepHD, spriteWidth, hairColor, skinColor,
+            				i3, l3, yStep);
             }
         }
         catch (Exception _ex)
@@ -1434,376 +1363,6 @@ public class GameImage implements ImageProducer, ImageObserver {
         	_ex.printStackTrace();
         	System.exit(1);
             //System.out.println("spriteClip4: error in sprite clipping routine");
-        }
-    }
-/*
---------------------------------------------------------------------------------
- */
-    private void spritePlotTransparent(
-    		int imagePixels[], int spritePixels[], int pixelColor, int j, int k, int gameWindowStartIdx,
-    		int spriteBoxWidth, int spriteBoxHeight, int k1, int l1, int spriteWidth,
-    		int overlay, int k2, int l2, int i3)
-    {
-    	//j += (int)(0x1000000*Math.random());
-    	//k += (int)(0x1000000*Math.random());
-    	//l += (int)(100*Math.random());
-        int redOverlay = overlay >> 16 & 0xff;
-        int greenOverlay = overlay >> 8 & 0xff;
-        int blueOverlay = overlay & 0xff;
-        try
-        {
-            int l4 = j;
-            for (int spritePixelRow = -spriteBoxHeight; spritePixelRow < 0; spritePixelRow++)
-            {
-                int j5 = (k >> 16) * spriteWidth;
-                int k5 = k2 >> 16;
-                int l5 = spriteBoxWidth;
-                if (k5 < imageX)
-                {
-                    int i6 = imageX - k5;
-                    l5 -= i6;
-                    k5 = imageX;
-                    j += k1 * i6;
-                }
-                if (k5 + l5 >= imageWidth)
-                {
-                    int j6 = (k5 + l5) - imageWidth;
-                    l5 -= j6;
-                }
-                i3 = 1 - i3;
-                if (i3 != 0)
-                {
-                    for (int spritePixelIdx = k5; spritePixelIdx < k5 + l5; spritePixelIdx++)
-                    {
-                        pixelColor = spritePixels[(j >> 16) + j5];
-                        if (pixelColor != 0)
-                        {
-                            int spriteRed = pixelColor >> 16 & 0xff;
-                            int spriteGreen = pixelColor >> 8 & 0xff;
-                            int spriteBlue = pixelColor & 0xff;
-                            if (spriteRed == spriteGreen
-                            		&& spriteGreen == spriteBlue)
-                            {  // apply color mask
-                                imagePixels[spritePixelIdx+ + gameWindowStartIdx] = (((spriteRed * redOverlay >> 8) << 16)
-                                		+ ((spriteGreen * greenOverlay >> 8) << 8)
-                                		+ (spriteBlue * blueOverlay >> 8));
-                            }
-                            else
-                            {  // use the sprite color
-                                imagePixels[spritePixelIdx + gameWindowStartIdx] = pixelColor;
-                            }
-                        }
-                        j += k1;
-                    }
-
-                }
-                k += l1;
-                j = l4;
-                gameWindowStartIdx += gameWindowWidth;
-                k2 += l2;
-            }
-            return;
-        }
-        catch (Exception _ex)
-        {
-            System.out.println("error in transparent sprite plot routine");
-        }
-    }
-
-    private void spritePlotTransparent(
-    		int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1,
-    		int k1, int l1, int i2, int overlay, int k2, int l2, int i3, int j3)
-    {
-        int j4 = overlay >> 16 & 0xff;
-        int k4 = overlay >> 8 & 0xff;
-        int l4 = overlay & 0xff;
-        int i5 = k2 >> 16 & 0xff;
-        int j5 = k2 >> 8 & 0xff;
-        int k5 = k2 & 0xff;
-        try {
-            int l5 = j;
-            for (int i6 = -j1; i6 < 0; i6++) {
-                int j6 = (k >> 16) * i2;
-                int k6 = l2 >> 16;
-                int l6 = i1;
-                if (k6 < imageX) {
-                    int i7 = imageX - k6;
-                    l6 -= i7;
-                    k6 = imageX;
-                    j += k1 * i7;
-                }
-                if (k6 + l6 >= imageWidth) {
-                    int j7 = (k6 + l6) - imageWidth;
-                    l6 -= j7;
-                }
-                j3 = 1 - j3;
-                if (j3 != 0) {
-                    for (int k7 = k6; k7 < k6 + l6; k7++) {
-                        i = ai1[(j >> 16) + j6];
-                        if (i != 0) {
-                            int k3 = i >> 16 & 0xff;
-                            int l3 = i >> 8 & 0xff;
-                            int i4 = i & 0xff;
-                            if (k3 == l3 && l3 == i4)
-                                ai[k7 + l] = ((k3 * j4 >> 8) << 16) + ((l3 * k4 >> 8) << 8) + (i4 * l4 >> 8);
-                            else if (k3 == 255 && l3 == i4)
-                                ai[k7 + l] = ((k3 * i5 >> 8) << 16) + ((l3 * j5 >> 8) << 8) + (i4 * k5 >> 8);
-                            else
-                                ai[k7 + l] = i;
-                        }
-                        j += k1;
-                    }
-
-                }
-                k += l1;
-                j = l5;
-                l += gameWindowWidth;
-                l2 += i3;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in transparent sprite plot routine");
-        }
-    }
-
-    private void spritePlotTransparent(
-    		int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l,
-    		int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2,
-    		int i3)
-    {
-        int i4 = overlay >> 16 & 0xff;
-        int j4 = overlay >> 8 & 0xff;
-        int k4 = overlay & 0xff;
-        try {
-            int l4 = j;
-            for (int i5 = -j1; i5 < 0; i5++) {
-                int j5 = (k >> 16) * i2;
-                int k5 = k2 >> 16;
-                int l5 = i1;
-                if (k5 < imageX) {
-                    int i6 = imageX - k5;
-                    l5 -= i6;
-                    k5 = imageX;
-                    j += k1 * i6;
-                }
-                if (k5 + l5 >= imageWidth) {
-                    int j6 = (k5 + l5) - imageWidth;
-                    l5 -= j6;
-                }
-                i3 = 1 - i3;
-                if (i3 != 0) {
-                    for (int k6 = k5; k6 < k5 + l5; k6++) {
-                        i = abyte0[(j >> 16) + j5] & 0xff;
-                        if (i != 0) {
-                            i = ai1[i];
-                            int j3 = i >> 16 & 0xff;
-                            int k3 = i >> 8 & 0xff;
-                            int l3 = i & 0xff;
-                            if (j3 == k3 && k3 == l3)
-                                ai[k6 + l] = ((j3 * i4 >> 8) << 16) + ((k3 * j4 >> 8) << 8) + (l3 * k4 >> 8);
-                            else
-                                ai[k6 + l] = i;
-                        }
-                        j += k1;
-                    }
-
-                }
-                k += l1;
-                j = l4;
-                l += gameWindowWidth;
-                k2 += l2;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in transparent sprite plot routine");
-        }
-    }
-
-    private void spritePlotTransparent(
-    		int ai[], byte abyte0[], int ai1[], int i, int j, int k, int l,
-    		int i1, int j1, int k1, int l1, int i2, int overlay, int k2, int l2,
-    		int i3, int j3)
-{
-        int j4 = overlay >> 16 & 0xff;
-        int k4 = overlay >> 8 & 0xff;
-        int l4 = overlay & 0xff;
-        int i5 = k2 >> 16 & 0xff;
-        int j5 = k2 >> 8 & 0xff;
-        int k5 = k2 & 0xff;
-        try {
-            int l5 = j;
-            for (int i6 = -j1; i6 < 0; i6++) {
-                int j6 = (k >> 16) * i2;
-                int k6 = l2 >> 16;
-                int l6 = i1;
-                if (k6 < imageX) {
-                    int i7 = imageX - k6;
-                    l6 -= i7;
-                    k6 = imageX;
-                    j += k1 * i7;
-                }
-                if (k6 + l6 >= imageWidth) {
-                    int j7 = (k6 + l6) - imageWidth;
-                    l6 -= j7;
-                }
-                j3 = 1 - j3;
-                if (j3 != 0) {
-                    for (int k7 = k6; k7 < k6 + l6; k7++) {
-                        i = abyte0[(j >> 16) + j6] & 0xff;
-                        if (i != 0) {
-                            i = ai1[i];
-                            int k3 = i >> 16 & 0xff;
-                            int l3 = i >> 8 & 0xff;
-                            int i4 = i & 0xff;
-                            if (k3 == l3 && l3 == i4)
-                                ai[k7 + l] = ((k3 * j4 >> 8) << 16) + ((l3 * k4 >> 8) << 8) + (i4 * l4 >> 8);
-                            else if (k3 == 255 && l3 == i4)
-                                ai[k7 + l] = ((k3 * i5 >> 8) << 16) + ((l3 * j5 >> 8) << 8) + (i4 * k5 >> 8);
-                            else
-                                ai[k7 + l] = i;
-                        }
-                        j += k1;
-                    }
-
-                }
-                k += l1;
-                j = l5;
-                l += gameWindowWidth;
-                l2 += i3;
-            }
-
-            return;
-        }
-        catch (Exception _ex) {
-            System.out.println("error in transparent sprite plot routine");
-        }
-    }
-    public static void loadFont(String fontName, int fontSize,
-    		int fontStyle, boolean addCharWidth, int fontNumber,
-    		GameWindow gameWindow)
-    {
-    	/*
-    	String fnts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    	for (String str : fnts)
-    	{
-    		System.out.println(str);
-    	}*/
-        Font font = new Font(fontName, fontStyle, fontSize);
-        FontMetrics fontmetrics = gameWindow.getFontMetrics(font);
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
-        anInt350 = 885; //855
-        for (int charSetOffset = 0; charSetOffset < 95; charSetOffset++)
-            drawLetter(font, fontmetrics, charSet.charAt(charSetOffset), charSetOffset, gameWindow, fontNumber, addCharWidth);
-
-        aByteArrayArray336[fontNumber] = new byte[anInt350];
-        for (int i1 = 0; i1 < anInt350; i1++)
-            aByteArrayArray336[fontNumber][i1] = aByteArray351[i1];
-    }
-    
-    public static void drawLetter(Font font, FontMetrics fontmetrics, char letter, int charSetOffset, GameWindow gameWindow, int fontNumber, boolean addCharWidth) {
-        int charWidth = fontmetrics.charWidth(letter);
-        int oldCharWidth = charWidth;
-        if (addCharWidth)
-            try {
-                if (letter == '/')
-                    addCharWidth = false;
-                if (letter == 'f' || letter == 't' || letter == 'w' || letter == 'v' || letter == 'k' || letter == 'x' || letter == 'y' || letter == 'A' || letter == 'V' || letter == 'W')
-                    charWidth++;
-            }
-            catch (Exception _ex) {
-            }
-        int i1 = fontmetrics.getMaxAscent();
-        int j1 = fontmetrics.getMaxAscent() + fontmetrics.getMaxDescent();
-        int k1 = fontmetrics.getHeight();
-        Image image = gameWindow.createImage(charWidth, j1);
-        Graphics g = image.getGraphics();
-        g.setColor(Color.black);
-        g.fillRect(0, 0, charWidth, j1);
-        g.setColor(Color.white);
-        g.setFont(font);
-        g.drawString(String.valueOf(letter), 0, i1);
-        if (addCharWidth)
-            g.drawString(String.valueOf(letter), 1, i1);
-        int ai[] = new int[charWidth * j1];
-        PixelGrabber pixelgrabber = new PixelGrabber(image, 0, 0, charWidth, j1, ai, 0, charWidth);
-        try {
-            pixelgrabber.grabPixels();
-        }
-        catch (InterruptedException _ex) {
-            return;
-        }
-        image.flush();
-        image = null;
-        int l1 = 0;
-        int i2 = 0;
-        int j2 = charWidth;
-        int k2 = j1;
-        label0:
-        for (int l2 = 0; l2 < j1; l2++) {
-            for (int i3 = 0; i3 < charWidth; i3++) {
-                int k3 = ai[i3 + l2 * charWidth];
-                if ((k3 & 0xffffff) == 0)
-                    continue;
-                i2 = l2;
-                break label0;
-            }
-
-        }
-
-        label1:
-        for (int j3 = 0; j3 < charWidth; j3++) {
-            for (int l3 = 0; l3 < j1; l3++) {
-                int j4 = ai[j3 + l3 * charWidth];
-                if ((j4 & 0xffffff) == 0)
-                    continue;
-                l1 = j3;
-                break label1;
-            }
-
-        }
-
-        label2:
-        for (int i4 = j1 - 1; i4 >= 0; i4--) {
-            for (int k4 = 0; k4 < charWidth; k4++) {
-                int i5 = ai[k4 + i4 * charWidth];
-                if ((i5 & 0xffffff) == 0)
-                    continue;
-                k2 = i4 + 1;
-                break label2;
-            }
-
-        }
-        label3:
-        for (int l4 = charWidth - 1; l4 >= 0; l4--) {
-            for (int j5 = 0; j5 < j1; j5++) {
-                int l5 = ai[l4 + j5 * charWidth];
-                if ((l5 & 0xffffff) == 0)
-                    continue;
-                j2 = l4 + 1;
-                break label3;
-            }
-
-        }
-        aByteArray351[charSetOffset * 9] = (byte) (anInt350 / 16384);
-        aByteArray351[charSetOffset * 9 + 1] = (byte) (anInt350 / 128 & 0x7f);
-        aByteArray351[charSetOffset * 9 + 2] = (byte) (anInt350 & 0x7f);
-        aByteArray351[charSetOffset * 9 + 3] = (byte) (j2 - l1);
-        aByteArray351[charSetOffset * 9 + 4] = (byte) (k2 - i2);
-        aByteArray351[charSetOffset * 9 + 5] = (byte) l1;
-        aByteArray351[charSetOffset * 9 + 6] = (byte) (i1 - i2);
-        aByteArray351[charSetOffset * 9 + 7] = (byte) oldCharWidth;
-        aByteArray351[charSetOffset * 9 + 8] = (byte) k1;
-        for (int k5 = i2; k5 < k2; k5++) {
-            for (int i6 = l1; i6 < j2; i6++) {
-                int j6 = ai[i6 + k5 * charWidth] & 0xff;
-                if (j6 > 30 && j6 < 230)
-                    aBooleanArray349[fontNumber] = true;
-                aByteArray351[anInt350++] = (byte) j6;
-            }
         }
     }
 
@@ -1818,7 +1377,7 @@ public class GameImage implements ImageProducer, ImageObserver {
     public void drawBoxTextColour(String s, int i, int j, int k, int l, int i1) {
         try {
             int j1 = 0;
-            byte abyte0[] = aByteArrayArray336[k];
+            byte abyte0[] = fontPixels[k];
             int k1 = 0;
             int l1 = 0;
             for (int i2 = 0; i2 < s.length(); i2++) {
@@ -1857,76 +1416,57 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     public void drawString(String string, int x, int y, int k, int colour) {
         try {
-            byte abyte0[] = aByteArrayArray336[k];
+            byte abyte0[] = fontPixels[k];
             for (int offset = 0; offset < string.length(); offset++)
-                if (string.charAt(offset) == '@' && offset + 4 < string.length() && string.charAt(offset + 4) == '@') {
-                    if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("red"))
-                        colour = 0xff0000;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("lre"))
-                        colour = 0xff9040;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("yel"))
-                        colour = 0xffff00;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("gre"))
-                        colour = 65280;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("blu"))
-                        colour = 255;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("cya"))
-                        colour = 65535;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("mag"))
-                        colour = 0xff00ff;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("whi"))
-                        colour = 0xffffff;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("bla"))
-                        colour = 0;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("dre"))
-                        colour = 0xc00000;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("ora"))
-                        colour = 0xff9040;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("ran"))
-                        colour = (int) (Math.random() * 16777215D);
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("or1"))
-                        colour = 0xffb000;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("or2"))
-                        colour = 0xff7000;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("or3"))
-                        colour = 0xff3000;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("gr1"))
-                        colour = 0xc0ff00;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("gr2"))
-                        colour = 0x80ff00;
-                    else if (string.substring(offset + 1, offset + 4).equalsIgnoreCase("gr3"))
-                        colour = 0x40ff00;
+            	if ((string.charAt(offset) == '@')
+            			&& (offset + 4 < string.length())
+            			&& (string.charAt(offset + 4) == '@'))
+                {
+                	colour = getColor(string.substring(offset, offset + 5), colour);
                     offset += 4;
-                } else
-                if (string.charAt(offset) == '~' && offset + 4 < string.length() && string.charAt(offset + 4) == '~') {
-                    char c = string.charAt(offset + 1);
-                    char c1 = string.charAt(offset + 2);
-                    char c2 = string.charAt(offset + 3);
-                    if (c >= '0' && c <= '9' && c1 >= '0' && c1 <= '9' && c2 >= '0' && c2 <= '9')
-                        x = Integer.parseInt(string.substring(offset + 1, offset + 4));
+                }
+                else if ((string.charAt(offset) == '~')
+                		&& (offset + 4 < string.length())
+                		&& (string.charAt(offset + 4) == '~'))
+                {
+                	try
+                	{
+                		x = Integer.parseInt(string.substring(offset + 1, offset + 4));
+                	}
+                	catch (NumberFormatException e) {}
                     offset += 4;
-                } else
-                if (string.charAt(offset) == '#' && offset + 4 < string.length() && string.charAt(offset + 4) == '#' && string.substring(offset + 1, offset + 4).equalsIgnoreCase("adm")) {
-                    spriteClip4(x - 12, y - 16, 30, 20, 2339, -256, 0, 0, false);
-                    x += 14;
-                    offset += 4;
-                } else
-                if (string.charAt(offset) == '#' && offset + 4 < string.length() && string.charAt(offset + 4) == '#' && string.substring(offset + 1, offset + 4).equalsIgnoreCase("mod")) {
-                    spriteClip4(x - 12, y - 16, 30, 20, 2339, -2302756, 0, 0, false);
-                    x += 14;
-                    offset += 4;
-                } else
-                if (string.charAt(offset) == '#' && offset + 4 < string.length() && string.charAt(offset + 4) == '#' && string.substring(offset + 1, offset + 4).equalsIgnoreCase("pmd")) {
-                    spriteClip4(x - 12, y - 16, 30, 20, 2339, -13382656, 0, 0, false);
-                    x += 14;
-                    offset += 4;
-                } else {
+                }
+                else if ((string.charAt(offset) == '#')
+                		&& (offset + 4 < string.length())
+                		&& (string.charAt(offset + 4) == '#'))
+                {
+                	switch(string.substring(offset + 1, offset + 4))
+                	{
+                	case "adm":
+                		spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xffffff00, 0, 0, false);
+                        x += 14;
+                        offset += 4;
+                		break;
+                	case "mod":
+                		spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xffdcdcdc, 0, 0, false);
+                        x += 14;
+                        offset += 4;
+                		break;
+                	case "pmd":
+                        spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xff33cc00, 0, 0, false);
+                        x += 14;
+                        offset += 4;
+                		break;
+                	}
+                }
+                else
+                {
                     int charIndex = charIndexes[string.charAt(offset)];
                     if (drawStringShadows && !aBooleanArray349[k] && colour != 0)
-                        method257(charIndex, x + 1, y, 0, abyte0, aBooleanArray349[k]);
+                        displayLetter(charIndex, x + 1, y, 0, abyte0, aBooleanArray349[k]);
                     if (drawStringShadows && !aBooleanArray349[k] && colour != 0)
-                        method257(charIndex, x, y + 1, 0, abyte0, aBooleanArray349[k]);
-                    method257(charIndex, x, y, colour, abyte0, aBooleanArray349[k]);
+                        displayLetter(charIndex, x, y + 1, 0, abyte0, aBooleanArray349[k]);
+                    displayLetter(charIndex, x, y, colour, abyte0, aBooleanArray349[k]);
                     x += abyte0[charIndex + 7];
                 }
 
@@ -1936,110 +1476,6 @@ public class GameImage implements ImageProducer, ImageObserver {
             System.out.println("drawstring: " + exception);
             exception.printStackTrace();
             return;
-        }
-    }
-
-    private void method257(int i, int x, int y, int colour, byte abyte0[], boolean flag) {
-        int i1 = x + abyte0[i + 5];
-        int j1 = y - abyte0[i + 6];
-        int k1 = abyte0[i + 3];
-        int l1 = abyte0[i + 4];
-        int i2 = abyte0[i] * 16384 + abyte0[i + 1] * 128 + abyte0[i + 2];
-        int j2 = i1 + j1 * gameWindowWidth;
-        int k2 = gameWindowWidth - k1;
-        int l2 = 0;
-        if (j1 < imageY) {
-            int i3 = imageY - j1;
-            l1 -= i3;
-            j1 = imageY;
-            i2 += i3 * k1;
-            j2 += i3 * gameWindowWidth;
-        }
-        if (j1 + l1 >= imageHeight)
-            l1 -= ((j1 + l1) - imageHeight) + 1;
-        if (i1 < imageX) {
-            int j3 = imageX - i1;
-            k1 -= j3;
-            i1 = imageX;
-            i2 += j3;
-            j2 += j3;
-            l2 += j3;
-            k2 += j3;
-        }
-        if (i1 + k1 >= imageWidth) {
-            int k3 = ((i1 + k1) - imageWidth) + 1;
-            k1 -= k3;
-            l2 += k3;
-            k2 += k3;
-        }
-        if (k1 > 0 && l1 > 0) {
-            if (flag) {
-                method259(imagePixelArray, abyte0, colour, i2, j2, k1, l1, k2, l2);
-                return;
-            }
-            plotLetter(imagePixelArray, abyte0, colour, i2, j2, k1, l1, k2, l2);
-        }
-    }
-
-    private void plotLetter(int ai[], byte abyte0[], int i, int j, int k, int l, int i1, int j1, int k1) {
-        try {
-            int l1 = -(l >> 2);
-            l = -(l & 3);
-            for (int i2 = -i1; i2 < 0; i2++) {
-                for (int j2 = l1; j2 < 0; j2++) {
-                    if (abyte0[j++] != 0)
-                        ai[k++] = i;
-                    else
-                        k++;
-                    if (abyte0[j++] != 0)
-                        ai[k++] = i;
-                    else
-                        k++;
-                    if (abyte0[j++] != 0)
-                        ai[k++] = i;
-                    else
-                        k++;
-                    if (abyte0[j++] != 0)
-                        ai[k++] = i;
-                    else
-                        k++;
-                }
-                for (int k2 = l; k2 < 0; k2++)
-                    if (abyte0[j++] != 0)
-                        ai[k++] = i;
-                    else
-                        k++;
-
-                k += j1;
-                j += k1;
-            }
-            return;
-        }
-        catch (Exception exception) {
-            System.out.println("plotletter: " + exception);
-            exception.printStackTrace();
-            return;
-        }
-    }
-
-    private void method259(int ai[], byte abyte0[], int i, int j, int k, int l, int i1, int j1, int k1) {
-        for (int l1 = -i1; l1 < 0; l1++) {
-            for (int i2 = -l; i2 < 0; i2++) {
-                int j2 = abyte0[j++] & 0xff;
-                if (j2 > 30) {
-                    if (j2 >= 230) {
-                        ai[k++] = i;
-                    } else {
-                        int k2 = ai[k];
-                        ai[k++] = ((i & 0xff00ff) * j2 + (k2 & 0xff00ff) * (256 - j2) & 0xff00ff00) + ((i & 0xff00) * j2 + (k2 & 0xff00) * (256 - j2) & 0xff0000) >> 8;
-                    }
-                } else {
-                    k++;
-                }
-            }
-
-            k += j1;
-            j += k1;
         }
     }
 
@@ -2067,15 +1503,15 @@ public class GameImage implements ImageProducer, ImageObserver {
 
     public int method261(int i) {
         if (i == 0) {
-            return aByteArrayArray336[i][8] - 2;
+            return fontPixels[i][8] - 2;
         } else {
-            return aByteArrayArray336[i][8] - 1;
+            return fontPixels[i][8] - 1;
         }
     }
 
     public int textWidth(String s, int i) {
         int j = 0;
-        byte abyte0[] = aByteArrayArray336[i];
+        byte abyte0[] = fontPixels[i];
         for (int k = 0; k < s.length(); k++) {
             if (s.charAt(k) == '@' && k + 2 < s.length() && s.charAt(k + 2) == '@') {
                 k += 2; //2 used to be 4
@@ -2087,42 +1523,39 @@ public class GameImage implements ImageProducer, ImageObserver {
         }
         return j;
     }
-
-    public boolean imageUpdate(Image image, int i, int j, int k, int l, int i1) {
-        return true;
-    }
-
-    public int gameWindowWidth;
-    public int gameWindowHeight;
-    public int gameWindowWidthUnused;
-    public int gameWindowHeightUnused;
-    ColorModel colourModel;
-    public int imagePixelArray[];
-    ImageConsumer imageConsumer;
-    public Image image;
-    private int imageY;
-    private int imageHeight;
-    private int imageX;
-    private int imageWidth;
-    public boolean lowDef;
-    static byte aByteArrayArray336[][] = new byte[50][];
-    static int charIndexes[];
-    public boolean drawStringShadows;
-    double x_start[];
-    double x_end[];
-    double x_start_sprite[];
-    double x_end_sprite[];
-    double y_start_sprite[];
-    double y_end_sprite[];
-    public static int anInt346;
-    public static int anInt347;
-    public static int anInt348;
+    
+    private static byte fontPixels[][] = new byte[50][];
+    private static int charIndexes[];
     private static boolean aBooleanArray349[] = new boolean[12];
     private static int anInt350;
-    private static byte aByteArray351[] = new byte[0x186a0];
-    public static int anInt352;
+    private static byte fontPixelsLoadBuffer[] = new byte[0x186a0];
+    private ColorModel colourModel;
+    private ImageConsumer imageConsumer;
+    private Rectangle bounds;
+    private ZipFile entityArchive, mediaArchive, utilArchive,
+    itemArchive, logoArchive, projectileArchive, textureArchive;
+    private static final Map<String, Integer> textColors;
 
     static {
+        textColors = new HashMap<String, Integer>();
+        textColors.put("@red@", 0xff0000);
+        textColors.put("@lre@", 0xff9040);
+        textColors.put("@yel@", 0xffff00);
+        textColors.put("@gre@", 0x00ff00);
+        textColors.put("@blu@", 0x0000ff);
+        textColors.put("@cya@", 0x00ffff);
+        textColors.put("@mag@", 0xff00ff);
+        textColors.put("@whi@", 0xffffff);
+        textColors.put("@bla@", 0x000000);
+        textColors.put("@dre@", 0xc00000);
+        textColors.put("@ora@", 0xff9040);
+        textColors.put("@or1@", 0xffb000);
+        textColors.put("@or2@", 0xff7000);
+        textColors.put("@or3@", 0xff3000);
+        textColors.put("@gr1@", 0xc0ff00);
+        textColors.put("@gr2@", 0x80ff00);
+        textColors.put("@gr3@", 0x40ff00);
+        
         String s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"\243$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
         charIndexes = new int[256];
         for (int i = 0; i < 256; i++) {
@@ -2131,6 +1564,528 @@ public class GameImage implements ImageProducer, ImageObserver {
                 j = 74;
             }
             charIndexes[i] = j * 9;
+        }
+    }
+	
+	private static int getColor(String command, int defaultColor)
+	{
+		if (textColors.containsKey(command))
+			return textColors.get(command);
+		else if (command.equalsIgnoreCase("@ran@"))
+			return (int) (Math.random() * 0x1000000);
+		return defaultColor;
+	}
+
+    /**
+     * 
+     * @param dst Destination pixels
+     * @param src Source pixels
+     * @param srcStart Source array start index
+     * @param dstStart Destination array start index
+     * @param srcWidth Source image width
+     * @param srcHeight Source image height.
+     * @param dstYStep Number of pixels to skip in the destination array
+     * 		after each row.
+     * @param srcYStep Number of pixels to skip in the source array
+     * 		after each row.
+     * @param yStep Number of steps (expressed in rows) in the source
+     * 		(and destination) array. High-detail should use 1, low detail
+     * 		should use &gt;1.
+     */
+    private void drawImage(int dst[], int src[], int srcStart,
+    		int dstStart, int srcWidth, int srcHeight, int dstYStep,
+    		int srcYStep, int yStep)
+    {
+    	int imagePixVal;
+        for (int y = -srcHeight; y < 0; y += yStep)
+        {
+            for (int l2 = -srcWidth; l2 < 0; l2++)
+            {
+            	imagePixVal = src[srcStart];
+                if (imagePixVal != 0)
+                    dst[dstStart] = imagePixVal;
+                srcStart++;
+                dstStart++;
+            }
+
+            dstStart += dstYStep;
+            srcStart += srcYStep;
+        }
+    }
+
+    private void drawImageScale(
+    		int dstPixels[], int srcPixels[], int srcXIdxHD, int srcYIdxHD, int dstStart, int dstYStep, int srcScaledWidth,
+    		int srcScaledHeight, int srcXStep, int srcYStepHD, int srcWidthOriginal, int yStep)
+    {
+        try
+        {
+        	int imagePixVal;
+            int srcXStartHD = srcXIdxHD;
+            for (int y = -srcScaledHeight; y < 0; y += yStep)
+            {
+                int srcYIdx = (srcYIdxHD >> 16) * srcWidthOriginal;
+                for (int x = -srcScaledWidth; x < 0; x++)
+                {
+                    int srcXIdx = (srcXIdxHD >> 16);
+                	imagePixVal = srcPixels[srcYIdx + srcXIdx];
+                    if (imagePixVal != 0)
+                        dstPixels[dstStart] = imagePixVal;
+                    dstStart++;
+                    srcXIdxHD += srcXStep;
+                }
+
+                srcYIdxHD += srcYStepHD;
+                srcXIdxHD = srcXStartHD;
+                dstStart += dstYStep;
+            }
+
+            return;
+        }
+        catch (Exception _ex) {
+            System.out.println("error in plot_scale");
+        }
+    }
+
+    private void drawImageTransparent(int dstPixels[], int srcPixels[], int srcStart,
+    		int dstStart, int srcWidth, int srcHeight, int dstYStep,
+    		int srcYStep, int yStep, int fgAlpha)
+    {
+    	int srcPixelVal;
+        int bgAlpha = 0xff - fgAlpha;
+        for (int y = -srcHeight; y < 0; y += yStep)
+        {
+            for (int x = -srcWidth; x < 0; x++)
+            {
+            	srcPixelVal = srcPixels[srcStart++];
+                if (srcPixelVal != 0)
+                {
+                    int dstPixelVal = dstPixels[dstStart];
+                    dstPixels[dstStart] = ((srcPixelVal & 0xff00ff)*fgAlpha + (dstPixelVal & 0xff00ff)*bgAlpha & 0xff00ff00)
+                    		+ ((srcPixelVal & 0xff00)*fgAlpha + (dstPixelVal & 0xff00)*bgAlpha & 0xff0000) >> 8;
+                }
+                dstStart++;
+            }
+
+            dstStart += dstYStep;
+            srcStart += srcYStep;
+        }
+
+    }
+
+    private void drawImageTransparentScale(
+    		int dstPixels[], int srcPixels[], int srcXIdxHD, int srcYIdxHD, int dstStart, int dstYStep, int srcScaledWidth,
+    		int srcScaledHeight, int srcXStepHD, int srcYStepHD, int srcWidthOriginal, int k2, int fgAlpha)
+    {
+    	int srcPixelVal;
+        int bgAlpha = 256 - fgAlpha;
+        try
+        {
+            int srcXStartHD = srcXIdxHD;
+            for (int y = -srcScaledHeight; y < 0; y += k2)
+            {
+                int srcYIdx = (srcYIdxHD >> 16) * srcWidthOriginal;
+                for (int x = -srcScaledWidth; x < 0; x++)
+                {
+                    int srcXIdx = (srcXIdxHD >> 16);
+                    srcPixelVal = srcPixels[srcYIdx + srcXIdx];
+                    if (srcPixelVal != 0) {
+                        int dstPixelVal = dstPixels[dstStart];
+                        dstPixels[dstStart] = ((srcPixelVal & 0xff00ff)*fgAlpha + (dstPixelVal & 0xff00ff)*bgAlpha & 0xff00ff00)
+                        		+ ((srcPixelVal & 0xff00)*fgAlpha + (dstPixelVal & 0xff00)*bgAlpha & 0xff0000) >> 8;
+                    }
+                    dstStart++;
+                    srcXIdxHD += srcXStepHD;
+                }
+
+                srcYIdxHD += srcYStepHD;
+                srcXIdxHD = srcXStartHD;
+                dstStart += dstYStep;
+            }
+
+            return;
+        }
+        catch (Exception _ex) {
+            System.out.println("error in tran_scale");
+        }
+    }
+
+	private void drawImageOverlay(int dstPixels[], int srcPixels[], int srcXIdxHD,
+			int srcYIdxHD, int dstStart, int dstYStep, int srcScaledWidth,
+			int srcScaledHeight, int srcXStepHD, int srcYStepHD,
+			int srcWidthOriginal, int yStep, int overlay)
+	{
+		int srcPixelVal;
+		int overlayRed = (overlay >> 16) & 0xff;
+		int overlayGreen = (overlay >> 8) & 0xff;
+		int overlayBlue = overlay & 0xff;
+		try
+		{
+			int srcXStartHD = srcXIdxHD;
+			for (int y = -srcScaledHeight; y < 0; y += yStep)
+			{
+				int srcYIdx = (srcYIdxHD >> 16) * srcWidthOriginal;
+				for (int x = -srcScaledWidth; x < 0; x++)
+				{
+					int srcXIdx = (srcXIdxHD >> 16);
+					srcPixelVal = srcPixels[srcYIdx + srcXIdx];
+					if (srcPixelVal != 0)
+					{
+						int srcRed = (srcPixelVal >> 16) & 0xff;
+						int srcGreen = (srcPixelVal >> 8) & 0xff;
+						int srcBlue = srcPixelVal & 0xff;
+						
+						if (srcRed == srcGreen && srcGreen == srcBlue)
+						{
+							dstPixels[dstStart] =
+									((srcRed*overlayRed & 0xff00) << 8)
+									+ (srcGreen*overlayGreen & 0xff00)
+									+ ((srcBlue*overlayBlue & 0xff00) >> 8);
+						}
+						else
+							dstPixels[dstStart] = srcPixelVal;
+					}
+					dstStart++;
+					srcXIdxHD += srcXStepHD;
+				}
+				
+				srcYIdxHD += srcYStepHD;
+				srcXIdxHD = srcXStartHD;
+				dstStart += dstYStep;
+			}
+
+			return;
+		}
+		catch (Exception _ex) {
+			System.out.println("error in plot_scale");
+		}
+	}
+	
+	private void darwImageOverlayScale(int dstPixels[], int srcPixels[],
+			int srcXIdxHD, int srcYIdxHD, int gameWindowStartIdx,
+			int srcScaledWidth, int spriteScaledHeight,
+			int srcXStepHD, int srcYStepHD, int spriteWidth, int overlay,
+			int srcXIdxStartHD, int srcXIdxStepHD, int yStep)
+	{
+		int pixelColor;
+		int overlayRed = (overlay >> 16) & 0xff;
+		int overlayGreen = (overlay >> 8) & 0xff;
+		int overlayBlue = overlay & 0xff;
+		try
+		{
+			int srcXStartHD = srcXIdxHD;
+			for (int y = -spriteScaledHeight; y < 0; y++)
+			{
+				int srcXIdxStart = (srcXIdxStartHD >> 16);
+				int scaledWidthCrop = srcScaledWidth;
+				if (srcXIdxStart < bounds.x)
+				{
+					int cropWidth = bounds.x - srcXIdxStart;
+					scaledWidthCrop -= cropWidth;
+					srcXIdxStart = bounds.x;
+					srcXIdxHD += srcXStepHD * cropWidth;
+				}
+				if (srcXIdxStart + scaledWidthCrop >= bounds.width)
+				{
+					int cropWidth = (srcXIdxStart + scaledWidthCrop) - bounds.width;
+					scaledWidthCrop -= cropWidth;
+				}
+				yStep = 1 - yStep;
+				if (yStep != 0)
+				{
+					int srcYIdx = (srcYIdxHD >> 16) * spriteWidth;
+					for (int x = srcXIdxStart; x < srcXIdxStart + scaledWidthCrop; x++)
+					{
+						int srcXIdx = (srcXIdxHD >> 16);
+						pixelColor = srcPixels[srcXIdx + srcYIdx];
+						if (pixelColor != 0)
+						{
+							int spriteRed = (pixelColor >> 16) & 0xff;
+							int spriteGreen = (pixelColor >> 8) & 0xff;
+							int spriteBlue = pixelColor & 0xff;
+							
+							if (spriteRed == spriteGreen && spriteGreen == spriteBlue)
+							{
+								dstPixels[x + gameWindowStartIdx] =
+										((spriteRed*overlayRed & 0xff00) << 8)
+										+ (spriteGreen*overlayGreen & 0xff00)
+										+ ((spriteBlue*overlayBlue & 0xff00) >> 8);
+							}
+							else
+								dstPixels[x + gameWindowStartIdx] = pixelColor;
+						}
+						srcXIdxHD += srcXStepHD;
+					}
+					
+				}
+				srcYIdxHD += srcYStepHD;
+				srcXIdxHD = srcXStartHD;
+				gameWindowStartIdx += gameWindowWidth;
+				srcXIdxStartHD += srcXIdxStepHD;
+			}
+			return;
+		}
+		catch (Exception _ex)
+		{
+			System.out.println("error in transparent sprite plot routine");
+		}
+	}
+
+	/**
+	 * 
+	 * @param dstPixels
+	 * @param srcPixels
+	 * @param srcXIdxHD
+	 * @param srcYIdxHD
+	 * @param gameWindowStartIdx
+	 * @param srcScaledWidth
+	 * @param spriteScaledHeight
+	 * @param srcXStepHD
+	 * @param srcYStepHD
+	 * @param spriteWidth
+	 * @param overlay
+	 * @param k2
+	 * @param srcXIdxStartHD
+	 * @param srcXIdxStepHD
+	 * @param yStep
+	 */
+	private void drawImageOverlayScale2(int dstPixels[], int srcPixels[],
+			int srcXIdxHD, int srcYIdxHD, int gameWindowStartIdx,
+			int srcScaledWidth, int spriteScaledHeight, int srcXStepHD,
+			int srcYStepHD, int spriteWidth, int overlay, int k2,
+			int srcXIdxStartHD, int srcXIdxStepHD, int yStep)
+	{
+		int pixelColor;
+		int overlayRed = (overlay >> 16) & 0xff;
+		int overlayGreen = (overlay >> 8) & 0xff;
+		int overlayBlue = overlay & 0xff;
+		int colorRed = (k2 >> 16) & 0xff;
+		int colorGreen = (k2 >> 8) & 0xff;
+		int colorBlue = k2 & 0xff;
+		try
+		{
+			int srcXStartHD = srcXIdxHD;
+			for (int y = -spriteScaledHeight; y < 0; y++)
+			{
+				int srcXIdxStart = (srcXIdxStartHD >> 16);
+				int scaledWidthCrop = srcScaledWidth;
+				if (srcXIdxStart < bounds.x)
+				{
+					int cropWidth = bounds.x - srcXIdxStart;
+					scaledWidthCrop -= cropWidth;
+					srcXIdxStart = bounds.x;
+					srcXIdxHD += srcXStepHD * cropWidth;
+				}
+				if (srcXIdxStart + scaledWidthCrop >= bounds.width)
+				{
+					int cropWidth = (srcXIdxStart + scaledWidthCrop) - bounds.width;
+					scaledWidthCrop -= cropWidth;
+				}
+				yStep = 1 - yStep;
+				if (yStep != 0)
+				{
+					int srcYIdx = (srcYIdxHD >> 16) * spriteWidth;
+					for (int x = srcXIdxStart; x < srcXIdxStart + scaledWidthCrop; x++)
+					{
+						pixelColor = srcPixels[(srcXIdxHD >> 16) + srcYIdx];
+						if (pixelColor != 0)
+						{
+							int spriteRed = (pixelColor >> 16) & 0xff;
+							int spriteGreen = (pixelColor >> 8) & 0xff;
+							int spriteBlue = pixelColor & 0xff;
+							
+							if (spriteRed == spriteGreen && spriteGreen == spriteBlue)
+							{
+								dstPixels[x + gameWindowStartIdx] = 
+										((spriteRed*overlayRed & 0xff00) << 8)
+										+ (spriteGreen*overlayGreen & 0xff00)
+										+ ((spriteBlue * overlayBlue & 0xff00) >> 8);
+							}
+							else if (spriteRed == 0xff && spriteGreen == spriteBlue)
+							{
+								dstPixels[x + gameWindowStartIdx] = 
+										((spriteRed*colorRed & 0xff00) << 8)
+										+ (spriteGreen*colorGreen & 0xff00)
+										+ ((spriteBlue*colorBlue & 0xff00) >> 8);
+							}
+							else
+								dstPixels[x + gameWindowStartIdx] = pixelColor;
+						}
+						srcXIdxHD += srcXStepHD;
+					}
+
+                }
+                srcYIdxHD += srcYStepHD;
+                srcXIdxHD = srcXStartHD;
+                gameWindowStartIdx += gameWindowWidth;
+                srcXIdxStartHD += srcXIdxStepHD;
+            }
+
+            return;
+        }
+        catch (Exception _ex) {
+            System.out.println("error in transparent sprite plot routine");
+        }
+    }
+
+	private void drawMapSpriteWOShift(int imagePixels[], int spritePixels[],
+			int offset, double x, double y, double xStep, double yStep,
+			int length, int spriteWidth)
+	{
+		int pixIdx;
+		for (int i = length; i < 0; i++)
+		{
+			pixIdx = ((int) x) + ((int) y) * spriteWidth;
+			imagePixels[offset] = spritePixels[pixIdx];
+			offset++;
+			x += xStep;
+			y += yStep;
+		}
+		
+	}
+	
+	private void drawMapSpriteWShift(int imagePixels[], int spritePixels[],
+			int offset, double x, double y, double xStep, double yStep,
+			int length, int spriteWidth)
+	{
+		int pixIdx;
+		for (int i = length; i < 0; i++)
+		{
+			pixIdx = ((int) x) + ((int) y) * spriteWidth;
+			if (pixIdx > 0 && spritePixels[pixIdx] != 0)
+				imagePixels[offset] = spritePixels[pixIdx];
+			offset++;
+			x += xStep;
+			y += yStep;
+		}
+	}
+
+    private void displayLetter(int i, int x, int y, int colour,
+    		byte letterInfo[], boolean transparent)
+    {
+        int letterStartIdx = letterInfo[i] * 16384
+        		+ letterInfo[i + 1] * 128
+        		+ letterInfo[i + 2];
+        int letterWidth = letterInfo[i + 3];
+        int letterHeight = letterInfo[i + 4];
+        int letterXStart = x + letterInfo[i + 5];
+        int letterYStart = y - letterInfo[i + 6];
+        int windowStartIdx = letterXStart + letterYStart * gameWindowWidth;
+        int windowSkipIdx = gameWindowWidth - letterWidth;
+        int letterSkipIdx = 0;
+        
+        if (letterYStart < bounds.y)
+        {
+            int letterYCrop = bounds.y - letterYStart;
+            letterHeight -= letterYCrop;
+            letterYStart = bounds.y;
+            letterStartIdx += letterYCrop * letterWidth;
+            windowStartIdx += letterYCrop * gameWindowWidth;
+        }
+        if (letterYStart + letterHeight >= bounds.height)
+            letterHeight -= ((letterYStart + letterHeight) - bounds.height) + 1;
+        if (letterXStart < bounds.x)
+        {
+            int letterXCrop = bounds.x - letterXStart;
+            letterWidth -= letterXCrop;
+            letterXStart = bounds.x;
+            letterStartIdx += letterXCrop;
+            windowStartIdx += letterXCrop;
+            letterSkipIdx += letterXCrop;
+            windowSkipIdx += letterXCrop;
+        }
+        if (letterXStart + letterWidth >= bounds.width)
+        {
+            int letterXCrop = ((letterXStart + letterWidth) - bounds.width) + 1;
+            letterWidth -= letterXCrop;
+            letterSkipIdx += letterXCrop;
+            windowSkipIdx += letterXCrop;
+        }
+        
+        if (letterWidth > 0 && letterHeight > 0)
+        {
+            if (transparent)
+            {
+                drawLetterTransparent(imagePixelArray, letterInfo, colour,
+                		letterStartIdx, windowStartIdx, letterWidth,
+                		letterHeight, windowSkipIdx, letterSkipIdx);
+            }
+            else
+            {
+            	drawLetter(imagePixelArray, letterInfo, colour,
+            			letterStartIdx, windowStartIdx, letterWidth,
+            			letterHeight, windowSkipIdx, letterSkipIdx);
+            }
+        }
+    }
+
+    private void drawLetter(int dstPixels[], byte srcPixels[],
+    		int color, int srcStart, int dstStart, int dstWidth,
+    		int dstHeight, int dstStep, int srcStep)
+    {
+        try
+        {
+            for (int i2 = -dstHeight; i2 < 0; i2++)
+            {
+                for (int k2 = -dstWidth; k2 < 0; k2++)
+                    if (srcPixels[srcStart++] != 0)
+                        dstPixels[dstStart++] = color;
+                    else
+                        dstStart++;
+
+                dstStart += dstStep;
+                srcStart += srcStep;
+            }
+            return;
+        }
+        catch (Exception exception) {
+            System.out.println("plotletter: " + exception);
+            exception.printStackTrace();
+            return;
+        }
+    }
+
+    private void drawLetterTransparent(int dstPixels[], byte srcPixels[],
+    		int color, int srcStart, int dstStart, int srcWidth, int srcHeight, int dstStep, int srcStep)
+    {
+        for (int y = -srcHeight; y < 0; y++)
+        {
+            for (int x = -srcWidth; x < 0; x++)
+            {
+                int fgAlpha = srcPixels[srcStart++] & 0xff;
+                int bgAlpha = 256 - fgAlpha;
+                if (fgAlpha > 30)
+                {
+                    if (fgAlpha >= 230)
+                        dstPixels[dstStart] = color;
+                    else {
+                        int k2 = dstPixels[dstStart];
+                        dstPixels[dstStart] = ((color & 0xff00ff)*fgAlpha + (k2 & 0xff00ff)*bgAlpha & 0xff00ff00)
+                        		+ ((color & 0xff00)*fgAlpha + (k2 & 0xff00)*bgAlpha & 0xff0000) >> 8;
+                    }
+                }
+                dstStart++;
+            }
+
+            dstStart += dstStep;
+            srcStart += srcStep;
+        }
+    }
+
+    private boolean loadArchive(int id, ZipFile archive)
+    {
+        try
+        {
+            ZipEntry e = archive.getEntry(String.valueOf(id));
+            if (e == null)
+                return false;
+            ByteBuffer data = DataConversions.streamToBuffer(new BufferedInputStream(archive.getInputStream(e)));
+            sprites[id] = Sprite.unpack(data);
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
         }
     }
 }
