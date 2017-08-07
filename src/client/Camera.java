@@ -922,8 +922,7 @@ public class Camera {
 		}
 	}
 
-	private static void drawTexture(
-			int pixelArray[], int texturePixels[],
+	private static void drawTexture(int pixelArray[], int texturePixels[],
 			int xTexture, int yTexture, double smthXTexture,
 			double smthYTexture, double smthDivision,
 			double smthXTextureStep, double smthYTextureStep,
@@ -1010,10 +1009,10 @@ public class Camera {
 		}
 	}
 
-	private static void drawColorLine(
-			int imagePixels[], int length, int offset, int pixelColor,
-			int colorGradient[], int gradColOffs, int gradColStep,
-			int fadeColOffs, int fadeColStep, int nSteps, boolean transparent)
+	private static void drawColorLine(int imagePixels[], int length,
+			int offset, int pixelColor, int colorGradient[],
+			int gradColOffs, int gradColStep, int fadeColOffs,
+			int fadeColStep, int nSteps, boolean transparent)
 	{
 		if (length >= 0)
 			return;
