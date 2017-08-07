@@ -13,6 +13,7 @@ public class Camera {
 		nbrColors = 50;
 		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
+		fadeGradientArray = new int[256];
 		viewPlaneDist = 0.0390625D;
 		gradient2Step = false;
 		aDouble387 = 1.1D;
@@ -25,6 +26,7 @@ public class Camera {
 		xScreen = new int[40];
 		yScreen = new int[40];
 		pointBrightness = new int[40];
+		pointFadeBright = new int[40];
 		xCoordCamDist = new double[40];
 		yCoordCamDist = new double[40];
 		zCoordCamDist = new double[40];
@@ -542,7 +544,7 @@ public class Camera {
 						 * background colors than black */
 						double dstnc = model.getDistanceTo(pt);
 						if (dstnc > fadeDist)
-							pointBrightness[pointsInSurfac] += (dstnc - fadeDist) / fadeFactor;
+							pointFadeBright[pointsInSurfac] = (int) ((dstnc - fadeDist) / fadeFactor);
 						pointsInSurfac++;
 					}
 					else
@@ -583,13 +585,17 @@ public class Camera {
 				{
 					if (pointBrightness[j] < 0)
 						pointBrightness[j] = 0;
-					else if (pointBrightness[j] > 255)
-						pointBrightness[j] = 255;
+					else if (pointBrightness[j] > 0xff)
+						pointBrightness[j] = 0xff;
+					if (pointFadeBright[j] < 0)
+						pointFadeBright[j] = 0;
+					else if (pointFadeBright[j] > 0xff)
+						pointFadeBright[j] = 0xff;
 				}
 
 				if (pointsInSurfac == 0)
 					continue;
-				makeTriangle(0, 0, 0, pointsInSurfac, xScreen, yScreen, pointBrightness, model, l);
+				makeTriangle(pointsInSurfac, xScreen, yScreen, pointBrightness, pointFadeBright, model, l);
 				if (modelYMax > modelYMin)
 					applyColor(0, ptsPerCell, xCoordCamDist, yCoordCamDist,
 							zCoordCamDist, cm.color, model);
@@ -599,8 +605,8 @@ public class Camera {
 		aBoolean = false;
 	}
 
-	private void makeTriangle(int xMin, int xMax, int xMinBright, int pointsInSurface,
-			int triangleX[], int triangleY[], int brightness[],
+	private void makeTriangle(int pointsInSurface, int triangleX[],
+			int triangleY[], int brightness[], int[] fadeBright,
 			Model model, int j1)
 	{
 		int i, j;
@@ -613,11 +619,16 @@ public class Camera {
 		int[] p_b = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; ++i)
 			p_b[i] = brightness[i];
+		int[] p_f = new int[pointsInSurface];
+		for (i = 0; i < pointsInSurface; ++i)
+			p_f[i] = fadeBright[i];
 		int drawYMax = (yCenter + halfVPHeight) - 1;
 		int[] min_x = new int[pointsInSurface];
 		int[] min_b = new int[pointsInSurface];
+		int[] min_f = new int[pointsInSurface];
 		int[] slope_x = new int[pointsInSurface];
 		int[] slope_b = new int[pointsInSurface];
+		int[] slope_f = new int[pointsInSurface];
 		int[] min_y = new int[pointsInSurface];
 		for (i = 0; i < pointsInSurface; min_y[i++] = 9999999);
 		int[] max_y = new int[pointsInSurface];
@@ -630,10 +641,12 @@ public class Camera {
 			{
 				slope_x[i] = (p_x[j] - p_x[i] << 8) / (p_y[j] - p_y[i]);
 				slope_b[i] = (p_b[j] - p_b[i] << 8) / (p_y[j] - p_y[i]);
+				slope_f[i] = (p_f[j] - p_f[i] << 8) / (p_y[j] - p_y[i]);
 				if (p_y[i] < p_y[j])
 				{
 					min_x[i] = p_x[i] << 8;
 					min_b[i] = p_b[i] << 8;
+					min_f[i] = p_f[i] << 8;
 					min_y[i] = p_y[i];
 					max_y[i] = p_y[j];
 				}
@@ -641,6 +654,7 @@ public class Camera {
 				{
 					min_x[i] = p_x[j] << 8;
 					min_b[i] = p_b[j] << 8;
+					min_f[i] = p_f[j] << 8;
 					min_y[i] = p_y[j];
 					max_y[i] = p_y[i];
 				}
@@ -648,6 +662,7 @@ public class Camera {
 				{
 					min_x[i] -= slope_x[i] * min_y[i];
 					min_b[i] -= slope_b[i] * min_y[i];
+					min_f[i] -= slope_f[i] * min_y[i];
 					min_y[i] = 0;
 				}
 				if (max_y[i] > drawYMax)
@@ -663,7 +678,11 @@ public class Camera {
 			if (max_y[i] > modelYMax)
 				modelYMax = max_y[i];
 
+		int xMinBright = 0;
 		int xMaxBright = 0;
+		int xMinFade = 0;
+		int xMaxFade = 0;
+		int xMin, xMax;
 		for (i = modelYMin; i < modelYMax; i++)
 		{
 			xMin = 9999999;
@@ -676,21 +695,26 @@ public class Camera {
 					{
 						xMin = min_x[j];
 						xMinBright = min_b[j];
+						xMinFade = min_f[j];
 					}
 					if (min_x[j] > xMax)
 					{
 						xMax = min_x[j];
 						xMaxBright = min_b[j];
+						xMaxFade = min_f[j];
 					}
 					min_x[j] += slope_x[j];
 					min_b[j] += slope_b[j];
+					min_f[j] += slope_f[j];
 				}
 			}
-			CameraVariables cameraVariables_6 = cameraVariables[i];
-			cameraVariables_6.leftX = xMin;
-			cameraVariables_6.rightX = xMax;
-			cameraVariables_6.leftXBright = xMinBright;
-			cameraVariables_6.rightXBright = xMaxBright;
+			CameraVariables camVar = cameraVariables[i];
+			camVar.leftX = xMin;
+			camVar.rightX = xMax;
+			camVar.leftXBright = xMinBright;
+			camVar.rightXBright = xMaxBright;
+			camVar.leftXFade = xMinFade;
+			camVar.rightXFade = xMaxFade;
 		}
 
 		if (modelYMin < yCenter - halfVPHeight)
@@ -790,11 +814,14 @@ public class Camera {
 				}
 				else
 				{
-					int gradStart = camVar.leftXBright;
-					int gradStep = (camVar.rightXBright - gradStart) / lineLength;
+					int shadeGradStart = camVar.leftXBright;
+					int shadeGradStep = (camVar.rightXBright - shadeGradStart) / lineLength;
+					int fadeGradStart = camVar.leftXFade;
+					int fadeGradStep = (camVar.rightXFade - fadeGradStart) / lineLength;
 					if (imgPixXStart < -halfVPWidth)
 					{
-						gradStart += (-halfVPWidth - imgPixXStart) * gradStep;
+						shadeGradStart += (-halfVPWidth - imgPixXStart) * shadeGradStep;
+						fadeGradStart += (-halfVPWidth - imgPixXStart) * fadeGradStep;
 						imgPixXStart = -halfVPWidth;
 						lineLength = imgPixXEnd - imgPixXStart;
 					}
@@ -806,7 +833,9 @@ public class Camera {
 							n1_y + i15 * imgPixXStart,
 							n_y + k15 * imgPixXStart,
 							nk_x, n1_x, n_x, lineLength,
-							imgPixRow + imgPixXStart, gradStart, gradStep,
+							imgPixRow + imgPixXStart,
+							shadeGradStart, shadeGradStep,
+							fadeGradStart, fadeGradStep,
 							nSkip, trnspar, seethu, textureSize[color]);
 					nk_y += nk_z;
 					n1_y += n1_z;
@@ -829,16 +858,16 @@ public class Camera {
 				int newIdx = (int) (Math.random() * (double) nbrColors);
 				colorArray[newIdx] = color;
 				color = -1 - color; // convert to color
-				int red = (color >> 10 & 0x1f) * 8;
-				int green = (color >> 5 & 0x1f) * 8;
+				int red = (color >> 10 & 0x1f) << 3;
+				int green = (color >> 5 & 0x1f) << 3;
 				int blue = (color & 0x1f) * 8;
-				for (int j4 = 0; j4 < 256; j4++)
+				for (int shadeVal = 0; shadeVal < 256; shadeVal++)
 				{
-					int j6 = j4 * j4;
-					int tmpRed = (red * j6) >> 16;
-					int tmpGreen = (green * j6) >> 16;
-					int tmpBlue = (blue * j6) >> 16;
-					colorGradientArray[newIdx][255 - j4] = (tmpRed << 16) + (tmpGreen << 8) + tmpBlue;
+					int shadeMod = shadeVal * shadeVal;
+					int nrmlRed   = ((red * shadeMod) & 0xff0000);
+					int nrmlGreen = (((green * shadeMod) & 0xff0000) >> 8);
+					int nrmlBlue  = (((blue * shadeMod) & 0xff0000) >> 16);
+					colorGradientArray[newIdx][0xff - shadeVal] = nrmlRed + nrmlGreen + nrmlBlue;
 				}
 				colorGradient = colorGradientArray[newIdx];
 			}
@@ -870,11 +899,14 @@ public class Camera {
 				imgPixRow += imgPixSkip;
 			else
 			{
-				int gradStart = camVar.leftXBright;
-				int gradEnd = (camVar.rightXBright - gradStart) / lineLength;
+				int shadeGradStart = camVar.leftXBright;
+				int shadeGradStep = (camVar.rightXBright - shadeGradStart) / lineLength;
+				int fadeGradStart = camVar.leftXFade;
+				int fadeGradStep = (camVar.rightXFade - fadeGradStart) / lineLength;
 				if (imgPixXStart < -halfVPWidth)
 				{
-					gradStart += (-halfVPWidth - imgPixXStart) * gradEnd;
+					shadeGradStart += (-halfVPWidth - imgPixXStart) * shadeGradStep;
+					fadeGradStart += (-halfVPWidth - imgPixXStart) * fadeGradStep;
 					imgPixXStart = -halfVPWidth;
 					lineLength = imgPixXEnd - imgPixXStart;
 				}
@@ -883,8 +915,8 @@ public class Camera {
 				drawColorLine(
 						imagePixelArray, -lineLength,
 						imgPixRow + imgPixXStart, 0,
-						colorGradient, gradStart, gradEnd,
-						nGradSteps, transparent);
+						colorGradient, shadeGradStart, shadeGradStep,
+						fadeGradStart, fadeGradStep, nGradSteps, transparent);
 				imgPixRow += imgPixSkip;
 			}
 		}
@@ -896,13 +928,14 @@ public class Camera {
 			double smthYTexture, double smthDivision,
 			double smthXTextureStep, double smthYTextureStep,
 			double smthDivisionStep, int length, int offset,
-			int shadeOffset, int shadeStep,
+			int shadeOffset, int shadeStep, int fadeOffset, int fadeStep,
 			int nSteps, boolean transparent, boolean seethrough, int size)
 	{
 		if (length <= 0)
 			return;
 		int mask = transparent ? 0x7f7f7f : 0x0;
 		shadeStep <<= (nSteps >> 1);
+		fadeStep  <<= (nSteps >> 1);
 		int lastRow = (1 << 2*size) - (1 << size);
 		int maxSpriteIdx = (1 << 2*size) - 1;
 
@@ -933,23 +966,25 @@ public class Camera {
 			i3 = lastRow;
 		int xTextureStep = i3 - xTexture >> 4;
 		int yTextureStep = j3 - yTexture >> 4;
-		int pixelColor = 0, color, shadeVal, shadeMod;
+		int color, shadeVal, fadeVal;
 		for (int j4 = length >> 4; j4 > 0; j4--)
 		{
 			for (int i = 0; i < 4; ++i)
 			{
 				xTexture = (xTexture & maxSpriteIdx);
 				shadeOffset += shadeStep;
+				fadeOffset  += fadeStep;
 				for (int j = 0; j < 4; ++j)
 				{
 					color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
-					shadeVal = (255-(shadeOffset >> 8));
-					shadeMod = shadeVal*shadeVal;
-					pixelColor = (((color >> 16 & 0xff) * shadeMod) & 0xff0000)
-							+ ((((color >> 8 & 0xff) * shadeMod) & 0xff0000) >> 8)
-							+ (((color & 0xff) * shadeMod) >> 16);
-					if (!seethrough || pixelColor != 0)
-						pixelArray[offset] = pixelColor + (pixelArray[offset] >> 1 & mask);
+					shadeVal = 255-(shadeOffset >> 8 & 0xff);
+					fadeVal  = 255-(fadeOffset  >> 8 & 0xff);
+					color = applyShade(color, shadeVal);
+					color = applyFade(color, fadeVal);
+					int fadeColor = getModifiedColor(GameImage.BACKGROUND,
+							getModCompl(getMod(fadeVal)));
+					if (!seethrough || color != fadeColor)
+						pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
 					++offset;
 					xTexture += xTextureStep;
 					yTexture += yTextureStep;
@@ -979,16 +1014,17 @@ public class Camera {
 			{
 				xTexture = (xTexture & maxSpriteIdx);
 				shadeOffset += shadeStep;
+				shadeOffset += shadeStep;
 			}
 			color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
-			shadeVal = (255-(shadeOffset >> 8));
-			shadeMod = shadeVal*shadeVal;
-			pixelColor = (((color >> 16 & 0xff) * shadeMod) & 0xff0000)
-					+ ((((color >> 8 & 0xff) * shadeMod) & 0xff0000) >> 8)
-					+ (((color & 0xff) * shadeMod) >> 16);
-			if (!seethrough
-					|| pixelColor != 0)
-				pixelArray[offset] = pixelColor + (pixelArray[offset] >> 1 & mask);
+			shadeVal = 255 - (shadeOffset >> 8 & 0xff);
+			fadeVal  = 255 - (fadeOffset  >> 8 & 0xff);
+			color = applyShade(color, shadeVal);
+			color = applyFade(color, fadeVal);
+			int fadeColor = getModifiedColor(GameImage.BACKGROUND,
+					getModCompl(getMod(fadeVal)));
+			if (!seethrough || color != fadeColor)
+				pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
 			++offset;
 			xTexture += xTextureStep;
 			yTexture += yTextureStep;
@@ -998,14 +1034,19 @@ public class Camera {
 	private static void drawColorLine(
 			int imagePixels[], int length, int offset, int pixelColor,
 			int colorGradient[], int gradColOffs, int gradColStep,
-			int nSteps, boolean transparent)
+			int fadeColOffs, int fadeColStep, int nSteps, boolean transparent)
 	{
 		if (length >= 0)
 			return;
 		int mask = transparent ? 0x7f7f7f : 0x0;
 		gradColStep <<= (nSteps >> 1);
-		pixelColor = colorGradient[gradColOffs >> 8 & 0xff];
+		fadeColStep <<= (nSteps >> 1);
+		pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
+				+ (imagePixels[offset] >> 1 & mask);
+		pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
+		
 		gradColOffs += gradColStep;
+		fadeColOffs += fadeColStep;
 
 		int step = length / (4 * nSteps);
 		for (int i = step; i < 0; i++)
@@ -1016,7 +1057,10 @@ public class Camera {
 					imagePixels[offset++] = pixelColor;
 				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
 						+ (imagePixels[offset] >> 1 & mask);
+				pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
+				
 				gradColOffs += gradColStep;
+				fadeColOffs += fadeColStep;
 			}
 		}
 
@@ -1029,9 +1073,45 @@ public class Camera {
 			{
 				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
 						+ (imagePixels[offset] >> 1 & mask);
+				pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
+				
 				gradColOffs += gradColStep;
+				fadeColOffs += fadeColStep;
 			}
 		}
+	}
+	
+	private static int getMod(int val)
+	{
+		if (val < 0)
+			val = 0;
+		if (val > 0xff)
+			val = 0xff;
+		return val * val;
+	}
+	
+	private static int getModCompl(int mod)
+	{
+		return 0xff00 - mod;
+	}
+	
+	private static int getModifiedColor(int pixelColor, int modifier)
+	{
+		return    ((pixelColor           >> 16 & 0xff) * modifier           & 0xff0000)
+				+ ((pixelColor           >>  8 & 0xff) * modifier     >> 8  & 0x00ff00)
+				+ ((pixelColor                 & 0xff) * modifier     >> 16 & 0x0000ff);
+	}
+	
+	private static int applyShade(int pixelColor, int shadeVal)
+	{
+		return getModifiedColor(pixelColor, getMod(shadeVal));
+	}
+	
+	private static int applyFade(int pixelColor, int fadeVal)
+	{
+		int fadeMod = getMod(fadeVal);
+		return    getModifiedColor(pixelColor,                       fadeMod)
+				+ getModifiedColor(GameImage.BACKGROUND, getModCompl(fadeMod));
 	}
 
 	public void setCamera(double playerX, double playerZ, double playerY,
@@ -2137,6 +2217,7 @@ public class Camera {
 	int nbrColors;
 	int colorArray[];
 	int colorGradientArray[][];
+	int fadeGradientArray[];
 	int colorGradient[];
 	public int lastCameraModelCount;
 	public double viewPlaneDist;
@@ -2197,6 +2278,7 @@ public class Camera {
 	int xScreen[];
 	int yScreen[];
 	int pointBrightness[];
+	int pointFadeBright[];
 	double xCoordCamDist[];
 	double yCoordCamDist[];
 	double zCoordCamDist[];
@@ -2220,6 +2302,8 @@ public class Camera {
 		int rightX;
 		int leftXBright;
 		int rightXBright;
+		int leftXFade;
+		int rightXFade;
 	}
 	
 	private class CameraModel

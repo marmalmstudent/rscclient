@@ -20,7 +20,7 @@ import javax.imageio.ImageIO;
 
 public class GameImage implements ImageProducer, ImageObserver
 {
-    public static final int BACKGROUND = 0;//0x349ed8;
+    public static final int BACKGROUND = 0x349ed8;
     public static int anInt346;
     public static int anInt347;
     public static int anInt348;

@@ -170,7 +170,7 @@ public class mudclient extends GameWindowMiddleMan
 		memoryError = false;
 		bankItemsMax = 48;
 		showQuestionMenu = false;
-		viewDistance = 37.5;
+		viewDistance = 25;
 		cameraAutoAngle = 1;
 		showServerMessageBox = false;
 		hasReceivedWelcomeBoxDetails = false;
@@ -893,10 +893,10 @@ public class mudclient extends GameWindowMiddleMan
 		gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
 		gameCamera.setCameraSize(center, bounds.width/2, bounds.height/2,
 				bounds.width, cameraSizeInt);
-		gameCamera.drawModelMaxDist = viewDistance;
-		gameCamera.drawSpriteMaxDist = viewDistance;
-		gameCamera.fadeFactor = 0.0078125;
-		gameCamera.fadeDist = viewDistance*0.9583333333333333;
+		gameCamera.drawModelMaxDist = viewDistance*1.3;
+		gameCamera.drawSpriteMaxDist = viewDistance*1.3;
+		gameCamera.fadeFactor = 1D/16D;
+		gameCamera.fadeDist = viewDistance*23D/24D;
 		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
 		engineHandle = new EngineHandle(gameCamera, gameGraphics);
 		loadTextures(); // 60%
