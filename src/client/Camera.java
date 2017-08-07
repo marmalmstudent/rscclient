@@ -1022,40 +1022,29 @@ public class Camera {
 		fadeColStep <<= (nSteps >> 1);
 		pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
 				+ (imagePixels[offset] >> 1 & mask);
-		pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
+		pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8));
 		
 		gradColOffs += gradColStep;
 		fadeColOffs += fadeColStep;
 
-		int step = length / (4 * nSteps);
-		for (int i = step; i < 0; i++)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				for (int k = 0; k < nSteps; ++k)
-					imagePixels[offset++] = pixelColor;
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
-						+ (imagePixels[offset] >> 1 & mask);
-				pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
-				
-				gradColOffs += gradColStep;
-				fadeColOffs += fadeColStep;
-			}
-		}
-
-		step = -(length % (4 * nSteps));
+		int linkedVar = nSteps; // * 4;
+		int step = length / linkedVar;
 		int end = nSteps-1;
-		for (int i = 0; i < step; i++)
+		for (int i = step; i <= 0; ++i)
 		{
-			imagePixels[offset++] = pixelColor;
-			if ((i & end) == end)
+			int stepp = i == 0 ? length % linkedVar : -linkedVar;
+			for (int j = stepp; j < 0; ++j)
 			{
-				pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
-						+ (imagePixels[offset] >> 1 & mask);
-				pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8 & 0xff));
-				
-				gradColOffs += gradColStep;
-				fadeColOffs += fadeColStep;
+				imagePixels[offset++] = pixelColor;
+				if ((j & end) == end)
+				{
+					pixelColor = colorGradient[gradColOffs >> 8 & 0xff]
+							+ (imagePixels[offset] >> 1 & mask);
+					pixelColor = applyFade(pixelColor, 255 - (fadeColOffs >> 8));
+					
+					gradColOffs += gradColStep;
+					fadeColOffs += fadeColStep;
+				}
 			}
 		}
 	}
