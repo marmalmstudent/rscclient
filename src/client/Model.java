@@ -2,12 +2,140 @@ package client;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Model
 {
 	public static final int INVISIBLE = 0xbc614e; // 12345678, probably
 	public static final int BIG_NUMBER = 9999999;
-	public Model(int nPoints, int nSurfaces) {
+    public static final int MODEL_3D = 1, MODEL_2D = 2;
+    public int nbrCoordPoints;
+    public double xCoordCamDist[];
+    public double yCoordCamDist[];
+    public double zCoordCamDist[];
+    public double xProjected[];
+    public double yProjected[];
+    public double pointBrightness[];
+    public int nbrSurfaces;
+    public int pointsPerCell[];
+    public int surfaces[][];
+    public int surfaceTexture1[];
+    public int surfaceTexture2[];
+    public double normalLength[];
+    public double lightSourceProjectToSurfNormal[];
+    public double xNormals[];
+    public double zNormals[];
+    public int modelType;
+    public boolean visible;
+    public double xMin;
+    public double xMax;
+    public double zMin;
+    public double zMax;
+    public double yMin;
+    public double yMax;
+    public boolean aBoolean254;
+    public boolean transparentTexture;
+    public boolean transparent;
+    public int index;
+    public int entityType[];
+    public byte aByteArray259[];
+    public boolean aBoolean261;
+    public boolean aBoolean262;
+    public boolean aBoolean263;
+    public boolean aBoolean264;
+    public int nPoints;
+    public double xCoords[];
+    public double zCoords[];
+    public double yCoords[];
+    public double xCoordsDraw[];
+    public double zCoordsDraw[];
+    public double yCoordsDraw[];
+
+    public Model(String path)
+    {
+        modelType = Model.MODEL_3D;
+        visible = true;
+        aBoolean254 = true;
+        transparentTexture = false;
+        transparent = false;
+        index = -1;
+        aBoolean260 = false;
+        aBoolean261 = false;
+        aBoolean262 = false;
+        aBoolean263 = false;
+        aBoolean264 = false;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
+        byte data[] = null;
+        try
+        {
+            InputStream inputstream = DataOperations.streamFromPath(path);
+            DataInputStream datainputstream = new DataInputStream(inputstream);
+            data = new byte[3];
+            offset = 0;
+            for (int i = 0; i < 3;
+            		i += datainputstream.read(data, i, 3 - i));
+            int k = getNextData(data);
+            data = new byte[k];
+            offset = 0;
+            for (int j = 0; j < k;
+            		j += datainputstream.read(data, j, k - j));
+            datainputstream.close();
+        }
+        catch (IOException _ex)
+        {
+            nbrCoordPoints = 0;
+            nbrSurfaces = 0;
+            return;
+        }
+        int nPoints = getNextData(data);
+        int nSurfaces = getNextData(data);
+        initArrays(nPoints, nSurfaces);
+        surfacesOrdered = new int[nSurfaces][];
+        for (int i = 0; i < nPoints; i++)
+        {
+            int x = getNextData(data);
+            int z = getNextData(data);
+            int y = getNextData(data);
+            insertCoordPoint(x, z, y);
+        }
+
+        for (int i = 0; i < nSurfaces; i++)
+        {
+            int pointsInCell = getNextData(data);
+            int texture1 = getNextData(data);
+            int texture2 = getNextData(data);
+            int l2 = getNextData(data);
+            featuresLight = getNextData(data);
+            globalLight = getNextData(data);
+            int i3 = getNextData(data);
+            int surfacePoints[] = new int[pointsInCell];
+            for (int j = 0; j < pointsInCell; j++)
+                surfacePoints[j] = getNextData(data);
+
+            int ai1[] = new int[l2];
+            for (int j = 0; j < l2; j++)
+                ai1[j] = getNextData(data);
+
+            int lastSurface = addSurface(pointsInCell, surfacePoints, texture1, texture2);
+            surfacesOrdered[i] = ai1;
+            if (i3 == 0)
+                lightSourceProjectToSurfNormal[lastSurface] = 0;
+            else
+                lightSourceProjectToSurfNormal[lastSurface] = invisible;
+        }
+
+        modelType = Model.MODEL_3D;
+    }
+    
+	public Model(int nPoints, int nSurfaces)
+	{
 		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
@@ -31,10 +159,11 @@ public class Model
 		surfacesOrdered = new int[nSurfaces][1];
 		for (int k = 0; k < nSurfaces; k++)
 			surfacesOrdered[k][0] = k;
-		
 	}
 
-	public Model(int nbrCoordPoints, int nbrSides, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
+	public Model(int nbrCoordPoints, int nbrSides, boolean flag,
+			boolean flag1, boolean flag2, boolean flag3, boolean flag4)
+	{
 		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
@@ -57,85 +186,57 @@ public class Model
 		initArrays(nbrCoordPoints, nbrSides);
 	}
 
-	private void initArrays(int nbrCoordPoints, int nbrSides)
+    public Model(Model models[], int i)
+    {
+        modelType = Model.MODEL_3D;
+        visible = true;
+        aBoolean254 = true;
+        transparentTexture = false;
+        transparent = false;
+        index = -1;
+        aBoolean260 = false;
+        aBoolean261 = false;
+        aBoolean262 = false;
+        aBoolean263 = false;
+        aBoolean264 = false;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
+        method178(models, i, true);
+    }
+
+    public Model(Model model[], int i, boolean flag, boolean flag1,
+    		boolean flag2, boolean flag3)
+    {
+        modelType = Model.MODEL_3D;
+        visible = true;
+        aBoolean254 = true;
+        transparentTexture = false;
+        transparent = false;
+        index = -1;
+        aBoolean264 = false;
+        invisible = INVISIBLE;
+        longestLength = BIG_NUMBER;
+        lightSourceX = 180;
+        lightSourceZ = 155;
+        lightSourceY = 95;
+        lightSourceDist = 256;
+        featuresLight = 512;
+        globalLight = 32;
+        aBoolean260 = flag;
+        aBoolean261 = flag1;
+        aBoolean262 = flag2;
+        aBoolean263 = flag3;
+        method178(model, i, false);
+    }
+
+	public Model(byte database[], int offset, boolean flag)
 	{
-		xCoords = new double[nbrCoordPoints];
-		zCoords = new double[nbrCoordPoints];
-		yCoords = new double[nbrCoordPoints];
-		pointBrightness = new double[nbrCoordPoints];
-		pointsPerCell = new int[nbrSides];
-		surfaces = new int[nbrSides][];
-		surfaceTexture1 = new int[nbrSides];
-		surfaceTexture2 = new int[nbrSides];
-		lightSourceProjectToSurfNormal = new double[nbrSides];
-		normalLength = new double[nbrSides];
-		if (!aBoolean264) {
-			xCoordCamDist = new double[nbrCoordPoints];
-			yCoordCamDist = new double[nbrCoordPoints];
-			zCoordCamDist = new double[nbrCoordPoints];
-			xProjected = new double[nbrCoordPoints];
-			yProjected = new double[nbrCoordPoints];
-		}
-		if (!aBoolean263) {
-			aByteArray259 = new byte[nbrSides];
-			entityType = new int[nbrSides];
-		}
-		if (aBoolean260) {
-        	zCoordsDraw = zCoords;
-	        xCoordsDraw = xCoords;
-        	yCoordsDraw = yCoords;
-		} else {
-			xCoordsDraw = new double[nbrCoordPoints];
-			zCoordsDraw = new double[nbrCoordPoints];
-			yCoordsDraw = new double[nbrCoordPoints];
-		}
-		if (!aBoolean262 || !aBoolean261) {
-			xNormals = new double[nbrSides];
-			zNormals = new double[nbrSides];
-			yNormals = new double[nbrSides];
-		}
-		if (!aBoolean261) {
-			xMinArray = new double[nbrSides];
-			xMaxArray = new double[nbrSides];
-			zMinArray = new double[nbrSides];
-			zMaxArray = new double[nbrSides];
-			yMinArray = new double[nbrSides];
-			yMaxArray = new double[nbrSides];
-		}
-		this.nbrSurfaces = 0;
-		this.nbrCoordPoints = 0;
-		nPoints = nbrCoordPoints;
-		nSides = nbrSides;
-		translateX = translateZ = translateY = 0;
-		rotateX = rotateZ = rotateY = 0;
-		scaleX = scaleZ = scaleY = 256;
-		xSkew_z = ySkew_z = xSkew_y = zSkew_y = ySkew_x = zSkew_x = 256;
-		actions = 0;
-	}
-
-	public void resetProjection() {
-		xCoordCamDist = new double[nbrCoordPoints];
-		yCoordCamDist = new double[nbrCoordPoints];
-		zCoordCamDist = new double[nbrCoordPoints];
-		xProjected = new double[nbrCoordPoints];
-		yProjected = new double[nbrCoordPoints];
-	}
-
-	public void method176() {
-		nbrSurfaces = 0;
-		nbrCoordPoints = 0;
-	}
-
-	public void method177(int i, int j) {
-		nbrSurfaces -= i;
-		if (nbrSurfaces < 0)
-			nbrSurfaces = 0;
-		nbrCoordPoints -= j;
-		if (nbrCoordPoints < 0)
-			nbrCoordPoints = 0;
-	}
-
-	public Model(byte database[], int offset, boolean flag) {
 		modelType = Model.MODEL_3D;
 		visible = true;
 		aBoolean254 = true;
@@ -243,138 +344,37 @@ public class Model
 		modelType = Model.MODEL_3D;
 	}
 
-    public Model(String path)
-    {
-        modelType = Model.MODEL_3D;
-        visible = true;
-        aBoolean254 = true;
-        transparentTexture = false;
-        transparent = false;
-        index = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
-        aBoolean264 = false;
-        invisible = INVISIBLE;
-        longestLength = BIG_NUMBER;
-        lightSourceX = 180;
-        lightSourceZ = 155;
-        lightSourceY = 95;
-        lightSourceDist = 256;
-        featuresLight = 512;
-        globalLight = 32;
-        byte data[] = null;
-        try {
-            java.io.InputStream inputstream = DataOperations.streamFromPath(path);
-            DataInputStream datainputstream = new DataInputStream(inputstream);
-            data = new byte[3];
-            offset = 0;
-            for (int i = 0; i < 3;
-            		i += datainputstream.read(data, i, 3 - i));
-            int k = getNextData(data);
-            data = new byte[k];
-            offset = 0;
-            for (int j = 0; j < k;
-            		j += datainputstream.read(data, j, k - j));
-            datainputstream.close();
-        }
-        catch (IOException _ex) {
-            nbrCoordPoints = 0;
-            nbrSurfaces = 0;
-            return;
-        }
-        int nPoints = getNextData(data);
-        int nSurfaces = getNextData(data);
-        initArrays(nPoints, nSurfaces);
-        surfacesOrdered = new int[nSurfaces][];
-        for (int i = 0; i < nPoints; i++)
-        {
-            int x = getNextData(data);
-            int z = getNextData(data);
-            int y = getNextData(data);
-            insertCoordPoint(x, z, y);
-        }
+	public void resetProjection()
+	{
+		xCoordCamDist = new double[nbrCoordPoints];
+		yCoordCamDist = new double[nbrCoordPoints];
+		zCoordCamDist = new double[nbrCoordPoints];
+		xProjected = new double[nbrCoordPoints];
+		yProjected = new double[nbrCoordPoints];
+	}
 
-        for (int i = 0; i < nSurfaces; i++)
-        {
-            int pointsInCell = getNextData(data);
-            int texture1 = getNextData(data);
-            int texture2 = getNextData(data);
-            int l2 = getNextData(data);
-            featuresLight = getNextData(data);
-            globalLight = getNextData(data);
-            int i3 = getNextData(data);
-            int surfacePoints[] = new int[pointsInCell];
-            for (int j = 0; j < pointsInCell; j++)
-                surfacePoints[j] = getNextData(data);
+	public void method176()
+	{
+		nbrSurfaces = 0;
+		nbrCoordPoints = 0;
+	}
 
-            int ai1[] = new int[l2];
-            for (int j = 0; j < l2; j++)
-                ai1[j] = getNextData(data);
-
-            int lastSurface = addSurface(pointsInCell, surfacePoints, texture1, texture2);
-            surfacesOrdered[i] = ai1;
-            if (i3 == 0)
-                lightSourceProjectToSurfNormal[lastSurface] = 0;
-            else
-                lightSourceProjectToSurfNormal[lastSurface] = invisible;
-        }
-
-        modelType = Model.MODEL_3D;
-    }
-
-    public Model(Model model[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
-        modelType = Model.MODEL_3D;
-        visible = true;
-        aBoolean254 = true;
-        transparentTexture = false;
-        transparent = false;
-        index = -1;
-        aBoolean264 = false;
-        invisible = INVISIBLE;
-        longestLength = BIG_NUMBER;
-        lightSourceX = 180;
-        lightSourceZ = 155;
-        lightSourceY = 95;
-        lightSourceDist = 256;
-        featuresLight = 512;
-        globalLight = 32;
-        aBoolean260 = flag;
-        aBoolean261 = flag1;
-        aBoolean262 = flag2;
-        aBoolean263 = flag3;
-        method178(model, i, false);
-    }
-
-    public Model(Model models[], int i) {
-        modelType = Model.MODEL_3D;
-        visible = true;
-        aBoolean254 = true;
-        transparentTexture = false;
-        transparent = false;
-        index = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        aBoolean263 = false;
-        aBoolean264 = false;
-        invisible = INVISIBLE;
-        longestLength = BIG_NUMBER;
-        lightSourceX = 180;
-        lightSourceZ = 155;
-        lightSourceY = 95;
-        lightSourceDist = 256;
-        featuresLight = 512;
-        globalLight = 32;
-        method178(models, i, true);
-    }
+	public void method177(int i, int j)
+	{
+		nbrSurfaces -= i;
+		if (nbrSurfaces < 0)
+			nbrSurfaces = 0;
+		nbrCoordPoints -= j;
+		if (nbrCoordPoints < 0)
+			nbrCoordPoints = 0;
+	}
 
     public void method178(Model models[], int nModels, boolean flag)
     {
         int totNbrSurfaces = 0;
         int totNbrPoints = 0;
-        for (int i = 0; i < nModels; i++) {
+        for (int i = 0; i < nModels; i++)
+        {
             totNbrSurfaces += models[i].nbrSurfaces;
             totNbrPoints += models[i].nbrCoordPoints;
         }
@@ -474,7 +474,8 @@ public class Model
     }
 
     public Model[] makeModels(double factor1, double factor2,
-    		int factor3, int nModels, int k1, boolean flag) {
+    		int factor3, int nModels, int k1, boolean flag)
+    {
         setCurrentToDefaultConfig();
         int nPoints[] = new int[nModels];
         int nSides[] = new int[nModels];
@@ -533,7 +534,8 @@ public class Model
     		int pointsInCell, int surfacIdx)
     {
         int newSurface[] = new int[pointsInCell];
-        for (int k = 0; k < pointsInCell; k++) {
+        for (int k = 0; k < pointsInCell; k++)
+        {
             int point = newSurface[k] = model.insertCoordPoint(
             		xCoords[surface[k]],
             		zCoords[surface[k]],
@@ -621,169 +623,6 @@ public class Model
         translateY = y;
         checkActions();
         modelType = Model.MODEL_3D;
-    }
-
-    private void checkActions()
-    {
-        if (xSkew_z != 256 || ySkew_z != 256
-        		|| xSkew_y != 256 || zSkew_y != 256
-        		|| ySkew_x != 256 || zSkew_x != 256)
-        {
-            actions |= SKEW_MASK + SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
-            return;
-        }
-        if (scaleX != 256 || scaleZ != 256 || scaleY != 256)
-        {
-            actions |= SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
-            return;
-        }
-        if (rotateX != 0 || rotateZ != 0 || rotateY != 0)
-        {
-            actions |= ROTATE_MASK + TRANSLATE_MASK;
-            return;
-        }
-        if (translateX != 0 || translateZ != 0 || translateY != 0)
-        {
-            actions |= TRANSLATE_MASK;
-            return;
-        }
-        actions = 0;
-        return;
-    }
-
-    private void translate(double x, double z, double y)
-    {
-        for (int l = 0; l < nbrCoordPoints; l++)
-        {
-            xCoordsDraw[l] += x;
-            zCoordsDraw[l] += z;
-            yCoordsDraw[l] += y;
-        }
-
-    }
-
-    private void rotate(int x, int z, int y)
-    {
-        for (int i = 0; i < nbrCoordPoints; i++)
-        {
-            if (y != 0)
-            {
-                double sin = Trig.sin256[y];
-                double cos = Trig.cos256[y];
-                double tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
-                zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
-                xCoordsDraw[i] = tmp;
-            }
-            if (x != 0)
-            {
-            	double sin = Trig.sin256[x];
-            	double cos = Trig.cos256[x];
-                double tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin;
-                yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos;
-                zCoordsDraw[i] = tmp;
-            }
-            if (z != 0)
-            {
-            	double sin = Trig.sin256[z];
-            	double cos = Trig.cos256[z];
-                double tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
-                yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
-                xCoordsDraw[i] = tmp;
-            }
-        }
-
-    }
-
-    private void skew(double x_skew_z, double y_skew_z, double x_skew_y,
-    		double z_skew_y, double y_skew_x, double z_skew_x)
-    {
-        for (int k1 = 0; k1 < nbrCoordPoints; k1++)
-        {
-            if (x_skew_z != 0)
-                xCoordsDraw[k1] += zCoordsDraw[k1] * x_skew_z / 256D;
-            if (y_skew_z != 0)
-                yCoordsDraw[k1] += zCoordsDraw[k1] * y_skew_z / 256D;
-            if (x_skew_y != 0)
-                xCoordsDraw[k1] += yCoordsDraw[k1] * x_skew_y / 256D;
-            if (z_skew_y != 0)
-                zCoordsDraw[k1] += yCoordsDraw[k1] * z_skew_y / 256D;
-            if (y_skew_x != 0)
-                yCoordsDraw[k1] += xCoordsDraw[k1] * y_skew_x / 256D;
-            if (z_skew_x != 0)
-                zCoordsDraw[k1] += xCoordsDraw[k1] * z_skew_x / 256D;
-        }
-
-    }
-
-    private void scale(int i, int j, int k) {
-        for (int l = 0; l < nbrCoordPoints; l++) {
-            xCoordsDraw[l] = xCoordsDraw[l] * i / 256D;
-            zCoordsDraw[l] = zCoordsDraw[l] * j / 256D;
-            yCoordsDraw[l] = yCoordsDraw[l] * k / 256D;
-        }
-
-    }
-
-    private void findModelBounds()
-    {
-        xMin = zMin = yMin = BIG_NUMBER;
-        longestLength = xMax = zMax = yMax = -BIG_NUMBER;
-        for (int i = 0; i < nbrSurfaces; i++)
-        {
-            int surface[] = surfaces[i];
-            int firstPointIdx = surface[0];
-            int pointsInCell = pointsPerCell[i];
-            double xmin;
-            double xmax = xmin = xCoordsDraw[firstPointIdx];
-            double zmin;
-            double zmax = zmin = zCoordsDraw[firstPointIdx];
-            double ymin;
-            double ymax = ymin = yCoordsDraw[firstPointIdx];
-            for (int j = 0; j < pointsInCell; j++)
-            {
-                int point = surface[j];
-                if (xCoordsDraw[point] < xmin)
-                    xmin = xCoordsDraw[point];
-                else if (xCoordsDraw[point] > xmax)
-                    xmax = xCoordsDraw[point];
-                if (zCoordsDraw[point] < zmin)
-                    zmin = zCoordsDraw[point];
-                else if (zCoordsDraw[point] > zmax)
-                    zmax = zCoordsDraw[point];
-                if (yCoordsDraw[point] < ymin)
-                    ymin = yCoordsDraw[point];
-                else if (yCoordsDraw[point] > ymax)
-                    ymax = yCoordsDraw[point];
-            }
-
-            if (!aBoolean261) {
-                xMinArray[i] = xmin;
-                xMaxArray[i] = xmax;
-                zMinArray[i] = zmin;
-                zMaxArray[i] = zmax;
-                yMinArray[i] = ymin;
-                yMaxArray[i] = ymax;
-            }
-            if (xmax - xmin > longestLength)
-                longestLength = xmax - xmin;
-            if (zmax - zmin > longestLength)
-                longestLength = zmax - zmin;
-            if (ymax - ymin > longestLength)
-                longestLength = ymax - ymin;
-            if (xmin < xMin)
-                xMin = xmin;
-            if (xmax > xMax)
-                xMax = xmax;
-            if (zmin < zMin)
-                zMin = zmin;
-            if (zmax > zMax)
-                zMax = zmax;
-            if (ymin < yMin)
-                yMin = ymin;
-            if (ymax > yMax)
-                yMax = ymax;
-        }
-
     }
 
     public void setLightining()
@@ -958,8 +797,7 @@ public class Model
     
     public double getDistanceTo(int p)
     {
-    	// seems more accurate sphere-like when using 1.25
-		double x = xCoordCamDist[p]*1.25;
+		double x = xCoordCamDist[p];
 		double y = yCoordCamDist[p];
 		double z = zCoordCamDist[p];
 		return Math.sqrt(x*x + y*y + z*z);
@@ -1018,54 +856,16 @@ public class Model
             l = invisible;
         return l;
     }
-
-    public int nbrCoordPoints;
-    public double xCoordCamDist[];
-    public double yCoordCamDist[];
-    public double zCoordCamDist[];
-    public double xProjected[];
-    public double yProjected[];
-    public double pointBrightness[];
-    public int nbrSurfaces;
-    public int pointsPerCell[];
-    public int surfaces[][];
-    public int surfaceTexture1[];
-    public int surfaceTexture2[];
-    public double normalLength[];
-    public double lightSourceProjectToSurfNormal[];
-    public double xNormals[];
-    public double zNormals[];
-    private double yNormals[];
-    public int modelType;
-    public static final int MODEL_3D = 1, MODEL_2D = 2;
-    public boolean visible;
-    public double xMin;
-    public double xMax;
-    public double zMin;
-    public double zMax;
-    public double yMin;
-    public double yMax;
-    public boolean aBoolean254;
-    public boolean transparentTexture;
-    public boolean transparent;
-    public int index;
-    public int entityType[];
-    public byte aByteArray259[];
-    private boolean aBoolean260;
-    public boolean aBoolean261;
-    public boolean aBoolean262;
-    public boolean aBoolean263;
-    public boolean aBoolean264;
+    
+    protected double featuresLight;
+    protected double globalLight;
+    
     private static byte aByteArray267[];
     private static int anIntArray268[];
+    private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
+    private double yNormals[];
+    private boolean aBoolean260;
     private int invisible;
-    public int nPoints;
-    public double xCoords[];
-    public double zCoords[];
-    public double yCoords[];
-    public double xCoordsDraw[];
-    public double zCoordsDraw[];
-    public double yCoordsDraw[];
     private int nSides;
     private int surfacesOrdered[][];
     private double xMinArray[];
@@ -1095,10 +895,7 @@ public class Model
     private double lightSourceZ;
     private double lightSourceY;
     private double lightSourceDist;
-    protected double featuresLight;
-    protected double globalLight;
     private int offset;
-    private static final int TRANSLATE_MASK = 1, ROTATE_MASK = 2, SCALE_MASK = 4, SKEW_MASK = 8;
 
     static {
         aByteArray267 = new byte[64];
@@ -1126,5 +923,231 @@ public class Model
 
         anIntArray268[163] = 62;
         anIntArray268[36] = 63;
+    }
+
+	private void initArrays(int nbrCoordPoints, int nbrSides)
+	{
+		xCoords = new double[nbrCoordPoints];
+		zCoords = new double[nbrCoordPoints];
+		yCoords = new double[nbrCoordPoints];
+		pointBrightness = new double[nbrCoordPoints];
+		pointsPerCell = new int[nbrSides];
+		surfaces = new int[nbrSides][];
+		surfaceTexture1 = new int[nbrSides];
+		surfaceTexture2 = new int[nbrSides];
+		lightSourceProjectToSurfNormal = new double[nbrSides];
+		normalLength = new double[nbrSides];
+		if (!aBoolean264)
+		{
+			xCoordCamDist = new double[nbrCoordPoints];
+			yCoordCamDist = new double[nbrCoordPoints];
+			zCoordCamDist = new double[nbrCoordPoints];
+			xProjected = new double[nbrCoordPoints];
+			yProjected = new double[nbrCoordPoints];
+		}
+		if (!aBoolean263)
+		{
+			aByteArray259 = new byte[nbrSides];
+			entityType = new int[nbrSides];
+		}
+		if (aBoolean260)
+		{
+        	zCoordsDraw = zCoords;
+	        xCoordsDraw = xCoords;
+        	yCoordsDraw = yCoords;
+		}
+		else
+		{
+			xCoordsDraw = new double[nbrCoordPoints];
+			zCoordsDraw = new double[nbrCoordPoints];
+			yCoordsDraw = new double[nbrCoordPoints];
+		}
+		if (!aBoolean262 || !aBoolean261)
+		{
+			xNormals = new double[nbrSides];
+			zNormals = new double[nbrSides];
+			yNormals = new double[nbrSides];
+		}
+		if (!aBoolean261)
+		{
+			xMinArray = new double[nbrSides];
+			xMaxArray = new double[nbrSides];
+			zMinArray = new double[nbrSides];
+			zMaxArray = new double[nbrSides];
+			yMinArray = new double[nbrSides];
+			yMaxArray = new double[nbrSides];
+		}
+		this.nbrSurfaces = 0;
+		this.nbrCoordPoints = 0;
+		nPoints = nbrCoordPoints;
+		nSides = nbrSides;
+		translateX = translateZ = translateY = 0;
+		rotateX = rotateZ = rotateY = 0;
+		scaleX = scaleZ = scaleY = 256;
+		xSkew_z = ySkew_z = xSkew_y = zSkew_y = ySkew_x = zSkew_x = 256;
+		actions = 0;
+	}
+
+    private void checkActions()
+    {
+        if (xSkew_z != 256 || ySkew_z != 256
+        		|| xSkew_y != 256 || zSkew_y != 256
+        		|| ySkew_x != 256 || zSkew_x != 256)
+        {
+            actions |= SKEW_MASK + SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
+            return;
+        }
+        if (scaleX != 256 || scaleZ != 256 || scaleY != 256)
+        {
+            actions |= SCALE_MASK + ROTATE_MASK + TRANSLATE_MASK;
+            return;
+        }
+        if (rotateX != 0 || rotateZ != 0 || rotateY != 0)
+        {
+            actions |= ROTATE_MASK + TRANSLATE_MASK;
+            return;
+        }
+        if (translateX != 0 || translateZ != 0 || translateY != 0)
+        {
+            actions |= TRANSLATE_MASK;
+            return;
+        }
+        actions = 0;
+        return;
+    }
+
+    private void translate(double x, double z, double y)
+    {
+        for (int l = 0; l < nbrCoordPoints; l++)
+        {
+            xCoordsDraw[l] += x;
+            zCoordsDraw[l] += z;
+            yCoordsDraw[l] += y;
+        }
+
+    }
+
+    private void rotate(int x, int z, int y)
+    {
+        for (int i = 0; i < nbrCoordPoints; i++)
+        {
+            if (y != 0)
+            {
+                double sin = Trig.sin256[y];
+                double cos = Trig.cos256[y];
+                double tmp = zCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
+                zCoordsDraw[i] = zCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
+                xCoordsDraw[i] = tmp;
+            }
+            if (x != 0)
+            {
+            	double sin = Trig.sin256[x];
+            	double cos = Trig.cos256[x];
+                double tmp = zCoordsDraw[i] * cos - yCoordsDraw[i] * sin;
+                yCoordsDraw[i] = zCoordsDraw[i] * sin + yCoordsDraw[i] * cos;
+                zCoordsDraw[i] = tmp;
+            }
+            if (z != 0)
+            {
+            	double sin = Trig.sin256[z];
+            	double cos = Trig.cos256[z];
+                double tmp = yCoordsDraw[i] * sin + xCoordsDraw[i] * cos;
+                yCoordsDraw[i] = yCoordsDraw[i] * cos - xCoordsDraw[i] * sin;
+                xCoordsDraw[i] = tmp;
+            }
+        }
+
+    }
+
+    private void skew(double x_skew_z, double y_skew_z, double x_skew_y,
+    		double z_skew_y, double y_skew_x, double z_skew_x)
+    {
+        for (int k1 = 0; k1 < nbrCoordPoints; k1++)
+        {
+            if (x_skew_z != 0)
+                xCoordsDraw[k1] += zCoordsDraw[k1] * x_skew_z / 256D;
+            if (y_skew_z != 0)
+                yCoordsDraw[k1] += zCoordsDraw[k1] * y_skew_z / 256D;
+            if (x_skew_y != 0)
+                xCoordsDraw[k1] += yCoordsDraw[k1] * x_skew_y / 256D;
+            if (z_skew_y != 0)
+                zCoordsDraw[k1] += yCoordsDraw[k1] * z_skew_y / 256D;
+            if (y_skew_x != 0)
+                yCoordsDraw[k1] += xCoordsDraw[k1] * y_skew_x / 256D;
+            if (z_skew_x != 0)
+                zCoordsDraw[k1] += xCoordsDraw[k1] * z_skew_x / 256D;
+        }
+
+    }
+
+    private void scale(int i, int j, int k) {
+        for (int l = 0; l < nbrCoordPoints; l++) {
+            xCoordsDraw[l] = xCoordsDraw[l] * i / 256D;
+            zCoordsDraw[l] = zCoordsDraw[l] * j / 256D;
+            yCoordsDraw[l] = yCoordsDraw[l] * k / 256D;
+        }
+
+    }
+
+    private void findModelBounds()
+    {
+        xMin = zMin = yMin = BIG_NUMBER;
+        longestLength = xMax = zMax = yMax = -BIG_NUMBER;
+        for (int i = 0; i < nbrSurfaces; i++)
+        {
+            int surface[] = surfaces[i];
+            int firstPointIdx = surface[0];
+            int pointsInCell = pointsPerCell[i];
+            double xmin;
+            double xmax = xmin = xCoordsDraw[firstPointIdx];
+            double zmin;
+            double zmax = zmin = zCoordsDraw[firstPointIdx];
+            double ymin;
+            double ymax = ymin = yCoordsDraw[firstPointIdx];
+            for (int j = 0; j < pointsInCell; j++)
+            {
+                int point = surface[j];
+                if (xCoordsDraw[point] < xmin)
+                    xmin = xCoordsDraw[point];
+                else if (xCoordsDraw[point] > xmax)
+                    xmax = xCoordsDraw[point];
+                if (zCoordsDraw[point] < zmin)
+                    zmin = zCoordsDraw[point];
+                else if (zCoordsDraw[point] > zmax)
+                    zmax = zCoordsDraw[point];
+                if (yCoordsDraw[point] < ymin)
+                    ymin = yCoordsDraw[point];
+                else if (yCoordsDraw[point] > ymax)
+                    ymax = yCoordsDraw[point];
+            }
+
+            if (!aBoolean261) {
+                xMinArray[i] = xmin;
+                xMaxArray[i] = xmax;
+                zMinArray[i] = zmin;
+                zMaxArray[i] = zmax;
+                yMinArray[i] = ymin;
+                yMaxArray[i] = ymax;
+            }
+            if (xmax - xmin > longestLength)
+                longestLength = xmax - xmin;
+            if (zmax - zmin > longestLength)
+                longestLength = zmax - zmin;
+            if (ymax - ymin > longestLength)
+                longestLength = ymax - ymin;
+            if (xmin < xMin)
+                xMin = xmin;
+            if (xmax > xMax)
+                xMax = xmax;
+            if (zmin < zMin)
+                zMin = zmin;
+            if (zmax > zMax)
+                zMax = zmax;
+            if (ymin < yMin)
+                yMin = ymin;
+            if (ymax > yMax)
+                yMax = ymax;
+        }
+
     }
 }

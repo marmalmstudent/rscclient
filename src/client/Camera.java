@@ -411,7 +411,7 @@ public class Camera
 									double sum = 0;
 									for (int k = 0; k < pointsInCell; k++)
 										sum += model.getDistanceTo(surface[k]);
-									camMdl.drawOrderVal = sum / (double)pointsInCell;
+									camMdl.drawOrderVal = sum / ((double) pointsInCell);
 									camMdl.color = modelTexture;
 									cameraModelCount++;
 								}
