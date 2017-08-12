@@ -1182,8 +1182,13 @@ public class mudclient extends GameWindowMiddleMan
 							// TODO: make the server send objects that are further away
 							gameCamera.addModel(_GObj.model);
 							_GObj.model.addRotation(0, _GObj.id * 32, 0);
-							_GObj.model.addTranslate(x_transl, -engineHandle.getAveragedElevation(x_transl, y_transl), y_transl);
-							_GObj.model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
+							_GObj.model.addTranslate(x_transl,
+									-engineHandle.getAveragedElevation(x_transl, y_transl),
+									y_transl);
+							_GObj.model.setLightAndGradAndSource(true,
+									Camera.GLOBAL_NORMAL,
+									Camera.FEATURE_NORMAL, Camera.light_x,
+									Camera.light_z, Camera.light_y);
 							engineHandle.method412((int)_GObj.x, (int)_GObj.y, _GObj.type, _GObj.id);
 							if (_GObj.type == 74)
 								_GObj.model.addTranslate(0, -480, 0);
@@ -3854,7 +3859,9 @@ public class mudclient extends GameWindowMiddleMan
 				p0, p1, p2, p3
 		};
 		model.addSurface(4, surface, texture1, texture2);
-		model.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
+		model.setLightAndGradAndSource(false, Camera.GLOBAL_BRIGHT,
+				Camera.FEATURE_NORMAL, Camera.light_x,
+				Camera.light_z, Camera.light_y);
 		if (x >= 0 && y >= 0
 				&& x < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_WIDTH
 				&& y < EngineHandle.VISIBLE_SECTORS*EngineHandle.SECTOR_HEIGHT)
@@ -4062,8 +4069,8 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.lowDef = super.keyF1Toggle;
 		if (sectorHeight == 3)
 		{ // underground, flickering light
-			int globalLight = 40 + (int) (Math.random() * 3D);
-			int featureLight = 40 + (int) (Math.random() * 7D);
+			int globalLight = Camera.GLOBAL_DARK + (int) (Math.random() * 3D);
+			int featureLight = Camera.GLOBAL_DARK + (int) (Math.random() * 7D);
 			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
 		}
 		anInt699 = 0;
@@ -5693,7 +5700,9 @@ public class mudclient extends GameWindowMiddleMan
 			try {
 				Model model = gameDataModels[newMdlIdx].newModel();
 				gameCamera.addModel(model);
-				model.setLightAndGradAndSource(true, 48, 48, Camera.light_x, Camera.light_z, Camera.light_y);
+				model.setLightAndGradAndSource(true, Camera.GLOBAL_NORMAL,
+						Camera.FEATURE_NORMAL, Camera.light_x,
+						Camera.light_z, Camera.light_y);
 				model.copyRotTrans(gObj.model);
 				model.index = i;
 				gObj.model = model;

@@ -426,8 +426,8 @@ public class EngineHandle
                 for (int yTile = 0; yTile < VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++)
                     walkableValue[xTile][yTile] = 0;
 
-            Model model = aModel;
-            model.method176();
+            Model tiles = aModel;
+            tiles.method176();
             /* Sets elevation. */
             for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH; x++)
             {
@@ -446,7 +446,7 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
-                    model.insertCoordPoint(x, z, y);
+                    tiles.insertCoordPoint(x, z, y);
                 }
             }
 
@@ -574,20 +574,20 @@ public class EngineHandle
                                 surfacePoints1[0] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[2] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                int i = model.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
+                                int i = tiles.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
-                                model.entityType[i] = 0x30d40 + i;
+                                tiles.entityType[i] = 0x30d40 + i;
                             }
                             if (texture2 != Model.INVISIBLE)
                             {
                                 surfacePoints2[0] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints2[1] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints2[2] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                int i = model.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
+                                int i = tiles.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
-                                model.entityType[i] = 0x30d40 + i;
+                                tiles.entityType[i] = 0x30d40 + i;
                             }
                         }
                         else
@@ -597,20 +597,20 @@ public class EngineHandle
                                 surfacePoints1[0] = (tile_y+1) + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[1] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints1[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                int i = model.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
+                                int i = tiles.addSurface(3, surfacePoints1, Model.INVISIBLE, texture1);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
-                                model.entityType[i] = 0x30d40 + i;
+                                tiles.entityType[i] = 0x30d40 + i;
                             }
                             if (texture2 != Model.INVISIBLE)
                             {
                                 surfacePoints2[0] = tile_y + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints2[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                                 surfacePoints2[2] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                                int i = model.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
+                                int i = tiles.addSurface(3, surfacePoints2, Model.INVISIBLE, texture2);
                                 selectedX[i] = tile_x;
                                 selectedY[i] = tile_y;
-                                model.entityType[i] = 0x30d40 + i;
+                                tiles.entityType[i] = 0x30d40 + i;
                             }
                         }
                     }
@@ -621,10 +621,10 @@ public class EngineHandle
                         surfacePoints[1] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT;
                         surfacePoints[2] = tile_y + tile_x * VISIBLE_SECTORS*SECTOR_HEIGHT + 1;
                         surfacePoints[3] = (tile_y+1) + (tile_x+1) * VISIBLE_SECTORS*SECTOR_HEIGHT;
-                        int l19 = model.addSurface(4, surfacePoints, Model.INVISIBLE, texture1);
+                        int l19 = tiles.addSurface(4, surfacePoints, Model.INVISIBLE, texture1);
                         selectedX[l19] = tile_x;
                         selectedY[l19] = tile_y;
-                        model.entityType[l19] = 0x30d40 + l19;
+                        tiles.entityType[l19] = 0x30d40 + l19;
                     }
                 }
 
@@ -638,15 +638,15 @@ public class EngineHandle
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                     {
                         int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
-                        int p00 = model.insertCoordPoint(x, -getGroundElevation(x, y), y);
-                        int p10 = model.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y), y);
-                        int p11 = model.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y + 1), y + 1);
-                        int p01 = model.insertCoordPoint(x, -getGroundElevation(x, y + 1), y + 1);
+                        int p00 = tiles.insertCoordPoint(x, -getGroundElevation(x, y), y);
+                        int p10 = tiles.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y), y);
+                        int p11 = tiles.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y + 1), y + 1);
+                        int p01 = tiles.insertCoordPoint(x, -getGroundElevation(x, y + 1), y + 1);
                         int rect[] = {p00, p10, p11, p01};
-                        int i = model.addSurface(4, rect, color, Model.INVISIBLE);
+                        int i = tiles.addSurface(4, rect, color, Model.INVISIBLE);
                         selectedX[i] = x;
                         selectedY[i] = y;
-                        model.entityType[i] = 0x30d40 + i;
+                        tiles.entityType[i] = 0x30d40 + i;
                         drawOnMinimap(x, y, 0, color, color);
                     }
                     else if (getGroundTexturesOverlay(x, y) == 0
@@ -660,15 +660,15 @@ public class EngineHandle
                             		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getTexture() == 4)
                             {
                                 int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getColour();
-                                int p00 = model.insertCoordPoint(x, -getGroundElevation(x, y), y);
-                                int p10 = model.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y), y);
-                                int p11 = model.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y + 1), y + 1);
-                                int p01 = model.insertCoordPoint(x, -getGroundElevation(x, y + 1), y + 1);
+                                int p00 = tiles.insertCoordPoint(x, -getGroundElevation(x, y), y);
+                                int p10 = tiles.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y), y);
+                                int p11 = tiles.insertCoordPoint(x + 1, -getGroundElevation(x + 1, y + 1), y + 1);
+                                int p01 = tiles.insertCoordPoint(x, -getGroundElevation(x, y + 1), y + 1);
                                 int rect[] = {p00, p10, p11, p01};
-                                int j = model.addSurface(4, rect, color, Model.INVISIBLE);
+                                int j = tiles.addSurface(4, rect, color, Model.INVISIBLE);
                                 selectedX[j] = x;
                                 selectedY[j] = y;
-                                model.entityType[j] = 0x30d40 + j;
+                                tiles.entityType[j] = 0x30d40 + j;
                                 drawOnMinimap(x, y, 0, color, color);
                             }
                     	}
@@ -676,7 +676,9 @@ public class EngineHandle
                 }
             }
 
-            model.setLightAndGradAndSource(true, 40, 48, Camera.light_x, Camera.light_z, Camera.light_y);
+            tiles.setLightAndGradAndSource(true, Camera.GLOBAL_NORMAL,
+            		Camera.FEATURE_NORMAL, Camera.light_x,
+            		Camera.light_z, Camera.light_y);
             aModelArray596 = aModel.makeModels(
             		12, 12, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
@@ -1326,7 +1328,9 @@ public class EngineHandle
                     model.addTranslate(k1, -getAveragedElevation(k1, i2), i2);
                     model.setRotation(0, l * 32, 0);
                     camera.addModel(model);
-                    model.setLightAndSource(SECTOR_WIDTH, SECTOR_HEIGHT, Camera.light_x, Camera.light_z, Camera.light_y);
+                    model.setLightAndSource(
+                    		Camera.GLOBAL_NORMAL, Camera.FEATURE_NORMAL,
+                    		Camera.light_x, Camera.light_z, Camera.light_y);
                     if (i1 > 1 || j1 > 1) {
                         for (int k2 = x; k2 < x + i1; k2++) {
                             for (int l2 = y; l2 < y + j1; l2++) {
