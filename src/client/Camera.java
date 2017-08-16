@@ -101,7 +101,7 @@ public class Camera
 
 	public void method266() {
 		mobIndex = 0;
-		spriteModels.method176();
+		spriteModels.resetSurfAndPointCount();
 	}
 
 	public void updateFightCount(int i) {

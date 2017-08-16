@@ -1931,15 +1931,18 @@ public class GameImage implements ImageProducer, ImageObserver
 			int offset, double x, double y, double xStep, double yStep,
 			int length, int spriteWidth)
 	{
-		int pixIdx;
-		for (int i = length; i < 0; i++)
+		try 
 		{
-			pixIdx = ((int) x) + ((int) y) * spriteWidth;
-			imagePixels[offset] = spritePixels[pixIdx];
-			offset++;
-			x += xStep;
-			y += yStep;
-		}
+			int pixIdx;
+			for (int i = length; i < 0; i++)
+			{
+				pixIdx = ((int) x) + ((int) y) * spriteWidth;
+				imagePixels[offset] = spritePixels[pixIdx];
+				offset++;
+				x += xStep;
+				y += yStep;
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {}
 		
 	}
 	

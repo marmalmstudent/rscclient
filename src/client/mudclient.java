@@ -142,7 +142,6 @@ public class mudclient extends GameWindowMiddleMan
 			localhost = "unknown";
 		}
 		startTime = System.currentTimeMillis();
-		configAutoCameraAngle = true;
 		questionMenuAnswer = new String[10];
 		currentUser = "";
 		currentPass = "";
@@ -224,7 +223,6 @@ public class mudclient extends GameWindowMiddleMan
 		notInWilderness = false;
 		zoomCamera = false;
 		playerStatExperience = new int[18];
-		cameraAutoAngleDebug = false;
 		showDuelWindow = false;
 		lastLoadedNull = false;
 		experienceArray = new int[99];
@@ -1509,7 +1507,7 @@ public class mudclient extends GameWindowMiddleMan
 						doorCount = k27;
 						if (k9 != 60000)
 						{ // 65535) {
-							engineHandle.method408(i16, k20, byte5, k9);
+							engineHandle.updateDoorState(i16, k20, byte5, k9);
 							Model model = makeModel(i16, k20, byte5, k9, doorCount);
 							doorModel[doorCount] = model;
 							doorX[doorCount] = i16;
@@ -1897,7 +1895,7 @@ public class mudclient extends GameWindowMiddleMan
 				serverMessageBoxTop = false;
 				break;
 			case 152:
-				configAutoCameraAngle = DataOperations.getUnsignedByte(data[1]) == 1;
+				boolean configAutoCameraAngle = DataOperations.getUnsignedByte(data[1]) == 1;
 				configMouseButtons = DataOperations.getUnsignedByte(data[2]) == 1;
 				configSoundEffects = DataOperations.getUnsignedByte(data[3]) == 1;
 				showRoof = DataOperations.getUnsignedByte(data[4]) == 1;
@@ -2307,7 +2305,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean combatWindow;
 	private int lastLoggedInDays;
 	private int subscriptionLeftDays;
-	private boolean configAutoCameraAngle;
 	private String questionMenuAnswer[];
 	private int anInt658;
 	private int handlePacketErrorCount;
@@ -2532,6 +2529,8 @@ public class mudclient extends GameWindowMiddleMan
 	private long duelOpponentNameLong;
 
 	private boolean isTyping;
+	
+    public boolean playerIsAlive;
 	
 	private static final String getAmountText(long amount)
 	{
@@ -2810,42 +2809,6 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.drawText(str, abWin.getXCenter(), rowY, 1,
 					abWin.insideCloseBtn() ? 0xffff00 : 0xffffff);
 			rowY += abWin.getRowSeparation();
-		}
-	}
-
-	private final void autoRotateCamera()
-	{
-		if ((cameraAutoAngle & 1) == 1 && enginePlayerVisible(cameraAutoAngle))
-			return;
-		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
-		{
-			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
-			{
-				cameraAutoAngle = cameraAutoAngle + 1 & 7;
-				return;
-			}
-			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
-				cameraAutoAngle = cameraAutoAngle + 7 & 7;
-			return;
-		}
-		int ai[] = {1, -1, 2, -2, 3, -3, 4};
-		for (int i = 0; i < ai.length; ++i)
-		{
-			if (!enginePlayerVisible(cameraAutoAngle + ai[i] + 8 & 7))
-				continue;
-			cameraAutoAngle = cameraAutoAngle + ai[i] + 8 & 7;
-			break;
-		}
-
-		if ((cameraAutoAngle & 1) == 0 && enginePlayerVisible(cameraAutoAngle))
-		{
-			if (enginePlayerVisible(cameraAutoAngle + 1 & 7))
-			{
-				cameraAutoAngle = cameraAutoAngle + 1 & 7;
-				return;
-			}
-			if (enginePlayerVisible(cameraAutoAngle + 7 & 7))
-				cameraAutoAngle = cameraAutoAngle + 7 & 7;
 		}
 	}
 
@@ -3903,33 +3866,11 @@ public class mudclient extends GameWindowMiddleMan
 			method62();
 			return;
 		}
-		if (!engineHandle.playerIsAlive) {
+		if (!playerIsAlive) {
 			return;
 		}
-		for (int i = 0; i < 64; i++)
-		{ // draw other height sectors
-			gameCamera.removeModel(engineHandle.roofs[sectorHeight][i]);
-			if (sectorHeight == 0) {
-				gameCamera.removeModel(engineHandle.walls[1][i]);
-				gameCamera.removeModel(engineHandle.roofs[1][i]);
-				gameCamera.removeModel(engineHandle.walls[2][i]);
-				gameCamera.removeModel(engineHandle.roofs[2][i]);
-			}
-			zoomCamera = true;
-			if (sectorHeight == 0 && (engineHandle.walkableValue[(int)self.me.currentX][(int)self.me.currentY] & EngineHandle.WALKABLE_INDOORS) == 0)
-			{
-				if (showRoof) {
-					gameCamera.addModel(engineHandle.roofs[sectorHeight][i]);
-					if (sectorHeight == 0) {
-						gameCamera.addModel(engineHandle.walls[1][i]);
-						gameCamera.addModel(engineHandle.roofs[1][i]);
-						gameCamera.addModel(engineHandle.walls[2][i]);
-						gameCamera.addModel(engineHandle.roofs[2][i]);
-					}
-				}
-				zoomCamera = false;
-			}
-		}
+		zoomCamera = engineHandle.addHeightSectors(sectorHeight, showRoof,
+				self.me.currentX, self.me.currentY);
 
 		if (modelFireLightningSpellNumber != anInt742) {
 			anInt742 = modelFireLightningSpellNumber;
@@ -4062,10 +4003,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 
 		gameGraphics.lowDef = false;
-		if (sectorHeight == 3)
-			gameGraphics.resetImagePixels(0);
-		else
-			gameGraphics.resetImagePixels(GameImage.BACKGROUND);
+		gameGraphics.resetImagePixels(sectorHeight == 3 ? 0 : GameImage.BACKGROUND);
 		gameGraphics.lowDef = super.keyF1Toggle;
 		if (sectorHeight == 3)
 		{ // underground, flickering light
@@ -4078,41 +4016,15 @@ public class mudclient extends GameWindowMiddleMan
 		mobMsgs.clear();
 		hitpoints.clear();
 		if (freeCamera)
-		{
 			handleCharacterControlBinds();
-		}
-		if (cameraAutoAngleDebug) {
-			if (configAutoCameraAngle && !zoomCamera) {
-				int lastCameraAutoAngle = cameraAutoAngle;
-				autoRotateCamera();
-				if (cameraAutoAngle != lastCameraAutoAngle) {
-					lastAutoCameraRotatePlayerX = self.me.currentX;
-					lastAutoCameraRotatePlayerY = self.me.currentY;
-				}
-			}
-			cameraZRot = cameraAutoAngle * 128;
-			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
-			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(plrX,
-					-engineHandle.getAveragedElevation(plrX, plrY),
-					plrY, cameraXRot, cameraZRot, 0,
-					15.625D, cameraZoom);
-		} else {
-			if (configAutoCameraAngle && !zoomCamera)
-				autoRotateCamera();
-			double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
-			double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
-			gameCamera.setCamera(plrX,
-					-engineHandle.getAveragedElevation(plrX, plrY),
-					plrY, cameraXRot, cameraZRot, 0,
-					cameraHeight, cameraZoom);
-			/*
-			gameCamera.setCamera(self.me.currentX,
-					-engineHandle.getAveragedElevation(
-							self.me.currentX, self.me.currentY),
-					self.me.currentY, cameraXRot, cameraZRot, 0,
-					cameraHeight, cameraZoom);*/
-		}
+
+		double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
+		double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
+		gameCamera.setCamera(plrX,
+				-engineHandle.getAveragedElevation(plrX, plrY),
+				plrY, cameraXRot, cameraZRot, 0,
+				cameraHeight, cameraZoom);
+		
 		gameCamera.finishCamera();
 		method119();
 		if (actionPictureType > 0)
@@ -4293,13 +4205,8 @@ public class mudclient extends GameWindowMiddleMan
 			npcRecordArray = null;
 			npcArray = null;
 			self.me = null;
-			if (engineHandle != null) {
-				engineHandle.aModelArray596 = null;
-				engineHandle.walls = null;
-				engineHandle.roofs = null;
-				engineHandle.aModel = null;
+			if (engineHandle != null)
 				engineHandle = null;
-			}
 			System.gc();
 			return;
 		}
@@ -4656,21 +4563,19 @@ public class mudclient extends GameWindowMiddleMan
 			{
 				if (spellDef.getSpellType() == 6)
 				{
+					Point p = engineHandle.selected[l1];
 					MenuRightClick mrc = addCommand(
 							String.format("Cast %s on ground", spellDef.getName()),
-							"", 900, engineHandle.selectedX[l1],
-							engineHandle.selectedY[l1],
-							selSpell.id, null, null);
+							"", 900, p.x, p.y, selSpell.id, null, null);
 					rightClickMenu.add(mrc);
 					return;
 				}
 			}
 			else if (selItem == null)
 			{
+				Point p = engineHandle.selected[l1];
 				MenuRightClick mrc = addCommand("Walk here",
-						"", 920, engineHandle.selectedX[l1],
-						engineHandle.selectedY[l1],
-						null, null, null);
+						"", 920, p.x, p.y, null, null, null);
 				rightClickMenu.add(mrc);
 			}
 		}
@@ -4932,7 +4837,7 @@ public class mudclient extends GameWindowMiddleMan
 	private final boolean loadSection(int xPos, int yPos)
 	{
 		if (playerAliveTimeout != 0) {
-			engineHandle.playerIsAlive = false;
+			playerIsAlive = false;
 			return false;
 		}
 		notInWilderness = false;
@@ -4944,7 +4849,7 @@ public class mudclient extends GameWindowMiddleMan
 				&& yPos > yMinReloadNextSect
 				&& yPos < yMaxReloadNextSect)
 		{
-			engineHandle.playerIsAlive = true;
+			playerIsAlive = true;
 			return false;
 		}
 		gameGraphics.drawText("Loading... Please wait", center.x, center.y + 25, 1, 0xffffff);
@@ -4962,7 +4867,7 @@ public class mudclient extends GameWindowMiddleMan
 		yMinReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT - 2*EngineHandle.SECTOR_HEIGHT/3; // lowerAreaYTile
 		xMaxReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH + 2*EngineHandle.SECTOR_WIDTH/3; // upperAreaXTile
 		yMaxReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT + 2*EngineHandle.SECTOR_HEIGHT/3; // upperAreaYTile
-		engineHandle.method401(xPos, yPos, sectorHeight);
+		engineHandle.updateWorld(xPos, yPos, sectorHeight);
 		areaX -= wildX;
 		areaY -= wildY;
 		int areaXDiff = areaX - oldAreaX;
@@ -5009,19 +4914,19 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		for (int k2 = 0; k2 < doorCount; k2++)
+		for (int id = 0; id < doorCount; id++)
 		{
-			doorX[k2] -= areaXDiff;
-			doorY[k2] -= areaYDiff;
-			int i3 = doorX[k2];
-			int l3 = doorY[k2];
-			int j4 = doorType[k2];
-			int i5 = doorDirection[k2];
+			doorX[id] -= areaXDiff;
+			doorY[id] -= areaYDiff;
+			int x = doorX[id];
+			int y = doorY[id];
+			int type = doorType[id];
+			int direction = doorDirection[id];
 			try
 			{
-				engineHandle.method408(i3, l3, i5, j4);
-				Model model_1 = makeModel(i3, l3, i5, j4, k2);
-				doorModel[k2] = model_1;
+				engineHandle.updateDoorState(x, y, direction, type);
+				Model model_1 = makeModel(x, y, direction, type, id);
+				doorModel[id] = model_1;
 			}
 			catch (RuntimeException runtimeexception1)
 			{
@@ -5061,7 +4966,7 @@ public class mudclient extends GameWindowMiddleMan
 			}
 		}
 
-		engineHandle.playerIsAlive = true;
+		playerIsAlive = true;
 		return true;
 	}
 
@@ -5756,39 +5661,6 @@ public class mudclient extends GameWindowMiddleMan
 			if (mv.leftDown())
 				mv.releaseButton();
 		}
-	}
-
-	private final boolean enginePlayerVisible(int i) {
-		int x = (int) self.me.currentX;
-		int y = (int) self.me.currentY;
-		for (int l = 2; l >= 1; l--) {
-			if (i == 1 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 3 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x - l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 5 && ((engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 7 && ((engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS
-					|| (engineHandle.walkableValue[x + l][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS))
-				return false;
-			if (i == 0 && (engineHandle.walkableValue[x][y - l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 2 && (engineHandle.walkableValue[x - l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 4 && (engineHandle.walkableValue[x][y + l] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-			if (i == 6 && (engineHandle.walkableValue[x + l][y] & EngineHandle.WALKABLE_INDOORS) == EngineHandle.WALKABLE_INDOORS)
-				return false;
-		}
-
-		return true;
 	}
 
 	private final void playSound(String s) {
@@ -8005,7 +7877,7 @@ public class mudclient extends GameWindowMiddleMan
 				"Camera angle mode", "Mouse buttons", "Sound effects"
 		};
 		boolean condition[] = {
-				configAutoCameraAngle, !configMouseButtons, !configSoundEffects
+				false, !configMouseButtons, !configSoundEffects
 		};
 		int xOffset = 2;
 		gameGraphics.drawString("Game options - click to toggle",
@@ -8114,8 +7986,7 @@ public class mudclient extends GameWindowMiddleMan
 			List<InGameButton> buttons = optPan.getGameOptions().getButtons();
 			if (buttons.get(0).isMouseOver())
 			{
-				configAutoCameraAngle = !configAutoCameraAngle;
-				formatPacket(157, 0, configAutoCameraAngle ? 1 : 0);
+				formatPacket(157, 0, 0);
 			}
 			else if (buttons.get(1).isMouseOver())
 			{
@@ -8404,63 +8275,18 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void updateCamera()
 	{
-		if (cameraAutoAngleDebug)
+		if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
+				|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
+				|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
+				|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
 		{
-			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
-			{
-				lastAutoCameraRotatePlayerX = self.me.currentX;
-				lastAutoCameraRotatePlayerY = self.me.currentY;
-			}
+			lastAutoCameraRotatePlayerX = self.me.currentX;
+			lastAutoCameraRotatePlayerY = self.me.currentY;
 		}
-		else
-		{
-			if (lastAutoCameraRotatePlayerX - self.me.currentX < -3.90625
-					|| lastAutoCameraRotatePlayerX - self.me.currentX > 3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY < -3.90625
-					|| lastAutoCameraRotatePlayerY - self.me.currentY > 3.90625)
-			{
-				lastAutoCameraRotatePlayerX = self.me.currentX;
-				lastAutoCameraRotatePlayerY = self.me.currentY;
-			}
-			if (lastAutoCameraRotatePlayerX != self.me.currentX)
-				lastAutoCameraRotatePlayerX += (self.me.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
-			if (lastAutoCameraRotatePlayerY != self.me.currentY)
-				lastAutoCameraRotatePlayerY += (self.me.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
-			if (configAutoCameraAngle)
-			{
-				int autoAngle = cameraAutoAngle * 128;
-				int zRotDiff = autoAngle - cameraZRot;
-				byte byte0 = 1;
-				if (zRotDiff != 0)
-				{
-					cameraRotationBaseAddition++;
-					if (zRotDiff > 1024)
-					{
-						byte0 = -1;
-						zRotDiff = 1024 - zRotDiff;
-					}
-					else if (zRotDiff > 0)
-						byte0 = 1;
-					else if (zRotDiff < -1024)
-					{
-						byte0 = 1;
-						zRotDiff = 1024 + zRotDiff;
-					}
-					else if (zRotDiff < 0)
-					{
-						byte0 = -1;
-						zRotDiff = -zRotDiff;
-					}
-					cameraZRot += ((cameraRotationBaseAddition * zRotDiff + 1023) / 1024) * byte0;
-					cameraZRot &= 0x3ff;
-				}
-				else
-					cameraRotationBaseAddition = 0;
-			}
-		}
+		if (lastAutoCameraRotatePlayerX != self.me.currentX)
+			lastAutoCameraRotatePlayerX += (self.me.currentX - lastAutoCameraRotatePlayerX) / (16 + (cameraHeight - 7.8125D) / 15);
+		if (lastAutoCameraRotatePlayerY != self.me.currentY)
+			lastAutoCameraRotatePlayerY += (self.me.currentY - lastAutoCameraRotatePlayerY) / (16 + (cameraHeight - 7.8125D) / 15);
 	}
 
 	private void checkChatTab()
@@ -8587,46 +8413,7 @@ public class mudclient extends GameWindowMiddleMan
 
 	private void updateCameraPosition()
 	{
-
-		if (configAutoCameraAngle)
-		{
-			if (cameraRotationBaseAddition == 0 || cameraAutoAngleDebug)
-			{
-				if (super.keyLeftDown)
-				{
-					cameraAutoAngle = cameraAutoAngle + 1 & 7;
-					super.keyLeftDown = false;
-					if (!zoomCamera)
-					{
-						if ((cameraAutoAngle & 1) == 0)
-							cameraAutoAngle = cameraAutoAngle + 1 & 7;
-						for (int i2 = 0; i2 < 8; i2++)
-						{
-							if (enginePlayerVisible(cameraAutoAngle))
-								break;
-							cameraAutoAngle = cameraAutoAngle + 1 & 7;
-						}
-
-					}
-				}
-				if (super.keyRightDown)
-				{
-					cameraAutoAngle = cameraAutoAngle + 7 & 7;
-					super.keyRightDown = false;
-					if (!zoomCamera) {
-						if ((cameraAutoAngle & 1) == 0)
-							cameraAutoAngle = cameraAutoAngle + 7 & 7;
-						for (int j2 = 0; j2 < 8; j2++) {
-							if (enginePlayerVisible(cameraAutoAngle))
-								break;
-							cameraAutoAngle = cameraAutoAngle + 7 & 7;
-						}
-
-					}
-				}
-			}
-		}
-		else if (super.keyLeftDown)
+		if (super.keyLeftDown)
 			cameraZRot = cameraZRot + 8 & 0x3ff;
 		else if (super.keyRightDown)
 			cameraZRot = cameraZRot - 8 & 0x3ff;

@@ -353,7 +353,7 @@ public class Model
 		yProjected = new double[nbrCoordPoints];
 	}
 
-	public void method176()
+	public void resetSurfAndPointCount()
 	{
 		nbrSurfaces = 0;
 		nbrCoordPoints = 0;
