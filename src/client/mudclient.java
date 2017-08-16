@@ -2252,7 +2252,6 @@ public class mudclient extends GameWindowMiddleMan
 	private String duelOpponentName;
 	private int mouseOverBankPageText;
 	private int fightCount;
-	private int mobMessageCount;
 	private boolean showBank;
 	private List<MobMessage> mobMsg;
 	private int equipmentStatus[];
@@ -3938,7 +3937,6 @@ public class mudclient extends GameWindowMiddleMan
 			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
 		}
 		anInt699 = 0;
-		mobMessageCount = 0;
 		mobMsg.clear();
 		hitpoints.clear();
 		if (freeCamera)
@@ -6444,7 +6442,6 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final void method119() {
-		mobMessageCount = 0;
 		int i = 0;
 		for (Iterator<MobMessage> itr = mobMsg.iterator(); itr.hasNext(); i++)
 		{
