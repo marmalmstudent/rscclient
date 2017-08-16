@@ -28,10 +28,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 import javax.swing.JApplet;
+import javax.swing.JPanel;
 
-import client.util.Config;
-
-public class GameWindow extends JApplet 
+public class GameWindow extends JPanel 
 	implements Runnable, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, FocusListener, WindowListener, ComponentListener
 {
 	public static final Color BAR_COLOUR = new Color(132, 132, 132); //144, 192, 64

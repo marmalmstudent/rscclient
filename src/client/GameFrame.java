@@ -19,8 +19,8 @@ public class GameFrame extends JFrame
         graphicsTranslate = translate;
         if (graphicsTranslate)
         {
-        	bounds.x = 2;
-        	bounds.y = 18;
+        	bounds.x = 1;
+        	bounds.y = 24;
         }
         else
         {

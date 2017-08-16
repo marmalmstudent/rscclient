@@ -1,6 +1,5 @@
 package client;
 
-import client.GameWindow.MouseVariables;
 import client.UI.InGameButton;
 import client.UI.InGameGrid;
 import client.UI.menus.MenuRightClick;
@@ -47,7 +46,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -67,10 +65,6 @@ public class mudclient extends GameWindowMiddleMan
 	public static final int SPRITE_LOGO_START = 3150;
 	public static final int SPRITE_PROJECTILE_START = 3160;
 	public static final int SPRITE_TEXTURE_START = 3220;
-
-	/* Custom variables */
-	public static int itemSlotWidth = 49;
-	public static int itemSlotHeight = 34;
 	
 	public static OpenMenu om = OpenMenu.get();
 	public static String quests[] = new String[]{
@@ -94,18 +88,6 @@ public class mudclient extends GameWindowMiddleMan
 	public static int SCROLL_BAR_WIDTH = 11;
 	public static int SCROLL_BAR_HEIGHT = 12;
 	
-	public static boolean showhp;
-	public static boolean pkingmap;
-	public static boolean cameratoggle;
-	public static boolean maplock;
-	public static int mapface;
-	public static int portNumber = 43594;
-	public static boolean coords;
-	public static int zoom;
-	public static int fwdbwd;
-	public static int lftrit;
-	public static mudclient mc;
-	
 	public boolean loggedIn;
 	public int chatBoxX, chatBoxY, chatBoxWidth, chatBoxHeight, chatBoxVisRows,
 	chatPlayerEntryX, chatPlayerEntryY, chatPlayerEntryWidth, chatPlayerEntryHeight;
@@ -113,23 +95,6 @@ public class mudclient extends GameWindowMiddleMan
 	gameWindowMenuBarHeight, gameWindowMenuBarItemWidth, gameWindowMenuBarItemHeight;
 	public int miniMapX, miniMapY, miniMapWidth, miniMapHeight;
 
-
-	/* Here are some variable that are added to make the rsc client work with
-	 * the mopar wrapper */
-	public boolean graphicsEnabled;
-	public String loginMessage1;
-	public String loginMessage2;
-	/* EOF */
-
-	public static void main(String[] args) throws Exception
-	{
-		Config.initConfig();
-		GameWindowMiddleMan.clientVersion = 25;
-		mc = new mudclient();
-		Rectangle rect = mc.getVPBounds();
-		mc.createWindow(mc, new Rectangle(rect.x, rect.y, rect.width + 4, rect.height + 32),
-				"TestServer v" + GameWindowMiddleMan.clientVersion, false);
-	}
 	
 	public mudclient()
 	{
@@ -153,14 +118,9 @@ public class mudclient extends GameWindowMiddleMan
 		duelMyAccepted = false;
 		serverMessage = "";
 		duelOpponentName = "";
-		mobMsg = new String[50];
 		showBank = false;
 		doorModel = new Model[500];
-		mobMsgs = new ArrayList<MobMessage>();
-		mobMsgX = new int[50];
-		mobMsgY = new int[50];
-		mobMsgWidth = new int[50];
-		mobMsgHeight = new int[50];
+		mobMsg = new ArrayList<MobMessage>();
 		equipmentStatus = new int[6];
 		prayerOn = new boolean[50];
 		tradeOtherAccepted = false;
@@ -170,7 +130,6 @@ public class mudclient extends GameWindowMiddleMan
 		bankItemsMax = 48;
 		showQuestionMenu = false;
 		viewDistance = 25;
-		cameraAutoAngle = 1;
 		showServerMessageBox = false;
 		hasReceivedWelcomeBoxDetails = false;
 		playerStatCurrent = new int[18];
@@ -294,10 +253,12 @@ public class mudclient extends GameWindowMiddleMan
 	public static final String getAbbreviatedValue(long amount)
 	{
 		String abbrevVal = String.valueOf(amount);
-		if (amount >= 10000000)
-			abbrevVal = String.valueOf(amount/1000000) + "M";
-		else if (amount >= 100000)
-			abbrevVal = String.valueOf(amount/1000) + "K";
+		if (amount >= 10000000000L)
+			abbrevVal = Long.toString(amount/10000000000L) + "B";
+		else if (amount >= 10000000L)
+			abbrevVal = Long.toString(amount/1000000L) + "M";
+		else if (amount >= 100000L)
+			abbrevVal = Long.toString(amount/1000L) + "K";
 		return abbrevVal;
 	}
 	
@@ -312,28 +273,20 @@ public class mudclient extends GameWindowMiddleMan
 				else
 					amount += items.get(index).getAmount();
 		}
-		/*
-		System.out.printf("%s, %b, %d, %d\n", item.getName(), item.isStackable(),
-				item.getAmount(), amount);
-				*/
 		return amount;
 	}
 
 	@Override
-	public final Image createImage(int i, int j) {
-		if (GameWindow.gameFrame != null) {
+	public final Image createImage(int i, int j)
+	{
+		if (GameWindow.gameFrame != null)
 			return GameWindow.gameFrame.createImage(i, j);
-		}
 		return super.createImage(i, j);
 	}
 
 	@Override
 	public final Graphics getGraphics()
 	{
-		/*
-        if (GameWindow.gameFrame != null) {
-            return GameWindow.gameFrame.getGraphics();
-        }*/
 		return super.getGraphics();
 	}
 
@@ -377,7 +330,6 @@ public class mudclient extends GameWindowMiddleMan
 		return freeCamera;
 	}
 
-	String mobMsg[];
 	int menuMagicPrayersSelected;
 	int messagesHandleChatHist;
 	int chatHandlePlayerEntry;
@@ -472,17 +424,17 @@ public class mudclient extends GameWindowMiddleMan
 			int h = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
 			int x = i + wSprite / 2;
 			int y = j;
-			mobMsgs.add(new MobMessage(mob.lastMessage,
+			mobMsg.add(new MobMessage(mob.lastMessage,
 					new Rectangle(x, y, w, h)));
 			/*
-			mobMsgWidth[mobMessageCount] = gameGraphics.textWidth(mob.lastMessage, 1) / 2;
-			if (mobMsgWidth[mobMessageCount] > 150)
-				mobMsgWidth[mobMessageCount] = 150;
-			mobMsgHeight[mobMessageCount] = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
-			mobMsgX[mobMessageCount] = i + wSprite / 2;
-			mobMsgY[mobMessageCount] = j;
-			mobMsg[mobMessageCount++] = mob.lastMessage;
-			*/
+			int width = gameGraphics.textWidth(mob.lastMessage, 1) / 2;
+			if (width > 150)
+				width = 150;
+			int height = (gameGraphics.textWidth(mob.lastMessage, 1) / 300) * gameGraphics.messageFontHeight(1);
+			mobMsg.add(new MobMessage(mob.lastMessage,
+					new Rectangle(i + wSprite / 2, j, width, height)));
+					*/
+			
 		}
 		if (mob.currentSprite == 8
 				|| mob.currentSprite == 9
@@ -602,15 +554,14 @@ public class mudclient extends GameWindowMiddleMan
 
 		if (plr.lastMessageTimeout > 0)
 		{
-			mobMsgWidth[mobMessageCount] = gameGraphics.textWidth(plr.lastMessage, 1) / 2;
-			if (mobMsgWidth[mobMessageCount] > 150)
-				mobMsgWidth[mobMessageCount] = 150;
-			mobMsgHeight[mobMessageCount] = (
+			int mmsgWidth = gameGraphics.textWidth(plr.lastMessage, 1) / 2;
+			if (mmsgWidth > 150)
+				mmsgWidth = 150;
+			int mmsgHeight = (
 					(gameGraphics.textWidth(plr.lastMessage, 1) / 300)
 					* gameGraphics.messageFontHeight(1));
-			mobMsgX[mobMessageCount] = x + width / 2;
-			mobMsgY[mobMessageCount] = y;
-			mobMsg[mobMessageCount++] = plr.lastMessage;
+			mobMsg.add(new MobMessage(plr.lastMessage,
+					new Rectangle(x + width / 2, y, mmsgWidth, mmsgHeight)));
 		}
 		if (plr.skullTimer > 0) {
 			anIntArray858[anInt699] = x + width / 2;
@@ -891,8 +842,8 @@ public class mudclient extends GameWindowMiddleMan
 		gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
 		gameCamera.setCameraSize(center, bounds.width/2, bounds.height/2,
 				bounds.width, cameraSizeInt);
-		gameCamera.drawModelMaxDist = viewDistance*1.3;
-		gameCamera.drawSpriteMaxDist = viewDistance*1.3;
+		gameCamera.drawModelMaxDist = viewDistance*1.5;
+		gameCamera.drawSpriteMaxDist = viewDistance*1.5;
 		gameCamera.fadeFactor = 1D/16D;
 		gameCamera.fadeDist = viewDistance*23D/24D;
 		gameCamera.setModelLightSources(Camera.light_x, Camera.light_z, Camera.light_y);
@@ -925,24 +876,6 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		if (keyCode == 122)
 		{ // F11
-			/* TODO: not using recorder anymore.
-        	recording = !recording;
-        	if (recording) {
-        		try {
-        			frames.clear();
-        			File file = misc.getEmptyFile(true, currentUser);
-        			Recorder recorder = new Recorder(windowWidth, windowHeight + 11,
-        					Config.MOVIE_FPS, frames, file.getAbsolutePath(),
-        					"video.quicktime");
-        			displayMessage("Recording movie to " + file.getName(), 3, 0);
-        			new Thread(recorder).start();
-        		}
-        		catch (Exception e) {
-        		}
-        	} else {
-        		frames.add(null);
-        		displayMessage("Movie saved.", 3, 0);
-        	}*/
 		}
 		else if (keyCode == 123)
 		{ // F12
@@ -2321,11 +2254,7 @@ public class mudclient extends GameWindowMiddleMan
 	private int fightCount;
 	private int mobMessageCount;
 	private boolean showBank;
-	private List<MobMessage> mobMsgs;
-	private int mobMsgX[];
-	private int mobMsgY[];
-	private int mobMsgWidth[];
-	private int mobMsgHeight[];
+	private List<MobMessage> mobMsg;
 	private int equipmentStatus[];
 	private int loginScreenNumber;
 	private boolean prayerOn[];
@@ -2340,11 +2269,8 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean showQuestionMenu;
 	private double viewDistance;
 	private double cameraZoom;
-	private int cameraAutoAngle;
-	private int cameraRotationBaseAddition;
 	private double screenRotationX;
 	private double screenRotationY;
-	private int randomYRot;
 	private int showAbuseWindow;
 	private int duelCantRetreat;
 	private int duelUseMagic;
@@ -4013,7 +3939,7 @@ public class mudclient extends GameWindowMiddleMan
 		}
 		anInt699 = 0;
 		mobMessageCount = 0;
-		mobMsgs.clear();
+		mobMsg.clear();
 		hitpoints.clear();
 		if (freeCamera)
 			handleCharacterControlBinds();
@@ -5902,9 +5828,9 @@ public class mudclient extends GameWindowMiddleMan
 		int nInventoryRows = 6;
 		int nDuelCols = 4;
 		int nDuelRows = 2;
-		int duelWindowWidth = 8 + (nDuelCols*itemSlotWidth+1) + 11 + (nInventoryCols*itemSlotWidth+1) + 6;
+		int duelWindowWidth = 8 + (nDuelCols*InGameGrid.ITEM_SLOT_WIDTH+1) + 11 + (nInventoryCols*InGameGrid.ITEM_SLOT_WIDTH+1) + 6;
 		int duelWindowHalfWidth = duelWindowWidth/2;
-		int duelWidnowHeight = 12+18 + 2*(nDuelRows*itemSlotHeight+1) + 22 + 20;//      262;
+		int duelWidnowHeight = 12+18 + 2*(nDuelRows*InGameGrid.ITEM_SLOT_HEIGHT+1) + 22 + 20;//      262;
 		int duelWidnowHalfHeight = duelWidnowHeight/2;
 		int duelWindowX = (center.x - duelWindowHalfWidth);
 		int duelWindowY = (center.y - duelWidnowHalfHeight);
@@ -5916,16 +5842,16 @@ public class mudclient extends GameWindowMiddleMan
 		int[] titleBar = {duelWindowX, duelWindowY, duelWindowWidth, 12, 0x0000c0, 0x00};
 		int[] plrTextBox = {duelWindowX, titleBar[1]+titleBar[3], duelWindowWidth, 18, duelBgClr, duelWindowAlpha};
 		int[] plrOfferBox = {duelWindowX+leftMarginWidth, plrTextBox[1]+plrTextBox[3],
-				nDuelCols*itemSlotWidth+1, nDuelRows*itemSlotHeight+1, invBgClr, duelWindowAlpha};
+				nDuelCols*InGameGrid.ITEM_SLOT_WIDTH+1, nDuelRows*InGameGrid.ITEM_SLOT_HEIGHT+1, invBgClr, duelWindowAlpha};
 		int[] opntTextBox = {duelWindowX+leftMarginWidth, plrOfferBox[1]+plrOfferBox[3],
-				nDuelCols*itemSlotWidth+1, 22, duelBgClr, duelWindowAlpha};
+				nDuelCols*InGameGrid.ITEM_SLOT_WIDTH+1, 22, duelBgClr, duelWindowAlpha};
 		int[] opntOfferBox = {duelWindowX+leftMarginWidth, opntTextBox[1]+opntTextBox[3],
-				nDuelCols*itemSlotWidth+1, nDuelRows*itemSlotHeight+1, invBgClr, duelWindowAlpha};
+				nDuelCols*InGameGrid.ITEM_SLOT_WIDTH+1, nDuelRows*InGameGrid.ITEM_SLOT_HEIGHT+1, invBgClr, duelWindowAlpha};
 		int[] plrInvBox = {plrOfferBox[0]+plrOfferBox[2]+middleMarginWidth,
-				plrTextBox[1]+plrTextBox[3], nInventoryCols*itemSlotWidth+1,
-				nInventoryRows*itemSlotHeight+1, invBgClr, duelWindowAlpha};
+				plrTextBox[1]+plrTextBox[3], nInventoryCols*InGameGrid.ITEM_SLOT_WIDTH+1,
+				nInventoryRows*InGameGrid.ITEM_SLOT_HEIGHT+1, invBgClr, duelWindowAlpha};
 		int[] btmLeftMarginBar = {duelWindowX+leftMarginWidth, opntOfferBox[1]+opntOfferBox[3],
-				nDuelCols*itemSlotWidth+1, 20, duelBgClr, duelWindowAlpha};
+				nDuelCols*InGameGrid.ITEM_SLOT_WIDTH+1, 20, duelBgClr, duelWindowAlpha};
 		int[] leftMarginBar = {duelWindowX, plrTextBox[1]+plrTextBox[3], leftMarginWidth,
 				plrOfferBox[3]+opntTextBox[3]+opntOfferBox[3]+btmLeftMarginBar[3],
 				duelBgClr, duelWindowAlpha};
@@ -6518,24 +6444,36 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final void method119() {
-		for (int i = 0; i < mobMessageCount; i++) {
+		mobMessageCount = 0;
+		int i = 0;
+		for (Iterator<MobMessage> itr = mobMsg.iterator(); itr.hasNext(); i++)
+		{
 			int j = gameGraphics.messageFontHeight(1);
-			int l = mobMsgX[i];
-			int k1 = mobMsgY[i];
-			int j2 = mobMsgWidth[i];
-			int i3 = mobMsgHeight[i];
+			MobMessage mmsg = itr.next();
+			int l = mmsg.bounds.x;
+			int k1 = mmsg.bounds.y;
+			int j2 = mmsg.bounds.width;
+			int i3 = mmsg.bounds.height;
 			boolean flag = true;
 			while (flag) {
 				flag = false;
 				for (int i4 = 0; i4 < i; i4++)
-					if (k1 + i3 > mobMsgY[i4] - j && k1 - j < mobMsgY[i4] + mobMsgHeight[i4] && l - j2 < mobMsgX[i4] + mobMsgWidth[i4] && l + j2 > mobMsgX[i4] - mobMsgWidth[i4] && mobMsgY[i4] - j - i3 < k1) {
-						k1 = mobMsgY[i4] - j - i3;
+				{
+					MobMessage mmsg2 = mobMsg.get(i4);
+					if ((k1 + i3 > mmsg2.bounds.y - j)
+							&& (k1 - j < mmsg2.bounds.y + mmsg2.bounds.height)
+							&& (l - j2 < mmsg2.bounds.x + mmsg2.bounds.width)
+							&& (l + j2 > mmsg2.bounds.x - mmsg2.bounds.width)
+							&& (mmsg2.bounds.y - j - i3 < k1))
+					{
+						k1 = mmsg2.bounds.y - j - i3;
 						flag = true;
 					}
+				}
 
 			}
-			mobMsgY[i] = k1;
-			gameGraphics.drawBoxTextColour(mobMsg[i], l, k1, 1, 0xffff00, 300);
+			mmsg.bounds.y = k1;
+			gameGraphics.drawBoxTextColour(mmsg.message, l, k1, 1, 0xffff00, 300);
 		}
 
 		for (int k = 0; k < anInt699; k++)
@@ -7065,10 +7003,10 @@ public class mudclient extends GameWindowMiddleMan
 		{
 			for (int col = 0; col < bankGrid.getCols(); col++)
 			{
-				int slotXMin = col * itemSlotWidth - 1;
-				int slotYMin = row * itemSlotHeight - 1;
-				if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + itemSlotWidth
-						&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + itemSlotHeight
+				int slotXMin = col * InGameGrid.ITEM_SLOT_WIDTH - 1;
+				int slotYMin = row * InGameGrid.ITEM_SLOT_HEIGHT - 1;
+				if (mouseXGrid > slotXMin && mouseXGrid < slotXMin + InGameGrid.ITEM_SLOT_WIDTH
+						&& mouseYGrid > slotYMin && mouseYGrid < slotYMin + InGameGrid.ITEM_SLOT_HEIGHT
 						&& itemIdx < bankItemCount && self.getBankItems().get(itemIdx).getID() != -1)
 				{
 					selectedBankItemType = self.getBankItems().get(itemIdx).getID();
