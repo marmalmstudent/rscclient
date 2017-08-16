@@ -458,7 +458,7 @@ public class EngineHandle
 			double currentX, double currentY)
 	{
 		boolean zoomCamera = true;
-		for (int i = 0; i < 64; i++)
+		for (int i = 0; i < WORLD_OBJ_AREA; i++)
 		{ // draw other height sectors
 			camera.removeModel(roofs[sectorHeight][i]);
 			if (sectorHeight == 0) {
@@ -700,7 +700,7 @@ public class EngineHandle
         roofs[hSector] = world.makeModels(12, 12, WORLD_OBJ_SIDE,
         		WORLD_OBJ_AREA, 169, true);
         for (int l9 = 0; l9 < WORLD_OBJ_AREA; l9++)
-            camera.addModel(roofs[hSector][l9]);
+          camera.addModel(roofs[hSector][l9]);
         
         for (int j12 = 0; j12 < VISIBLE_SECTORS*SECTOR_WIDTH; j12++)
             for (int k14 = 0; k14 < VISIBLE_SECTORS*SECTOR_HEIGHT; k14++)
