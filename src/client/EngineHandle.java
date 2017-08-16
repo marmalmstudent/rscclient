@@ -30,18 +30,18 @@ public class EngineHandle
         selected = new Point[SECTOR_WIDTH*SECTOR_HEIGHT*2*VISIBLE_SECTORS*VISIBLE_SECTORS];
         for (int i = 0; i < selected.length; ++i)
         	selected[i] = new Point(0, 0);
-        walls = new Model[4][64];
-        roofs = new Model[4][64];
-        elevation = new double[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
+        walls = new Model[4][WORLD_OBJ_AREA];
+        roofs = new Model[4][WORLD_OBJ_AREA];
+        elevHandle = new ElevationHandle();
         requiresClean = true;
-        groundTiles = new Model[64];
+        groundTiles = new Model[WORLD_OBJ_AREA];
         groundTextureArray = new int[256];
         walkableValue = new int[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
         sectors = new Sector[VISIBLE_SECTORS*VISIBLE_SECTORS];
 
         if (world == null) {
-            world = new Model((73*64)*VISIBLE_SECTORS*VISIBLE_SECTORS,
-            		(73*64)*VISIBLE_SECTORS*VISIBLE_SECTORS, true, true, false, false, true);
+            world = new Model((73*WORLD_OBJ_AREA)*VISIBLE_SECTORS*VISIBLE_SECTORS,
+            		(73*WORLD_OBJ_AREA)*VISIBLE_SECTORS*VISIBLE_SECTORS, true, true, false, false, true);
         }
         try
         {
@@ -508,8 +508,8 @@ public class EngineHandle
 	private int[][] objectDirs;
 	private int[][] walkableValue;
 	private Model world;
+	private ElevationHandle elevHandle;
 	private Model[][] walls;
-	private double[][] elevation;
 	private Model[] groundTiles;
 	private Model[][] roofs;
 	private Sector[] sectors;
@@ -570,11 +570,11 @@ public class EngineHandle
 
     private void method403(int wallHeight, int x0, int y0, int x1, int y1) {
         double height = EntityHandler.getDoorDef(wallHeight).getHeight();
-        if (elevation[x0][y0] < ROOF_LIM) {
-            elevation[x0][y0] += ROOF_LIM + height;
+        if (elevHandle.getElevation(x0, y0) < ROOF_LIM) {
+        	elevHandle.addElevation(x0, y0, ROOF_LIM + height);
         }
-        if (elevation[x1][y1] < ROOF_LIM) {
-            elevation[x1][y1] += ROOF_LIM + height;
+        if (elevHandle.getElevation(x1, y1) < ROOF_LIM) {
+        	elevHandle.addElevation(x1, y1, ROOF_LIM + height);
         }
     }
 
@@ -593,7 +593,7 @@ public class EngineHandle
         if (requiresClean) {
             camera.cleanupModels();
         }
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < WORLD_OBJ_AREA; i++) {
             groundTiles[i] = null;
             for (int j = 0; j < 4; j++) {
                 walls[j][i] = null;
@@ -666,7 +666,7 @@ public class EngineHandle
         	// objects; roofs, fences, walls etc but not trees and and stuff.
             for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH; x++)
                 for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
-                    elevation[x][y] = getGroundElevation(x, y);
+                	elevHandle.setElevation(x, y, getGroundElevation(x, y));
         }
     }
     
@@ -704,8 +704,8 @@ public class EngineHandle
         
         for (int j12 = 0; j12 < VISIBLE_SECTORS*SECTOR_WIDTH; j12++)
             for (int k14 = 0; k14 < VISIBLE_SECTORS*SECTOR_HEIGHT; k14++)
-                if (elevation[j12][k14] >= ROOF_LIM)
-                    elevation[j12][k14] -= ROOF_LIM;
+                if (elevHandle.getElevation(j12, k14) >= ROOF_LIM)
+                	elevHandle.subtractElevation(j12, k14, ROOF_LIM);
     }
     
     private void setTileElevation(Model tiles)
@@ -1059,10 +1059,11 @@ public class EngineHandle
                 	int[] x = {i, i+1, i+1, i};
                 	int[] y = {j, j, j+1, j+1};
                     double[] z = {
-                    		elevation[x[0]][y[0]],
-                    		elevation[x[1]][y[1]],
-                    		elevation[x[2]][y[2]],
-                    		elevation[x[3]][y[3]]};
+                    		elevHandle.getElevation(x[0], y[0]),
+                    		elevHandle.getElevation(x[1], y[1]),
+                    		elevHandle.getElevation(x[2], y[2]),
+                    		elevHandle.getElevation(x[3], y[3])
+                    };
                     if (z[0] > ROOF_LIM)
                     	z[0] -= ROOF_LIM;
                     if (z[1] > ROOF_LIM)
@@ -1081,21 +1082,21 @@ public class EngineHandle
                     if (zMax >= ROOF_LIM)
                         zMax -= ROOF_LIM; 
                     if (z[0] < ROOF_LIM)
-                        elevation[x[0]][y[0]] = zMax;
+                    	elevHandle.setElevation(x[0], y[0], zMax);
                     else
-                        elevation[x[0]][y[0]] -= ROOF_LIM;
+                    	elevHandle.subtractElevation(x[0], y[0], ROOF_LIM);
                     if (z[1] < ROOF_LIM)
-                    	elevation[x[1]][y[1]] = zMax;
+                    	elevHandle.setElevation(x[1], y[1], zMax);
                     else
-                        elevation[x[1]][y[1]] -= ROOF_LIM;
+                    	elevHandle.subtractElevation(x[1], y[1], ROOF_LIM);
                     if (z[2] < ROOF_LIM)
-                    	elevation[x[2]][y[2]] = zMax;
+                    	elevHandle.setElevation(x[2], y[2], zMax);
                     else
-                        elevation[x[2]][y[2]] -= ROOF_LIM;
+                    	elevHandle.subtractElevation(x[2], y[2], ROOF_LIM);
                     if (z[3] < ROOF_LIM)
-                    	elevation[x[3]][y[3]] = zMax;
+                    	elevHandle.setElevation(x[3], y[3], zMax);
                     else
-                        elevation[x[3]][y[3]] -= ROOF_LIM;
+                    	elevHandle.subtractElevation(x[3], y[3], ROOF_LIM);
                 }
             }
         }
@@ -1115,26 +1116,27 @@ public class EngineHandle
                 	double[] x_big = {i, i, i+1, i+1};
                 	double[] y_big = {j, j, j+1, j+1};
                     double[] z = {
-                    		elevation[x[0]][y[0]],
-                    		elevation[x[1]][y[1]],
-                    		elevation[x[2]][y[2]],
-                    		elevation[x[3]][y[3]]};
+                    		elevHandle.getElevation(x[0], y[0]),
+                    		elevHandle.getElevation(x[1], y[1]),
+                    		elevHandle.getElevation(x[2], y[2]),
+                    		elevHandle.getElevation(x[3], y[3])
+                    };
                     double roofHeight = EntityHandler.getElevationDef(color - 1).getRoofHeight();
                     if (isNotEdge(x[0], y[0]) && z[0] < ROOF_LIM) {
                         z[0] += roofHeight + ROOF_LIM;
-                        elevation[x[0]][y[0]] = z[0];
+                    	elevHandle.setElevation(x[0], y[0], z[0]);
                     }
                     if (isNotEdge(x[1], y[1]) && z[1] < ROOF_LIM) {
                         z[1] += roofHeight + ROOF_LIM;
-                        elevation[x[1]][y[1]] = z[1];
+                    	elevHandle.setElevation(x[1], y[1], z[1]);
                     }
                     if (isNotEdge(x[2], y[2]) && z[2] < ROOF_LIM) {
                         z[2] += roofHeight + ROOF_LIM;
-                        elevation[x[2]][y[2]] = z[2];
+                    	elevHandle.setElevation(x[2], y[2], z[2]);
                     }
                     if (isNotEdge(x[3], y[3]) && z[3] < ROOF_LIM) {
                         z[3] += roofHeight + ROOF_LIM;
-                        elevation[x[3]][y[3]] = z[3];
+                    	elevHandle.setElevation(x[3], y[3], z[3]);
                     }
                     if (z[0] >= ROOF_LIM)
                         z[0] -= ROOF_LIM;
@@ -1338,10 +1340,10 @@ public class EngineHandle
         double height = EntityHandler.getDoorDef(i).getHeight();
         int texture1 = EntityHandler.getDoorDef(i).getTexture1();
         int texture2 = EntityHandler.getDoorDef(i).getTexture2();
-        int p0 = model.insertCoordPoint(x0, -elevation[x0][y0], y0);
-        int p1 = model.insertCoordPoint(x0, -elevation[x0][y0] - height, y0);
-        int p2 = model.insertCoordPoint(x1, -elevation[x1][y1] - height, y1);
-        int p3 = model.insertCoordPoint(x1, -elevation[x1][y1], y1);
+        int p0 = model.insertCoordPoint(x0, -elevHandle.getElevation(x0, y0), y0);
+        int p1 = model.insertCoordPoint(x0, -elevHandle.getElevation(x0, y0) - height, y0);
+        int p2 = model.insertCoordPoint(x1, -elevHandle.getElevation(x1, y1) - height, y1);
+        int p3 = model.insertCoordPoint(x1, -elevHandle.getElevation(x1, y1), y1);
         int i4 = model.addSurface(4, new int[]{p0, p1, p2, p3}, texture1, texture2);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
             model.entityType[i4] = 30000 + i;
@@ -1464,5 +1466,34 @@ public class EngineHandle
             System.exit(1);
         }
         sectors[sector] = s;
+    }
+    
+    private class ElevationHandle
+    {
+    	double[][] elevation;
+    	ElevationHandle()
+    	{
+            elevation = new double[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
+    	}
+    	
+    	void addElevation(int x, int y, double elev)
+    	{
+    		elevation[x][y] += elev;
+    	}
+    	
+    	void subtractElevation(int x, int y, double elev)
+    	{
+    		elevation[x][y] -= elev;
+    	}
+    	
+    	void setElevation(int x, int y, double elev)
+    	{
+    		elevation[x][y] = elev;
+    	}
+    	
+    	double getElevation(int x, int y)
+    	{
+    		return elevation[x][y];
+    	}
     }
 }
