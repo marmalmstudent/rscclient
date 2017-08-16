@@ -514,6 +514,11 @@ public class EngineHandle
 	private Model[][] roofs;
 	private Sector[] sectors;
 	
+	private int getSectorID(int i, int j)
+	{
+		return j*VISIBLE_SECTORS + i;
+	}
+	
 	private Tile getTile(double x, double y)
     {
         if (x < 0 || x >= VISIBLE_SECTORS*SECTOR_WIDTH
@@ -526,7 +531,7 @@ public class EngineHandle
             	if (x >= i*SECTOR_WIDTH && x < (i+1)*SECTOR_WIDTH
             			&& y >= j*SECTOR_HEIGHT && y < (j+1)*SECTOR_HEIGHT)
             	{
-            		section = j*VISIBLE_SECTORS + i;
+            		section = getSectorID(i, j);
                     x -= i*SECTOR_WIDTH;
                     y -= j*SECTOR_HEIGHT;
                     break;
@@ -602,12 +607,20 @@ public class EngineHandle
     
     private void loadSections(int xSector, int ySector, int hSector)
     {
+        int nextXSector = xSector / SECTOR_WIDTH;
+        int nextYSector = ySector / SECTOR_HEIGHT;
+        for (int y = -((VISIBLE_SECTORS-1)/2), j = 0; j < VISIBLE_SECTORS; ++j, ++y)
+        	for (int x = -((VISIBLE_SECTORS-1)/2), i = 0; i < VISIBLE_SECTORS; ++i, ++x)
+            	loadSection(nextXSector + x, nextYSector + y,
+            			hSector, getSectorID(i, j));
+    	/*
         int nextXSector = (xSector + SECTOR_WIDTH/2) / SECTOR_WIDTH;
         int nextYSector = (ySector + SECTOR_HEIGHT/2) / SECTOR_HEIGHT;
         for (int j = 0; j < VISIBLE_SECTORS; ++j)
         	for (int i = 0; i < VISIBLE_SECTORS; ++i)
             	loadSection(nextXSector + (i - 1), nextYSector + (j - 1),
-            			hSector, j*VISIBLE_SECTORS + i);
+            			hSector, getSectorID(i, j));
+    	 */
         method400();
     }
 
@@ -661,8 +674,11 @@ public class EngineHandle
     {
         makeWalls(currentHeight);
         
+        /* minimap */
         if (currentHeight)
-            gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1, 0, 0, 285, 285);
+            gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1,
+            		0, 0, SECTOR_WIDTH*VISIBLE_SECTORS*3,
+            		SECTOR_HEIGHT*VISIBLE_SECTORS*3);
         
         // viewport walls, fences etc.
         world.setLightAndGradAndSource(false, 60, 24, Camera.light_x, Camera.light_z, Camera.light_y);
@@ -962,7 +978,9 @@ public class EngineHandle
                             orWalkable(x, y - 1, WALKABLE_2);
                     }
                     if (currentHeight)
+                    {
                         gameImage.drawLineX(x * 3, y * 3, 3, mmWallColor);
+                    }
                 }
                 k3 = getHorizontalWall(x, y);
                 if (k3 > 0 && EntityHandler.getDoorDef(k3 - 1).getUnknown() == 0)
@@ -975,7 +993,8 @@ public class EngineHandle
                             orWalkable(x - 1, y, WALKABLE_3);
                         }
                     }
-                    if (currentHeight) {
+                    if (currentHeight) 
+                    {
                         gameImage.drawLineY(x * 3, y * 3, 3, mmWallColor);
                     }
                 }

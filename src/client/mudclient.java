@@ -4857,16 +4857,24 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.drawImage(aGraphics936, 0, 0);
 		int oldAreaX = areaX;
 		int oldAreaY = areaY;
-		int i1 = (xPos + EngineHandle.SECTOR_WIDTH/2) / EngineHandle.SECTOR_WIDTH; // tile x (or y)
-		int j1 = (yPos + EngineHandle.SECTOR_HEIGHT/2) / EngineHandle.SECTOR_HEIGHT; // tile y (or x)
+		int nextAreaX = xPos / EngineHandle.SECTOR_WIDTH;
+		int nextAreaY = yPos / EngineHandle.SECTOR_HEIGHT;
 		sectorHeight = wildYSubtract;
-		areaX = i1 * EngineHandle.SECTOR_WIDTH - EngineHandle.SECTOR_WIDTH; // next areaX
-		areaY = j1 * EngineHandle.SECTOR_HEIGHT - EngineHandle.SECTOR_HEIGHT; // next areaY
+		areaX = (nextAreaX - 1) * EngineHandle.SECTOR_WIDTH;
+		areaY = (nextAreaY - 1) * EngineHandle.SECTOR_HEIGHT;
 		// sets
-		xMinReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH - 2*EngineHandle.SECTOR_WIDTH/3; // lowerAreaXTile
-		yMinReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT - 2*EngineHandle.SECTOR_HEIGHT/3; // lowerAreaYTile
-		xMaxReloadNextSect = i1 * EngineHandle.SECTOR_WIDTH + 2*EngineHandle.SECTOR_WIDTH/3; // upperAreaXTile
-		yMaxReloadNextSect = j1 * EngineHandle.SECTOR_HEIGHT + 2*EngineHandle.SECTOR_HEIGHT/3; // upperAreaYTile
+		int visSec = EngineHandle.VISIBLE_SECTORS;
+		int minMod = (1 - (visSec-1)/2 * 3);
+		int maxMod = (2 + visSec/2 * 3);
+		System.out.println(minMod +", " + maxMod);
+		xMinReloadNextSect = nextAreaX*EngineHandle.SECTOR_WIDTH
+				+ minMod*EngineHandle.SECTOR_WIDTH/3;
+		yMinReloadNextSect = nextAreaY*EngineHandle.SECTOR_HEIGHT
+				+ minMod*EngineHandle.SECTOR_HEIGHT/3;
+		xMaxReloadNextSect = nextAreaX*EngineHandle.SECTOR_WIDTH
+				+ maxMod*EngineHandle.SECTOR_WIDTH/3;
+		yMaxReloadNextSect = nextAreaY*EngineHandle.SECTOR_HEIGHT
+				+ maxMod*EngineHandle.SECTOR_HEIGHT/3;
 		engineHandle.updateWorld(xPos, yPos, sectorHeight);
 		areaX -= wildX;
 		areaY -= wildY;
@@ -6566,8 +6574,8 @@ public class mudclient extends GameWindowMiddleMan
 		double cos = Trig.cos1024[0x400 - zRot & 0x3ff];
 
 		/* minimap tiles */
-		double x = (self.me.currentX - 47.1875) * 4.5;
-		double y = (self.me.currentY - 47.1875) * 4.5;
+		double x = (self.me.currentX - 24*EngineHandle.VISIBLE_SECTORS)*4.5;
+		double y = (self.me.currentY - 24*EngineHandle.VISIBLE_SECTORS)*4.5;
 		double tmp = y * sin + x * cos;
 		y = y * cos - x * sin;
 		x = tmp;
