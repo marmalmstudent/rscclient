@@ -1114,7 +1114,7 @@ public class mudclient extends GameWindowMiddleMan
 							gameCamera.addModel(_GObj.model);
 							_GObj.model.addRotation(0, _GObj.id * 32, 0);
 							_GObj.model.addTranslate(x_transl,
-									-engineHandle.getAveragedElevation(x_transl, y_transl),
+									-engineHandle.getAveragedElevation(x_transl, y_transl, sectorHeight),
 									y_transl);
 							_GObj.model.setLightAndGradAndSource(true,
 									Camera.GLOBAL_NORMAL,
@@ -3739,10 +3739,10 @@ public class mudclient extends GameWindowMiddleMan
 			modelX1 = x + 1;
 			modelX2 = y + 1;
 		}
-		int p0 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY), modelY);
-		int p1 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY) - height, modelY);
-		int p2 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2) - height, modelX2);
-		int p3 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2), modelX2);
+		int p0 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY, sectorHeight), modelY);
+		int p1 = model.insertCoordPoint(modelX, -engineHandle.getAveragedElevation(modelX, modelY, sectorHeight) - height, modelY);
+		int p2 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2, sectorHeight) - height, modelX2);
+		int p3 = model.insertCoordPoint(modelX1, -engineHandle.getAveragedElevation(modelX1, modelX2, sectorHeight), modelX2);
 		int surface[] = {
 				p0, p1, p2, p3
 		};
@@ -3844,7 +3844,7 @@ public class mudclient extends GameWindowMiddleMan
 			if (mob.colourBottomType != 255) {
 				double x = mob.currentX;
 				double y = mob.currentY;
-				double z = -engineHandle.getAveragedElevation(x, y);
+				double z = -engineHandle.getAveragedElevation(x, y, sectorHeight);
 				double mobWidth = 1.1328125D;
 				double mobHeight = 1.71875D;
 				int l3 = gameCamera.add2DModel(5000 + i1, x, z, y, mobWidth, mobHeight, i1 + 10000);
@@ -3869,10 +3869,10 @@ public class mudclient extends GameWindowMiddleMan
 				if (npc != null) {
 					double px = player.currentX;
 					double py = player.currentY;
-					double pz = -engineHandle.getAveragedElevation(px, py) - 0.859375D;
+					double pz = -engineHandle.getAveragedElevation(px, py, sectorHeight) - 0.859375D;
 					double nx = npc.currentX;
 					double ny = npc.currentY;
-					double nz = -engineHandle.getAveragedElevation(nx, ny) - EntityHandler.getNpcDef(npc.type).getHeight() / 2;
+					double nz = -engineHandle.getAveragedElevation(nx, ny, sectorHeight) - EntityHandler.getNpcDef(npc.type).getHeight() / 2;
 					double i10 = (px * player.anInt176 + nx * (attackingInt40 - player.anInt176)) / attackingInt40;
 					double j10 = (pz * player.anInt176 + nz * (attackingInt40 - player.anInt176)) / attackingInt40;
 					double k10 = (py * player.anInt176 + ny * (attackingInt40 - player.anInt176)) / attackingInt40;
@@ -3890,7 +3890,7 @@ public class mudclient extends GameWindowMiddleMan
 			Mob npc = itr.next();
 			double mobx = npc.currentX;
 			double moby = npc.currentY;
-			double mobz = -engineHandle.getAveragedElevation(mobx, moby);
+			double mobz = -engineHandle.getAveragedElevation(mobx, moby, sectorHeight);
 			double mobWidth = EntityHandler.getNpcDef(npc.type).getWidth();
 			double mobHeight = EntityHandler.getNpcDef(npc.type).getHeight();
 			int i9 = gameCamera.add2DModel(20000 + l1, mobx, mobz, moby,
@@ -3907,7 +3907,7 @@ public class mudclient extends GameWindowMiddleMan
 			double mobWidth = 0.75D;
 			double mobHeight = 0.5D;
 			gameCamera.add2DModel(40000 + groundItemType[j2], x,
-					-engineHandle.getAveragedElevation(x, y) - groundItemZ[j2],
+					-engineHandle.getAveragedElevation(x, y, sectorHeight) - groundItemZ[j2],
 					y, mobWidth, mobHeight, j2 + 20000);
 			fightCount++;
 		}
@@ -3922,7 +3922,7 @@ public class mudclient extends GameWindowMiddleMan
 				mobHeight = 2D;
 			if (j9 == 1)
 				mobHeight = 0.5D;
-			gameCamera.add2DModel(50000 + mdlIdx, x, -engineHandle.getAveragedElevation(x, y),
+			gameCamera.add2DModel(50000 + mdlIdx, x, -engineHandle.getAveragedElevation(x, y, sectorHeight),
 					y, mobWidth, mobHeight, mdlIdx + 50000);
 			fightCount++;
 		}
@@ -3945,7 +3945,7 @@ public class mudclient extends GameWindowMiddleMan
 		double plrX = lastAutoCameraRotatePlayerX + screenRotationX;
 		double plrY = lastAutoCameraRotatePlayerY + screenRotationY;
 		gameCamera.setCamera(plrX,
-				-engineHandle.getAveragedElevation(plrX, plrY),
+				-engineHandle.getAveragedElevation(plrX, plrY, sectorHeight),
 				plrY, cameraXRot, cameraZRot, 0,
 				cameraHeight, cameraZoom);
 		
@@ -4831,7 +4831,7 @@ public class mudclient extends GameWindowMiddleMan
 				{
 					gameCamera.addModel(gObj.model); // objects
 					gObj.model.setTranslate(x,
-							-engineHandle.getAveragedElevation(x, y),
+							-engineHandle.getAveragedElevation(x, y, sectorHeight),
 							y);
 					engineHandle.method412((int)gObj.x, (int)gObj.y, gObj.type, gObj.id); // shadows
 					if (gObj.type == 74)
