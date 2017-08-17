@@ -25,7 +25,6 @@ public class GameImage implements ImageProducer, ImageObserver
     public static int anInt347;
     public static int anInt348;
     public static int anInt352;
-    public Sprite[] sprites;
     public BufferedImage loginScreen;
     public int gameWindowWidth;
     public int gameWindowHeight;
@@ -42,7 +41,7 @@ public class GameImage implements ImageProducer, ImageObserver
         gameWindowWidth = width;
         gameWindowHeight = height;
         imagePixelArray = new int[width * height];
-        sprites = new Sprite[maxSprites];
+        spriteHandle = new SpriteHandler(maxSprites);
         if (width > 1 && height > 1 && component != null) {
             colourModel = new DirectColorModel(32, 0xff0000, 0xff00, 0xff);
             image = component.createImage(this);
@@ -258,6 +257,11 @@ public class GameImage implements ImageProducer, ImageObserver
         imageConsumer.setPixels(0, 0, gameWindowWidth, gameWindowHeight,
         		colourModel, imagePixelArray, 0, gameWindowWidth);
         imageConsumer.imageComplete(ImageConsumer.TOPDOWNLEFTRIGHT);
+    }
+    
+    public Sprite getSprite(int index)
+    {
+    	return spriteHandle.getSprite(index);
     }
     
     public boolean loadSprite(int id, String packageName, int amount)
@@ -585,8 +589,7 @@ public class GameImage implements ImageProducer, ImageObserver
 
     public void cleanupSprites()
     {
-        for (int i = 0; i < sprites.length; i++)
-            sprites[i] = null;
+    	spriteHandle.garbageCollect();
     }
 
     public void storeSpriteHoriz(int index, int startX, int startY,
@@ -605,7 +608,7 @@ public class GameImage implements ImageProducer, ImageObserver
         sprite.setRequiresShift(false);
         sprite.setTotalSize(width, height);
 
-        sprites[index] = sprite;
+        spriteHandle.addSprite(sprite, index);
     }
 
     public void storeSpriteVert(int index, int startX, int startY,
@@ -624,20 +627,21 @@ public class GameImage implements ImageProducer, ImageObserver
         sprite.setRequiresShift(false);
         sprite.setTotalSize(width, height);
 
-        sprites[index] = sprite;
+        spriteHandle.addSprite(sprite, index);
     }
 
     public void drawPicture(int x, int y, int picture)
     {
         try {
-            if (sprites[picture].requiresShift()) {
-                x += sprites[picture].getXShift();
-                y += sprites[picture].getYShift();
+        	Sprite sprite = getSprite(picture);
+            if (sprite.requiresShift()) {
+                x += sprite.getXShift();
+                y += sprite.getYShift();
             }
             int l = x + y * gameWindowWidth;
             int i1 = 0;
-            int j1 = sprites[picture].getHeight();
-            int k1 = sprites[picture].getWidth();
+            int j1 = sprite.getHeight();
+            int k1 = sprite.getWidth();
             int l1 = gameWindowWidth - k1;
             int i2 = 0;
             if (y < bounds.y) {
@@ -670,13 +674,13 @@ public class GameImage implements ImageProducer, ImageObserver
             if (lowDef) {
                 byte0 = 2;
                 l1 += gameWindowWidth;
-                i2 += sprites[picture].getWidth();
+                i2 += sprite.getWidth();
                 if ((y & 1) != 0) {
                     l += gameWindowWidth;
                     j1--;
                 }
             }
-            drawImage(imagePixelArray, sprites[picture].getPixels(), i1, l, k1, j1, l1, i2, byte0);
+            drawImage(imagePixelArray, sprite.getPixels(), i1, l, k1, j1, l1, i2, byte0);
         }
         catch (Exception e) {
             System.err.println("Error drawing: " + picture);
@@ -689,26 +693,27 @@ public class GameImage implements ImageProducer, ImageObserver
     		int newHeight, int spriteId)
     {
         try {
-            int spriteWidthInit = sprites[spriteId].getWidth();
-            int spriteHeightInit = sprites[spriteId].getHeight();
+        	Sprite sprite = getSprite(spriteId);
+            int spriteWidthInit = sprite.getWidth();
+            int spriteHeightInit = sprite.getHeight();
             int l1 = 0;
             int i2 = 0;
             int j2 = (spriteWidthInit << 16) / newWidth; // instead of using decimals i guess
             int k2 = (spriteHeightInit << 16) / newHeight; // instead of using decimals i guess
-            if (sprites[spriteId].requiresShift())
+            if (sprite.requiresShift())
             {
-                int l2 = sprites[spriteId].getTotalWidth();
-                int j3 = sprites[spriteId].getTotalHeight();
+                int l2 = sprite.getTotalWidth();
+                int j3 = sprite.getTotalHeight();
                 j2 = (l2 << 16) / newWidth;
                 k2 = (j3 << 16) / newHeight;
-                startX += ((sprites[spriteId].getXShift() * newWidth + l2) - 1) / l2;
-                startY += ((sprites[spriteId].getYShift() * newHeight + j3) - 1) / j3;
-                if ((sprites[spriteId].getXShift() * newWidth) % l2 != 0)
-                    l1 = (l2 - (sprites[spriteId].getXShift() * newWidth) % l2 << 16) / newWidth;
-                if ((sprites[spriteId].getYShift() * newHeight) % j3 != 0)
-                    i2 = (j3 - (sprites[spriteId].getYShift() * newHeight) % j3 << 16) / newHeight;
-                newWidth = (newWidth * (sprites[spriteId].getWidth() - (l1 >> 16))) / l2;
-                newHeight = (newHeight * (sprites[spriteId].getHeight() - (i2 >> 16))) / j3;
+                startX += ((sprite.getXShift() * newWidth + l2) - 1) / l2;
+                startY += ((sprite.getYShift() * newHeight + j3) - 1) / j3;
+                if ((sprite.getXShift() * newWidth) % l2 != 0)
+                    l1 = (l2 - (sprite.getXShift() * newWidth) % l2 << 16) / newWidth;
+                if ((sprite.getYShift() * newHeight) % j3 != 0)
+                    i2 = (j3 - (sprite.getYShift() * newHeight) % j3 << 16) / newHeight;
+                newWidth = (newWidth * (sprite.getWidth() - (l1 >> 16))) / l2;
+                newHeight = (newHeight * (sprite.getHeight() - (i2 >> 16))) / j3;
             }
             int i3 = startX + startY * gameWindowWidth;
             int k3 = gameWindowWidth - newWidth;
@@ -744,7 +749,7 @@ public class GameImage implements ImageProducer, ImageObserver
                     newHeight--;
                 }
             }
-            drawImageScale(imagePixelArray, sprites[spriteId].getPixels(), l1, i2, i3, k3, newWidth, newHeight, j2, k2, spriteWidthInit, byte0);
+            drawImageScale(imagePixelArray, sprite.getPixels(), l1, i2, i3, k3, newWidth, newHeight, j2, k2, spriteWidthInit, byte0);
             return;
         }
         catch (Exception _ex) {
@@ -754,14 +759,15 @@ public class GameImage implements ImageProducer, ImageObserver
 
     public void method232(int i, int j, int spriteId, int spriteAlpha)
     {
-        if (sprites[spriteId].requiresShift()) {
-            i += sprites[spriteId].getXShift();
-            j += sprites[spriteId].getYShift();
+    	Sprite sprite = getSprite(spriteId);
+        if (sprite.requiresShift()) {
+            i += sprite.getXShift();
+            j += sprite.getYShift();
         }
         int imageStart = i + j * gameWindowWidth;
         int spriteStart = 0;
-        int spriteHeight = sprites[spriteId].getHeight();
-        int spriteWidth = sprites[spriteId].getWidth();
+        int spriteHeight = sprite.getHeight();
+        int spriteWidth = sprite.getWidth();
         int imageYStep = gameWindowWidth - spriteWidth;
         int spriteYStep = 0;
         if (j < bounds.y) {
@@ -794,13 +800,13 @@ public class GameImage implements ImageProducer, ImageObserver
         if (lowDef) {
             yStep = 2;
             imageYStep += gameWindowWidth;
-            spriteYStep += sprites[spriteId].getWidth();
+            spriteYStep += sprite.getWidth();
             if ((j & 1) != 0) {
                 imageStart += gameWindowWidth;
                 spriteHeight--;
             }
         }
-        drawImageTransparent(imagePixelArray, sprites[spriteId].getPixels(),
+        drawImageTransparent(imagePixelArray, sprite.getPixels(),
         		spriteStart, imageStart, spriteWidth, spriteHeight,
         		imageYStep, spriteYStep, yStep, spriteAlpha);
     }
@@ -819,25 +825,26 @@ public class GameImage implements ImageProducer, ImageObserver
     {
         try
         {
-            int spriteWidthInit = sprites[spriteId].getWidth();
-            int spriteHeightInit = sprites[spriteId].getHeight();
+        	Sprite sprite = getSprite(spriteId);
+            int spriteWidthInit = sprite.getWidth();
+            int spriteHeightInit = sprite.getHeight();
             int i2 = 0;
             int j2 = 0;
             int k2 = (spriteWidthInit << 16) / newWidth;
             int l2 = (spriteHeightInit << 16) / newHeight;
-            if (sprites[spriteId].requiresShift()) {
-                int i3 = sprites[spriteId].getTotalWidth();
-                int k3 = sprites[spriteId].getTotalHeight();
+            if (sprite.requiresShift()) {
+                int i3 = sprite.getTotalWidth();
+                int k3 = sprite.getTotalHeight();
                 k2 = (i3 << 16) / newWidth;
                 l2 = (k3 << 16) / newHeight;
-                startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
-                startY += ((sprites[spriteId].getYShift() * newHeight + k3) - 1) / k3;
-                if ((sprites[spriteId].getXShift() * newWidth) % i3 != 0)
-                    i2 = (i3 - (sprites[spriteId].getXShift() * newWidth) % i3 << 16) / newWidth;
-                if ((sprites[spriteId].getYShift() * newHeight) % k3 != 0)
-                    j2 = (k3 - (sprites[spriteId].getYShift() * newHeight) % k3 << 16) / newHeight;
-                newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
-                newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
+                startX += ((sprite.getXShift() * newWidth + i3) - 1) / i3;
+                startY += ((sprite.getYShift() * newHeight + k3) - 1) / k3;
+                if ((sprite.getXShift() * newWidth) % i3 != 0)
+                    i2 = (i3 - (sprite.getXShift() * newWidth) % i3 << 16) / newWidth;
+                if ((sprite.getYShift() * newHeight) % k3 != 0)
+                    j2 = (k3 - (sprite.getYShift() * newHeight) % k3 << 16) / newHeight;
+                newWidth = (newWidth * (sprite.getWidth() - (i2 >> 16))) / i3;
+                newHeight = (newHeight * (sprite.getHeight() - (j2 >> 16))) / k3;
             }
             int j3 = startX + startY * gameWindowWidth;
             int l3 = gameWindowWidth - newWidth;
@@ -873,7 +880,7 @@ public class GameImage implements ImageProducer, ImageObserver
                     newHeight--;
                 }
             }
-            drawImageTransparentScale(imagePixelArray, sprites[spriteId].getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, j1);
+            drawImageTransparentScale(imagePixelArray, sprite.getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, j1);
             return;
         }
         catch (Exception _ex) {
@@ -894,25 +901,26 @@ public class GameImage implements ImageProducer, ImageObserver
     		int newHeight, int spriteId, int spriteColor)
     {
         try {
-            int spriteWidthInit = sprites[spriteId].getWidth();
-            int spriteHeightInit = sprites[spriteId].getHeight();
+        	Sprite sprite = getSprite(spriteId);
+            int spriteWidthInit = sprite.getWidth();
+            int spriteHeightInit = sprite.getHeight();
             int i2 = 0;
             int j2 = 0;
             int k2 = (spriteWidthInit << 16) / newWidth;
             int l2 = (spriteHeightInit << 16) / newHeight;
-            if (sprites[spriteId].requiresShift()) {
-                int i3 = sprites[spriteId].getTotalWidth();
-                int k3 = sprites[spriteId].getTotalHeight();
+            if (sprite.requiresShift()) {
+                int i3 = sprite.getTotalWidth();
+                int k3 = sprite.getTotalHeight();
                 k2 = (i3 << 16) / newWidth;
                 l2 = (k3 << 16) / newHeight;
-                startX += ((sprites[spriteId].getXShift() * newWidth + i3) - 1) / i3;
-                startY += ((sprites[spriteId].getYShift() * newHeight + k3) - 1) / k3;
-                if ((sprites[spriteId].getXShift() * newWidth) % i3 != 0)
-                    i2 = (i3 - (sprites[spriteId].getXShift() * newWidth) % i3 << 16) / newWidth;
-                if ((sprites[spriteId].getYShift() * newHeight) % k3 != 0)
-                    j2 = (k3 - (sprites[spriteId].getYShift() * newHeight) % k3 << 16) / newHeight;
-                newWidth = (newWidth * (sprites[spriteId].getWidth() - (i2 >> 16))) / i3;
-                newHeight = (newHeight * (sprites[spriteId].getHeight() - (j2 >> 16))) / k3;
+                startX += ((sprite.getXShift() * newWidth + i3) - 1) / i3;
+                startY += ((sprite.getYShift() * newHeight + k3) - 1) / k3;
+                if ((sprite.getXShift() * newWidth) % i3 != 0)
+                    i2 = (i3 - (sprite.getXShift() * newWidth) % i3 << 16) / newWidth;
+                if ((sprite.getYShift() * newHeight) % k3 != 0)
+                    j2 = (k3 - (sprite.getYShift() * newHeight) % k3 << 16) / newHeight;
+                newWidth = (newWidth * (sprite.getWidth() - (i2 >> 16))) / i3;
+                newHeight = (newHeight * (sprite.getHeight() - (j2 >> 16))) / k3;
             }
             int j3 = startX + startY * gameWindowWidth;
             int l3 = gameWindowWidth - newWidth;
@@ -948,7 +956,7 @@ public class GameImage implements ImageProducer, ImageObserver
                     newHeight--;
                 }
             }
-            drawImageOverlay(imagePixelArray, sprites[spriteId].getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, spriteColor);
+            drawImageOverlay(imagePixelArray, sprite.getPixels(), i2, j2, j3, l3, newWidth, newHeight, k2, l2, spriteWidthInit, byte0, spriteColor);
             return;
         }
         catch (Exception _ex) {
@@ -993,10 +1001,11 @@ public class GameImage implements ImageProducer, ImageObserver
     {
         int windowWidth = gameWindowWidth;
         int windowHeight = gameWindowHeight;
-        int x0 = -sprites[sprite].getTotalWidth() / 2 + sprites[sprite].getXShift();
-        int x1 = x0 + sprites[sprite].getWidth();
-        int y0 = -sprites[sprite].getTotalHeight() / 2 + sprites[sprite].getYShift();
-        int y1 = y0 + sprites[sprite].getHeight();
+        Sprite spritee = getSprite(sprite);
+        int x0 = -spritee.getTotalWidth() / 2 + spritee.getXShift();
+        int x1 = x0 + spritee.getWidth();
+        int y0 = -spritee.getTotalHeight() / 2 + spritee.getYShift();
+        int y1 = y0 + spritee.getHeight();
         double[] p_x = { x0, x0, x1, x1 };
         double[] p_y = { y0, y1, y1, y0 };
         phi &= 0x3ff;
@@ -1048,8 +1057,8 @@ public class GameImage implements ImageProducer, ImageObserver
         double slope_1 = 0;
         double slope_3 = 0;
         double slope_2 = 0;
-        int spriteWidth = sprites[sprite].getWidth();
-        int spriteHeight = sprites[sprite].getHeight();
+        int spriteWidth = spritee.getWidth();
+        int spriteHeight = spritee.getHeight();
         p_x[0] = 0;
         p_x[1] = 0;
         p_x[2] = spriteWidth - 1;
@@ -1215,7 +1224,7 @@ public class GameImage implements ImageProducer, ImageObserver
         }
 
         int offset = ymin * windowWidth;
-        int mapPixels[] = sprites[sprite].getPixels();
+        int mapPixels[] = spritee.getPixels();
         for (int y = ymin; y < ymax; y++)
         {
         	double xStart = x_start[y];
@@ -1236,7 +1245,7 @@ public class GameImage implements ImageProducer, ImageObserver
                 if (xEnd > bounds.width)
                     xEnd = bounds.width;
                 if (!lowDef || (y & 1) == 0)
-                    if (!sprites[sprite].requiresShift())
+                    if (!spritee.requiresShift())
                         drawMapSpriteWOShift(imagePixelArray, mapPixels,
                         		(int)(offset + xStart),
                         		xDrawStart, yDrawstart,
@@ -1280,7 +1289,7 @@ public class GameImage implements ImageProducer, ImageObserver
     {
         try
         {
-        	Sprite sprite = sprites[spriteId];
+        	Sprite sprite = getSprite(spriteId);
             if (hairColor == 0)
                 hairColor = 0xffffff;
             if (skinColor == 0)
@@ -1534,6 +1543,7 @@ public class GameImage implements ImageProducer, ImageObserver
     private static boolean aBooleanArray349[] = new boolean[12];
     private static int anInt350;
     private static byte fontPixelsLoadBuffer[] = new byte[0x186a0];
+    private SpriteHandler spriteHandle;
     private ColorModel colourModel;
     private ImageConsumer imageConsumer;
     private Rectangle bounds;
@@ -2087,12 +2097,99 @@ public class GameImage implements ImageProducer, ImageObserver
             if (e == null)
                 return false;
             ByteBuffer data = DataConversions.streamToBuffer(new BufferedInputStream(archive.getInputStream(e)));
-            sprites[id] = Sprite.unpack(data);
+            spriteHandle.addSprite(Sprite.unpack(data), id);
             return true;
         }
         catch (Exception e)
         {
             return false;
         }
+    }
+    
+    private class SpriteHandler
+    {
+    	public static final int ENTITY_START = 0;
+    	public static final int MEDIA_START = 2000;
+    	public static final int UTIL_START = 2100;
+    	public static final int ITEM_START = 2150;
+    	public static final int LOGO_START = 3150;
+    	public static final int PROJECTILE_START = 3160;
+    	public static final int TEXTURE_START = 3220;
+    	public static final int NULL_START = 4000;
+    	
+        Sprite[] entity, media, util, item, logo, projectile, texture;
+        
+    	SpriteHandler(int maxSprites)
+    	{
+            entity = new Sprite[MEDIA_START - ENTITY_START];
+            media = new Sprite[UTIL_START - MEDIA_START];
+            util = new Sprite[ITEM_START - UTIL_START];
+            item = new Sprite[LOGO_START - ITEM_START];
+            logo = new Sprite[PROJECTILE_START - LOGO_START];
+            projectile = new Sprite[TEXTURE_START - TEXTURE_START];
+            texture = new Sprite[NULL_START - TEXTURE_START];
+    	}
+    	
+    	Sprite getSprite(int index)
+    	{
+    		if (index >= NULL_START)
+    			return null;
+    		else if (index >= TEXTURE_START)
+    			return texture[index - TEXTURE_START];
+    		else if (index >= PROJECTILE_START)
+    			return projectile[index - PROJECTILE_START];
+    		else if (index >= LOGO_START)
+    			return logo[index - LOGO_START];
+    		else if (index >= ITEM_START)
+    			return item[index - ITEM_START];
+    		else if (index >= UTIL_START)
+    			return util[index - UTIL_START];
+    		else if (index >= MEDIA_START)
+    			return media[index - MEDIA_START];
+    		else if (index >= ENTITY_START)
+    			return entity[index - ENTITY_START];
+    		else
+    			return null;
+    	}
+    	
+    	void addSprite(Sprite sprite, int index)
+    	{
+    		if (index >= NULL_START)
+    			return;
+    		else if (index >= TEXTURE_START)
+    			texture[index - TEXTURE_START] = sprite;
+    		else if (index >= PROJECTILE_START)
+    			projectile[index - PROJECTILE_START] = sprite;
+    		else if (index >= LOGO_START)
+    			logo[index - LOGO_START] = sprite;
+    		else if (index >= ITEM_START)
+    			item[index - ITEM_START] = sprite;
+    		else if (index >= UTIL_START)
+    			util[index - UTIL_START] = sprite;
+    		else if (index >= MEDIA_START)
+    			media[index - MEDIA_START] = sprite;
+    		else if (index >= ENTITY_START)
+    			entity[index - ENTITY_START] = sprite;
+    		else
+    			return;
+    	}
+    	
+    	void garbageCollect()
+    	{
+            for (int i = 0; i < entity.length; i++)
+            	entity[i] = null;
+            for (int i = 0; i < media.length; i++)
+            	media[i] = null;
+            for (int i = 0; i < util.length; i++)
+            	util[i] = null;
+            for (int i = 0; i < item.length; i++)
+            	item[i] = null;
+            for (int i = 0; i < logo.length; i++)
+            	logo[i] = null;
+            for (int i = 0; i < projectile.length; i++)
+            	projectile[i] = null;
+            for (int i = 0; i < texture.length; i++)
+            	texture[i] = null;
+    	}
     }
 }

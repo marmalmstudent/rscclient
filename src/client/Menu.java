@@ -725,8 +725,8 @@ public class Menu {
     }
 
     public int method158(int i, int j, int k) {
-        int l = gameImage.sprites[k].getWidth();
-        int i1 = gameImage.sprites[k].getHeight();
+        int l = gameImage.getSprite(k).getWidth();
+        int i1 = gameImage.getSprite(k).getHeight();
         menuObjectType[menuObjectCount] = 12;
         menuObjectCanAcceptActions[menuObjectCount] = true;
         menuObjectHasAction[menuObjectCount] = false;
