@@ -311,7 +311,9 @@ public class Camera
 			distMaxHide = dist;
 	}
 
-	public void finishCamera() {
+	public void finishCamera(int fadeColor)
+	{
+		_fadeColor = fadeColor;
 		lowDef = gameImage.lowDef;
 		int fctr = 1 << cameraSizeInt;
 		double xBounds = halfVPWidth * drawModelMaxDist / fctr;
@@ -1357,6 +1359,8 @@ public class Camera
 	static double yMaxHide;
 	static double distMinHide;
 	static double distMaxHide;
+	
+	private int _fadeColor;
 
 	private void makeTriangle(int pointsInSurface, int triangleX[],
 			int triangleY[], int brightness[], int[] fadeBright,
@@ -1675,7 +1679,7 @@ public class Camera
 		}
 	}
 
-	private static void drawTexture(int pixelArray[], int texturePixels[],
+	private void drawTexture(int pixelArray[], int texturePixels[],
 			int xTexture, int yTexture, double smthXTexture,
 			double smthYTexture, double smthDivision,
 			double smthXTextureStep, double smthYTextureStep,
@@ -1735,7 +1739,7 @@ public class Camera
 				fadeVal  = 255-(fadeOffset  >> 8);
 				color = applyShade(color, shadeVal);
 				color = applyFade(color, fadeVal);
-				int fadeColor = getModifiedColor(GameImage.BACKGROUND,
+				int fadeColor = getModifiedColor(this._fadeColor,
 						getModCompl(getMod(fadeVal)));
 				if (!seethrough || color != fadeColor)
 					pixelArray[offset] = color + (pixelArray[offset] >> 1 & mask);
@@ -1762,7 +1766,7 @@ public class Camera
 		}
 	}
 
-	private static void drawColorLine(int imagePixels[], int length,
+	private void drawColorLine(int imagePixels[], int length,
 			int offset, int pixelColor, int colorGradient[],
 			int gradColOffs, int gradColStep, int fadeColOffs,
 			int fadeColStep, int nSteps, boolean transparent)
@@ -1801,7 +1805,7 @@ public class Camera
 		}
 	}
 	
-	private static int getMod(int val)
+	private int getMod(int val)
 	{
 		if (val < 0)
 			val = 0;
@@ -1810,28 +1814,28 @@ public class Camera
 		return val * val;
 	}
 	
-	private static int getModCompl(int mod)
+	private int getModCompl(int mod)
 	{
 		return 0xff00 - mod;
 	}
 	
-	private static int getModifiedColor(int pixelColor, int modifier)
+	private int getModifiedColor(int pixelColor, int modifier)
 	{
 		return    ((pixelColor >> 16 & 0xff) * modifier       & 0xff0000)
 				+ ((pixelColor >>  8 & 0xff) * modifier >> 8  & 0x00ff00)
 				+ ((pixelColor       & 0xff) * modifier >> 16 & 0x0000ff);
 	}
 	
-	private static int applyShade(int pixelColor, int shadeVal)
+	private int applyShade(int pixelColor, int shadeVal)
 	{
 		return getModifiedColor(pixelColor, getMod(shadeVal));
 	}
 	
-	private static int applyFade(int pixelColor, int fadeVal)
+	private int applyFade(int pixelColor, int fadeVal)
 	{
 		int fadeMod = getMod(fadeVal);
 		return    getModifiedColor(pixelColor,           fadeMod)
-				+ getModifiedColor(GameImage.BACKGROUND, getModCompl(fadeMod));
+				+ getModifiedColor(_fadeColor, getModCompl(fadeMod));
 	}
 
 	private void sortModelsByDistToCam(CameraModel cameraModels[], int lower, int upper)

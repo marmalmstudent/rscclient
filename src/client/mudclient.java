@@ -3900,7 +3900,7 @@ public class mudclient extends GameWindowMiddleMan
 				plrY, cameraXRot, cameraZRot, 0,
 				cameraHeight, cameraZoom);
 		
-		gameCamera.finishCamera();
+		gameCamera.finishCamera(sectorHeight == 3 ? 0 : GameImage.BACKGROUND);
 		method119();
 		if (actionPictureType > 0)
 			gameGraphics.drawPicture(actionPictureX - 8, actionPictureY - 8, SPRITE_MEDIA_START + 14 + (24 - actionPictureType) / 6);
