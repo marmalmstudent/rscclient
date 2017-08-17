@@ -260,23 +260,28 @@ public class GameImage implements ImageProducer, ImageObserver
         imageConsumer.imageComplete(ImageConsumer.TOPDOWNLEFTRIGHT);
     }
     
-    public boolean loadSprite(int id, String packageName)
+    public boolean loadSprite(int id, String packageName, int amount)
     {
+    	ZipFile archive = null;
     	if (packageName.equals("entity"))
-        	return loadArchive(id, entityArchive);
+    		archive = entityArchive;
     	else if (packageName.equals("media"))
-        	return loadArchive(id, mediaArchive);
+    		archive = mediaArchive;
     	else if (packageName.equals("util"))
-        	return loadArchive(id, utilArchive);
+    		archive = utilArchive;
     	else if (packageName.equals("item"))
-        	return loadArchive(id, itemArchive);
+    		archive = itemArchive;
     	else if (packageName.equals("logo"))
-        	return loadArchive(id, logoArchive);
+    		archive = logoArchive;
     	else if (packageName.equals("projectile"))
-        	return loadArchive(id, projectileArchive);
+    		archive = projectileArchive;
     	else if (packageName.equals("texture"))
-        	return loadArchive(id, textureArchive);
-    	return false;
+    		archive = textureArchive;
+    	if (archive == null)
+    		return false;
+    	for (int i = id; i < id + amount; i++)
+    		loadArchive(i, archive);
+    	return true;
     }
 
     public void setDimensions(int x, int y, int width, int height)
@@ -2087,7 +2092,6 @@ public class GameImage implements ImageProducer, ImageObserver
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return false;
         }
     }

@@ -830,10 +830,10 @@ public class mudclient extends GameWindowMiddleMan
 				plrPan.getY() + plrPan.getTabHeight() + plrPan.getScrollBoxTitleHeight(),
 				plrPan.getWidth(), plrPan.getScrollBoxHeight(), 1, 500, true);
 		loadMedia(); // 30%
-		tradePan.addAcceptButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
-		tradePan.addDeclineButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
-		tradeCfrmPan.addAcceptButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
-		tradeCfrmPan.addDeclineButton(((GameImage) (gameGraphics)).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
+		tradePan.addAcceptButton(((GameImage) gameGraphics).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
+		tradePan.addDeclineButton(((GameImage) gameGraphics).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
+		tradeCfrmPan.addAcceptButton(((GameImage) gameGraphics).sprites[SPRITE_MEDIA_START + 25], SPRITE_MEDIA_START + 25);
+		tradeCfrmPan.addDeclineButton(((GameImage) gameGraphics).sprites[SPRITE_MEDIA_START + 26], SPRITE_MEDIA_START + 26);
 		if (lastLoadedNull)
 			return;
 		loadEntity(); // 45%
@@ -4506,71 +4506,47 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	private final void loadSprite(int id, String packageName, int amount) {
-		for (int i = id; i < id + amount; i++) {
-			if (!gameGraphics.loadSprite(i, packageName)) {
-				lastLoadedNull = true;
-				return;
-			}
+		if (!gameGraphics.loadSprite(id, packageName, amount)) {
+			lastLoadedNull = true;
+			return;
 		}
 	}
 
 	private final void loadMedia() {
 		drawLoadingBarText(30, "Unpacking media");
-		loadSprite(SPRITE_MEDIA_START, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 1, "media", 6);
-		loadSprite(SPRITE_MEDIA_START + 9, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 10, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 11, "media", 3);
-		loadSprite(SPRITE_MEDIA_START + 14, "media", 8);
-		loadSprite(SPRITE_MEDIA_START + 22, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 23, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 24, "media", 1);
-		loadSprite(SPRITE_MEDIA_START + 25, "media", 2);
-		loadSprite(SPRITE_MEDIA_START + 27, "media", 2);
-		loadSprite(SPRITE_UTIL_START, "util", 2);
-		loadSprite(SPRITE_UTIL_START + 2, "util", 4);
-		loadSprite(SPRITE_UTIL_START + 6, "util", 2);
+		loadSprite(SPRITE_MEDIA_START, "media", 30);
+		loadSprite(SPRITE_UTIL_START, "util", 10);
 		loadSprite(SPRITE_PROJECTILE_START, "projectile", 7);
 		loadSprite(SPRITE_LOGO_START, "logo", 2);
-
-		int i = EntityHandler.invPictureCount();
-		for (int j = 1; i > 0; j++) {
-			int k = i;
-			i -= 30;
-			if (k > 30) {
-				k = 30;
-			}
-			loadSprite(SPRITE_ITEM_START + (j - 1) * 30, "item", k);
-		}
+		loadSprite(SPRITE_ITEM_START, "item", 500);
 	}
 
 	private final void loadEntity() {
 		drawLoadingBarText(45, "Unpacking entities");
 		int animation = 0;
-		label0:
-			for (int anim = 0; anim < EntityHandler.animationCount(); anim++)
-			{
-				String s = EntityHandler.getAnimationDef(anim).getName();
-				for (int nextAnim = 0; nextAnim < anim; nextAnim++)
-				{ // find the next animation
-					if (!EntityHandler.getAnimationDef(nextAnim).getName().equalsIgnoreCase(s)) {
-						continue;
-					}
-					EntityHandler.getAnimationDef(anim).number = EntityHandler.getAnimationDef(nextAnim).getNumber();
-					continue label0;
+		
+		label0: for (int anim = 0; anim < EntityHandler.animationCount(); anim++)
+		{
+			String s = EntityHandler.getAnimationDef(anim).getName();
+			for (int nextAnim = 0; nextAnim < anim; nextAnim++)
+			{ // find the next animation
+				if (!EntityHandler.getAnimationDef(nextAnim).getName().equalsIgnoreCase(s)) {
+					continue;
 				}
-
-				loadSprite(animation, "entity", 15);
-				if (EntityHandler.getAnimationDef(anim).hasAttack()) {
-					loadSprite(animation + 15, "entity", 3);
-				}
-
-				if (EntityHandler.getAnimationDef(anim).hasFlip()) {
-					loadSprite(animation + 18, "entity", 9);
-				}
-				EntityHandler.getAnimationDef(anim).number = animation;
-				animation += 27;
+				EntityHandler.getAnimationDef(anim).number = EntityHandler.getAnimationDef(nextAnim).getNumber();
+				continue label0;
 			}
+			
+			int nSprites = 15;
+			if (EntityHandler.getAnimationDef(anim).hasAttack())
+				nSprites += 3;
+			if (EntityHandler.getAnimationDef(anim).hasFlip())
+				nSprites += 9;
+			loadSprite(animation, "entity", nSprites);
+			
+			EntityHandler.getAnimationDef(anim).number = animation;
+			animation += 27;
+		}
 	}
 
 	private final void loadTextures() {
