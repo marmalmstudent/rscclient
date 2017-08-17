@@ -21,10 +21,6 @@ import javax.imageio.ImageIO;
 public class GameImage implements ImageProducer, ImageObserver
 {
     public static final int BACKGROUND = 0x349ed8;
-    public static int anInt346;
-    public static int anInt347;
-    public static int anInt348;
-    public static int anInt352;
     public BufferedImage loginScreen;
     public int gameWindowWidth;
     public int gameWindowHeight;
@@ -1024,12 +1020,6 @@ public class GameImage implements ImageProducer, ImageObserver
         		yCorner + (p_y[2] * cos - p_x[2] * sin) * fctr,
         		yCorner + (p_y[3] * cos - p_x[3] * sin) * fctr
         };
-        if (theta == 192 && (phi & 0xff) == (anInt348 & 0xff))
-            anInt346++;
-        else if (theta == 128)
-            anInt348 = phi;
-        else
-            anInt347++;
         double ymn = p_y_rot[0];
         double ymx = p_y_rot[0];
         for (double j : p_y_rot)

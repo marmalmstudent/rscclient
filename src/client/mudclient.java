@@ -6,7 +6,6 @@ import client.UI.menus.MenuRightClick;
 import client.UI.panels.AbuseWindow;
 import client.UI.panels.BankPanel;
 import client.UI.panels.FriendsPanel;
-import client.UI.panels.InventoryPanel;
 import client.UI.panels.MagicPanel;
 import client.UI.panels.OptionsPanel;
 import client.UI.panels.PlayerInfoPanel;
@@ -43,8 +42,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -100,13 +97,6 @@ public class mudclient extends GameWindowMiddleMan
 	{
 		combatWindow = false;
 		threadSleepTime = 10;
-		try {
-			localhost = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException uhe)
-		{
-			localhost = "unknown";
-		}
-		startTime = System.currentTimeMillis();
 		questionMenuAnswer = new String[10];
 		currentUser = "";
 		currentPass = "";
@@ -810,7 +800,6 @@ public class mudclient extends GameWindowMiddleMan
 		tradePan = new TradePanel(center, gameGraphics);
 		tradeCfrmPan = new TradeConfirmPanel(center, gameGraphics);
 		
-		invPan = new InventoryPanel(center, gameGraphics);
 		plrPan = new PlayerInfoPanel(center, gameGraphics);
 		magicPan = new MagicPanel(center, gameGraphics);
 		friendPan = new FriendsPanel(center, gameGraphics);
@@ -1146,22 +1135,16 @@ public class mudclient extends GameWindowMiddleMan
 					{
 						int i30 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
-						if (mob != null)
-						{
-							mob.skullTimer = 150;
-							mob.anInt162 = i30;
-						}
+						mob.skullTimer = 150;
+						mob.anInt162 = i30;
 					}
 					else if (mobUpdateType == 1)
 					{ // Player talking
 						byte byte7 = data[mobUpdateOffset++];
-						if (mob != null)
-						{
-							String s2 = DataConversions.byteToString(data, mobUpdateOffset, byte7);
-							mob.lastMessageTimeout = 150;
-							mob.lastMessage = s2;
-							displayMessage(mob.name + ": " + mob.lastMessage, 2, mob.admin);
-						}
+						String s2 = DataConversions.byteToString(data, mobUpdateOffset, byte7);
+						mob.lastMessageTimeout = 150;
+						mob.lastMessage = s2;
+						displayMessage(mob.name + ": " + mob.lastMessage, 2, mob.admin);
 						mobUpdateOffset += byte7;
 					}
 					else if (mobUpdateType == 2)
@@ -1169,17 +1152,15 @@ public class mudclient extends GameWindowMiddleMan
 						int j30 = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						int hits = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
 						int hitsBase = DataOperations.getUnsignedByte(data[mobUpdateOffset++]);
-						if (mob != null) {
-							mob.dmgRcv = j30;
-							mob.hitPointsCurrent = hits;
-							mob.hitPointsBase = hitsBase;
-							mob.combatTimer = 200;
-							if (mob == self.me) {
-								playerStatCurrent[3] = hits;
-								playerStatBase[3] = hitsBase;
-								showWelcomeBox = false;
-								//                                showServerMessageBox = false;
-							}
+						mob.dmgRcv = j30;
+						mob.hitPointsCurrent = hits;
+						mob.hitPointsBase = hitsBase;
+						mob.combatTimer = 200;
+						if (mob == self.me) {
+							playerStatCurrent[3] = hits;
+							playerStatBase[3] = hitsBase;
+							showWelcomeBox = false;
+							//                                showServerMessageBox = false;
 						}
 					}
 					else if (mobUpdateType == 3)
@@ -1188,13 +1169,10 @@ public class mudclient extends GameWindowMiddleMan
 						mobUpdateOffset += 2;
 						int k34 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
-						if (mob != null)
-						{
-							mob.attackingCameraInt = k30;
-							mob.attackingNpcIndex = k34;
-							mob.attackingMobIndex = -1;
-							mob.anInt176 = attackingInt40;
-						}
+						mob.attackingCameraInt = k30;
+						mob.attackingNpcIndex = k34;
+						mob.attackingMobIndex = -1;
+						mob.anInt176 = attackingInt40;
 					}
 					else if (mobUpdateType == 4)
 					{ // Projectile another player.
@@ -1202,60 +1180,46 @@ public class mudclient extends GameWindowMiddleMan
 						mobUpdateOffset += 2;
 						int l34 = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
 						mobUpdateOffset += 2;
-						if (mob != null) {
-							mob.attackingCameraInt = l30;
-							mob.attackingMobIndex = l34;
-							mob.attackingNpcIndex = -1;
-							mob.anInt176 = attackingInt40;
-						}
+						mob.attackingCameraInt = l30;
+						mob.attackingMobIndex = l34;
+						mob.attackingNpcIndex = -1;
+						mob.anInt176 = attackingInt40;
 					}
 					else if (mobUpdateType == 5)
 					{ // Apperance update
-						if (mob != null)
+						mob.mobIntUnknown = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
+						mobUpdateOffset += 2;
+						mob.nameLong = DataOperations.getUnsigned8Bytes(data, mobUpdateOffset);
+						mobUpdateOffset += 8;
+						mob.name = DataOperations.longToString(mob.nameLong);
+						int i31 = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
+						mobUpdateOffset++;
+						for (int i35 = 0; i35 < i31; i35++)
 						{
-							mob.mobIntUnknown = DataOperations.getUnsigned2Bytes(data, mobUpdateOffset);
-							mobUpdateOffset += 2;
-							mob.nameLong = DataOperations.getUnsigned8Bytes(data, mobUpdateOffset);
-							mobUpdateOffset += 8;
-							mob.name = DataOperations.longToString(mob.nameLong);
-							int i31 = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
+							mob.animationCount[i35] = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
 							mobUpdateOffset++;
-							for (int i35 = 0; i35 < i31; i35++)
-							{
-								mob.animationCount[i35] = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
-								mobUpdateOffset++;
-							}
-
-							for (int l37 = i31; l37 < 12; l37++)
-								mob.animationCount[l37] = 0;
-
-							mob.colourHairType = data[mobUpdateOffset++] & 0xff;
-							mob.colourTopType = data[mobUpdateOffset++] & 0xff;
-							mob.colourBottomType = data[mobUpdateOffset++] & 0xff;
-							mob.colourSkinType = data[mobUpdateOffset++] & 0xff;
-							mob.level = data[mobUpdateOffset++] & 0xff;
-							mob.anInt179 = data[mobUpdateOffset++] & 0xff;
-							mob.admin = data[mobUpdateOffset++] & 0xff;
 						}
-						else
-						{
-							mobUpdateOffset += 14;
-							int j31 = DataOperations.getUnsignedByte(data[mobUpdateOffset]);
-							mobUpdateOffset += j31 + 1;
-						}
+
+						for (int l37 = i31; l37 < 12; l37++)
+							mob.animationCount[l37] = 0;
+
+						mob.colourHairType = data[mobUpdateOffset++] & 0xff;
+						mob.colourTopType = data[mobUpdateOffset++] & 0xff;
+						mob.colourBottomType = data[mobUpdateOffset++] & 0xff;
+						mob.colourSkinType = data[mobUpdateOffset++] & 0xff;
+						mob.level = data[mobUpdateOffset++] & 0xff;
+						mob.anInt179 = data[mobUpdateOffset++] & 0xff;
+						mob.admin = data[mobUpdateOffset++] & 0xff;
 					}
 					else if (mobUpdateType == 6)
 					{ // private player talking
 						byte byte8 = data[mobUpdateOffset];
 						mobUpdateOffset++;
-						if (mob != null)
-						{
-							String s3 = DataConversions.byteToString(data, mobUpdateOffset, byte8);
-							mob.lastMessageTimeout = 150;
-							mob.lastMessage = s3;
-							if (mob == self.me)
-								displayMessage(mob.name + ": " + mob.lastMessage, 5, mob.admin);
-						}
+						String s3 = DataConversions.byteToString(data, mobUpdateOffset, byte8);
+						mob.lastMessageTimeout = 150;
+						mob.lastMessage = s3;
+						if (mob == self.me)
+							displayMessage(mob.name + ": " + mob.lastMessage, 5, mob.admin);
 						mobUpdateOffset += byte8;
 					}
 				}
@@ -1531,9 +1495,9 @@ public class mudclient extends GameWindowMiddleMan
 				break;
 			case 110:
 				int i = 1;
-				serverStartTime = DataOperations.getUnsigned8Bytes(data, i);
+				long serverStartTime = DataOperations.getUnsigned8Bytes(data, i);
 				i += 8;
-				serverLocation = new String(data, i, dataLength - i);
+				String serverLocation = new String(data, i, dataLength - i);
 				break;
 			case 114:
 				int invOffset = 1;
@@ -1828,7 +1792,9 @@ public class mudclient extends GameWindowMiddleMan
 				serverMessageBoxTop = false;
 				break;
 			case 152:
+				// needs to be here until we remove this on server-side
 				boolean configAutoCameraAngle = DataOperations.getUnsignedByte(data[1]) == 1;
+				
 				configMouseButtons = DataOperations.getUnsignedByte(data[2]) == 1;
 				configSoundEffects = DataOperations.getUnsignedByte(data[3]) == 1;
 				showRoof = DataOperations.getUnsignedByte(data[4]) == 1;
@@ -2200,12 +2166,8 @@ public class mudclient extends GameWindowMiddleMan
 	private final String skillArrayLong[] = {"Attack", "Defense", "Strength", "Hits", "Ranged", "Prayer", "Magic", "Cooking", "Woodcutting", "Fletching", "Fishing", "Firemaking", "Crafting", "Smithing", "Mining", "Herblaw", "Agility", "Thieving"};
 	private final int chrSkinClrs[] = {0xecded0, 0xccb366, 0xb38c40, 0x997326, 0x906020};
 
-	private long startTime = 0;
-	private long serverStartTime = 0;
 	private String lastMessage = "";
 	private int fatigue;
-	private String serverLocation = "";
-	private String localhost;
 	private int prayerMenuIndex = 0;
 	private int magicMenuIndex = 0;
 	private boolean showRoof = true;
@@ -2239,7 +2201,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int lastLoggedInDays;
 	private int subscriptionLeftDays;
 	private String questionMenuAnswer[];
-	private int anInt658;
 	private int handlePacketErrorCount;
 	private int loginButtonNewUser;
 	private int loginButtonExistingUser;
@@ -2329,7 +2290,6 @@ public class mudclient extends GameWindowMiddleMan
 	private int playerStatBase[];
 	private AbuseWindow abWin;
 	private BankPanel bankPan;
-	private InventoryPanel invPan;
 	private PlayerInfoPanel plrPan;
 	private MagicPanel magicPan;
 	private FriendsPanel friendPan;
@@ -2398,7 +2358,6 @@ public class mudclient extends GameWindowMiddleMan
 	private Model doorModel[];
 	
 	private boolean serverMessageBoxTop;
-	private int referId;
 	private int anInt900;
 	private int newUserOkButton;
 	private double cameraHeight;
@@ -2406,7 +2365,6 @@ public class mudclient extends GameWindowMiddleMan
 	private boolean zoomCamera;
 	private AudioReader audioReader;
 	private int playerStatExperience[];
-	private boolean cameraAutoAngleDebug;
 	private boolean showDuelWindow;
 	private boolean lastLoadedNull;
 	private int experienceArray[];
@@ -2438,7 +2396,6 @@ public class mudclient extends GameWindowMiddleMan
 	private double groundItemZ[];
 	private int selectedShopItemIndex;
 	private int selectedShopItemType;
-	private int messagesRows;
 	private String messagesArray[];
 	private int messagesTimeout[];
 	private long tradeConfirmOtherNameLong;
@@ -3930,12 +3887,6 @@ public class mudclient extends GameWindowMiddleMan
 		gameGraphics.lowDef = false;
 		gameGraphics.resetImagePixels(sectorHeight == 3 ? 0 : GameImage.BACKGROUND);
 		gameGraphics.lowDef = super.keyF1Toggle;
-		if (sectorHeight == 3)
-		{ // underground, flickering light
-			int globalLight = Camera.GLOBAL_DARK + (int) (Math.random() * 3D);
-			int featureLight = Camera.GLOBAL_DARK + (int) (Math.random() * 7D);
-			gameCamera.setLightAndSource(globalLight, featureLight, Camera.light_x, Camera.light_z, Camera.light_y);
-		}
 		anInt699 = 0;
 		mobMsg.clear();
 		hitpoints.clear();
@@ -5091,15 +5042,6 @@ public class mudclient extends GameWindowMiddleMan
 		updatePlayers(); // player walking animations
 		updateNPCs(); // npc walking animations
 
-		if (!om.isOpen(OpenMenu.MINIMAP))
-		{
-			if (GameImage.anInt346 > 0)
-				anInt658++;
-			if (GameImage.anInt347 > 0)
-				anInt658 = 0;
-			GameImage.anInt346 = 0;
-			GameImage.anInt347 = 0;
-		}
 		for (Iterator<Mob> itr = playerArray.iterator(); itr.hasNext();)
 		{
 			Mob mob_2 = itr.next();
@@ -5107,9 +5049,6 @@ public class mudclient extends GameWindowMiddleMan
 				mob_2.anInt176--;
 		}
 		updateCamera();
-
-		if (anInt658 > 20)
-			anInt658 = 0;
 
 		checkChatTab();
 		updateChatTabs();

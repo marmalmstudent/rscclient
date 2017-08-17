@@ -333,18 +333,6 @@ public class EngineHandle
         }
         else
             updateWorld(xSector, ySector, hSector, true);
-        	
-        /*
-        updateWorld(xSector, ySector, hSector, true);
-        if (hSector == 0)
-        {
-            updateWorld(xSector, ySector, 1, false);
-            updateWorld(xSector, ySector, 2, false);
-
-            // update height for 3d objects
-        	loadSections(xSector, ySector, hSector);
-        }
-        */
     }
 
     public void updateDoorState(int x, int y, int direction, int type)
@@ -1416,11 +1404,6 @@ public class EngineHandle
                     elevation[1][x][y] = getGroundElevation(x, y);
                 }
             }
-    	}
-    	
-    	void addElevation(int x, int y, double elev)
-    	{
-    		//elevation[x][y] += elev;
     	}
     	
     	double getBuildElevation(int x, int y, int h)
