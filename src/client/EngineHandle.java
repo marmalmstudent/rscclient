@@ -321,7 +321,20 @@ public class EngineHandle
     public void updateWorld(int xSector, int ySector, int hSector)
     {
         garbageCollect();
+        
+        if (hSector >= 0 && hSector <= 2)
+        {
+            updateWorld(xSector, ySector, 0, hSector == 0);
+            updateWorld(xSector, ySector, 1, hSector == 1);
+            updateWorld(xSector, ySector, 2, hSector == 2);
 
+            // update height for 3d objects
+        	loadSections(xSector, ySector, hSector);
+        }
+        else
+            updateWorld(xSector, ySector, hSector, true);
+        	
+        /*
         updateWorld(xSector, ySector, hSector, true);
         if (hSector == 0)
         {
@@ -331,6 +344,7 @@ public class EngineHandle
             // update height for 3d objects
         	loadSections(xSector, ySector, hSector);
         }
+        */
     }
 
     public void updateDoorState(int x, int y, int direction, int type)
@@ -568,16 +582,6 @@ public class EngineHandle
         }
     }
 
-    private void method403(int wallHeight, int hSector, int x0, int y0, int x1, int y1) {
-        double height = EntityHandler.getDoorDef(wallHeight).getHeight();
-        if (elevHandle.getElevation(x0, y0, hSector) < ROOF_LIM) {
-        	elevHandle.addElevation(x0, y0, ROOF_LIM + height);
-        }
-        if (elevHandle.getElevation(x1, y1, hSector) < ROOF_LIM) {
-        	elevHandle.addElevation(x1, y1, ROOF_LIM + height);
-        }
-    }
-
     private void setGroundTexturesOverlay(int x, int y, int overlay)
     {
         Tile tile = getTile(x, y);
@@ -613,14 +617,6 @@ public class EngineHandle
         	for (int x = -((VISIBLE_SECTORS-1)/2), i = 0; i < VISIBLE_SECTORS; ++i, ++x)
             	loadSection(nextXSector + x, nextYSector + y,
             			hSector, getSectorID(i, j));
-    	/*
-        int nextXSector = (xSector + SECTOR_WIDTH/2) / SECTOR_WIDTH;
-        int nextYSector = (ySector + SECTOR_HEIGHT/2) / SECTOR_HEIGHT;
-        for (int j = 0; j < VISIBLE_SECTORS; ++j)
-        	for (int i = 0; i < VISIBLE_SECTORS; ++i)
-            	loadSection(nextXSector + (i - 1), nextYSector + (j - 1),
-            			hSector, getSectorID(i, j));
-    	 */
         method400();
         if (hSector == 0 || hSector == 3)
         	elevHandle.updateBaseElevation();
@@ -642,13 +638,13 @@ public class EngineHandle
     
     private void updateTiles(boolean currentHeight, int hSector)
     {
-        if (currentHeight)
+        if (currentHeight || hSector == 0)
         {
             gameImage.resetImagePixels(0);
-            /* Reset all tiles to non-walkable */
-            for (int xTile = 0; xTile < VISIBLE_SECTORS*SECTOR_WIDTH; xTile++)
-                for (int yTile = 0; yTile < VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++)
-                    walkableValue[xTile][yTile] = 0;
+            	/* Reset all tiles to non-walkable */
+            	for (int xTile = 0; xTile < VISIBLE_SECTORS*SECTOR_WIDTH; xTile++)
+            		for (int yTile = 0; yTile < VISIBLE_SECTORS*SECTOR_HEIGHT; yTile++)
+            			walkableValue[xTile][yTile] = 0;
 
             Model tiles = world;
             tiles.resetSurfAndPointCount();
@@ -664,11 +660,10 @@ public class EngineHandle
             		WORLD_OBJ_AREA, 233, false);
             for (int j6 = 0; j6 < WORLD_OBJ_AREA; j6++)
                 camera.addModel(groundTiles[j6]); // floor tiles
-            
-        	// objects; roofs, fences, walls etc but not trees and and stuff.
-            for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH; x++)
-                for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
-                	elevHandle.setElevation(x, y, elevHandle.getElevation(x, y, hSector));
+        }
+        else
+        {
+        	
         }
     }
     
@@ -690,7 +685,6 @@ public class EngineHandle
             camera.addModel(walls[hSector][building]);
         
         /* update roof height inside buildings */
-        updateWallElevation(hSector); // surrounding walls
         updateRoofElevation(hSector); // inside building
     }
     
@@ -703,37 +697,13 @@ public class EngineHandle
         		WORLD_OBJ_AREA, 169, true);
         for (int l9 = 0; l9 < WORLD_OBJ_AREA; l9++)
           camera.addModel(roofs[hSector][l9]);
-        
-        for (int j12 = 0; j12 < VISIBLE_SECTORS*SECTOR_WIDTH; j12++)
-            for (int k14 = 0; k14 < VISIBLE_SECTORS*SECTOR_HEIGHT; k14++)
-                if (elevHandle.getElevation(j12, k14, hSector) >= ROOF_LIM)
-                	elevHandle.subtractElevation(j12, k14, ROOF_LIM);
     }
     
     private void setTileElevation(Model tiles, int hSector)
     {
         for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH; x++)
-        {
             for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT; y++)
-            {
-                double z = -elevHandle.getElevation(x, y, hSector);
-                /*
-                if (getGroundTexturesOverlay(x, y) > 0
-                		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
-                    z = -elevHandle.getZeroElevation(hSector);
-                if (getGroundTexturesOverlay(x - 1, y) > 0
-                		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getTexture() == 4)
-                    z = -elevHandle.getZeroElevation(hSector);
-                if (getGroundTexturesOverlay(x, y - 1) > 0
-                		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getTexture() == 4)
-                    z = -elevHandle.getZeroElevation(hSector);
-                if (getGroundTexturesOverlay(x - 1, y - 1) > 0
-                		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
-                    z = -elevHandle.getZeroElevation(hSector);
-                    */
-                tiles.insertCoordPoint(x, z, y);
-            }
-        }
+                tiles.insertCoordPoint(x, -elevHandle.getBuildElevation(x, y, hSector), y);
     }
 
     /** Draws ground tiles that does not have overlays
@@ -842,15 +812,15 @@ public class EngineHandle
                         }
                     }
                     if (EntityHandler.getTileDef(tileOverlay - 1).getObjectType() != 0)
-                        walkableValue[tile_x][tile_y] |= WALKABLE_6;
+                    	walkableValue[tile_x][tile_y] |= WALKABLE_6;
                     if (EntityHandler.getTileDef(tileOverlay - 1).getTexture() == 2)
-                        walkableValue[tile_x][tile_y] |= WALKABLE_INDOORS;
+                    	walkableValue[tile_x][tile_y] |= WALKABLE_INDOORS;
                 }
                 drawOnMinimap(tile_x, tile_y, l14, texture1, texture2);
-                double i17 = ((elevHandle.getElevation(tile_x + 1, tile_y + 1, hSector)
-                		- elevHandle.getElevation(tile_x + 1, tile_y, hSector))
-                		+ elevHandle.getElevation(tile_x, tile_y + 1, hSector))
-                		- elevHandle.getElevation(tile_x, tile_y, hSector);
+                double i17 = ((elevHandle.getBuildElevation(tile_x + 1, tile_y + 1, hSector)
+                		- elevHandle.getBuildElevation(tile_x + 1, tile_y, hSector))
+                		+ elevHandle.getBuildElevation(tile_x, tile_y + 1, hSector))
+                		- elevHandle.getBuildElevation(tile_x, tile_y, hSector);
                 if (texture1 != texture2 || i17 != 0)
                 {
                     int surfacePoints1[] = new int[3];
@@ -928,10 +898,10 @@ public class EngineHandle
                 		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getTexture() == 4)
                 {
                     int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
-                    int p00 = tiles.insertCoordPoint(x, -elevHandle.getElevation(x, y, hSector), y);
-                    int p10 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y, hSector), y);
+                    int p00 = tiles.insertCoordPoint(x    , -elevHandle.getElevation(x    , y    , hSector), y    );
+                    int p10 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y    , hSector), y    );
                     int p11 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y + 1, hSector), y + 1);
-                    int p01 = tiles.insertCoordPoint(x, -elevHandle.getElevation(x, y + 1, hSector), y + 1);
+                    int p01 = tiles.insertCoordPoint(x    , -elevHandle.getElevation(x    , y + 1, hSector), y + 1);
                     int rect[] = {p00, p10, p11, p01};
                     int i = tiles.addSurface(4, rect, color, Model.INVISIBLE);
                     selected[i] = new Point(x, y);
@@ -949,10 +919,10 @@ public class EngineHandle
                         		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getTexture() == 4)
                         {
                             int color = EntityHandler.getTileDef(getGroundTexturesOverlay(x + x_arr[i], y + y_arr[i]) - 1).getColour();
-                            int p00 = tiles.insertCoordPoint(x, -elevHandle.getElevation(x, y, hSector), y);
-                            int p10 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y, hSector), y);
+                            int p00 = tiles.insertCoordPoint(x    , -elevHandle.getElevation(x    , y    , hSector), y    );
+                            int p10 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y    , hSector), y    );
                             int p11 = tiles.insertCoordPoint(x + 1, -elevHandle.getElevation(x + 1, y + 1, hSector), y + 1);
-                            int p01 = tiles.insertCoordPoint(x, -elevHandle.getElevation(x, y + 1, hSector), y + 1);
+                            int p01 = tiles.insertCoordPoint(x    , -elevHandle.getElevation(x    , y + 1, hSector), y + 1);
                             int rect[] = {p00, p10, p11, p01};
                             int j = tiles.addSurface(4, rect, color, Model.INVISIBLE);
                             selected[j] = new Point(x, y);
@@ -1032,27 +1002,6 @@ public class EngineHandle
         }
     }
     
-    private void updateWallElevation(int hSector)
-    {
-        for (int x = 0; x < VISIBLE_SECTORS*SECTOR_WIDTH-1; x++)
-        {
-            for (int y = 0; y < VISIBLE_SECTORS*SECTOR_HEIGHT-1; y++)
-            {
-                int wallID = getVerticalWall(x, y);
-                if (wallID > 0)
-                    method403(wallID - 1, hSector, x, y, x + 1, y);
-                wallID = getHorizontalWall(x, y);
-                if (wallID > 0)
-                    method403(wallID - 1, hSector, x, y, x, y + 1);
-                wallID = getDiagonalWalls(x, y);
-                if (wallID > 0 && wallID < 12000)
-                    method403(wallID - 1, hSector, x, y, x + 1, y + 1);
-                if (wallID > 12000 && wallID < 24000)
-                    method403(wallID - 12001, hSector, x + 1, y, x, y + 1);
-            }
-        }
-    }
-    
     private void updateRoofElevation(int hSector)
     {
         for (int i = 1; i < VISIBLE_SECTORS*SECTOR_WIDTH-1; i++)
@@ -1064,10 +1013,10 @@ public class EngineHandle
                 	int[] x = {i, i+1, i+1, i};
                 	int[] y = {j, j, j+1, j+1};
                     double[] z = {
-                    		elevHandle.getElevation(x[0], y[0], hSector),
-                    		elevHandle.getElevation(x[1], y[1], hSector),
-                    		elevHandle.getElevation(x[2], y[2], hSector),
-                    		elevHandle.getElevation(x[3], y[3], hSector)
+                    		elevHandle.getBuildElevation(x[0], y[0], hSector),
+                    		elevHandle.getBuildElevation(x[1], y[1], hSector),
+                    		elevHandle.getBuildElevation(x[2], y[2], hSector),
+                    		elevHandle.getBuildElevation(x[3], y[3], hSector)
                     };
                     if (z[0] > ROOF_LIM)
                     	z[0] -= ROOF_LIM;
@@ -1086,6 +1035,7 @@ public class EngineHandle
                         zMax = z[3];
                     if (zMax >= ROOF_LIM)
                         zMax -= ROOF_LIM; 
+                    /*
                     if (z[0] < ROOF_LIM)
                     	elevHandle.setElevation(x[0], y[0], zMax);
                     else
@@ -1102,6 +1052,7 @@ public class EngineHandle
                     	elevHandle.setElevation(x[3], y[3], zMax);
                     else
                     	elevHandle.subtractElevation(x[3], y[3], ROOF_LIM);
+                    	*/
                 }
             }
         }
@@ -1121,27 +1072,27 @@ public class EngineHandle
                 	double[] x_big = {i, i, i+1, i+1};
                 	double[] y_big = {j, j, j+1, j+1};
                     double[] z = {
-                    		elevHandle.getElevation(x[0], y[0], hSector+1),
-                    		elevHandle.getElevation(x[1], y[1], hSector+1),
-                    		elevHandle.getElevation(x[2], y[2], hSector+1),
-                    		elevHandle.getElevation(x[3], y[3], hSector+1)
+                    		elevHandle.getBuildElevation(x[0], y[0], hSector+1),
+                    		elevHandle.getBuildElevation(x[1], y[1], hSector+1),
+                    		elevHandle.getBuildElevation(x[2], y[2], hSector+1),
+                    		elevHandle.getBuildElevation(x[3], y[3], hSector+1)
                     };
                     double roofHeight = EntityHandler.getElevationDef(color - 1).getRoofHeight();
                     if (isNotEdge(x[0], y[0]) && z[0] < ROOF_LIM) {
                         z[0] += roofHeight + ROOF_LIM;
-                    	elevHandle.setElevation(x[0], y[0], z[0]);
+                    	//elevHandle.setElevation(x[0], y[0], z[0]);
                     }
                     if (isNotEdge(x[1], y[1]) && z[1] < ROOF_LIM) {
                         z[1] += roofHeight + ROOF_LIM;
-                    	elevHandle.setElevation(x[1], y[1], z[1]);
+                    	//elevHandle.setElevation(x[1], y[1], z[1]);
                     }
                     if (isNotEdge(x[2], y[2]) && z[2] < ROOF_LIM) {
                         z[2] += roofHeight + ROOF_LIM;
-                    	elevHandle.setElevation(x[2], y[2], z[2]);
+                    	//elevHandle.setElevation(x[2], y[2], z[2]);
                     }
                     if (isNotEdge(x[3], y[3]) && z[3] < ROOF_LIM) {
                         z[3] += roofHeight + ROOF_LIM;
-                    	elevHandle.setElevation(x[3], y[3], z[3]);
+                    	//elevHandle.setElevation(x[3], y[3], z[3]);
                     }
                     if (z[0] >= ROOF_LIM)
                         z[0] -= ROOF_LIM;
@@ -1345,10 +1296,10 @@ public class EngineHandle
         double height = EntityHandler.getDoorDef(i).getHeight();
         int texture1 = EntityHandler.getDoorDef(i).getTexture1();
         int texture2 = EntityHandler.getDoorDef(i).getTexture2();
-        int p0 = model.insertCoordPoint(x0, -elevHandle.getElevation(x0, y0, hSector), y0);
-        int p1 = model.insertCoordPoint(x0, -elevHandle.getElevation(x0, y0, hSector) - height, y0);
-        int p2 = model.insertCoordPoint(x1, -elevHandle.getElevation(x1, y1, hSector) - height, y1);
-        int p3 = model.insertCoordPoint(x1, -elevHandle.getElevation(x1, y1, hSector), y1);
+        int p0 = model.insertCoordPoint(x0, -elevHandle.getBuildElevation(x0, y0, hSector), y0);
+        int p1 = model.insertCoordPoint(x0, -elevHandle.getBuildElevation(x0, y0, hSector) - height, y0);
+        int p2 = model.insertCoordPoint(x1, -elevHandle.getBuildElevation(x1, y1, hSector) - height, y1);
+        int p3 = model.insertCoordPoint(x1, -elevHandle.getBuildElevation(x1, y1, hSector), y1);
         int i4 = model.addSurface(4, new int[]{p0, p1, p2, p3}, texture1, texture2);
         if (EntityHandler.getDoorDef(i).getUnknown() == 5) {
             model.entityType[i4] = 30000 + i;
@@ -1435,11 +1386,11 @@ public class EngineHandle
     
     private class ElevationHandle
     {
-    	double[][] elevation;
+    	double[][][] elevation;
     	final double height = 1.5;
     	ElevationHandle()
     	{
-            elevation = new double[VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
+            elevation = new double[2][VISIBLE_SECTORS*SECTOR_WIDTH][VISIBLE_SECTORS*SECTOR_HEIGHT];
     	}
     	
     	void updateBaseElevation()
@@ -1461,7 +1412,8 @@ public class EngineHandle
                     if (getGroundTexturesOverlay(x - 1, y - 1) > 0
                     		&& EntityHandler.getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getTexture() == 4)
                         z = 0;
-                    elevation[x][y] = z;
+                    elevation[0][x][y] = z;
+                    elevation[1][x][y] = getGroundElevation(x, y);
                 }
             }
     	}
@@ -1471,24 +1423,14 @@ public class EngineHandle
     		//elevation[x][y] += elev;
     	}
     	
-    	void subtractElevation(int x, int y, double elev)
+    	double getBuildElevation(int x, int y, int h)
     	{
-    		//elevation[x][y] -= elev;
-    	}
-    	
-    	void setElevation(int x, int y, double elev)
-    	{
-    		//elevation[x][y] = elev;
+    		return elevation[0][x][y] + h*height;
     	}
     	
     	double getElevation(int x, int y, int h)
     	{
-    		return elevation[x][y] + h*height;
-    	}
-    	
-    	double getZeroElevation(int h)
-    	{
-    		return h*height;
+    		return elevation[1][x][y] + h*height;
     	}
     }
 }

@@ -32,6 +32,7 @@ public class Inventory
 				inventoryCount, invPan.getInvCountTextColor());
 		if (!flag)
 			return result;
+		
 		if (invPan.getInvGrid().isMouseOver())
 			result = handleMouseover(selItem, selSpell);
 		else if (invPan.getFrame().getCloseButton().isMouseOver())
@@ -45,7 +46,7 @@ public class Inventory
 		else if (invPan.getFrame().isMouseOver())
 			if (mv.leftDown())
 				mv.releaseButton();
-		return  result;
+		return result;
 	}
 	
 	protected void initGraphics(Point center, GameImageMiddleMan graphics)
