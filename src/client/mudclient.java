@@ -384,10 +384,10 @@ public class mudclient extends GameWindowMiddleMan
 						&& EntityHandler.getAnimationDef(k3).hasFlip())
 					k4 += 15;
 				if (i2 != 5 || EntityHandler.getAnimationDef(k3).hasAttack()) {
-					int l4 = k4 + EntityHandler.getAnimationDef(k3).getNumber();
-					i4 = (i4 * wSprite) / ((GameImage) (gameGraphics)).getSprite(l4).getTotalWidth();
-					j4 = (j4 * l) / ((GameImage) (gameGraphics)).getSprite(l4).getTotalHeight();
-					int i5 = (wSprite * ((GameImage) (gameGraphics)).getSprite(l4).getTotalWidth()) / ((GameImage) (gameGraphics)).getSprite(EntityHandler.getAnimationDef(k3).getNumber()).getTotalWidth();
+					Sprite sprite = gameGraphics.getEntitySprite(k4 + EntityHandler.getAnimationDef(k3).getNumber());
+					i4 = (i4 * wSprite) / sprite.getTotalWidth();
+					j4 = (j4 * l) / sprite.getTotalHeight();
+					int i5 = (wSprite * sprite.getTotalWidth()) / gameGraphics.getEntitySprite(EntityHandler.getAnimationDef(k3).getNumber()).getTotalWidth();
 					i4 -= (i5 - wSprite) / 2;
 					int colour = EntityHandler.getAnimationDef(k3).getCharColour();
 					int skinColour = 0;
@@ -401,7 +401,7 @@ public class mudclient extends GameWindowMiddleMan
 						colour = EntityHandler.getNpcDef(mob.type).getBottomColour();
 						skinColour = EntityHandler.getNpcDef(mob.type).getSkinColour();
 					}
-					gameGraphics.spriteClip4(i + i4, j + j4, i5, l, l4, colour, skinColour, j1, flag);
+					gameGraphics.spriteClip4(i + i4, j + j4, i5, l, sprite, colour, skinColour, j1, flag);
 				}
 			}
 		}
@@ -523,10 +523,10 @@ public class mudclient extends GameWindowMiddleMan
 					}
 				if (i2 != 5 || EntityHandler.getAnimationDef(l3).hasAttack())
 				{
-					int k5 = animationFrame + EntityHandler.getAnimationDef(l3).getNumber();
-					w = (w * width) / ((GameImage) (gameGraphics)).getSprite(k5).getTotalWidth();
-					h = (h * height) / ((GameImage) (gameGraphics)).getSprite(k5).getTotalHeight();
-					int l5 = (width * ((GameImage) (gameGraphics)).getSprite(k5).getTotalWidth()) / ((GameImage) (gameGraphics)).getSprite(EntityHandler.getAnimationDef(l3).getNumber()).getTotalWidth();
+					Sprite sprite = gameGraphics.getEntitySprite(animationFrame + EntityHandler.getAnimationDef(l3).getNumber());
+					w = (w * width) / sprite.getTotalWidth();
+					h = (h * height) / sprite.getTotalHeight();
+					int l5 = (width * sprite.getTotalWidth()) / gameGraphics.getEntitySprite(EntityHandler.getAnimationDef(l3).getNumber()).getTotalWidth();
 					w -= (l5 - width) / 2;
 					int colour = EntityHandler.getAnimationDef(l3).getCharColour();
 					int skinColour = chrSkinClrs[plr.colourSkinType];
@@ -536,7 +536,7 @@ public class mudclient extends GameWindowMiddleMan
 						colour = chrTopBottomClrs[plr.colourTopType];
 					else if (colour == 3)
 						colour = chrTopBottomClrs[plr.colourBottomType];
-					gameGraphics.spriteClip4(x + w, y + h, l5, height, k5,
+					gameGraphics.spriteClip4(x + w, y + h, l5, height, sprite,
 							colour, skinColour, j1, flag);
 				}
 			}
@@ -604,7 +604,7 @@ public class mudclient extends GameWindowMiddleMan
 	}
 
 	final void drawItems(int i, int j, int k, int l, int id, int j1, int k1) {
-		int l1 = EntityHandler.getItemDef(id).getSprite() + SPRITE_ITEM_START;
+		Sprite l1 = gameGraphics.getSprite(EntityHandler.getItemDef(id).getSprite() + SPRITE_ITEM_START);
 		int i2 = EntityHandler.getItemDef(id).getPictureMask();
 		gameGraphics.spriteClip4(i, j, k, l, l1, i2, 0, 0, false);
 	}
@@ -2957,15 +2957,17 @@ public class mudclient extends GameWindowMiddleMan
 		int j = center.y - 117;
 		i += 116;
 		j -= 25;
+		int bodyGenderSpriteID = EntityHandler.getAnimationDef(chrBodyGender).getNumber();
+		int headTypeSpriteID = EntityHandler.getAnimationDef(chrHeadType).getNumber();
 		gameGraphics.spriteClip3(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber(), chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber(), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber(), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, gameGraphics.getSprite(bodyGenderSpriteID), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32 - 55, j, 64, 102, gameGraphics.getSprite(headTypeSpriteID), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
 		gameGraphics.spriteClip3(i - 32, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 6, chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 6, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4(i - 32, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 6, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32, j, 64, 102, gameGraphics.getSprite(bodyGenderSpriteID + 6), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4(i - 32, j, 64, 102, gameGraphics.getSprite(headTypeSpriteID + 6), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
 		gameGraphics.spriteClip3((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(character2Colour).getNumber() + 12, chrTopBottomClrs[chrBottomClr]);
-		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrBodyGender).getNumber() + 12, chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
-		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, EntityHandler.getAnimationDef(chrHeadType).getNumber() + 12, chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, gameGraphics.getSprite(bodyGenderSpriteID + 12), chrTopBottomClrs[chrTopClr], chrSkinClrs[chrSkinClr], 0, false);
+		gameGraphics.spriteClip4((i - 32) + 55, j, 64, 102, gameGraphics.getSprite(headTypeSpriteID + 12), chrHairClrs[chrHairClr], chrSkinClrs[chrSkinClr], 0, false);
 
 		// blue bar at the botom
 		Sprite sprite = ((GameImage) (gameGraphics)).getSprite(SPRITE_MEDIA_START + 22);
@@ -4935,9 +4937,10 @@ public class mudclient extends GameWindowMiddleMan
 				else
 					gameGraphics.drawBoxAlpha(j5, i6, 49, 34, k2, 160);
 				gameGraphics.drawBoxEdge(j5, i6, 50, 35, 0);
-				if (shopItems[k3].getID() != -1) {
+				if (shopItems[k3].getID() != -1)
+				{
 					gameGraphics.spriteClip4(j5, i6, 48, 32,
-							SPRITE_ITEM_START + shopItems[k3].getIcon(),
+							gameGraphics.getSprite(SPRITE_ITEM_START + shopItems[k3].getIcon()),
 							shopItems[k3].getColor(), 0, 0, false);
 					gameGraphics.drawString(Long.toString(shopItems[k3].getAmount()),
 							j5 + 1, i6 + 10, 1, 65280);
@@ -5980,7 +5983,8 @@ public class mudclient extends GameWindowMiddleMan
 		for (int l4 = 0; l4 < inventoryCount; l4++) {
 			int i5 = 217 + byte0 + (l4 % 5) * 49;
 			int k5 = 31 + byte1 + (l4 / 5) * 34;
-			gameGraphics.spriteClip4(i5, k5, 48, 32, SPRITE_ITEM_START + inventory.items().get(l4).getIcon(),
+			gameGraphics.spriteClip4(i5, k5, 48, 32,
+					gameGraphics.getSprite(SPRITE_ITEM_START + inventory.items().get(l4).getIcon()),
 					inventory.items().get(l4).getColor(), 0, 0, false);
 			if (inventory.items().get(l4).isStackable())
 				gameGraphics.drawString(Long.toString(inventory.items().get(l4).getAmount()),
@@ -5990,7 +5994,8 @@ public class mudclient extends GameWindowMiddleMan
 		for (int j5 = 0; j5 < duelMyItemCount; j5++) {
 			int l5 = 9 + byte0 + (j5 % 4) * 49;
 			int j6 = 31 + byte1 + (j5 / 4) * 34;
-			gameGraphics.spriteClip4(l5, j6, 48, 32, SPRITE_ITEM_START + self.getDuelMyItems().get(j5).getIcon(),
+			gameGraphics.spriteClip4(l5, j6, 48, 32,
+					gameGraphics.getSprite(SPRITE_ITEM_START + self.getDuelMyItems().get(j5).getIcon()),
 					self.getDuelMyItems().get(j5).getColor(), 0, 0, false);
 			if (self.getDuelMyItems().get(j5).isStackable())
 				gameGraphics.drawString(Long.toString(self.getDuelMyItems().get(j5).getAmount()),
@@ -6005,7 +6010,7 @@ public class mudclient extends GameWindowMiddleMan
 			int k6 = 9 + byte0 + (i6 % 4) * 49;
 			int l6 = 124 + byte1 + (i6 / 4) * 34;
 			gameGraphics.spriteClip4(k6, l6, 48, 32,
-					SPRITE_ITEM_START + self.getDuelOpponentItems().get(i6).getIcon(),
+					gameGraphics.getSprite(SPRITE_ITEM_START + self.getDuelOpponentItems().get(i6).getIcon()),
 					self.getDuelOpponentItems().get(i6).getColor(), 0, 0, false);
 			if (self.getDuelOpponentItems().get(i6).isStackable())
 				gameGraphics.drawString(Long.toString(self.getDuelOpponentItems().get(i6).getAmount()),
@@ -6401,7 +6406,7 @@ public class mudclient extends GameWindowMiddleMan
 			int l4 = (36 * k2) / 100;
 			int i5 = (24 * k2) / 100;
 			gameGraphics.spriteClip4(i1 - l4 / 2, (k4 + j4 / 2) - i5 / 2, l4, i5,
-					EntityHandler.getItemDef(j3).getSprite() + SPRITE_ITEM_START,
+					gameGraphics.getSprite(EntityHandler.getItemDef(j3).getSprite() + SPRITE_ITEM_START),
 					EntityHandler.getItemDef(j3).getPictureMask(), 0, 0, false);
 		}
 
@@ -6897,8 +6902,7 @@ public class mudclient extends GameWindowMiddleMan
 			gameGraphics.spriteClip4(slotX+1, slotY+1,
 					InGameGrid.ITEM_SLOT_WIDTH-1,
 					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					SPRITE_ITEM_START + EntityHandler.getItemDef(
-							itemID).getSprite(),
+					gameGraphics.getSprite(SPRITE_ITEM_START + EntityHandler.getItemDef(itemID).getSprite()),
 					EntityHandler.getItemDef(itemID).getPictureMask(),
 					0, 0, false);
 	}

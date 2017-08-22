@@ -259,6 +259,11 @@ public class GameImage implements ImageProducer, ImageObserver
     {
     	return spriteHandle.getSprite(index);
     }
+    
+    public Sprite getEntitySprite(int index)
+    {
+		return spriteHandle.entity[index];
+    }
 	
     public Sprite getMinimap()
 	{
@@ -1259,12 +1264,11 @@ public class GameImage implements ImageProducer, ImageObserver
      * @param flip
      */
     public void spriteClip4(int startX, int startY, int scaledWidth,
-    		int scaledHeight, int spriteId, int hairColor, int skinColor,
+    		int scaledHeight, Sprite sprite, int hairColor, int skinColor,
     		int l1, boolean flip)
     {
         try
         {
-        	Sprite sprite = getSprite(spriteId);
             if (hairColor == 0)
                 hairColor = 0xffffff;
             if (skinColor == 0)
@@ -1432,17 +1436,17 @@ public class GameImage implements ImageProducer, ImageObserver
                 	switch(string.substring(offset + 1, offset + 4))
                 	{
                 	case "adm":
-                		spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xffffff00, 0, 0, false);
+                		spriteClip4(x - 12, y - 16, 30, 20, getSprite(2339), 0xffffff00, 0, 0, false);
                         x += 14;
                         offset += 4;
                 		break;
                 	case "mod":
-                		spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xffdcdcdc, 0, 0, false);
+                		spriteClip4(x - 12, y - 16, 30, 20, getSprite(2339), 0xffdcdcdc, 0, 0, false);
                         x += 14;
                         offset += 4;
                 		break;
                 	case "pmd":
-                        spriteClip4(x - 12, y - 16, 30, 20, 2339, 0xff33cc00, 0, 0, false);
+                        spriteClip4(x - 12, y - 16, 30, 20, getSprite(2339), 0xff33cc00, 0, 0, false);
                         x += 14;
                         offset += 4;
                 		break;
@@ -2122,8 +2126,6 @@ public class GameImage implements ImageProducer, ImageObserver
     			return util[index - UTIL_START];
     		else if (index >= MEDIA_START)
     			return media[index - MEDIA_START];
-    		else if (index >= ENTITY_START)
-    			return entity[index - ENTITY_START];
     		else
     			return null;
     	}

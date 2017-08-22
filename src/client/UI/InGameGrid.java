@@ -134,7 +134,7 @@ public class InGameGrid extends InGamePanel
 			graphics.spriteClip4(slotX+1, slotY+1,
 					InGameGrid.ITEM_SLOT_WIDTH-1,
 					InGameGrid.ITEM_SLOT_HEIGHT-1,
-					mudclient.SPRITE_ITEM_START + item.getIcon(),
+					graphics.getSprite(mudclient.SPRITE_ITEM_START + item.getIcon()),
 					item.getColor(), 0, 0, false);
 	}
 }
