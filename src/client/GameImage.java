@@ -612,44 +612,6 @@ public class GameImage implements ImageProducer, ImageObserver
         spriteHandle.addMinimap(sprite);
     }
 
-    public void storeSpriteHoriz(int index, int startX, int startY,
-    		int width, int height)
-    {
-        int[] pixels = new int[width * height];
-        int pixel = 0;
-        for (int x = startX; x < startX + width; x++) {
-            for (int y = startY; y < startY + height; y++) {
-                pixels[pixel++] = imagePixelArray[x + y * gameWindowWidth];
-            }
-        }
-
-        Sprite sprite = new Sprite(pixels, width, height);
-        sprite.setShift(0, 0);
-        sprite.setRequiresShift(false);
-        sprite.setTotalSize(width, height);
-
-        spriteHandle.addSprite(sprite, index);
-    }
-
-    public void storeSpriteVert(int index, int startX, int startY,
-    		int width, int height)
-    {
-        int[] pixels = new int[width * height];
-        int pixel = 0;
-        for (int y = startY; y < startY + height; y++) {
-            for (int x = startX; x < startX + width; x++) {
-                pixels[pixel++] = imagePixelArray[x + y * gameWindowWidth];
-            }
-        }
-
-        Sprite sprite = new Sprite(pixels, width, height);
-        sprite.setShift(0, 0);
-        sprite.setRequiresShift(false);
-        sprite.setTotalSize(width, height);
-
-        spriteHandle.addSprite(sprite, index);
-    }
-
     public void drawPicture(int x, int y, int picture)
     {
         try {
