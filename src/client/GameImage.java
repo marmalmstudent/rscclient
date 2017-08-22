@@ -260,6 +260,11 @@ public class GameImage implements ImageProducer, ImageObserver
     	return spriteHandle.getSprite(index);
     }
     
+    public Sprite getTextureSprite(int index)
+    {
+    	return spriteHandle.texture[index];
+    }
+    
     public Sprite getEntitySprite(int index)
     {
 		return spriteHandle.entity[index];
@@ -2114,8 +2119,6 @@ public class GameImage implements ImageProducer, ImageObserver
     	{
     		if (index >= NULL_START)
     			return null;
-    		else if (index >= TEXTURE_START)
-    			return texture[index - TEXTURE_START];
     		else if (index >= PROJECTILE_START)
     			return projectile[index - PROJECTILE_START];
     		else if (index >= LOGO_START)

@@ -4507,7 +4507,7 @@ public class mudclient extends GameWindowMiddleMan
 		gameCamera.method297(EntityHandler.textureCount(), 7, 11);
 		for (int i = 0; i < EntityHandler.textureCount(); i++) {
 			loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
-			Sprite sprite = ((GameImage) (gameGraphics)).getSprite(SPRITE_TEXTURE_START + i);
+			Sprite sprite = gameGraphics.getTextureSprite(i);
 
 			int length = sprite.getWidth() * sprite.getHeight();
 			int[] pixels = sprite.getPixels();
