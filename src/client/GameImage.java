@@ -259,6 +259,11 @@ public class GameImage implements ImageProducer, ImageObserver
     {
     	return spriteHandle.getSprite(index);
     }
+	
+    public Sprite getMinimap()
+	{
+		return spriteHandle.getMinimap();
+	}
     
     public boolean loadSprite(int id, String packageName, int amount)
     {
@@ -586,6 +591,25 @@ public class GameImage implements ImageProducer, ImageObserver
     public void cleanupSprites()
     {
     	spriteHandle.garbageCollect();
+    }
+
+    public void storeMinimapSprite(int startX, int startY,
+    		int width, int height)
+    {
+        int[] pixels = new int[width * height];
+        int pixel = 0;
+        for (int x = startX; x < startX + width; x++) {
+            for (int y = startY; y < startY + height; y++) {
+                pixels[pixel++] = imagePixelArray[x + y * gameWindowWidth];
+            }
+        }
+
+        Sprite sprite = new Sprite(pixels, width, height);
+        sprite.setShift(0, 0);
+        sprite.setRequiresShift(false);
+        sprite.setTotalSize(width, height);
+
+        spriteHandle.addMinimap(sprite);
     }
 
     public void storeSpriteHoriz(int index, int startX, int startY,
@@ -992,16 +1016,15 @@ public class GameImage implements ImageProducer, ImageObserver
     			bounds.width-image.getWidth(), 0, 1);
     }
 
-    public void drawMinimapTiles(int xCorner, int yCorner,
-    		int sprite, int phi, int theta)
+    public void drawMinimapSprite(int xCorner, int yCorner,
+    		Sprite sprite, int phi, int theta)
     {
         int windowWidth = gameWindowWidth;
         int windowHeight = gameWindowHeight;
-        Sprite spritee = getSprite(sprite);
-        int x0 = -spritee.getTotalWidth() / 2 + spritee.getXShift();
-        int x1 = x0 + spritee.getWidth();
-        int y0 = -spritee.getTotalHeight() / 2 + spritee.getYShift();
-        int y1 = y0 + spritee.getHeight();
+        int x0 = -sprite.getTotalWidth() / 2 + sprite.getXShift();
+        int x1 = x0 + sprite.getWidth();
+        int y0 = -sprite.getTotalHeight() / 2 + sprite.getYShift();
+        int y1 = y0 + sprite.getHeight();
         double[] p_x = { x0, x0, x1, x1 };
         double[] p_y = { y0, y1, y1, y0 };
         phi &= 0x3ff;
@@ -1047,8 +1070,8 @@ public class GameImage implements ImageProducer, ImageObserver
         double slope_1 = 0;
         double slope_3 = 0;
         double slope_2 = 0;
-        int spriteWidth = spritee.getWidth();
-        int spriteHeight = spritee.getHeight();
+        int spriteWidth = sprite.getWidth();
+        int spriteHeight = sprite.getHeight();
         p_x[0] = 0;
         p_x[1] = 0;
         p_x[2] = spriteWidth - 1;
@@ -1214,7 +1237,7 @@ public class GameImage implements ImageProducer, ImageObserver
         }
 
         int offset = ymin * windowWidth;
-        int mapPixels[] = spritee.getPixels();
+        int mapPixels[] = sprite.getPixels();
         for (int y = ymin; y < ymax; y++)
         {
         	double xStart = x_start[y];
@@ -1235,7 +1258,7 @@ public class GameImage implements ImageProducer, ImageObserver
                 if (xEnd > bounds.width)
                     xEnd = bounds.width;
                 if (!lowDef || (y & 1) == 0)
-                    if (!spritee.requiresShift())
+                    if (!sprite.requiresShift())
                         drawMapSpriteWOShift(imagePixelArray, mapPixels,
                         		(int)(offset + xStart),
                         		xDrawStart, yDrawstart,
@@ -2108,6 +2131,7 @@ public class GameImage implements ImageProducer, ImageObserver
     	public static final int NULL_START = 4000;
     	
         Sprite[] entity, media, util, item, logo, projectile, texture;
+        Sprite minimap;
         
     	SpriteHandler(int maxSprites)
     	{
@@ -2142,6 +2166,11 @@ public class GameImage implements ImageProducer, ImageObserver
     			return null;
     	}
     	
+    	Sprite getMinimap()
+    	{
+    		return minimap;
+    	}
+    	
     	void addSprite(Sprite sprite, int index)
     	{
     		if (index >= NULL_START)
@@ -2162,6 +2191,11 @@ public class GameImage implements ImageProducer, ImageObserver
     			entity[index - ENTITY_START] = sprite;
     		else
     			return;
+    	}
+    	
+    	void addMinimap(Sprite sprite)
+    	{
+    		minimap = sprite;
     	}
     	
     	void garbageCollect()

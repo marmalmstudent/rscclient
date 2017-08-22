@@ -6429,9 +6429,9 @@ public class mudclient extends GameWindowMiddleMan
 		double tmp = y * sin + x * cos;
 		y = y * cos - x * sin;
 		x = tmp;
-		gameGraphics.drawMinimapTiles(miniMapX + miniMapWidth / 2 - (int)x,
-				miniMapY + miniMapHeight / 2 + (int)y, SPRITE_MEDIA_START - 1,
-				zRot + 256 & 0x3ff, 192);
+		gameGraphics.drawMinimapSprite(miniMapX + miniMapWidth / 2 - (int)x,
+				miniMapY + miniMapHeight / 2 + (int)y,
+				gameGraphics.getMinimap(), zRot + 256 & 0x3ff, 192);
 
 		for (Iterator<GameObject> itr = objects.iterator(); itr.hasNext();)
 		{
@@ -6530,7 +6530,8 @@ public class mudclient extends GameWindowMiddleMan
 				SPRITE_MEDIA_START + 28);
 
 		/* compas */
-		gameGraphics.drawMinimapTiles(miniMapX + 19, miniMapY + 19, SPRITE_MEDIA_START + 24,
+		gameGraphics.drawMinimapSprite(miniMapX + 19, miniMapY + 19,
+				gameGraphics.getSprite(SPRITE_MEDIA_START + 24),
 				cameraZRot + 512 & 0x3ff, 128);
 
 		/* restore dimensions */

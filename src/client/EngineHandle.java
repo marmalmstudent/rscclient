@@ -661,8 +661,8 @@ public class EngineHandle
         
         /* minimap */
         if (currentHeight)
-            gameImage.storeSpriteHoriz(mudclient.SPRITE_MEDIA_START - 1,
-            		0, 0, SECTOR_WIDTH*VISIBLE_SECTORS*3,
+            gameImage.storeMinimapSprite(0, 0,
+            		SECTOR_WIDTH*VISIBLE_SECTORS*3,
             		SECTOR_HEIGHT*VISIBLE_SECTORS*3);
         
         // viewport walls, fences etc.
