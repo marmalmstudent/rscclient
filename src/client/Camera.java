@@ -35,8 +35,8 @@ public class Camera
 		zCoordCamDist = new double[40];
 		lowDef = false;
 		this.gameImage = gameImage;
-		halfVPWidth = gameImage.gameWindowWidth / 2;
-		halfVPHeight = gameImage.gameWindowHeight / 2;
+		halfVPWidth = gameImage.gameWindowWidth/2;
+		halfVPHeight = gameImage.gameWindowHeight/2;
 		imagePixelArray = gameImage.imagePixelArray;
 		modelCount = 0;
 		maxModelCount = maxModels;
@@ -657,7 +657,7 @@ public class Camera
 	{
 		if (color < 0 || texturePixels[color] != null)
 			return;
-		texturePixels[color] = new int[1 << 2*textureSize[color]];
+		texturePixels[color] = new int[textureSize[color] * textureSize[color]];
 		fillTexturePixels(color);
 	}
 
@@ -665,7 +665,7 @@ public class Camera
 	{
 		if (texturePixels[texture] == null)
 			return;
-		int sideLen = 1 << textureSize[texture];
+		int sideLen = textureSize[texture];
 		int sizeReverse = sideLen-1;
 		int txtrPixels[] = texturePixels[texture];
 		if ((shiftMask & 1) == 1)
@@ -1509,9 +1509,9 @@ public class Camera
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
-			double factr1 = 1 << 5 + textureSize[color];
-			double factr2 = 1 << (5 - cameraSizeInt) + 4 + textureSize[color];
-			double factr3 = 1 << (5 - cameraSizeInt) + textureSize[color];
+			double factr1 = 32 * textureSize[color];
+			double factr2 = 512 * textureSize[color] / (1 << cameraSizeInt);
+			double factr3 = 32 * textureSize[color] / (1 << cameraSizeInt);
 			double nk_y = (p_x[2] * p_z[0] - p_z[2] * p_x[0]) * factr1;
 			double nk_x = (p_z[2] * p_y[0] - p_y[2] * p_z[0]) * factr2;
 			double nk_z = (p_y[2] * p_x[0] - p_x[2] * p_y[0]) * factr3;
@@ -1692,12 +1692,12 @@ public class Camera
 		int mask = transparent ? 0x7f7f7f : 0x0;
 		shadeStep <<= (nSteps >> 1);
 		fadeStep  <<= (nSteps >> 1);
-		int lastRow = (1 << 2*size) - (1 << size);
-		int maxSpriteIdx = (1 << 2*size) - 1;
+		int lastRow = size * (size - 1);
+		int maxSpriteIdx = size*size - 1;
 
 		int i3 = 0;
 		int j3 = 0;
-		int fctr = 1 << size;
+		int fctr = size;
 		if (smthDivision != 0)
 		{
 			xTexture = (int) (smthXTexture / smthDivision) * fctr;
@@ -1734,7 +1734,7 @@ public class Camera
 					shadeOffset += shadeStep;
 					fadeOffset  += fadeStep;
 				}
-				color = texturePixels[(yTexture & lastRow) + (xTexture >> size)];
+				color = texturePixels[(yTexture & lastRow) + (xTexture / size)];
 				shadeVal = 255-(shadeOffset >> 8);
 				fadeVal  = 255-(fadeOffset  >> 8);
 				color = applyShade(color, shadeVal);
@@ -2150,13 +2150,13 @@ public class Camera
 	{
 		for (int i = 0; i < Integer.SIZE; ++i)
 			if (size >> (i+1) == 0)
-				return i;
+				return 1 << i;
 		return 0;
 	}
 
 	private void fillTexturePixels(int texture)
 	{
-		int width = 1 << textureSize[texture];
+		int width = textureSize[texture];
 		int txtrPixels[] = texturePixels[texture];
 		int i = 0;
 		for (int y = 0; y < width; y++)
