@@ -211,7 +211,6 @@ public class mudclient extends GameWindowMiddleMan
 		 */
 		bounds = new Rectangle(0, 0, 1120, 630);
 		center = new Point(bounds.width/2, bounds.height/2);
-		cameraSizeInt = 9;
 		
 		mapClick = new DPoint();
 		
@@ -830,7 +829,7 @@ public class mudclient extends GameWindowMiddleMan
 			return;
 		gameCamera = new Camera(this, gameGraphics, 15000, 15000, 1000);
 		gameCamera.setCameraSize(center, bounds.width/2, bounds.height/2,
-				bounds.width, cameraSizeInt);
+				bounds.width);
 		gameCamera.drawModelMaxDist = viewDistance*1.5;
 		gameCamera.drawSpriteMaxDist = viewDistance*1.5;
 		gameCamera.fadeFactor = 1D/16D;
@@ -2405,7 +2404,6 @@ public class mudclient extends GameWindowMiddleMan
 	
 	private Rectangle bounds;
 	private Point center;
-	private int cameraSizeInt;
 	
 	private DPoint mapClick;
 	private long duelOpponentNameLong;

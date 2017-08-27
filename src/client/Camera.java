@@ -162,14 +162,14 @@ public class Camera
 	}
 
 	public void setCameraSize(Point center, int halfViewportWidth,
-			int halfViewportHeight, int windowWidth, int camSizeInt)
+			int halfViewportHeight, int windowWidth)
 	{
 		halfVPWidth = halfViewportWidth;
 		halfVPHeight = halfViewportHeight;
 		xCenter = center.x;
 		yCenter = center.y;
 		width = windowWidth;
-		cameraSizeInt = camSizeInt;
+		cameraSizeInt = 9;
 		cameraVariables = new CameraVariables[halfViewportHeight + center.y];
 		for (int k1 = 0; k1 < halfViewportHeight + center.y; k1++)
 			cameraVariables[k1] = new CameraVariables();
