@@ -56,16 +56,17 @@ public abstract class FileOperations {
 			throws IOException
 	{
 		BufferedImage img = ImageIO.read(file);
+		int nChannels = img.isAlphaPremultiplied() ? 3 : 4;
 		int width = img.getWidth();
 		int height = img.getHeight();
-		int[] pixelDataRaw = new int[width*height*4];
+		int[] pixelDataRaw = new int[width*height*nChannels];
 		Raster rast = img.getData();
 		rast.getPixels(0, 0, width, height, pixelDataRaw);
 		int[] pixelData = new int[width*height];
 		int pdOffs = 0;
 		// rgba format
-		for (int i = 0; i < pixelDataRaw.length; i += 4)
-			pixelData[pdOffs++] = DataOperations.rgbaToInt(pixelDataRaw, i);
+		for (int i = 0; i < pixelDataRaw.length; i += nChannels)
+			pixelData[pdOffs++] = DataOperations.rgbaToInt(pixelDataRaw, i, nChannels == 4);
 		return pixelData;
 	}
 

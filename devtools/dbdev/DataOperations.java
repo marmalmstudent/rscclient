@@ -13,12 +13,11 @@ public class DataOperations
 		offset = 0;
 	}
 
-	public static int rgbaToInt(int array[], int offset)
+	public static int rgbaToInt(int array[], int offset, boolean hasAlpha)
 	{
-		return ((array[offset+3] & 0xff) << 24)
-				+ ((array[offset] & 0xff) << 16)
-				+ ((array[offset+1] & 0xff) << 8)
-				+ (array[offset+2] & 0xff);
+		int alpha = hasAlpha ? ((array[offset+3] & 0xff) << 24) : 0xff000000;
+		return alpha + ((array[offset] & 0xff) << 16)
+				+ ((array[offset+1] & 0xff) << 8) + (array[offset+2] & 0xff);
 	}
 	
 	public int readInt(boolean bigEndian)
