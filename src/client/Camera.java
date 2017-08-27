@@ -17,6 +17,7 @@ public class Camera
 
 	public Camera(mudclient mc, GameImage gameImage, int maxModels, int maxCameraModels, int nSurfaces) {
 		this.mc = mc;
+		cameraSize = 512;
 		nbrColors = 50;
 		colorArray = new int[nbrColors];
 		colorGradientArray = new int[nbrColors][256];
@@ -169,7 +170,6 @@ public class Camera
 		xCenter = center.x;
 		yCenter = center.y;
 		width = windowWidth;
-		cameraSizeInt = 9;
 		cameraVariables = new CameraVariables[halfViewportHeight + center.y];
 		for (int k1 = 0; k1 < halfViewportHeight + center.y; k1++)
 			cameraVariables[k1] = new CameraVariables();
@@ -315,9 +315,8 @@ public class Camera
 	{
 		_fadeColor = fadeColor;
 		lowDef = gameImage.lowDef;
-		int fctr = 1 << cameraSizeInt;
-		double xBounds = halfVPWidth * drawModelMaxDist / fctr;
-		double yBounds = halfVPHeight * drawModelMaxDist / fctr;
+		double xBounds = halfVPWidth * drawModelMaxDist / cameraSize;
+		double yBounds = halfVPHeight * drawModelMaxDist / cameraSize;
 		xMinHide = 0;
 		xMaxHide = 0;
 		yMinHide = 0;
@@ -341,13 +340,13 @@ public class Camera
 		for (int i = 0; i < modelCount; i++)
 			modelArray[i].makePerspectiveVectors(
 					cameraXPos, cameraZPos, cameraYPos, cameraXRot,
-					cameraZRot, cameraYRot, cameraSizeInt, viewPlaneDist);
+					cameraZRot, cameraYRot, cameraSize, viewPlaneDist);
 
 		modelArray[modelCount] = spriteModels;
 		spriteModels.modelType = Model.MODEL_2D;
 		modelArray[modelCount].makePerspectiveVectors(
 				cameraXPos, cameraZPos, cameraYPos, cameraXRot,
-				cameraZRot, cameraYRot, cameraSizeInt, viewPlaneDist);
+				cameraZRot, cameraYRot, cameraSize, viewPlaneDist);
 		cameraModelCount = 0;
 		for (int i = 0; i < modelCount; i++)
 		{ /* Calculate draw order for 3D model surfaces */
@@ -437,8 +436,8 @@ public class Camera
 				if (distToCam > viewPlaneDist
 						&& distToCam < drawSpriteMaxDist)
 				{
-					double modelWidth = mobWidth[k] * fctr / distToCam;
-					double modelHeight = mobHeight[k] * fctr / distToCam;
+					double modelWidth = mobWidth[k] * cameraSize / distToCam;
+					double modelHeight = mobHeight[k] * cameraSize / distToCam;
 					if (x - modelWidth / 2 <= halfVPWidth
 							&& x + modelWidth / 2 >= -halfVPWidth
 							&& y - modelHeight <= halfVPHeight
@@ -471,8 +470,8 @@ public class Camera
 				double x = model.xProjected[p0];
 				double y = model.yProjected[p0];
 				double modelDist = model.zCoordCamDist[p0];
-				double modelWidth = mobWidth[l] * fctr / modelDist;
-				double modelHeight = mobHeight[l] * fctr / modelDist;
+				double modelWidth = mobWidth[l] * cameraSize / modelDist;
+				double modelHeight = mobHeight[l] * cameraSize / modelDist;
 				int p1 = surface[1];
 				double length_y01 = y - model.yProjected[p1];
 				double length_x10 = model.xProjected[p1] - x;
@@ -482,10 +481,10 @@ public class Camera
 				
 				gameImage.doSpriteClip1((int)modelX + xCenter, (int)modelY,
 						(int)modelWidth, (int)modelHeight, anIntArray416[l],
-						(int)j11, (int) ((4D * fctr) / modelDist));
+						(int)j11, (int) ((4D * cameraSize) / modelDist));
 				if (aBoolean && currentVisibleModelCount < maxVisibleModelCount)
 				{
-					modelX += (attackAnimXOffset[l] * fctr) / modelDist;
+					modelX += (attackAnimXOffset[l] * cameraSize) / modelDist;
 					if (mouseY >= modelY && mouseY <= modelY + modelHeight
 							&& mouseX >= modelX && mouseX <= modelX + modelWidth
 							&& !model.aBoolean263 && model.aByteArray259[l] == 0)
@@ -540,8 +539,8 @@ public class Camera
 							double z = model.zCoordCamDist[pt] - model.zCoordCamDist[pt_other];
 							double x = model.xCoordCamDist[pt] - ((model.xCoordCamDist[pt] - model.xCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
 							double y = model.yCoordCamDist[pt] - ((model.yCoordCamDist[pt] - model.yCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
-							xScreen[pointsInSurfac] = (int) (x * fctr / viewPlaneDist);
-							yScreen[pointsInSurfac] = (int) (y * fctr / viewPlaneDist);
+							xScreen[pointsInSurfac] = (int) (x * cameraSize / viewPlaneDist);
+							yScreen[pointsInSurfac] = (int) (y * cameraSize / viewPlaneDist);
 							pointBrightness[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
@@ -554,8 +553,8 @@ public class Camera
 							double z = model.zCoordCamDist[pt] - model.zCoordCamDist[pt_other];
 							double x = model.xCoordCamDist[pt] - ((model.xCoordCamDist[pt] - model.xCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
 							double y = model.yCoordCamDist[pt] - ((model.yCoordCamDist[pt] - model.yCoordCamDist[pt_other]) * (model.zCoordCamDist[pt] - viewPlaneDist)) / z;
-							xScreen[pointsInSurfac] = (int) (x * fctr / viewPlaneDist);
-							yScreen[pointsInSurfac] = (int) (y * fctr / viewPlaneDist);
+							xScreen[pointsInSurfac] = (int) (x * cameraSize / viewPlaneDist);
+							yScreen[pointsInSurfac] = (int) (y * cameraSize / viewPlaneDist);
 							pointBrightness[pointsInSurfac] = brightness;
 							pointsInSurfac++;
 						}
@@ -1509,9 +1508,9 @@ public class Camera
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
-			double factr1 = 32 * textureSize[color];
-			double factr2 = 512 * textureSize[color] / (1 << cameraSizeInt);
-			double factr3 = 32 * textureSize[color] / (1 << cameraSizeInt);
+			double factr1 = 32D * textureSize[color];
+			double factr2 = 512D * textureSize[color] / cameraSize;
+			double factr3 = 32D * textureSize[color] / cameraSize;
 			double nk_y = (p_x[2] * p_z[0] - p_z[2] * p_x[0]) * factr1;
 			double nk_x = (p_z[2] * p_y[0] - p_y[2] * p_z[0]) * factr2;
 			double nk_z = (p_y[2] * p_x[0] - p_x[2] * p_y[0]) * factr3;
@@ -1520,9 +1519,8 @@ public class Camera
 			double n1_z = (p_y[1] * p_x[0] - p_x[1] * p_y[0]) * factr3;
 
 			double factr4 = 32D;
-			double factr5 = 512 / (1 << cameraSizeInt);
-			// this will be divided rather than multiplied
-			double factr6 = 32D / (1 << cameraSizeInt);
+			double factr5 = 512 / cameraSize;
+			double factr6 = 32D / cameraSize;
 			double n_y = (p_z[1] * p_x[2] - p_x[1] * p_z[2]) * factr4;
 			double n_x = (p_y[1] * p_z[2] - p_z[1] * p_y[2]) * factr5;
 			double n_z = (p_x[1] * p_y[2] - p_y[1] * p_x[2]) * factr6;
@@ -2219,7 +2217,7 @@ public class Camera
 	private int halfVPHeight;
 	private int xCenter;
 	private int yCenter;
-	private int cameraSizeInt;
+	private double cameraSize;
 	private double cameraXPos;
 	private double cameraZPos;
 	private double cameraYPos;

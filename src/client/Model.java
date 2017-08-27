@@ -732,7 +732,7 @@ public class Model
     public void makePerspectiveVectors(
     		double cameraXPos, double cameraZPos, double cameraYPos,
     		int cameraXRot, int cameraZRot, int cameraYRot,
-    		int cameraSizeInt, double drawMinDist)
+    		double cameraSize, double drawMinDist)
     {
         resetWithCurrentConfig();
         if (yMin > Camera.distMaxHide || yMax < Camera.distMinHide
@@ -776,15 +776,14 @@ public class Model
                 u_y = u_z * xSin + u_y * xCos;
                 u_z = tmp;
             }
-            int factr = 1 << cameraSizeInt;
             if (u_y >= drawMinDist)
-                xProjected[i] = u_x * factr / u_y;
+                xProjected[i] = u_x * cameraSize / u_y;
             else
-                xProjected[i] = u_x * factr;
+                xProjected[i] = u_x * cameraSize;
             if (u_y >= drawMinDist)
-                yProjected[i] = u_z * factr / u_y;
+                yProjected[i] = u_z * cameraSize / u_y;
             else
-                yProjected[i] = u_z * factr;
+                yProjected[i] = u_z * cameraSize;
             /* new coordinate system for camera;
              * x grows left to right,
              * y grows top to bottom,
