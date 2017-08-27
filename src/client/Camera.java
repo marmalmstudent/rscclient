@@ -1519,10 +1519,10 @@ public class Camera
 			double n1_x = (p_z[1] * p_y[0] - p_y[1] * p_z[0]) * factr2;
 			double n1_z = (p_y[1] * p_x[0] - p_x[1] * p_y[0]) * factr3;
 
-			double factr4 = 1 << 5;
-			double factr5 = 1 << (5 - cameraSizeInt) + 4;
+			double factr4 = 32D;
+			double factr5 = 512 / (1 << cameraSizeInt);
 			// this will be divided rather than multiplied
-			double factr6 = 1.0 / (double)(1 << cameraSizeInt - 5);
+			double factr6 = 32D / (1 << cameraSizeInt);
 			double n_y = (p_z[1] * p_x[2] - p_x[1] * p_z[2]) * factr4;
 			double n_x = (p_y[1] * p_z[2] - p_z[1] * p_y[2]) * factr5;
 			double n_z = (p_x[1] * p_y[2] - p_y[1] * p_x[2]) * factr6;
