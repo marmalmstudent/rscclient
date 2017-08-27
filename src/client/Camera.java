@@ -271,30 +271,33 @@ public class Camera
 		} while (true);
 	}
 
-	public void method279(double x, double y, double dist)
+	public void setVisibilityBounds(double x, double y, double z)
 	{
 		int xRot = -cameraXRot + 1024 & 0x3ff;
 		int zRot = -cameraZRot + 1024 & 0x3ff;
 		int yRot = -cameraYRot + 1024 & 0x3ff;
-		if (yRot != 0) {
+		if (yRot != 0)
+		{
 			double sin = Trig.sin1024[yRot];
 			double cos = Trig.cos1024[yRot];
 			double tmp = y * sin + x * cos;
-				y = y * cos - x * sin;
-				x = tmp;
+			y = y * cos - x * sin;
+			x = tmp;
 		}
-		if (xRot != 0) {
+		if (xRot != 0)
+		{
 			double sin = Trig.sin1024[xRot];
 			double cos = Trig.cos1024[xRot];
-			double tmp = y * cos - dist * sin;
-			dist = y * sin + dist * cos;
+			double tmp = y * cos - z * sin;
+			z = y * sin + z * cos;
 			y = tmp;
 		}
-		if (zRot != 0) {
+		if (zRot != 0)
+		{
 			double sin = Trig.sin1024[zRot];
 			double cos = Trig.cos1024[zRot];
-			double tmp = dist * sin + x * cos;
-			dist = dist * cos - x * sin;
+			double tmp = z * sin + x * cos;
+			z = z * cos - x * sin;
 			x = tmp;
 		}
 		if (x < xMinHide)
@@ -305,10 +308,10 @@ public class Camera
 			yMinHide = y;
 		if (y > yMaxHide)
 			yMaxHide = y;
-		if (dist < distMinHide)
-			distMinHide = dist;
-		if (dist > distMaxHide)
-			distMaxHide = dist;
+		if (z < distMinHide)
+			distMinHide = z;
+		if (z > distMaxHide)
+			distMaxHide = z;
 	}
 
 	public void finishCamera(int fadeColor)
@@ -323,14 +326,14 @@ public class Camera
 		yMaxHide = 0;
 		distMinHide = 0;
 		distMaxHide = 0;
-		method279(-xBounds, -yBounds, drawModelMaxDist);
-		method279(-xBounds, yBounds, drawModelMaxDist);
-		method279(xBounds, -yBounds, drawModelMaxDist);
-		method279(xBounds, yBounds, drawModelMaxDist);
-		method279(-halfVPWidth, -halfVPHeight, 0);
-		method279(-halfVPWidth, halfVPHeight, 0);
-		method279(halfVPWidth, -halfVPHeight, 0);
-		method279(halfVPWidth, halfVPHeight, 0);
+		setVisibilityBounds(-xBounds, -yBounds, drawModelMaxDist);
+		setVisibilityBounds(-xBounds, yBounds, drawModelMaxDist);
+		setVisibilityBounds(xBounds, -yBounds, drawModelMaxDist);
+		setVisibilityBounds(xBounds, yBounds, drawModelMaxDist);
+		setVisibilityBounds(-halfVPWidth, -halfVPHeight, 0);
+		setVisibilityBounds(-halfVPWidth, halfVPHeight, 0);
+		setVisibilityBounds(halfVPWidth, -halfVPHeight, 0);
+		setVisibilityBounds(halfVPWidth, halfVPHeight, 0);
 		xMinHide += cameraXPos;
 		xMaxHide += cameraXPos;
 		yMinHide += cameraZPos;
@@ -1327,31 +1330,6 @@ public class Camera
 		cameraYPos += y;
 	}
 
-	public double getCameraY()
-	{
-		return cameraYPos;
-	}
-
-	public double getCameraX()
-	{
-		return cameraXPos;
-	}
-
-	public double getCameraZ()
-	{
-		return cameraZPos;
-	}
-
-	public int getCameraZRot()
-	{
-		return cameraZRot;
-	}
-
-	public int getCameraXRot()
-	{
-		return cameraXRot;
-	}
-
 	static double xMinHide;
 	static double xMaxHide;
 	static double yMinHide;
@@ -1508,22 +1486,19 @@ public class Camera
 			double[] p_x = {xDist[0], xDist[0] - xDist[1], xDist[k] - xDist[0]};
 			double[] p_z = {zDist[0], zDist[0] - zDist[1], zDist[k] - zDist[0]};
 			double[] p_y = {yDist[0], yDist[0] - yDist[1], yDist[k] - yDist[0]};
-			double factr1 = 32D * textureSize[color];
-			double factr2 = 512D * textureSize[color] / cameraSize;
-			double factr3 = 32D * textureSize[color] / cameraSize;
-			double nk_y = (p_x[2] * p_z[0] - p_z[2] * p_x[0]) * factr1;
-			double nk_x = (p_z[2] * p_y[0] - p_y[2] * p_z[0]) * factr2;
-			double nk_z = (p_y[2] * p_x[0] - p_x[2] * p_y[0]) * factr3;
-			double n1_y = (p_x[1] * p_z[0] - p_z[1] * p_x[0]) * factr1;
-			double n1_x = (p_z[1] * p_y[0] - p_y[1] * p_z[0]) * factr2;
-			double n1_z = (p_y[1] * p_x[0] - p_x[1] * p_y[0]) * factr3;
+			double factr1 = 32D;
+			double factr2 = 512D / cameraSize;
+			double factr3 = 32D / cameraSize;
+			double nk_y = (p_x[2] * p_z[0] - p_z[2] * p_x[0]) * factr1 * textureSize[color];
+			double nk_x = (p_z[2] * p_y[0] - p_y[2] * p_z[0]) * factr2 * textureSize[color];
+			double nk_z = (p_y[2] * p_x[0] - p_x[2] * p_y[0]) * factr3 * textureSize[color];
+			double n1_y = (p_x[1] * p_z[0] - p_z[1] * p_x[0]) * factr1 * textureSize[color];
+			double n1_x = (p_z[1] * p_y[0] - p_y[1] * p_z[0]) * factr2 * textureSize[color];
+			double n1_z = (p_y[1] * p_x[0] - p_x[1] * p_y[0]) * factr3 * textureSize[color];
 
-			double factr4 = 32D;
-			double factr5 = 512 / cameraSize;
-			double factr6 = 32D / cameraSize;
-			double n_y = (p_z[1] * p_x[2] - p_x[1] * p_z[2]) * factr4;
-			double n_x = (p_y[1] * p_z[2] - p_z[1] * p_y[2]) * factr5;
-			double n_z = (p_x[1] * p_y[2] - p_y[1] * p_x[2]) * factr6;
+			double n_y = (p_z[1] * p_x[2] - p_x[1] * p_z[2]) * factr1;
+			double n_x = (p_y[1] * p_z[2] - p_z[1] * p_y[2]) * factr2;
+			double n_z = (p_x[1] * p_y[2] - p_y[1] * p_x[2]) * factr3;
 			
 			double k14 = nk_x / 16;
 			double i15 = n1_x / 16;
@@ -1548,7 +1523,7 @@ public class Camera
 				nk_z *= 2;
 				n1_z *= 2;
 				n_z *= 2;
-				imgPixSkip <<= 1;
+				imgPixSkip *= 2;
 				rowStep = 2;
 			}
 			boolean trnspar = model.transparentTexture;
